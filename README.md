@@ -70,6 +70,8 @@ master loop — and **imports none of their code.** That separation is a law, no
 
 ## Read next
 
+- **[Session handoff](docs/SESSION_HANDOFF.md) — the canonical recovery entrypoint. A new
+  session reads this FIRST.** Machine state: [docs/MISSION_STATE.json](docs/MISSION_STATE.json).
 - [Charter](CHARTER.md) — the operating laws in full
 - [Architecture](docs/ARCHITECTURE.md) — planes, the roster, the pipeline, isolation tiers
 - [Roadmap](docs/ROADMAP.md) — build-while-running, slice by slice
