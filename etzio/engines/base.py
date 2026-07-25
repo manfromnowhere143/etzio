@@ -95,14 +95,23 @@ class Marcellus(Unit):
         return candidate if candidate.poc is not None else None
 
 
+# Effects CATO recognizes as materially impactful (a modeled impact oracle for the
+# benchmark). A candidate only becomes a finding if its re-execution produces one of these
+# AND matches the producer's claim. Benign-but-honest effects are rejected, not confirmed.
+KNOWN_EXPLOIT_EFFECTS = frozenset({"balance_drained", "price_manipulated", "funds_stolen"})
+
+
 # --- CATO: independent verification & adjudication (the gate) ----------------------------
 class Cato(Unit):
-    def __init__(self) -> None:
+    def __init__(self, exploit_effects: frozenset[str] = KNOWN_EXPLOIT_EFFECTS) -> None:
         super().__init__("CATO", "verify")
+        self.exploit_effects = exploit_effects
 
     def verify(self, candidate: Candidate, contract: TargetContract, target: Target) -> Verdict:
         # A DIFFERENT identity from the producer. Re-runs the PoC from bytes; trusts the
         # observed effect, not the producer's claim. This is where false positives die.
+        # A finding requires BOTH: (1) the observed effect matches the claim on re-execution,
+        # and (2) the observed effect is materially impactful. Either failing => not a finding.
         env = digest({"env": "clean-verify-sandbox", "revision": target.revision})
         if candidate.poc is None:
             return Verdict(candidate.id, VerdictKind.INCONCLUSIVE, self.identity, False, env,
@@ -111,12 +120,16 @@ class Cato(Unit):
             return Verdict(candidate.id, VerdictKind.OUT_OF_SCOPE, self.identity, False, env,
                            ("asset outside TargetContract scope",))
         observed = target.run(candidate.poc.payload)
-        reproduced = observed == candidate.poc.claimed_effect and observed != "no_effect"
-        if reproduced:
+        claim_matches = observed == candidate.poc.claimed_effect
+        is_impactful = observed in self.exploit_effects
+        if claim_matches and is_impactful:
             return Verdict(candidate.id, VerdictKind.CONFIRMED, self.identity, True, env,
-                           (f"observed '{observed}' matches claim on re-execution",))
-        return Verdict(candidate.id, VerdictKind.NOT_REPRODUCED, self.identity, False, env,
-                       (f"claimed '{candidate.poc.claimed_effect}' but observed '{observed}'",))
+                           (f"re-execution produced impactful effect '{observed}' matching claim",))
+        if not claim_matches:
+            reason = f"claimed '{candidate.poc.claimed_effect}' but re-execution produced '{observed}'"
+        else:
+            reason = f"effect '{observed}' reproduces but is not materially impactful"
+        return Verdict(candidate.id, VerdictKind.NOT_REPRODUCED, self.identity, False, env, (reason,))
 
 
 # --- CAMILLUS: dedup, ranking, triage ----------------------------------------------------
