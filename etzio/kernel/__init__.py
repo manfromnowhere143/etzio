@@ -2,8 +2,8 @@
 what is legal and appends the truth. Nothing else writes the ledger."""
 
 from .events import Event, EventLedger
-from .state import Stage, legal_next, MissionState
-from .loop import MasterLoop, ScopeError, GeneratorIsVerifierError
+from .loop import GeneratorIsVerifierError, MasterLoop, ScopeError
+from .state import MissionState, Stage, legal_next
 
 __all__ = [
     "Event",

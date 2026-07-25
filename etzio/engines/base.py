@@ -10,8 +10,9 @@ producer unit never issues its own verdict.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Protocol
 
+from ..analysis import AttackSurface, find_findings, scan_surface
 from ..contracts import (
     Candidate,
     Hypothesis,
@@ -41,8 +42,12 @@ class Scipio(Unit):
         super().__init__("SCIPIO", "recon")
 
     def map_surface(self, contract: TargetContract) -> dict:
-        # STUB: a real SCIPIO parses the repo/protocol and returns entrypoints + trust boundaries.
+        # STUB path (VaultTarget demo): a modeled surface for the deterministic benchmark.
         return {"assets": list(contract.in_scope), "entrypoints": ["transfer", "withdraw", "approve"]}
+
+    def map_repo(self, repo_path: str) -> AttackSurface:
+        # REAL path: parse an actual Python repo into an attack surface (files, entrypoints, imports).
+        return scan_surface(repo_path)
 
 
 # --- FABIUS: threat modeling & ranked hypotheses ----------------------------------------
@@ -68,7 +73,7 @@ class Velites(Unit):
     def __init__(self) -> None:
         super().__init__("VELITES", "investigate")
 
-    def investigate(self, hyp: Hypothesis, contract: TargetContract, target: Target) -> Optional[Candidate]:
+    def investigate(self, hyp: Hypothesis, contract: TargetContract, target: Target) -> Candidate | None:
         # STUB: a real VELITES agent statically/dynamically probes the target for this hypothesis.
         # The foundation encodes three deterministic outcomes to exercise every path:
         #   H1 -> a genuine candidate (payload truly drains)         -> becomes a confirmed finding
@@ -83,13 +88,25 @@ class Velites(Unit):
             return Candidate("C2", hyp.id, self.identity, asset, poc, "looks unauthorized (unverified)")
         return None  # H3: honest null
 
+    def scan_repo(self, repo_path: str) -> list[Candidate]:
+        # REAL path: run the static detectors over an actual repo and return execution-pending
+        # candidates. Each carries file:line + rule, and NO PoC — so CATO returns 'inconclusive'
+        # (a static hit is a candidate, never a confirmed finding, until a PoC reproduces it).
+        candidates: list[Candidate] = []
+        for i, f in enumerate(find_findings(repo_path)):
+            note = f"[{f.severity}] {f.rule_id} at {f.file}:{f.line} — {f.message} :: {f.snippet}"
+            candidates.append(
+                Candidate(f"S{i:03d}", f.rule_id, self.identity, f.file, poc=None, note=note)
+            )
+        return candidates
+
 
 # --- MARCELLUS: exploit / PoC construction in isolation ----------------------------------
 class Marcellus(Unit):
     def __init__(self) -> None:
         super().__init__("MARCELLUS", "construct")
 
-    def construct_poc(self, candidate: Candidate, target: Target) -> Optional[Candidate]:
+    def construct_poc(self, candidate: Candidate, target: Target) -> Candidate | None:
         # STUB: a real MARCELLUS builds a compiling, reproducing PoC in a hard-isolated sandbox.
         # Here the candidate already carries its PoC; a candidate without a PoC cannot proceed.
         return candidate if candidate.poc is not None else None

@@ -8,9 +8,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Optional
 
 
 def digest(obj) -> str:
@@ -52,7 +51,7 @@ class TargetContract:
     disclosure_channel: str
     max_usd: float
     out_of_scope: tuple[str, ...] = ()
-    max_wallclock_minutes: Optional[float] = None
+    max_wallclock_minutes: float | None = None
 
     def allows(self, action: str) -> bool:
         return action in self.permitted_actions
@@ -90,7 +89,7 @@ class Candidate:
     hypothesis_id: str
     producer: str          # the unit identity that produced it (VELITES/MARCELLUS). NEVER the verifier.
     target_asset: str
-    poc: Optional[PoCArtifact]
+    poc: PoCArtifact | None
     note: str = ""
 
 
