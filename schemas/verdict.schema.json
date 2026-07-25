@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://etzio.local/schemas/verdict.schema.json",
+  "title": "Verdict",
+  "description": "CATO's terminal judgment on a candidate. Only CATO emits this, in a separate isolation boundary from the producer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["candidate_id", "verdict", "verifier_identity", "reproduced_from_bytes", "reasons"],
+  "properties": {
+    "candidate_id": { "type": "string" },
+    "verdict": {
+      "type": "string",
+      "enum": ["confirmed", "not_reproduced", "out_of_scope", "inconclusive"],
+      "description": "The only admissible outcomes. 'confirmed' requires reproduced_from_bytes = true."
+    },
+    "verifier_identity": {
+      "type": "string",
+      "description": "The distinct execution identity that verified. Must differ from the candidate's producer (generator != verifier)."
+    },
+    "reproduced_from_bytes": {
+      "type": "boolean",
+      "description": "True only if the PoC artifact re-executed to the expected effect in a clean environment."
+    },
+    "environment_digest": {
+      "type": "string",
+      "description": "Digest of the clean environment CATO used."
+    },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Why this verdict. For not_reproduced, what failed."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "verdict": { "const": "confirmed" } } },
+      "then": { "properties": { "reproduced_from_bytes": { "const": true } } }
+    }
+  ]
+}

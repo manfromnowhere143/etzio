@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://etzio.local/schemas/finding.schema.json",
+  "title": "Finding",
+  "description": "A CATO-confirmed vulnerability with a full, traversable evidence chain. No traversal, no finding.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "mission_id", "target_revision", "hypothesis_id", "triggering_input", "poc_artifact_digest", "verdict", "severity", "in_scope"],
+  "properties": {
+    "id": { "type": "string" },
+    "mission_id": { "type": "string" },
+    "target_revision": {
+      "type": "string",
+      "description": "Exact revision (git sha / contract address + chain) the finding is against."
+    },
+    "hypothesis_id": {
+      "type": "string",
+      "description": "The FABIUS hypothesis this finding confirms."
+    },
+    "triggering_input": {
+      "type": "string",
+      "description": "The input / transaction / call sequence that triggers the vulnerability."
+    },
+    "poc_artifact_digest": {
+      "type": "string",
+      "description": "Content-addressed digest of the reproducing PoC MARCELLUS built."
+    },
+    "environment_digest": { "type": "string" },
+    "verdict": {
+      "type": "string",
+      "const": "confirmed",
+      "description": "A Finding exists only for a confirmed verdict. Everything else stays a Candidate or a NullResult."
+    },
+    "verifier_identity": { "type": "string" },
+    "severity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["level", "exploitability"],
+      "properties": {
+        "level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "exploitability": { "type": "string", "enum": ["theoretical", "conditional", "demonstrated"] },
+        "payout_class": { "type": "string", "description": "Estimated bounty tier, for CAMILLUS ranking." }
+      }
+    },
+    "in_scope": {
+      "type": "boolean",
+      "description": "AQUILA's confirmation that the finding falls inside the TargetContract scope."
+    }
+  }
+}

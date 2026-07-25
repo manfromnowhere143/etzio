@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://etzio.local/schemas/target-contract.schema.json",
+  "title": "TargetContract",
+  "description": "The authorization envelope for one hunt. AQUILA enforces it. Missing or ambiguous authorization fails closed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["program", "authorization", "in_scope", "permitted_actions", "disclosure_channel", "budget"],
+  "properties": {
+    "program": {
+      "type": "string",
+      "description": "Human-readable program / engagement name."
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "reference"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["bug_bounty_scope", "written_permission", "benchmark", "responsible_disclosure"],
+          "description": "The legal basis for touching this target. 'benchmark' is a locally-owned test target."
+        },
+        "reference": {
+          "type": "string",
+          "description": "URL of the program scope, path to the permission grant, or benchmark id."
+        }
+      }
+    },
+    "in_scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Explicit assets that may be analyzed (repos, hosts, contract addresses, packages)."
+    },
+    "out_of_scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Explicit exclusions. Anything not in_scope is out of scope by default regardless of this list."
+    },
+    "permitted_actions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": ["static_analysis", "dynamic_analysis", "poc_execution", "network_probe", "disclosure_draft"]
+      },
+      "description": "The action classes AQUILA will allow. poc_execution runs only in the isolation tier."
+    },
+    "disclosure_channel": {
+      "type": "string",
+      "description": "Where a confirmed finding is disclosed. Disclosure remains a separate human-authorized effect."
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_usd"],
+      "properties": {
+        "max_usd": { "type": "number", "minimum": 0 },
+        "max_wallclock_minutes": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}
