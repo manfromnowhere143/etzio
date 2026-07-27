@@ -13,7 +13,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from ..analysis import AttackSurface, find_findings, scan_surface
 from ..contracts import (
     Candidate,
     Hypothesis,
@@ -45,11 +44,6 @@ class Scipio(Unit):
     def map_surface(self, contract: TargetContract) -> dict:
         # STUB path (VaultTarget demo): a modeled surface for the deterministic benchmark.
         return {"assets": list(contract.in_scope), "entrypoints": ["transfer", "withdraw", "approve"]}
-
-    def map_repo(self, repo_path: str) -> AttackSurface:
-        # REAL path: parse an actual Python repo into an attack surface (files, entrypoints, imports).
-        return scan_surface(repo_path)
-
 
 # --- FABIUS: threat modeling & ranked hypotheses ----------------------------------------
 class Fabius(Unit):
@@ -88,19 +82,6 @@ class Velites(Unit):
             poc = PoCArtifact(payload="approve(spender=attacker)", claimed_effect="balance_drained")
             return Candidate("C2", hyp.id, self.identity, asset, poc, "looks unauthorized (unverified)")
         return None  # H3: honest null
-
-    def scan_repo(self, repo_path: str) -> list[Candidate]:
-        # REAL path: run the static detectors over an actual repo and return execution-pending
-        # candidates. Each carries file:line + rule, and NO PoC — so CATO returns 'inconclusive'
-        # (a static hit is a candidate, never a confirmed finding, until a PoC reproduces it).
-        candidates: list[Candidate] = []
-        for i, f in enumerate(find_findings(repo_path)):
-            note = f"[{f.severity}] {f.rule_id} at {f.file}:{f.line} — {f.message} :: {f.snippet}"
-            candidates.append(
-                Candidate(f"S{i:03d}", f.rule_id, self.identity, f.file, poc=None, note=note)
-            )
-        return candidates
-
 
 # --- MARCELLUS: exploit / PoC construction in isolation ----------------------------------
 class Marcellus(Unit):

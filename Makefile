@@ -1,8 +1,11 @@
-.PHONY: demo test lint policy verify all
+.PHONY: demo model-demo test lint policy verify all
 
 ETZIO_PYTHON ?= python3
 
 demo:
+	$(ETZIO_PYTHON) -m etzio.scan --fixture vulnerable
+
+model-demo:
 	$(ETZIO_PYTHON) -m etzio.cli
 
 test:

@@ -1,14 +1,17 @@
-"""Narrow deterministic Python AST analysis.
-
-SCIPIO maps files, functions, and imports. VELITES matches six security-relevant syntactic
-patterns. A match is an execution-pending candidate, not a finding.
-"""
+"""Narrow deterministic Python AST analysis over caller-supplied immutable bytes."""
 
 from .python_sast import (
-    AttackSurface,
+    PYTHON_SAST_VERSION,
+    SourceAnalysisV1,
+    SourceParseFailureV1,
     StaticFinding,
-    find_findings,
-    scan_surface,
+    analyze_python_bytes,
 )
 
-__all__ = ["AttackSurface", "StaticFinding", "find_findings", "scan_surface"]
+__all__ = [
+    "PYTHON_SAST_VERSION",
+    "SourceAnalysisV1",
+    "SourceParseFailureV1",
+    "StaticFinding",
+    "analyze_python_bytes",
+]

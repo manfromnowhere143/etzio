@@ -4,10 +4,10 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/repository-foundation",
-  "foundation_predecessor": {
-    "commit": "542122752701c62a776cba6cc4c712dc86c11041",
-    "tree": "ac1cd687052d004b5668aec142faa2adc791623b"
+  "active_branch": "agent/foundation-integrity-v1",
+  "foundation_base": {
+    "commit": "745e860f9db25691b285834853fe23aa2ec73840",
+    "tree": "42d8401e90900cfdf5e81ba415fdc44d9c51a98f"
   },
   "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
   "author": {
@@ -19,20 +19,23 @@
     "target": "https://github.com/manfromnowhere143/etzio.git",
     "visibility": "private",
     "default_branch": "main",
-    "state": "created_and_verified",
-    "verified": "2026-07-27"
+    "verified": "2026-07-27",
+    "merge_policy": "squash_only_delete_branch",
+    "actions_default_token": "read_only",
+    "branch_protection": "unavailable_on_current_private_repository_plan"
   },
   "mission": {
     "purpose": "evidence-native operating system for authorized vulnerability research across target categories",
-    "first_wedge": "benchmark-first blockchain, Solidity, EVM, and later L1/client research",
-    "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel validation",
-    "current_phase": "repository foundation",
-    "next_phase": "foundation integrity"
+    "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
+    "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
+    "current_phase": "foundation_integrity",
+    "next_gate": "kernel_integrated_atomic_finding_admission"
   },
   "authority": {
     "repository_modify": true,
-    "private_remote_create": true,
-    "push": true,
+    "private_repository_operate": true,
+    "push_private_branch": true,
+    "repository_owned_fixtures": true,
     "public_visibility": false,
     "deployment": false,
     "live_target": false,
@@ -43,51 +46,60 @@
     "publication": false
   },
   "implemented": [
-    "in-memory deterministic lifecycle demonstration",
-    "typed skeleton ports for the ten named units",
+    "canonical protocol-v1 envelope and strict JSON",
+    "Unicode 17.0.0 NFC and fixed protocol resource ceilings",
+    "full domain-separated SHA-256 object and event identities",
+    "signed authority grants and self-verifying admissions",
+    "prime-subgroup Ed25519 validation for configured and embedded trust snapshots",
+    "content-addressed repository-fixture target snapshots",
+    "bounded analysis leases and stable candidate identities",
+    "byte-bound Python AST analyzer without a production filesystem walker",
+    "lifecycle-validated append-only SQLite event streams and replay",
+    "distinct refusal, failure, cancellation, timeout, budget, completion, and closure states",
+    "recoverable governed clean and vulnerable fixture scans",
+    "fixture-only supported CLI that emits candidates and never findings"
+  ],
+  "modeled_only": [
+    "original in-memory ten-unit behavior loop",
     "modeled target and eight-case verdict corpus",
-    "six-rule Python AST analyzer with seven planted instances",
-    "fifteen original behavior tests",
-    "repository-policy and CI foundation on the active tranche"
+    "verification lease and signed modeled-receipt contract",
+    "verifier trust snapshot and receipt binding checks",
+    "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
+  ],
+  "blocking_integrity_work": [
+    "semantic per-kind schema and runtime parity",
+    "kernel-issued authority-bound verification leases",
+    "typed CAS resolution of every receipt reference",
+    "atomic receipt acceptance and single-use lease consumption",
+    "canonical retention of complete receipt adjudication inputs",
+    "trusted clock and revocation freshness",
+    "authenticated external event-head anchoring",
+    "proved verifier principal, process, and isolation separation"
   ],
   "not_implemented": [
-    "aligned versioned runtime and wire protocol",
-    "authorization admission and revocation",
-    "durable immutable event storage and deterministic replay",
-    "stable content-bound candidate identity",
     "isolated exploit construction",
     "separately isolated independent verification",
-    "kernel-authenticated verifier receipts",
+    "kernel-minted findings",
     "live target adapters",
+    "blockchain domain pack",
     "governed learning promotion",
     "research-native cockpit"
   ],
-  "baseline_evidence": {
-    "scope": "repository-owned modeled fixtures only",
-    "original_tests": 15,
-    "repository_policy_tests": 14,
-    "current_total_tests": 29,
-    "verdict_corpus": {
-      "tp": 3,
-      "fp": 0,
-      "tn": 4,
-      "fn": 1
-    },
+  "current_evidence": {
+    "scope": "repository-owned deterministic fixtures only",
+    "validation_status": "local_release_suite_passed",
+    "test_count": 289,
+    "validated_runtimes": [
+      "CPython 3.11.15",
+      "CPython 3.14.2"
+    ],
+    "ruff_clean": true,
+    "repository_policy_passed": true,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
-    "claim_boundary": "no real-world precision, authorization, isolation, independence, durability, learning, or superiority claim"
+    "claim_boundary": "no real-world precision, finding validity, isolation, live authorization, learning, or superiority claim"
   },
-  "blocking_integrity_work": [
-    "freeze one versioned runtime and wire contract",
-    "admit valid authority before mission opening",
-    "route one real read-only scan through AQUILA and the kernel",
-    "use canonical full-SHA content-bound identities",
-    "persist deeply immutable events with compare-and-append and terminal closure",
-    "reconstruct state through a pure reducer and resume",
-    "validate independent verifier receipts inside the kernel",
-    "prove every invariant with a known-bad fixture"
-  ],
   "external_blockers": [
     {
       "capability": "isolated MARCELLUS and CATO execution",
@@ -95,11 +107,15 @@
     },
     {
       "capability": "live bounty mission",
-      "blocker": "exact current program scope, human acceptance, isolation gate, and target-specific authority"
+      "blocker": "closed integrity and isolation gates plus exact current program authority"
     }
   ],
   "verify": [
-    "ETZIO_PYTHON=.venv/bin/python make verify"
+    "ETZIO_PYTHON=.venv/bin/python make verify",
+    "ETZIO_PYTHON=.venv-314/bin/python make verify"
   ],
-  "decision_record": "docs/decisions/0001-foundation-integrity-before-breadth.md"
+  "decision_records": [
+    "docs/decisions/0001-foundation-integrity-before-breadth.md",
+    "docs/decisions/0002-canonical-governed-fixture-boundary.md"
+  ]
 }

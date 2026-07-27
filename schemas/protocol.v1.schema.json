@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://etzio.local/schemas/protocol.v1.schema.json",
+  "title": "Etzio Protocol v1 Envelope",
+  "description": "Framing-only schema for the strict common envelope and supported kind names; typed runtime parsers remain the semantic authority for each body. Runtime canonicalization additionally requires Unicode 17.0.0 NFC scalar strings and enforces 16 MiB wire, 64-level nesting, and 100,000-node global ceilings.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "object_kind",
+    "object_version",
+    "object_id",
+    "body",
+    "attestations"
+  ],
+  "properties": {
+    "protocol_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "object_kind": {
+      "type": "string",
+      "enum": [
+        "authority_grant",
+        "authority_admission",
+        "target_snapshot",
+        "analysis_lease",
+        "verification_lease",
+        "candidate",
+        "verifier_receipt",
+        "event",
+        "head_checkpoint"
+      ]
+    },
+    "object_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "object_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "body": {
+      "$ref": "#/$defs/json_object"
+    },
+    "attestations": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "$ref": "#/$defs/json_object"
+      }
+    }
+  },
+  "$defs": {
+    "json_value": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "string",
+          "maxLength": 1000000
+        },
+        {
+          "type": "array",
+          "maxItems": 10000,
+          "items": {
+            "$ref": "#/$defs/json_value"
+          }
+        },
+        {
+          "$ref": "#/$defs/json_object"
+        }
+      ]
+    },
+    "json_object": {
+      "type": "object",
+      "maxProperties": 10000,
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$",
+        "maxLength": 128
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/json_value"
+      }
+    }
+  }
+}

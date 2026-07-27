@@ -1,20 +1,17 @@
-"""Python static analysis via the standard-library `ast`. Real, deterministic, no deps.
+"""Deterministic byte-in/static-observation-out Python analysis.
 
-Two capabilities:
-  * scan_surface(root)  -> AttackSurface   (SCIPIO: files, functions/entrypoints, imports)
-  * find_findings(root) -> [StaticFinding]  (VELITES: real vulnerability-class detectors)
-
-Design bias: PRECISION over recall (the estate rule). A detector fires only on a concrete,
-dangerous syntactic shape — e.g. `os.system(x)` with a non-literal argument — so that clean
-code stays silent. Every finding carries file:line and the exact symbol, so a human (and,
-later, MARCELLUS) can act on it. A finding here is a *candidate*, not a confirmed bug.
+This module deliberately owns no filesystem walker. The governed mission kernel resolves
+an admitted target snapshot from content-addressed evidence and supplies exact bytes here.
+That keeps target access, authorization, and retention outside the detector. A detector
+match is a candidate observation, never a confirmed vulnerability.
 """
 
 from __future__ import annotations
 
 import ast
-import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+
+PYTHON_SAST_VERSION = "python_ast.v1"
 
 
 # --------------------------------------------------------------------------- data model
@@ -25,41 +22,45 @@ class StaticFinding:
     message: str
     file: str
     line: int
+    column: int
     symbol: str            # the offending call/name
     snippet: str
 
 
-@dataclass
-class AttackSurface:
-    root: str
-    files: list[str] = field(default_factory=list)
-    entrypoints: list[str] = field(default_factory=list)   # "path::function"
-    imports: set[str] = field(default_factory=set)
-    parse_errors: list[str] = field(default_factory=list)
+@dataclass(frozen=True, slots=True)
+class SourceParseFailureV1:
+    """Stable, non-source-bearing account of a Python source admission failure."""
 
-    def summary(self) -> dict:
+    relative_path: str
+    reason_code: str
+    line: int
+    column: int
+
+    def to_dict(self) -> dict[str, object]:
         return {
-            "files": len(self.files),
-            "entrypoints": len(self.entrypoints),
-            "distinct_imports": len(self.imports),
-            "parse_errors": len(self.parse_errors),
+            "column": self.column,
+            "line": self.line,
+            "reason_code": self.reason_code,
+            "relative_path": self.relative_path,
         }
 
 
-# --------------------------------------------------------------------------- helpers
-def _iter_py_files(root: str):
-    if os.path.isfile(root):
-        if root.endswith(".py"):
-            yield root
-        return
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in {
-            ".git", ".venv", "venv", "__pycache__", ".pytest_cache",
-            ".ruff_cache", "node_modules", "build", "dist",
-        }]
-        for fn in filenames:
-            if fn.endswith(".py"):
-                yield os.path.join(dirpath, fn)
+@dataclass(frozen=True, slots=True)
+class SourceAnalysisV1:
+    """One byte-bound analyzer result.
+
+    A parse failure and findings are mutually exclusive. Source snippets are intentionally
+    excluded from this protocol-facing result because they can contain credentials or other
+    sensitive literals.
+    """
+
+    relative_path: str
+    findings: tuple[StaticFinding, ...]
+    parse_failure: SourceParseFailureV1 | None
+
+    def __post_init__(self) -> None:
+        if self.findings and self.parse_failure is not None:
+            raise ValueError("a source analysis cannot contain findings and a parse failure")
 
 
 def _call_name(func: ast.AST) -> str | None:
@@ -92,28 +93,6 @@ def _looks_dynamic_sql(arg: ast.AST) -> bool:
 _SECRET_NAMES = ("password", "passwd", "secret", "api_key", "apikey", "token", "private_key", "access_key")
 
 
-# --------------------------------------------------------------------------- SCIPIO
-def scan_surface(root: str) -> AttackSurface:
-    surface = AttackSurface(root=root)
-    for path in _iter_py_files(root):
-        try:
-            src = open(path, encoding="utf-8").read()
-            tree = ast.parse(src, filename=path)
-        except (OSError, SyntaxError) as exc:
-            surface.parse_errors.append(f"{path}: {exc}")
-            continue
-        surface.files.append(path)
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                surface.entrypoints.append(f"{path}::{node.name}")
-            elif isinstance(node, ast.Import):
-                for a in node.names:
-                    surface.imports.add(a.name.split(".")[0])
-            elif isinstance(node, ast.ImportFrom) and node.module:
-                surface.imports.add(node.module.split(".")[0])
-    return surface
-
-
 # --------------------------------------------------------------------------- VELITES detectors
 def _scan_source(path: str, src: str) -> list[StaticFinding]:
     """Detectors for one already-parsed file. Kept as its own function so the `add`/`snip`
@@ -127,7 +106,18 @@ def _scan_source(path: str, src: str) -> list[StaticFinding]:
         return lines[i].strip() if 0 <= i < len(lines) else ""
 
     def add(rule: str, sev: str, msg: str, node: ast.AST, symbol: str) -> None:
-        out.append(StaticFinding(rule, sev, msg, path, getattr(node, "lineno", 0), symbol, snip(node)))
+        out.append(
+            StaticFinding(
+                rule,
+                sev,
+                msg,
+                path,
+                getattr(node, "lineno", 0),
+                getattr(node, "col_offset", 0),
+                symbol,
+                snip(node),
+            )
+        )
 
     _SUBPROCESS = {"subprocess.Popen", "subprocess.call", "subprocess.run", "subprocess.check_output"}
     for node in ast.walk(tree):
@@ -182,13 +172,35 @@ def _scan_source(path: str, src: str) -> list[StaticFinding]:
     return out
 
 
-def find_findings(root: str) -> list[StaticFinding]:
-    findings: list[StaticFinding] = []
-    for path in _iter_py_files(root):
-        try:
-            src = open(path, encoding="utf-8").read()
-            findings.extend(_scan_source(path, src))
-        except (OSError, SyntaxError):
-            continue
-    findings.sort(key=lambda f: (f.file, f.line))
-    return findings
+def analyze_python_bytes(relative_path: str, source_bytes: bytes) -> SourceAnalysisV1:
+    """Analyze exact UTF-8 bytes and make every admission/parse failure explicit.
+
+    The governed protocol-v1 caller retains ``source_bytes`` separately and binds the
+    resulting observations to that artifact digest.
+    """
+    if not isinstance(relative_path, str) or not relative_path:
+        raise ValueError("relative_path must be a nonempty string")
+    if not isinstance(source_bytes, bytes):
+        raise TypeError("source_bytes must be bytes")
+    try:
+        source = source_bytes.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        return SourceAnalysisV1(
+            relative_path,
+            (),
+            SourceParseFailureV1(relative_path, "invalid_utf8", 0, exc.start),
+        )
+    try:
+        findings = tuple(_scan_source(relative_path, source))
+    except SyntaxError as exc:
+        return SourceAnalysisV1(
+            relative_path,
+            (),
+            SourceParseFailureV1(
+                relative_path,
+                "python_syntax_error",
+                exc.lineno or 0,
+                exc.offset or 0,
+            ),
+        )
+    return SourceAnalysisV1(relative_path, findings, None)

@@ -1,148 +1,163 @@
 # Etzio Roadmap
 
-Status: 2026-07-27. Etzio is built through dependency-complete proofs. A phase advances only
-when its acceptance evidence is retained; a green structural check does not waive a
-scientific or authority gate.
+Status: **architecture foundation**, updated 2026-07-27.
 
-## Governing scorecard
+The roadmap advances by retained evidence, not calendar dates. A phase may start only when
+its predecessor’s named acceptance conditions are reproduced.
 
-No single metric governs vulnerability research. Every benchmark tranche reports:
+## Phase 0 — repository foundation
 
-- recall over eligible ground-truth vulnerabilities;
-- precision and false-discovery rate over adjudicated candidates;
-- false-positive rate over labeled benign cases;
-- exploit and patch success where the task supports them;
-- coverage failures, invalid tasks, crashes, and nondeterminism;
-- best-of-*k* and pass@*k* separately from single-run performance;
-- wall time, model/tool cost, compute cost, and human review time;
-- duplicate rate and accepted economic value for authorized bounty missions.
+Status: **implemented**.
 
-Empty denominators are `undefined`, never perfect scores. Confidence intervals accompany
-rates, and target-, harness-, model-, and date-specific results are never generalized
-silently.
+Evidence in the private repository:
 
-## Phase 0 — modeled foundation
+- sole-author provenance policy;
+- exact CPython patch matrix and hash-locked dependencies;
+- least-privilege GitHub Actions pinned to immutable commit SHAs;
+- repository-policy known-bads and retained CI logs;
+- private remote, charter, security policy, architecture, frontier baseline, handoff, and
+  machine-readable mission state.
 
-Status: **implemented narrowly; not accepted as the target architecture**.
+Operational limitation: GitHub branch protection and repository rulesets were unavailable
+for this private repository on the current account plan when checked on 2026-07-27. CI and
+review discipline therefore remain procedural controls; public visibility is not an
+acceptable workaround.
 
-The repository has a state-machine demonstration, in-memory event chain, ten typed unit
-stubs, a tiny labeled verdict corpus, and a six-rule Python AST analyzer. The original 15
-tests pass. This phase established vocabulary and exposed the real trust-boundary work.
+## Phase 1 — foundation integrity
 
-## Phase 0A — professional repository foundation
+Status: **running**.
 
-Status: **in progress on `agent/repository-foundation`**.
+### 1A. Governed candidate-generation slice
 
-- exact CPython patch and hash-locked validation dependencies;
-- SHA-pinned, least-privilege CI with retained logs;
-- repository policy known-bads;
-- sole-author provenance enforcement;
-- canonical bootstrap, handoff, architecture decisions, and evidence-bounded documentation;
-- private `manfromnowhere143/etzio` remote and protected `main`.
+Status: **implemented for repository fixtures**.
 
-Acceptance: the declared Python matrix reproduces all checks from a clean locked
-environment, the private remote is verified, and required GitHub checks pass.
+- common protocol-v1 envelope and canonical JSON;
+- full content-bound identities;
+- signed, expiring, revocable authority admission before mission opening;
+- prime-subgroup Ed25519 trust-key validation;
+- private content-addressed target evidence;
+- exact manifest-backed clean and vulnerable fixtures;
+- bounded analysis leases;
+- stable, source-minimized static candidates;
+- lifecycle-validated compare-and-append SQLite events;
+- deterministic replay, interruption recovery, and distinct terminal states;
+- supported CLI with no arbitrary target path; and
+- known-bads for cryptographic, protocol, authority, evidence, lifecycle, budget,
+  filesystem, and replay failures.
 
-## Phase 0B — foundation integrity
+This slice emits candidates only.
 
-Status: **next implementation mission**.
+### 1B. Finding-admission integrity
 
-Deliver one real read-only fixture scan through a truthful control path:
+Status: **proposed; next mission**.
 
-1. freeze one versioned runtime/wire protocol;
-2. validate and admit an exact benchmark authority before `mission_opened`;
-3. issue a scoped scan lease through AQUILA;
-4. bind target, candidate, artifact, and event identities to canonical full-SHA bytes;
-5. persist deeply immutable events with compare-and-append and terminal closure;
-6. rebuild state through a pure reducer and resume after interruption;
-7. validate verifier receipts in the kernel rather than trusting a Python object;
-8. retain denial, timeout, cancellation, crash, invalid, and non-reproduction distinctly.
+Required:
 
-Acceptance includes known-bads for malformed/blank/expired/wrong-target authority, mutation,
-reordering, truncation, forked heads, append-after-close, unstable IDs, self-verification,
-mismatched candidates, forged receipts, and missing evidence.
+1. semantic per-kind schemas with runtime/wire parity fixtures;
+2. verification leases issued by the kernel under the exact admitted grant;
+3. typed CAS resolution of target, PoC, environment, oracle, and evidence artifacts;
+4. canonical retention of trust snapshot, decision inputs, signed receipt, and result;
+5. atomic receipt acceptance and single-use lease consumption under concurrent writers;
+6. trusted time and revocation freshness;
+7. authenticated, externally anchored event heads; and
+8. known-bads for every refusal, substitution, replay, and concurrency condition.
 
-## Phase 1 — independent proof plane
+Acceptance: a modeled receipt may be authenticated today, but no finding-admission claim is
+accepted until all eight items are retained and replayable.
 
-Status: **proposed; blocked on Linux/KVM execution infrastructure**.
+## Phase 2 — independent proof plane
 
-- package immutable target, toolchain, PoC, and oracle bytes;
-- build MARCELLUS and CATO as separate worker identities;
-- evaluate Firecracker, gVisor, and Kata against Etzio’s syscall, performance, tenancy, and
-  evidence requirements;
-- default-deny egress, remove ambient credentials, enforce ceilings and expiring leases;
-- produce complete signed execution receipts;
-- demonstrate out-of-band termination and cleanup under known-bad workloads.
+Status: **blocked on an explicitly authorized Linux/KVM environment and Phase 1B**.
 
-Acceptance: CATO independently reproduces a planted exploit and rejects substituted,
-producer-forged, non-impactful, nondeterministic, escaped, timed-out, and policy-denied
-cases. Host and guest compromise assumptions are explicit.
+Build separately identified MARCELLUS and CATO workers:
 
-## Phase 2 — benchmark-first blockchain wedge
+- immutable, measured images and exact toolchains;
+- read-only target and artifact inputs;
+- no ambient host credentials;
+- default-deny egress with separately granted destinations;
+- ephemeral writable layers;
+- CPU, memory, process, storage, and wall-clock ceilings;
+- syscall/device restrictions;
+- expiring one-purpose leases;
+- complete stdout, stderr, effect, environment, and termination receipts;
+- out-of-band cancellation and kill; and
+- adversarial escape, confusion, stale-lease, replay, and teardown tests.
 
-Status: **proposed**.
+Acceptance is evidence that builder and verifier differ by principal, key, process, and
+isolation boundary—not merely by label.
 
-Use pinned historical tasks only:
-
-- EVM/Solidity surface and build adapter;
-- versioned smart-contract hypothesis and oracle pack;
-- EVMbench Detect, Patch, and Exploit subsets;
-- SCONE-bench and a contamination-controlled real-incident holdout;
-- negative contracts and semantics-preserving patch tests;
-- report generation from retained evidence only.
-
-Acceptance: end-to-end admitted target → candidate → isolated proof → verdict → finding/null
-→ disclosure draft, with reproducible scorecards and no hidden task exclusions.
-
-## Phase 3 — research depth and swarm
+## Phase 3 — benchmark-first blockchain wedge
 
 Status: **proposed**.
 
-- SCIPIO attack-surface graph and change-aware incremental analysis;
-- FABIUS information-gain and domain-conditioned hypothesis ranking;
-- diverse, leased VELITES workers with controlled ablations;
-- CAMILLUS root-cause deduplication, severity calibration, and review queues;
-- experiment registry for prompts, models, tools, pack versions, and budgets.
+Build the first domain pack around pinned historical Solidity/EVM tasks and later
+blockchain-client cases. Candidate benchmark sources include EVMbench, SCONE-bench,
+ReEVMBench, and carefully licensed historical incident subsets.
 
-Parallelism is earned only when it improves confirmed findings per unit cost without
-degrading precision, isolation, or reproducibility.
+The benchmark manifest must retain:
 
-## Phase 4 — progressively authorized missions
+- exact upstream revision, license/terms, acquisition digest, and build environment;
+- contamination and prior-exposure annotations;
+- labeled positive, negative, invalid, excluded, and unsupported cases;
+- deterministic effect oracles independent of generated prose;
+- repeated-run stability;
+- tool/model/configuration version;
+- compute, time, and failure accounting; and
+- all raw candidate, PoC, verifier, and adjudication receipts.
 
-Status: **not authorized**.
+Primary measures:
 
-Progression is per target and reversible:
+- eligibility and coverage;
+- precision, recall, false-positive rate, and false-discovery rate;
+- exploit reproduction and patch success where applicable;
+- duplicate and invalid-result rates;
+- run-to-run stability;
+- time, compute, and reviewer burden; and
+- category-level failure analysis.
+
+No benchmark result is generalized beyond its named corpus, comparator, configuration, and
+date.
+
+## Phase 4 — progressive authorized research
+
+Status: **proposed**.
+
+Progression is target-specific and reversible:
 
 1. local historical benchmark;
 2. read-only source under exact permission;
 3. passive or program-approved analysis;
 4. isolated dynamic proof against a local replica;
 5. narrowly approved live interaction;
-6. human-reviewed disclosure draft;
+6. human-reviewed disclosure draft; and
 7. one-time human-authorized submission.
 
-Each program’s current scope, automation rules, exclusions, rate limits, safe harbor, target
-revision, disclosure channel, and reward policy are captured in the admitted authority.
-Bounty revenue, duplicate rate, triage acceptance, time-to-confirm, and reviewer burden are
-measured without sacrificing negative-result visibility.
+Every program snapshot records current scope, assets, exclusions, automation rules, rate
+limits, safe harbor, revision, disclosure channel, and reward policy. Bounty acceptance and
+economic value are measured outcomes, never authority.
 
 ## Phase 5 — governed learning and category expansion
 
 Status: **proposed**.
 
-MINERVA creates candidate strategy versions from mission evidence. Promotion requires
-frozen training/evaluation splits, contamination checks, shadow runs, regression suites,
-cost and stability measurements, human review, signed release, and rollback.
+MINERVA may propose strategy versions from findings, contradictions, nulls, failures, costs,
+and reviewer outcomes. Promotion requires frozen train/evaluation partitions, contamination
+checks, shadow runs, positive and negative regressions, stability/cost analysis, human
+review, signature, rollout limits, and rollback.
 
-Category expansion then proceeds through domain packs: blockchain clients, web and APIs,
-cloud/IAM, native memory safety, mobile, supply chain, configuration, protocol and
-distributed-systems logic. Each pack brings its own authority vocabulary, environment,
-oracles, threat model, negative fixtures, and benchmark evidence.
+Learning cannot directly edit authority policy, evaluators, benchmark labels, production
+bytes, or its own promotion gate.
+
+Category expansion then proceeds through versioned domain packs: blockchain clients, web
+and APIs, cloud/IAM, native memory safety, mobile, supply chain, configuration, and protocol
+or distributed-systems logic.
 
 ## Deliberate exclusions
 
-- No live target is inferred from a repository URL or bounty listing.
+- No live target is inferred from a URL, repository, credential, or bounty listing.
 - No exploit execution occurs on the macOS host or in an ordinary developer container.
-- No model, worker, or verifier approves its own consequential effect.
-- No self-modification path edits policy, evaluators, labels, or production bytes.
-- No result is called state of the art without a dated comparator and retained run evidence.
+- No generator or verifier approves its own consequential effect.
+- No timeout, missing review, or retry exhaustion implies approval.
+- No self-modification path controls policy, evaluators, labels, or production.
+- No result is described as safe, autonomous, solved, production-ready, or state of the art
+  without a named benchmark, comparator, scope, date, and retained evidence.

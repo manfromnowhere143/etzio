@@ -117,12 +117,18 @@ jobs:
           smoke_root="$(mktemp -d)"
           trap 'rm -rf "${smoke_root}"' EXIT
           python -m venv "${smoke_root}/venv"
+          "${smoke_root}/venv/bin/python" -m pip install \
+            --no-input \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement tools/ci/requirements-ci.lock
           "${smoke_root}/venv/bin/python" -m pip install --no-deps dist/*.whl
+          "${smoke_root}/venv/bin/python" -m pip check
           (
             cd "${smoke_root}"
             "${smoke_root}/venv/bin/python" -c \
               'import etzio; assert etzio.__version__ == "0.0.1"'
-            "${smoke_root}/venv/bin/etzio"
+            "${smoke_root}/venv/bin/etzio" --fixture clean
           )
 
       - name: Prove validation did not mutate tracked bytes

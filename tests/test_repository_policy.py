@@ -21,9 +21,9 @@ def test_mutable_action_tag_is_rejected():
 
 
 def test_missing_required_schema_is_rejected(tmp_path: Path):
-    required = ("schemas/finding.schema.json",)
+    required = ("schemas/protocol.v1.schema.json",)
     assert required_path_issues(tmp_path, required) == [
-        "missing required repository file: schemas/finding.schema.json"
+        "missing required repository file: schemas/protocol.v1.schema.json"
     ]
 
 

@@ -1,44 +1,39 @@
 # Etzio Architecture
 
-Status: **architecture foundation**, 2026-07-27. This document separates the implemented
-repository from the intended system. “Target” marks a design obligation, not shipped code.
+Status: **architecture foundation**, 2026-07-27.
+
+This document distinguishes implemented, modeled, proposed, and blocked behavior. A green
+test proves only its named fixture and invariant.
 
 ## Architectural verdict
 
-Etzio’s intended shape is sound: a small deterministic control kernel surrounded by
+Etzio’s target shape remains sound: a small deterministic control kernel surrounded by
 replaceable research workers, with policy authority and independent scientific verification
-kept outside the generative swarm. That is the right foundation for broad vulnerability
-research.
+outside the generative workers.
 
-The current implementation does not yet realize that shape. It contains two disconnected
-demonstrations:
-
-1. a governed-looking, in-memory lifecycle using mostly deterministic stubs; and
-2. a real but narrow Python AST scan command that accepts a local path and bypasses the
-   lifecycle, authority, event, and verification layers.
-
-The first engineering mission is to make one small path truthful end to end before adding
-languages, agents, or live adapters.
+The first truthful vertical slice now exists. A signed fixture authority is admitted before
+mission opening; exact target bytes are retained by digest; VELITES analyzes those bytes
+under a bounded lease; canonical events are durably appended and replayed. This is meaningful
+foundation progress, but it is candidate generation—not a finding pipeline.
 
 ## Target system
 
 ```text
                           human / program authority
                                       │
-                         signed, exact grants and policy
+                            exact signed grants
                                       ▼
 ┌───────────────────────────────────────────────────────────────────────────┐
 │ AQUILA · policy plane                                                    │
-│ contract admission · scope · budgets · leases · egress · kill · approval │
+│ admission · scope · budgets · leases · egress · kill · approvals         │
 └──────────────────────────────┬────────────────────────────────────────────┘
                                │ admitted commands
                                ▼
 ┌───────────────────────────────────────────────────────────────────────────┐
 │ ETZIO · deterministic control plane                                      │
-│ protocol registry · lifecycle reducer · append-only ledger · scheduler   │
-│ idempotency · recovery · evidence graph · next legal action               │
+│ protocol · reducer · append-only ledger · recovery · evidence graph      │
 └──────────────┬───────────────────────────────┬────────────────────────────┘
-               │ leased work                   │ validated receipts
+               │ leased work                   │ authenticated receipts
                ▼                               ▼
 ┌──────────────────────────────┐     ┌──────────────────────────────────────┐
 │ research plane              │     │ independent proof plane              │
@@ -54,278 +49,247 @@ languages, agents, or live adapters.
                        MINERVA offline promotion loop
 ```
 
-Workers propose observations and receipts. They do not mutate canonical state or grant
-authority. The kernel validates commands against the protocol, current state, exact lease,
-authority snapshot, evidence digests, and producer identity before appending an event.
+Workers return typed proposals. They do not grant authority, mutate canonical state, or
+declare a finding.
 
-## Planes and responsibilities
+## Implemented fixture path
 
-### ETZIO — control plane
-
-Target: a deterministic command handler and pure reducer. It owns protocol versions,
-mission state, legal transitions, idempotency, artifact references, and the next legal
-action. It must recover the same state from retained events without conversational memory.
-
-Current: `MasterLoop` directly calls in-process Python objects and mutates `MissionState`.
-There is no command protocol, loader, reducer, durable store, resume, or closed-ledger
-enforcement.
-
-### AQUILA — policy plane
-
-Target: validate and admit a versioned authority envelope before mission creation. Every
-lease binds actor, target revision, allowed operation, resource ceiling, expiry, and
-revocation state. Egress, credentials, spending, live interaction, disclosure, and
-publication remain separate capabilities.
-
-Current: `TargetContract` is a caller-created dataclass. It accepts blank references,
-arbitrary authorization kinds, negative budgets, and unvalidated scope. `Aquila.permit`
-performs simple membership checks. The loop emits `mission_opened` and
-`scope_authorized` without an admission proof.
-
-### SCIPIO — surface plane
-
-Target: emit a versioned attack-surface graph with exact target revision, source provenance,
-entrypoints, trust boundaries, dependencies, build context, and parse/coverage failures.
-
-Current: the demo returns three hard-coded entrypoints. The standalone Python mapper walks
-files with `ast`, records functions and imports, and reports parse errors.
-
-### FABIUS — strategy plane
-
-Target: rank falsifiable hypotheses using domain-pack knowledge, target evidence, expected
-information gain, cost, and risk. Rankings remain reproducible and benchmarkable.
-
-Current: three hard-coded hypotheses.
-
-### VELITES — investigation plane
-
-Target: run small leased probes through versioned technique packs. Static and dynamic
-workers return typed observations and candidates; they never issue findings.
-
-Current: the demo emits two fixed candidates and one null. The standalone analyzer has six
-syntactic Python rule classes covering seven planted instances. It has no interprocedural
-taint, alias analysis, dependency reasoning, or proof construction. Syntax errors are
-skipped by the finding path, candidate IDs depend on traversal position, and snippets may
-expose literal source values.
-
-### MARCELLUS — construction plane
-
-Target: construct minimal exploit proofs inside an isolated worker, returning immutable
-artifact and execution receipts. Builder identity is cryptographically and operationally
-separate from CATO.
-
-Current: returns an existing in-memory `PoCArtifact` unchanged.
-
-### CATO — independent proof plane
-
-Target: rehydrate exact artifact bytes in a fresh environment, execute under a separate
-identity and policy, observe a machine-checkable effect, challenge the result, and return a
-signed verdict receipt. CATO may reject; only the kernel may mint a finding.
-
-Current: directly invokes `target.run(payload)` in the caller’s process. It trusts
-caller-supplied verifier fields and does not enforce a `poc_execution` grant itself.
-`reproduced_from_bytes` and the environment digest are modeled labels, not proof of separate
-execution.
-
-### CAMILLUS — adjudication plane
-
-Target: validate evidence completeness, deduplicate by root cause, calculate severity with a
-versioned rubric, rank review queues, and preserve conflicting interpretations.
-
-Current: deterministic ordering only.
-
-### FABRICIUS — disclosure plane
-
-Target: render a report solely from retained evidence and a program-specific template.
-Submission is a separate one-time human-authorized external effect.
-
-Current: deterministic report prose in memory; no external write.
-
-### MINERVA — learning plane
-
-Target: derive lessons from findings, nulls, failures, costs, and reviewer outcomes. A
-candidate strategy version passes shadow and holdout evaluation before human promotion.
-Training data, benchmark labels, evaluators, policy, and production code are protected from
-direct self-modification.
-
-Current: returns counts and a fixed note.
-
-## One versioned protocol
-
-The intended canonical envelope is:
+The supported executable path is intentionally closed:
 
 ```text
-ProtocolEnvelope
-  protocol_version
+repository fixture manifest
+  → CAS artifacts + TargetSnapshotV1
+  → SignedAuthorityGrantV1
+  → AuthorityAdmissionV1
+  → mission_opened
+  → AnalysisLeaseV1
+  → StaticCandidateV1 / explicit parse failure
+  → scan terminal
+  → mission_closed
+```
+
+Only `clean_app.py` and `vulnerable_app.py` from the immutable repository manifest are
+admitted. `etzio.scan` has no arbitrary filesystem-target argument. The analyzer itself
+takes bytes and owns no filesystem walker.
+
+The path cannot create a PoC or finding. Network access, credentials, spending, disclosure,
+publication, and live-target interaction are absent.
+
+## Protocol v1
+
+Every new protocol object uses one common envelope:
+
+```text
+EnvelopeV1
+  protocol_version = 1
   object_kind
-  object_version
-  object_id              # full SHA-256 of canonical semantic bytes
-  mission_id
-  target_revision
-  authority_snapshot_id
-  producer_identity
-  created_at
+  object_version = 1
+  object_id
   body
+  attestations
 ```
 
-Python runtime objects, JSON wire objects, stored events, tests, and schemas must serialize
-to this contract without special cases. Unknown versions fail closed. Canonicalization must
-reject non-finite numbers, implicit string coercion, duplicate keys, and unrecognized
-security-relevant fields.
+`object_id` is a full SHA-256 identity over domain-separated kind and canonical body
+semantics. Attestations do not change the object identity.
 
-Current dataclasses do not satisfy the checked-in JSON Schemas: `TargetContract` and
-`Finding` have different shapes, and tuples do not validate as JSON arrays without explicit
-serialization. Alignment is a blocking task.
+Canonical JSON enforcement includes:
 
-## Authority lifecycle
+- UTF-8 only, duplicate-key rejection, and ASCII snake-case field names;
+- Unicode 17.0.0 NFC scalar strings through an exact dependency;
+- booleans distinct from integers and no floats or non-standard numeric values;
+- signed 64-bit integer range;
+- fixed wire, string, key, nesting, container, node, and attestation ceilings; and
+- rejection of noncanonical wire spellings during parsing.
 
-```text
-untrusted contract
-      │ validate syntax, semantics, issuer, signature, time, revocation, target digest
-      ▼
-admitted authority snapshot
-      │ authorize mission creation
-      ▼
-mission_opened
-      │ derive scoped, expiring work leases
-      ▼
-worker receipts
-      │ validate identity + lease + evidence + current state
-      ▼
-canonical events
-```
+The checked-in `protocol.v1.schema.json` describes the common framing envelope and supported
+kind names. It is not yet a semantic schema for each object body. Python typed parsers are
+currently the semantic authority; schema/runtime parity remains an open Gate A item.
 
-A refusal appends a distinct terminal-visible event and projects the mission to `blocked`.
-Timeout, cancellation, crash, budget exhaustion, revocation, policy denial, and scientific
-non-reproduction are distinct outcomes.
+## Authority
 
-## Event and replay model
+`AuthorityGrantV1` binds issuer, subject, exact target snapshot, assets, permitted actions,
+authority evidence, time interval, and byte/candidate/wall-clock ceilings. An Ed25519
+signature is carried as exactly one common-envelope attestation.
 
-Target events use canonical JSON bytes and full SHA-256 digests. Event payloads are deeply
-immutable values. Each event commits to:
+Admission checks:
 
-- stream and sequence;
-- protocol and event version;
-- mission and target revision;
-- command and idempotency key;
-- actor and authority snapshot;
-- complete state-relevant payload;
-- prior event digest;
-- deterministic event digest.
+- canonical grant identity and signature;
+- trusted key role and configured issuer;
+- key/grant revocation snapshot;
+- half-open validity interval;
+- exact target snapshot and required actions; and
+- fixed hard ceilings.
 
-The durable store performs compare-and-append against the expected head, fsyncs before
-acknowledgment, refuses appends after terminal closure, and exposes an anchored head. A pure
-reducer reconstructs state and rejects gaps, forks, malformed events, illegal transitions,
-or incompatible versions. Runtime timestamps and diagnostics may be recorded, but cannot
-make semantic replay nondeterministic.
+Trusted public keys must be canonical Ed25519 points in the prime-order subgroup. Etzio uses
+libsodium point validation before keys enter configured or embedded trust snapshots; this
+closes a reproduced small-order-key signature-forgery failure in the underlying generic
+verification backend.
 
-Current `EventLedger` is a mutable in-memory list. Its frozen `Event` contains a mutable
-dictionary; events can be changed after append, appends remain possible after closure, only
-the predecessor linkage is checked, digests are truncated to 96 bits, and `default=str`
-hides noncanonical values. This is not a durable audit ledger.
+`AuthorityAdmissionV1` retains the signed grant, complete trust/revocation snapshot, decision
+time, target, required actions, signer, and expiry, and revalidates those historical inputs
+when reconstructed.
 
-## Finding admission
+Limits: the admission record cannot prove that its supplied clock or revocation snapshot
+was fresh, or that represented third-party permission was legally valid. A trusted service
+clock and external authority-evidence procedure are required before live research.
 
-A kernel-minted finding must establish all of the following:
+## Evidence and target identity
 
-1. the candidate ID is content-bound and matches the verdict;
-2. the candidate producer differs from the admitted verifier identity;
-3. the authority snapshot permits the exact target revision and action;
-4. the PoC bytes and environment specification match their full digests;
-5. the isolated execution receipt is authentic, complete, and within lease;
-6. the observed effect satisfies a versioned oracle independent of the producer’s claim;
-7. the verdict is `confirmed`;
-8. every referenced artifact is retained and traversable.
+`FileEvidenceStore` retains immutable bytes by full SHA-256 digest under private directory
+and file modes. Reads reject symlinks, type changes, mode changes, size drift, and digest
+drift. Writes use exclusive creation, fsync, and post-write verification.
 
-The current kernel checks only a producer/verifier identity string inequality before calling
-the verifier and trusts the returned object. A forged verifier can therefore mint a finding.
+`TargetSnapshotV1` binds source kind, canonical relative paths, exact artifact digests,
+sizes, and aggregate size. The governed runner revalidates the repository fixture against
+the checked-in manifest before analysis.
+
+Limits: the current CAS is local filesystem storage, not a multi-tenant access-control,
+retention, encryption, or legal-evidence service.
+
+## Event kernel and replay
+
+`EventV1` is itself a protocol-v1 envelope. Each event binds mission, sequence, kind, unit,
+authority, target, decision time, typed payload, and previous event digest.
+
+`SQLiteEventStore`:
+
+- requires an explicit private filesystem path;
+- uses WAL and `synchronous=FULL`;
+- stores exact canonical event bytes;
+- validates the full retained stream and proposed transition inside a
+  `BEGIN IMMEDIATE` append transaction;
+- compares the expected head;
+- rejects gaps, forks, duplicate digests, illegal transitions, and post-terminal appends;
+- prevents updates and deletes through database triggers; and
+- reconstructs state exclusively through the reducer.
+
+The reducer cross-validates embedded authority, target, lease, and candidate objects. It
+enforces the exact `static_analysis` action and rejects target-byte, lease-time,
+candidate/output-count, and retained-epoch time violations before the offending row is
+inserted. Refusal, failure, cancellation, timeout, budget exhaustion, completed scan, and
+closed mission remain distinct.
+
+Limits:
+
+- Python’s SQLite API cannot connect through Etzio’s already validated file descriptor, so
+  a hostile process under the same OS user retains a pathname-race opportunity;
+- a coherent offline database rewrite is not detectable without an external anchor;
+- checkpoint storage is opaque and not yet authenticated by an authority component; and
+- event time is only as trustworthy as the invoking service’s supplied clock.
+
+Production deployment therefore requires an isolated service identity, protected mount,
+trusted clock, and externally anchored event heads.
+
+## Investigation plane
+
+The implemented VELITES technique is a narrow Python `ast` analyzer. It recognizes six
+syntactic rule classes across seven planted vulnerable-fixture instances and returns zero
+on the one clean fixture.
+
+Protocol candidates bind mission, authority, analysis lease, target snapshot, source
+artifact, path, line, column, rule, severity, symbol, producer, and analyzer version. Source
+snippets and literal values are excluded from persisted candidate objects. Candidate IDs
+are stable within a mission; claim IDs preserve the mission-independent observation
+identity.
+
+This does not establish real-world precision or recall. There is no interprocedural taint,
+alias analysis, dependency reasoning, dynamic proof, exploit construction, or broad corpus.
+
+## Verification boundary
+
+`VerificationLeaseV1` and `VerifierReceiptV1` model exact bindings for one fixture receipt.
+The verification lease has its own `verification_lease` object kind, avoiding type confusion
+with analysis leases. Signed receipts have a canonical exactly-one-attestation wire form,
+strict size/count limits, verifier trust snapshots, revocations, time checks, verdict
+consistency checks, and exact lease/evidence-digest bindings.
+
+This boundary authenticates a configured modeled verifier’s statement. It never mints a
+finding.
+
+Still open:
+
+1. the kernel must issue the verification lease under the admitted grant;
+2. referenced digests must resolve to typed retained CAS bytes;
+3. acceptance and single-use lease consumption must commit atomically;
+4. the complete decision inputs and signed receipt must enter canonical mission history;
+5. freshness of clock and trust snapshot must be established; and
+6. different labels/keys must be replaced by proved process, principal, and isolation
+   separation.
+
+## Modeled components
+
+The original `MasterLoop`, ten unit ports, `BenchmarkTarget`, and verdict/FPR corpus remain
+useful behavior models. They are deliberately separate from the protocol-v1 path:
+
+- CATO calls a toy target in the host process;
+- MARCELLUS passes through an in-memory object;
+- FABIUS emits fixed hypotheses;
+- CAMILLUS sorts;
+- FABRICIUS renders in-memory prose; and
+- MINERVA returns counts.
+
+Their findings, environment labels, and hash-linked in-memory events are not evidence of the
+target architecture.
 
 ## Isolation model
 
-The proof plane requires at least two separately identified workers:
+The proposed proof plane has two separately identified workers:
 
-- **builder**: receives candidate evidence and creates an exploit artifact;
-- **verifier**: receives immutable target and artifact bytes, not builder state, and
-  independently executes the oracle.
+- **builder**: receives candidate evidence and constructs an exploit artifact;
+- **verifier**: receives immutable target and artifact bytes, not builder state, and executes
+  a versioned effect oracle.
 
-The initial production candidate is a Linux/KVM microVM profile, with gVisor or Kata
-evaluated where their syscall and operational trade-offs fit. Required controls include:
-default-deny egress, no ambient credentials, immutable base image, measured environment,
-read-only inputs, ephemeral writable layer, cgroup/resource ceilings, seccomp/device
-restrictions, expiring leases, complete stdout/stderr/effect receipts, and a tested
-out-of-band kill path.
+The first candidate profile is Linux/KVM microVM isolation. Required evidence includes
+default-deny egress, no ambient credentials, immutable images, read-only inputs, ephemeral
+writes, cgroup/resource ceilings, syscall/device restrictions, expiring leases, complete
+execution receipts, and a tested out-of-band kill path.
 
-No such execution tier exists in this repository.
+No such execution tier exists in this repository. Exploit execution remains blocked.
 
 ## Domain and technique packs
 
-Breadth is an adapter problem, not a kernel fork:
+Breadth is an adapter problem:
 
 ```text
 domain pack
   target/revision resolver
   authority vocabulary
-  surface schema
-  hypothesis library
-  build and execution profile
+  surface and hypothesis models
+  build/execution profile
   effect oracles
   severity/disclosure rules
   benchmark suite
 
 technique pack
   tool declaration
-  accepted input protocol
-  output/receipt protocol
-  capability and resource requirements
-  negative fixtures
+  input and output protocol
+  required capabilities and resources
+  positive and negative fixtures
   versioned evaluator
 ```
 
-The first wedge is benchmark-first EVM, Solidity, and blockchain-client research because
-the ecosystem provides concrete exploits, high-value outcomes, and emerging public
-benchmarks. Python analysis remains a small technique fixture, not the product boundary.
+The first proposed domain wedge is benchmark-first Solidity/EVM and later blockchain
+clients. It begins only after the proof-plane gates close.
 
 ## Threat model
 
-Etzio assumes hostile target bytes, malicious build systems, prompt injection in all
-research inputs, deceptive tool output, compromised or mistaken model workers, forged
-receipts, verifier gaming, artifact substitution, dependency compromise, event tampering,
-credential theft, resource exhaustion, and an operator making an accidental scope mistake.
+Etzio assumes hostile target bytes and build systems, prompt injection in research inputs,
+deceptive tool output, compromised model workers, forged receipts, verifier gaming,
+artifact substitution, event tampering, dependency compromise, credential theft, resource
+exhaustion, and operator scope mistakes.
 
-No single model, worker, signature, consensus, or green CI job is scientific or policy
-authority. Security depends on independently enforced boundaries and replayable evidence.
+No model, worker, signature, consensus, repository possession, or green CI run is itself
+scientific or policy authority.
 
-## Current evidence and its limits
+## Next acceptance gate
 
-| Evidence | Observed result | Valid claim |
-|---|---:|---|
-| Original behavior suite | 15 passing tests | modeled paths remain deterministic |
-| CATO fixture corpus | TP=3, FP=0, TN=4, FN=1 | behavior on eight labeled fixtures only |
-| Python vulnerable fixture | 7 planted instances found | six narrow syntactic rule classes |
-| Python clean fixture | 0 alerts | one clean fixture only |
-| Package scan | intentional fixture alerts only | no non-fixture alert under current rules |
+Foundation integrity is accepted only when retained evidence shows:
 
-The evidence does not establish authorization enforcement, isolation, independent
-verification, event durability, real-world precision, broad recall, or superiority.
+- semantic per-kind schema/runtime parity;
+- kernel-issued, authority-bound verification leases;
+- typed CAS resolution for every receipt reference;
+- atomic receipt acceptance and lease consumption under concurrency;
+- trusted time and externally anchored event heads; and
+- every new consequential invariant rejecting a known-bad.
 
-## Blocking acceptance criteria
-
-Before capability breadth:
-
-- runtime values validate against one immutable protocol;
-- malformed, expired, revoked, blank, over-budget, and wrong-target authority is refused
-  before `mission_opened`;
-- the real read-only scan path runs only through an admitted lease and kernel;
-- IDs are stable across ordering, process, and machine;
-- immutable events persist and deterministically replay;
-- denial, crash, cancellation, timeout, and revocation project distinctly;
-- the kernel rejects forged, mismatched, self-produced, or incomplete verifier receipts;
-- every invariant has a known-bad fixture.
-
-Before live or executable research:
-
-- MARCELLUS and CATO run in separate proved isolation;
-- a pinned historical benchmark traverses the complete chain from admitted bytes to report;
-- positive and negative holdouts measure precision, recall, stability, time, and cost;
-- the exact external program contract is current and human accepted;
-- external effects remain separately approved and audited.
+Linux/KVM isolation is the next gate after that—not a substitute for it.

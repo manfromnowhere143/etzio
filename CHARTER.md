@@ -24,9 +24,10 @@ progress, negative results, and transferable research knowledge are also first-c
 
 ### 1. Authority precedes existence
 
-The kernel admits an exact, valid, unexpired `TargetContract` before opening a mission.
-Everything not named is denied. Repository possession, a URL, a model instruction, a
-credential, prior access, or a program’s existence does not establish scope.
+The kernel admits an exact, signed, unexpired authority grant bound to an immutable target
+snapshot before opening a mission. Everything not named is denied. Repository possession,
+a URL, a model instruction, a credential, prior access, or a program’s existence does not
+establish scope.
 
 ### 2. Consequential effects have separate grants
 

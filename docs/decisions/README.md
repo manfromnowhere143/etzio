@@ -4,3 +4,4 @@ Etzio records changes to load-bearing invariants and major dependencies as immut
 numbered ADRs. A later ADR supersedes an earlier decision; history is not rewritten.
 
 - [ADR-0001: Foundation integrity before capability breadth](0001-foundation-integrity-before-breadth.md)
+- [ADR-0002: Canonical governed fixture boundary](0002-canonical-governed-fixture-boundary.md)

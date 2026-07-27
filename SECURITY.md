@@ -5,19 +5,30 @@ currently approved for live targets or untrusted exploit execution.
 
 ## Current security boundary
 
-The current permitted execution surface is repository-owned deterministic fixtures. Pinned
-historical benchmarks may be inspected read-only, but their build systems or payloads may
-not be executed until the isolation gate is accepted:
+The only supported executable research path is the repository-owned clean or vulnerable
+Python fixture selected by `etzio --fixture ...`. That path admits a signed, expiring
+fixture grant; resolves an exact manifest-backed content-addressed snapshot; emits stable
+candidate observations; and persists a lifecycle-checked hash chain in a private SQLite
+store. The supported command has no arbitrary target-path argument.
 
-- the demonstration verifier runs caller-supplied target behavior in the host process;
-- the standalone Python scan path is not admitted through `TargetContract`, AQUILA, or the
-  lifecycle kernel;
-- authorization records are not yet signed, validated, expired, or revoked;
-- budgets, egress, credentials, and disclosure controls are not yet enforcement boundaries;
-- the event ledger is in-memory and is not a durable tamper-evident audit record.
+Those controls prove only the bounded fixture slice:
 
-These are tracked architecture blockers, not operational safeguards. Do not run generated
-payloads, unknown repositories, or third-party exploit material with the current engine.
+- the local operator trust snapshot and decision clock are supplied by the invoking
+  process; the admission record cannot prove their freshness or the legal validity of
+  third-party permission;
+- the content store checks byte identity and private file modes but is not a production
+  access-control or retention service;
+- the SQLite stream is durable and append-only through Etzio's API, but it is not
+  externally anchored and retains a documented same-user pathname race;
+- static observations are candidates only; this path creates no PoC or finding;
+- verifier leases and signed modeled-fixture receipts are contract primitives, not a
+  kernel-integrated acceptance path: authoritative lease issuance, CAS-byte resolution,
+  atomic lease consumption, and independent execution remain open; and
+- the separate `etzio.cli` foundation model executes only its deterministic in-process
+  toy target. Its modeled verdicts are not vulnerability evidence.
+
+Do not run generated payloads, unknown repositories, historical benchmark build systems,
+or third-party exploit material with the current engine.
 
 ## Allowed research
 

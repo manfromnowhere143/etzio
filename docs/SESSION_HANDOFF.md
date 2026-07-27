@@ -3,8 +3,8 @@
 Status: **canonical recovery entrypoint**. Updated 2026-07-27, Asia/Jerusalem.
 
 This file describes Etzio only. It is not authority to access a live target, execute an
-exploit, spend money, use credentials, submit a report, or publish the repository. Revalidate
-every statement from checked-out bytes and retained evidence.
+exploit, use research credentials, spend, disclose, publish, deploy, or change repository
+visibility. Revalidate every statement from checked-out bytes and retained evidence.
 
 ## Mandatory recovery
 
@@ -14,7 +14,7 @@ test "$(basename "$(git rev-parse --show-toplevel)")" = "etzio"
 git status --short --branch
 git log --oneline -6
 git remote -v
-sed -n '1,320p' docs/SESSION_HANDOFF.md
+sed -n '1,360p' docs/SESSION_HANDOFF.md
 python3.11 -m venv .venv
 .venv/bin/python -m pip install \
   --no-input \
@@ -26,63 +26,63 @@ ETZIO_PYTHON=.venv/bin/python make verify
 ```
 
 If `.venv` already contains the exact locked dependencies, skip only environment creation
-and installation. Always inspect status and read this handoff. Then read
+and installation. Status, handoff reading, and validation remain mandatory. Then read
 [README](../README.md), [Charter](../CHARTER.md), [Architecture](ARCHITECTURE.md),
-[Roadmap](ROADMAP.md), [Frontier baseline](FRONTIER_BASELINE.md), and
-[ADR-0001](decisions/0001-foundation-integrity-before-breadth.md).
+[Roadmap](ROADMAP.md), [Frontier baseline](FRONTIER_BASELINE.md), [ADR-0001](decisions/0001-foundation-integrity-before-breadth.md),
+and [ADR-0002](decisions/0002-canonical-governed-fixture-boundary.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
-memory. A green repository check validates only what it names.
+memory. A green check validates only what it names.
 
-## Project identity
+## Repository identity
 
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Foundation predecessor: `542122752701c62a776cba6cc4c712dc86c11041`
-- Foundation predecessor tree: `ac1cd687052d004b5668aec142faa2adc791623b`
-- Active foundation branch while this packet was written: `agent/repository-foundation`
+- Current foundation-integrity branch: `agent/foundation-integrity-v1`
+- Branch base: `745e860f9db25691b285834853fe23aa2ec73840`
+- Branch-base tree: `42d8401e90900cfdf5e81ba415fdc44d9c51a98f`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
-- Verified default branch: `main`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
-The remote was created and its private visibility and default branch were verified on
-2026-07-27. Resolve current visibility, checks, and protections from GitHub before relying
-on this record. Do not add co-author trailers or automated author commits.
+Resolve the current branch head, pull request, workflow state, visibility, and default branch
+from Git and GitHub. Do not infer them from this dated packet.
+
+The private remote and `main` default branch were verified on 2026-07-27. Read-only Actions
+permissions, SHA-pinned actions, squash-only merging, and automatic branch deletion were
+configured. GitHub branch protection/rulesets were unavailable for this private repository
+on the current account plan; never change visibility to obtain them.
 
 Etzio is independent from Odeya, Sentinel, Aweb, Maestro, Telos, Inbar, and every other
-project. A prompt naming Etzio plus a different injected working directory is an identity
-mismatch, not permission to work in the other repository.
+project. A prompt naming Etzio while the injected working directory names another project
+is an identity mismatch that must be resolved before acting.
 
 ## Founder intent
 
-Etzio is not a scanner, toy, or one-domain bounty script. It is intended to become an
-enterprise-grade operating system for authorized vulnerability research across languages,
-vulnerability classes, target categories, and defensive workflows.
+Etzio is intended to become an enterprise-grade operating system for authorized
+vulnerability research—not a scanner, toy, or single bounty script.
 
 The engine should:
 
-- run progressively authorized missions while its capability grows;
-- learn transferable strategy from findings, nulls, failures, cost, and reviewer outcomes;
-- use bounty acceptance and economic value as one hard external signal;
-- preserve scientific, legal, and policy authority outside model workers;
+- span vulnerability classes, languages, target categories, and defensive workflows;
+- run progressively authorized missions while capability grows;
+- treat accepted bounty outcomes as one external economic signal, never as authority;
+- preserve findings, contradictions, nulls, failures, cost, and reviewer outcomes;
+- keep scientific and policy authority outside generative workers; and
 - expand through versioned domain and technique packs without fragmenting the kernel.
 
-Blockchain, Solidity, EVM, and eventually L1/client research are the first benchmark and
-economic wedge. They are not the ceiling.
+Blockchain, Solidity, EVM, and later L1/client research are the first benchmark and economic
+wedge. They are not the ceiling.
 
 ## Mission thesis
 
-A vulnerability is a falsifiable claim: a specific input against a specific target revision
-causes a security-relevant effect. A candidate is not a finding. A finding exists only after
-a separately identified verifier reproduces the effect from retained bytes in a clean,
-authorized environment and the kernel validates the receipt.
-
-The architectural moat is the chain:
+A candidate is a falsifiable claim about exact target bytes. It becomes a finding only
+after a separately authorized verifier reproduces a material effect from retained artifacts
+inside an independently controlled environment and the kernel accepts the complete receipt.
 
 ```text
 exact authority
-  → reproducible target
+  → immutable target
   → falsifiable hypothesis
   → content-bound candidate
   → isolated exploit artifact
@@ -94,176 +94,149 @@ exact authority
 
 ## Current implementation truth
 
-The repository currently has:
+### Implemented for the repository-fixture scan
 
-- dataclass contracts and three JSON Schemas;
-- an in-memory mission state and hash-linked event demonstration;
-- deterministic skeletons for the ten named units;
-- a modeled target and eight-case CATO fixture corpus;
-- a standard-library Python AST mapper and six-rule scanner;
-- 15 original behavior tests;
-- professional repository-policy and CI work on the active branch.
+- common protocol-v1 envelopes and strict canonical JSON;
+- Unicode 17.0.0 NFC, signed 64-bit integers, and fixed resource ceilings;
+- full domain-separated SHA-256 object and event identities;
+- Ed25519 signed authority grants and self-verifying admission records;
+- prime-subgroup trust-key validation for configured and embedded snapshots;
+- exact clean/vulnerable fixture manifests and content-addressed evidence;
+- bounded analysis leases and stable candidate/claim identities;
+- byte-bound Python AST analysis with no production filesystem walker;
+- lifecycle-validated append-only SQLite storage and deterministic replay;
+- fail-closed refusal, cancellation, failure, timeout, budget, completion, and closure;
+- recoverable deterministic fixture scans without duplicate outputs; and
+- a supported fixture-only CLI that emits candidates and never findings.
 
-The active repository-foundation branch currently defines 29 tests: 15 original behavior
-regressions and 14 repository-policy known-bads. Local CPython 3.11.15 validation, source
-and wheel builds, an out-of-checkout wheel smoke test, actionlint, and shellcheck pass.
+### Implemented as modeled contract primitives only
 
-It does not have:
+- distinct verification leases;
+- verifier trust snapshots and revocations;
+- canonical one-attestation signed verifier receipts;
+- exact receipt/lease/digest/time/verdict bindings and resource ceilings.
 
-- one aligned versioned runtime/wire protocol;
-- validated, signed, expiring, or revocable authority;
-- a durable immutable ledger, pure reducer, replay, or resume;
-- a real worker protocol or scheduler;
-- stable content-bound candidate identity;
-- isolated MARCELLUS construction;
-- separately isolated CATO verification;
-- kernel-authenticated evidence receipts;
-- a real report package, external effect gateway, cockpit, or learning system;
-- a live-target adapter or authority for a live mission.
+Receipt validation authenticates a configured modeled statement. It does not establish
+kernel issuance, CAS evidence, atomic single use, actual independence, isolation, or a
+finding.
 
-The current code is safer mainly because it has no live adapters, not because the intended
-boundaries are enforced.
+### Retained behavior models
 
-## Reproduced evidence
+The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eight-case
+verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
+digests, and event chain are not evidence of the protocol-v1 architecture.
 
-Before this tranche, the original repository was independently reproduced under CPython
-3.14.2 and CPython 3.11.15:
+## Reproduced local evidence
 
-- 15 tests passed and Ruff was clean under the then-configured rules;
-- the demo emitted one modeled finding, two nulls, 16 events, and an intact predecessor
-  chain;
-- the CATO fixture corpus produced TP=3, FP=0, TN=4, FN=1;
-- the vulnerable Python fixture produced seven instances across six rule classes;
-- the clean fixture produced zero alerts;
-- the package scan produced only intentional-fixture alerts.
+On the current candidate bytes, `make verify` passed under both CPython 3.11.15 and
+CPython 3.14.2:
 
-These results are synthetic and narrow. They do not establish real-world precision,
-authorization enforcement, independent verification, event integrity, isolation, or
-superiority. In particular, 0 false positives among four benign cases has a very wide
-confidence interval.
+- 289 tests passed;
+- Ruff was clean;
+- all four JSON Schemas and repository policy passed;
+- the governed vulnerable fixture closed with seven candidates and no finding;
+- the governed clean fixture closed with zero candidates; and
+- both modeled regression demonstrations retained their historical outputs.
 
-## Architecture audit findings
+The hash-locked environments passed `pip check`. This evidence remains fixture-scoped and
+must be reproduced by GitHub Actions for the pushed commit.
 
-The 2026-07-27 audit reproduced the following blockers:
+## Closed adversarial findings in this tranche
 
-1. The lifecycle demo and real Python scanner are disconnected. `etzio.scan` accepts a local
-   path without AQUILA, `TargetContract`, lifecycle state, or events.
-2. `TargetContract` is self-asserted and accepts invalid kinds, blank references, negative
-   budgets, and missing expiry/revocation evidence. `mission_opened` precedes admission.
-3. CATO directly invokes caller-supplied target behavior in the host process and does not
-   independently check `poc_execution` authority.
-4. The kernel trusts a caller-supplied verdict. A forged verifier can confirm mismatched or
-   false candidates because receipt fields are not validated.
-5. `Event.payload` is mutable, the ledger is in-memory, semantic bytes are noncanonical,
-   digests are truncated, appends remain possible after closure, and there is no durable
-   load/replay/anchor protocol.
-6. Runtime `TargetContract` and `Finding` objects do not validate against their checked-in
-   schemas.
-7. Verification and finding minting execute while lifecycle state is still `construct`;
-   `verify` and `adjudicate` are advanced afterward.
-8. Scope refusal emits an event and raises but does not persist a `blocked` projection.
-9. “Reproduced from bytes” and the environment digest are modeled labels, not retained
-   isolated-execution evidence.
-10. Budget, wall-clock, egress, credential, spending, disclosure, and kill controls are not
-    implemented boundaries.
-11. The FPR corpus has only four benign cases; empty metric denominators report misleading
-    perfect values; an always-negative verifier passes the `FP == 0` command-line bar.
-12. The scanner skips syntax failures in its finding path, lacks interprocedural and alias
-    reasoning, may print secret literals, and uses traversal-position candidate IDs.
-13. MINERVA returns only counts and prose; there is no evaluated promotion loop.
+Known-bads now cover:
 
-These findings are why [ADR-0001](decisions/0001-foundation-integrity-before-breadth.md)
-places integrity before language or finder expansion.
+- cross-runtime Unicode identity divergence;
+- duplicate/noncanonical/oversized protocol values;
+- forged, revoked, wrong-role, wrong-issuer, expired, and wrong-target authority;
+- small-order Ed25519 keys in configured and embedded trust snapshots;
+- target artifact, size, path, mode, symlink, and manifest substitution;
+- analysis/verification lease object-kind confusion;
+- hard-linked event-store aliasing, event fork, gap, mutation, illegal transition, wrong
+  unit, and post-terminal append;
+- action substitution and byte/time/output budget overflow before persistence;
+- candidate mission/authority/lease/source substitution;
+- receipt signature, verifier, lease, verdict, time, and digest substitution;
+- oversized receipt/trust/revocation/evidence collections;
+- crash-after-append replay without duplicate candidates;
+- late recovery before lease issuance and completed-scan closure after grant/trust
+  changes; and
+- the former arbitrary local-path CLI escape hatch.
 
-## Frontier conclusion
+## Open foundation-integrity blockers
 
-Open Kritt demonstrates the commercial value of focused domain workflows, repeat runs,
-compiling PoCs, post-validation, and ranking. EVMbench and SCONE-bench demonstrate rapid
-progress on executable smart-contract tasks. ReEVMBench demonstrates contamination,
-stability, scaffold, and real-incident gaps. BountyBench and CVE-Bench show the importance
-and difficulty of broader real systems. Codex Security, Big Sleep, and AIxCC show that deep
-context, validation, patching, and expert-guided workflows can produce real defensive value.
+1. `protocol.v1.schema.json` validates framing, not semantic per-kind bodies.
+2. Verification leases are not issued by the kernel under an admitted
+   `modeled_fixture_verification` grant.
+3. Receipt digest membership does not resolve and type-check retained CAS bytes.
+4. Receipt acceptance and lease consumption are not one atomic durable transaction.
+5. Complete receipt adjudication is not part of canonical mission history.
+6. Authority/verifier clock and revocation snapshot freshness are not externally proved.
+7. SQLite event heads are not externally authenticated or anchored.
+8. SQLite retains a documented same-user pathname race.
+9. Separate verifier labels and keys do not prove separate principals, processes, or
+   isolation.
+10. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
+    are not implemented.
 
-Etzio’s legitimate differentiator is the intended combination of exact authority, durable
-mission replay, independent proof, domain depth, and governed learning. None is accepted
-until Etzio retains its own evidence.
+These blockers prevent a finding pipeline and all live-target work.
 
 ## Current mission order
 
-### Mission A — repository foundation
+### Mission 1 — close finding-admission integrity
 
-Finish and integrate:
+Implement semantic schemas, kernel-issued verification leases, typed CAS resolution,
+atomic receipt acceptance/single-use consumption, canonical adjudication history, trusted
+time, and authenticated external head anchoring. Add concurrency and substitution
+known-bads.
 
-- exact interpreter and hash-locked dependencies;
-- SHA-pinned least-privilege GitHub Actions;
-- provenance and repository-policy known-bads;
-- honest README, architecture, roadmap, security policy, frontier baseline, and ADR;
-- private remote, required checks, and protected `main`.
+### Mission 2 — independent proof plane
 
-### Mission B — foundation integrity
+On a separately authorized Linux/KVM host, prove MARCELLUS/CATO separation with immutable
+inputs, default-deny egress, no ambient credentials, resource ceilings, expiring leases,
+complete receipts, and an out-of-band kill path.
 
-Implement the smallest real vertical slice:
+### Mission 3 — blockchain benchmark wedge
 
-1. one versioned runtime/wire protocol;
-2. contract admission before mission creation;
-3. one real read-only fixture scan through AQUILA and the kernel;
-4. canonical full-SHA identities;
-5. deeply immutable persisted events;
-6. pure deterministic reducer and resume;
-7. kernel validation of independent-verifier receipts;
-8. known-bad tests for every invariant.
+Run pinned, licensed, contamination-controlled historical EVM/Solidity benchmarks. Retain
+eligibility, exclusions, all negative/error outcomes, repeated-run stability, precision,
+recall, FPR/FDR, exploit and patch success, compute, time, and reviewer burden.
 
-### Mission C — independent proof plane
+### Mission 4 — progressive authorized research and learning
 
-On a separately authorized Linux/KVM host, build isolated MARCELLUS and CATO workers with
-default-deny egress, no ambient credentials, resource ceilings, expiring leases, complete
-receipts, and a tested kill path.
-
-### Mission D — blockchain benchmark wedge
-
-Run pinned historical EVMbench, SCONE-bench, and contamination-controlled real-incident
-subsets. Measure recall, precision, FPR, FDR, exploit/patch success, stability, cost, and
-time. Preserve all excluded, invalid, crashed, timed-out, and negative cases.
-
-### Mission E — progressive authorized research and learning
-
-Admit a specific program contract only after isolation and benchmark gates. Keep every
-external effect human-controlled. Promote MINERVA strategy versions offline through frozen
+Admit one exact program only after the integrity, isolation, and benchmark gates. Keep
+external effects human-authorized. Promote MINERVA strategy versions offline through frozen
 holdouts, regressions, signatures, and rollback.
 
 ## Authority state
 
-Authorized in this tranche:
+Authorized:
 
-- modify and validate the Etzio repository;
-- study public frontier systems and private estate patterns read-only;
-- create `manfromnowhere143/etzio` as a private GitHub repository;
-- push Daniel-authored Etzio changes and configure repository checks.
+- modify, validate, commit, and push this Etzio repository;
+- use repository-owned deterministic fixtures;
+- inspect public research and other estate repositories read-only for patterns;
+- operate the private `manfromnowhere143/etzio` GitHub repository.
 
 Not authorized:
 
-- public visibility;
-- deployment;
+- public visibility or deployment;
 - live-target interaction;
-- exploit execution outside repository-owned deterministic fixtures;
-- credential use for a research target;
+- execution of unknown or third-party exploit/build material;
+- research credentials or sensitive target data;
 - spending;
 - disclosure, submission, publication, or external messaging.
 
-GitHub credentials used solely to publish the authorized private repository are repository
-operations, not mission credentials.
+GitHub credentials used only for the authorized private repository are repository
+operations, not research-target credentials.
 
-## Continuation standard
+## Handoff standard
 
-Before handoff:
+Before handing off:
 
-1. inspect the complete diff and all untracked paths;
-2. reproduce the declared checks from the hash-locked environment;
-3. retain exact test, benchmark, commit, tree, workflow, and remote state;
+1. inspect all modified and untracked paths;
+2. reproduce the suite from the hash-locked environment on both declared runtimes;
+3. validate schemas, package build, wheel install, shell/workflow checks, and Git diff;
 4. stage only the declared tranche;
 5. commit as Daniel without co-author trailers;
-6. push through a pull request and verify required checks;
-7. update this file and `MISSION_STATE.json`;
-8. leave unsupported claims, open risks, and unimplemented components explicit.
-
-Never infer completion from confident prose. Recover from bytes, evidence, and authority.
+6. push to the private remote and inspect GitHub Actions;
+7. update this file and `MISSION_STATE.json`; and
+8. report exact residuals without promoting modeled behavior to implemented status.

@@ -8,6 +8,5 @@ etzio_python="${ETZIO_PYTHON:-python3}"
 "${etzio_python}" scripts/validate_repository.py
 "${etzio_python}" -m etzio.cli
 "${etzio_python}" -m etzio.harness.fpr
-"${etzio_python}" -m etzio.scan
-"${etzio_python}" -m etzio.scan etzio/fixtures_code/clean_app.py
-"${etzio_python}" -m etzio.scan --self
+"${etzio_python}" -m etzio.scan --fixture vulnerable
+"${etzio_python}" -m etzio.scan --fixture clean
