@@ -751,6 +751,31 @@ def test_store_requires_private_nonsymlink_directory_chain(tmp_path: Path) -> No
         SQLiteEventStore(link / "events.sqlite3")
 
 
+def test_only_root_owned_sticky_temp_is_a_writable_ancestor_trust_boundary() -> None:
+    sticky_mode = stat.S_IFDIR | stat.S_ISVTX | 0o777
+
+    assert SQLiteEventStore._is_trusted_sticky_root(
+        directory_uid=0,
+        directory_mode=sticky_mode,
+        effective_uid=1000,
+    )
+    assert not SQLiteEventStore._is_trusted_sticky_root(
+        directory_uid=1001,
+        directory_mode=sticky_mode,
+        effective_uid=1000,
+    )
+    assert not SQLiteEventStore._is_trusted_sticky_root(
+        directory_uid=0,
+        directory_mode=stat.S_IFDIR | 0o777,
+        effective_uid=1000,
+    )
+    assert not SQLiteEventStore._is_trusted_sticky_root(
+        directory_uid=0,
+        directory_mode=sticky_mode,
+        effective_uid=0,
+    )
+
+
 def test_database_symlink_is_rejected(tmp_path: Path) -> None:
     root = tmp_path.resolve()
     real = root / "real.sqlite3"

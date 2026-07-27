@@ -88,7 +88,7 @@
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
     "validation_status": "local_release_suite_passed",
-    "test_count": 289,
+    "test_count": 290,
     "validated_runtimes": [
       "CPython 3.11.15",
       "CPython 3.14.2"

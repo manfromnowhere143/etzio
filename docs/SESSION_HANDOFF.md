@@ -131,7 +131,7 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 On the current candidate bytes, `make verify` passed under both CPython 3.11.15 and
 CPython 3.14.2:
 
-- 289 tests passed;
+- 290 tests passed;
 - Ruff was clean;
 - all four JSON Schemas and repository policy passed;
 - the governed vulnerable fixture closed with seven candidates and no finding;

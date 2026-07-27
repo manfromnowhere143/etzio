@@ -190,8 +190,25 @@ class SQLiteEventStore:
             raise
 
     @staticmethod
-    def _validate_private_directory_chain(parent: Path) -> None:
-        """Validate the user-controlled path chain up to a non-writable trust boundary."""
+    def _is_trusted_sticky_root(
+        *,
+        directory_uid: int,
+        directory_mode: int,
+        effective_uid: int | None,
+    ) -> bool:
+        """Recognize a root-owned sticky temp root that another user cannot replace."""
+
+        return (
+            effective_uid is not None
+            and effective_uid != 0
+            and directory_uid == 0
+            and bool(directory_mode & stat.S_ISVTX)
+            and bool(stat.S_IMODE(directory_mode) & 0o022)
+        )
+
+    @classmethod
+    def _validate_private_directory_chain(cls, parent: Path) -> None:
+        """Validate the path chain up to a protected system trust boundary."""
 
         current = parent
         immediate = True
@@ -217,6 +234,11 @@ class SQLiteEventStore:
                 )
 
             permissions = stat.S_IMODE(metadata.st_mode)
+            trusted_sticky_root = cls._is_trusted_sticky_root(
+                directory_uid=metadata.st_uid,
+                directory_mode=metadata.st_mode,
+                effective_uid=effective_uid,
+            )
             if immediate:
                 if effective_uid is not None and metadata.st_uid != effective_uid:
                     raise EventStoreError(
@@ -226,15 +248,19 @@ class SQLiteEventStore:
                     raise EventStoreError(
                         "database parent directory must have mode 0700"
                     )
-            if permissions & 0o022:
+            if permissions & 0o022 and not trusted_sticky_root:
                 raise EventStoreError(
                     "database directory chain must not be group/world writable"
                 )
 
-            # A non-user-owned, non-writable directory is the trusted boundary.  Walking
-            # above it would reject root-managed compatibility links (for example macOS
-            # /var) that the service user cannot replace.
-            if effective_uid is not None and metadata.st_uid != effective_uid:
+            # Stop at either a non-user-owned, non-writable directory or the conventional
+            # root-owned sticky temp root. Sticky deletion rules prevent other unprivileged
+            # users from replacing this service user's private child directory.
+            if (
+                effective_uid is not None
+                and metadata.st_uid != effective_uid
+                and (not permissions & 0o022 or trusted_sticky_root)
+            ):
                 return
             if current.parent == current:
                 return
