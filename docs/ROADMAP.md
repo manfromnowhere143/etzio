@@ -49,21 +49,28 @@ This slice emits candidates only.
 
 ### 1B. Finding-admission integrity
 
-Status: **proposed; next mission**.
+Status: **running**.
 
-Required:
+Implemented in this phase:
 
-1. semantic per-kind schemas with runtime/wire parity fixtures;
-2. verification leases issued by the kernel under the exact admitted grant;
-3. typed CAS resolution of target, PoC, environment, oracle, and evidence artifacts;
-4. canonical retention of trust snapshot, decision inputs, signed receipt, and result;
-5. atomic receipt acceptance and single-use lease consumption under concurrent writers;
-6. trusted time and revocation freshness;
-7. authenticated, externally anchored event heads; and
-8. known-bads for every refusal, substitution, replay, and concurrency condition.
+- installed semantic per-kind wire schemas for all eight typed objects and all twelve event
+  variants;
+- runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and
+- fail-closed rejection of untyped reserved kinds, malformed signed-grant encoding, and
+  `"."` relative paths.
+
+Remaining required:
+
+1. verification leases issued by the kernel under the exact admitted grant;
+2. typed CAS resolution of target, PoC, environment, oracle, and evidence artifacts;
+3. canonical retention of trust snapshot, decision inputs, signed receipt, and result;
+4. atomic receipt acceptance and single-use lease consumption under concurrent writers;
+5. trusted time and revocation freshness;
+6. authenticated, externally anchored event heads; and
+7. known-bads for every new refusal, substitution, replay, and concurrency condition.
 
 Acceptance: a modeled receipt may be authenticated today, but no finding-admission claim is
-accepted until all eight items are retained and replayable.
+accepted until the implemented and remaining conditions above are retained and replayable.
 
 ## Phase 2 — independent proof plane
 

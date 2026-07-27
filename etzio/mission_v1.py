@@ -12,44 +12,19 @@ from dataclasses import dataclass
 from pathlib import PurePosixPath
 
 from .analysis import PYTHON_SAST_VERSION, StaticFinding
-from .protocol import EnvelopeV1, ProtocolError, content_id, thaw_json
+from .protocol import (
+    SEMANTIC_BODY_FIELDS_BY_KIND_V1,
+    EnvelopeV1,
+    ProtocolError,
+    content_id,
+    thaw_json,
+)
 
 _FULL_SHA = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 _NONCE = re.compile(r"^[0-9a-f]{32}$", re.ASCII)
 _SEVERITIES = frozenset({"low", "medium", "high", "critical"})
-_LEASE_FIELDS = frozenset(
-    {
-        "action",
-        "authority_id",
-        "expires_at",
-        "issued_at",
-        "lease_nonce",
-        "max_bytes",
-        "max_candidates",
-        "max_wallclock_seconds",
-        "mission_id",
-        "target_snapshot_id",
-        "worker_identity",
-    }
-)
-_CANDIDATE_FIELDS = frozenset(
-    {
-        "analysis_lease_id",
-        "analyzer_version",
-        "authority_id",
-        "claim_id",
-        "column",
-        "line",
-        "mission_id",
-        "producer_identity",
-        "relative_path",
-        "rule_id",
-        "severity",
-        "source_artifact_digest",
-        "symbol",
-        "target_snapshot_id",
-    }
-)
+_LEASE_FIELDS = SEMANTIC_BODY_FIELDS_BY_KIND_V1["analysis_lease"]
+_CANDIDATE_FIELDS = SEMANTIC_BODY_FIELDS_BY_KIND_V1["candidate"]
 
 
 class MissionProtocolError(ProtocolError):
@@ -78,7 +53,8 @@ def _require_relative_path(value: object) -> str:
     path_text = _require_text(value, "relative_path")
     path = PurePosixPath(path_text)
     if (
-        path.is_absolute()
+        path_text == "."
+        or path.is_absolute()
         or path.as_posix() != path_text
         or "." in path.parts
         or ".." in path.parts

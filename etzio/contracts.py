@@ -1,7 +1,8 @@
-"""Modeled runtime objects for the Etzio foundation.
+"""Legacy, non-authoritative behavior-model objects for the Etzio foundation.
 
-The current dataclasses do not yet implement the versioned wire protocol or align exactly
-with the JSON Schemas under ``schemas/``. That alignment is blocking integrity work.
+These dataclasses are intentionally separate from the typed protocol-v1 fixture path and
+the installed semantic wire schema. They do not establish authority, evidence, isolation,
+or finding admission.
 """
 
 from __future__ import annotations

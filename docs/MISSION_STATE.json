@@ -4,7 +4,7 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/foundation-integrity-v1",
+  "active_branch": "agent/semantic-protocol-schemas-v1",
   "foundation_base": {
     "commit": "745e860f9db25691b285834853fe23aa2ec73840",
     "tree": "42d8401e90900cfdf5e81ba415fdc44d9c51a98f"
@@ -29,7 +29,7 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "kernel_integrated_atomic_finding_admission"
+    "next_gate": "kernel_issued_authority_bound_verification_leases"
   },
   "authority": {
     "repository_modify": true,
@@ -47,6 +47,8 @@
   },
   "implemented": [
     "canonical protocol-v1 envelope and strict JSON",
+    "installed semantic wire schema and typed dispatch for all eight supported object kinds",
+    "exact closed-field schema/runtime parity for all eight semantic bodies and twelve event variants",
     "Unicode 17.0.0 NFC and fixed protocol resource ceilings",
     "full domain-separated SHA-256 object and event identities",
     "signed authority grants and self-verifying admissions",
@@ -67,7 +69,6 @@
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "semantic per-kind schema and runtime parity",
     "kernel-issued authority-bound verification leases",
     "typed CAS resolution of every receipt reference",
     "atomic receipt acceptance and single-use lease consumption",
@@ -88,7 +89,7 @@
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
     "validation_status": "local_release_suite_passed",
-    "test_count": 290,
+    "test_count": 314,
     "validated_runtimes": [
       "CPython 3.11.15",
       "CPython 3.14.2"
@@ -116,6 +117,7 @@
   ],
   "decision_records": [
     "docs/decisions/0001-foundation-integrity-before-breadth.md",
-    "docs/decisions/0002-canonical-governed-fixture-boundary.md"
+    "docs/decisions/0002-canonical-governed-fixture-boundary.md",
+    "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md"
   ]
 }

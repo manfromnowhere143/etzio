@@ -8,6 +8,7 @@ include SECURITY.md
 include Makefile
 recursive-include .github CODEOWNERS *.md *.yml
 recursive-include docs *.json *.md
+recursive-include etzio/schemas *.json
 recursive-include schemas *.json
 recursive-include scripts *.py *.sh
 recursive-include tests *.py

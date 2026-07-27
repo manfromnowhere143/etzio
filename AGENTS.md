@@ -61,18 +61,16 @@ outcome, not authority to touch a third-party system.
 
 The first governed fixture vertical slice now has a canonical protocol envelope, signed
 authority admission, content-addressed target snapshot, stable candidates, lifecycle-checked
-SQLite replay, fail-closed terminal states, and known-bad controls. It remains a narrow
-candidate-generation proof, not a finding pipeline.
+SQLite replay, semantic schemas for every typed wire kind, fail-closed terminal states, and
+known-bad controls. It remains a narrow candidate-generation proof, not a finding pipeline.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. replace the framing-only JSON Schema with semantic per-kind wire schemas and parity
-   fixtures;
-2. make verification leases kernel-issued under the admitted grant;
-3. resolve referenced receipt evidence from retained CAS bytes and atomically consume each
+1. make verification leases kernel-issued under the admitted grant;
+2. resolve referenced receipt evidence from retained CAS bytes and atomically consume each
    lease with its accepted signed receipt;
-4. establish a trusted clock boundary and externally anchor event heads; and
-5. prove every refusal and concurrency invariant with a known-bad.
+3. establish a trusted clock boundary and externally anchor event heads; and
+4. prove every refusal and concurrency invariant with a known-bad.
 
 Then build MARCELLUS and independent CATO execution on an explicitly accepted Linux/KVM
 profile before the benchmark-first EVM domain pack.

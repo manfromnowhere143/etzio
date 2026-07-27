@@ -9,12 +9,27 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 from jsonschema.exceptions import SchemaError
 from jsonschema.validators import validator_for
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from etzio.kernel.events_v1 import (  # noqa: E402
+    EVENT_PAYLOAD_FIELDS_BY_KIND_V1,
+    EVENT_UNIT_BY_KIND_V1,
+)
+from etzio.protocol import (  # noqa: E402
+    ENVELOPE_FIELDS_V1,
+    OPTIONALLY_ATTESTED_OBJECT_KINDS_V1,
+    SEMANTIC_BODY_FIELDS_BY_KIND_V1,
+    SUPPORTED_OBJECT_KINDS,
+)
+
 EXPECTED_AUTHOR = ("Daniel Wahnich", "cogitoergosum143@gmail.com")
 ACTION_REF = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 MARKDOWN_LINK = re.compile(r"!?\[[^\]]*]\(([^)]+)\)")
@@ -34,15 +49,25 @@ REQUIRED_PATHS = (
     "docs/SESSION_HANDOFF.md",
     "docs/decisions/0001-foundation-integrity-before-breadth.md",
     "docs/decisions/0002-canonical-governed-fixture-boundary.md",
+    "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md",
     "docs/decisions/README.md",
     "schemas/finding.schema.json",
-    "schemas/protocol.v1.schema.json",
+    "etzio/schemas/__init__.py",
+    "etzio/schemas/protocol.v1.schema.json",
     "schemas/target-contract.schema.json",
     "schemas/verdict.schema.json",
     ".github/CODEOWNERS",
     ".github/workflows/ci.yml",
     "tools/ci/requirements-ci.in",
     "tools/ci/requirements-ci.lock",
+)
+PROTOCOL_SCHEMA_PATH = ROOT / "etzio/schemas/protocol.v1.schema.json"
+LEGACY_SCHEMA_PATHS = frozenset(
+    {
+        ROOT / "schemas/finding.schema.json",
+        ROOT / "schemas/target-contract.schema.json",
+        ROOT / "schemas/verdict.schema.json",
+    }
 )
 
 
@@ -202,12 +227,323 @@ def _git_author_records() -> list[tuple[str, str, str]]:
     return records
 
 
+def _unique_schema_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    result: dict[str, object] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate schema object key {key!r}")
+        result[key] = value
+    return result
+
+
+def decode_schema_document(text: str) -> object:
+    """Decode one schema document without silently overwriting duplicate keys."""
+
+    return json.loads(text, object_pairs_hook=_unique_schema_object)
+
+
+def _exact_object_contract_issues(
+    value: object,
+    expected_fields: frozenset[str],
+    label: str,
+) -> list[str]:
+    """Require a closed JSON object whose declared and required fields are identical."""
+
+    if type(value) is not dict:
+        return [f"{label} must be an object schema"]
+    issues: list[str] = []
+    if value.get("type") != "object":
+        issues.append(f"{label} must declare object type")
+    if value.get("additionalProperties") is not False:
+        issues.append(f"{label} must reject unknown fields")
+
+    required = value.get("required")
+    if (
+        type(required) is not list
+        or any(type(field) is not str for field in required)
+        or len(required) != len(expected_fields)
+        or frozenset(required) != expected_fields
+    ):
+        issues.append(f"{label} required fields differ from the runtime contract")
+
+    properties = value.get("properties")
+    if type(properties) is not dict or frozenset(properties) != expected_fields:
+        issues.append(f"{label} declared fields differ from the runtime contract")
+    return issues
+
+
+def protocol_schema_contract_issues(schema: object) -> list[str]:
+    """Check load-bearing schema/runtime structure for exact parity."""
+
+    if type(schema) is not dict:
+        return ["protocol-v1 schema must contain a JSON object"]
+    issues: list[str] = []
+    if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
+        issues.append("protocol-v1 schema must declare Draft 2020-12")
+    if schema.get("$id") != "https://etzio.local/schemas/protocol.v1.schema.json":
+        issues.append("protocol-v1 schema has an unexpected canonical ID")
+    if schema.get("x-etzio-schema-role") != "semantic_wire_shape_guard":
+        issues.append("protocol-v1 schema must declare the semantic wire-shape role")
+    if frozenset(SEMANTIC_BODY_FIELDS_BY_KIND_V1) != SUPPORTED_OBJECT_KINDS:
+        issues.append("protocol-v1 runtime body registry differs from its kind allowlist")
+
+    issues.extend(
+        _exact_object_contract_issues(
+            schema,
+            ENVELOPE_FIELDS_V1,
+            "protocol-v1 envelope",
+        )
+    )
+
+    root_properties = schema.get("properties")
+    if type(root_properties) is dict:
+        if root_properties.get("protocol_version") != {"type": "integer", "const": 1}:
+            issues.append("protocol-v1 envelope protocol_version contract drifted")
+        if root_properties.get("object_version") != {"type": "integer", "const": 1}:
+            issues.append("protocol-v1 envelope object_version contract drifted")
+        if root_properties.get("object_id") != {"$ref": "#/$defs/sha256_id"}:
+            issues.append("protocol-v1 envelope object_id contract drifted")
+        if root_properties.get("body") != {"type": "object"}:
+            issues.append("protocol-v1 envelope body contract drifted")
+        root_attestations = root_properties.get("attestations")
+        if (
+            type(root_attestations) is not dict
+            or root_attestations.get("type") != "array"
+            or root_attestations.get("minItems", 0) != 0
+            or root_attestations.get("maxItems") != 1
+            or root_attestations.get("items")
+            != {"$ref": "#/$defs/ed25519_attestation"}
+        ):
+            issues.append("protocol-v1 envelope attestation frame drifted")
+
+    try:
+        raw_schema_kinds = schema["properties"]["object_kind"]["enum"]
+        schema_kinds = frozenset(raw_schema_kinds)
+    except (KeyError, TypeError):
+        raw_schema_kinds = []
+        schema_kinds = frozenset()
+        issues.append("protocol-v1 schema is missing its object-kind enum")
+    if (
+        len(raw_schema_kinds) != len(SUPPORTED_OBJECT_KINDS)
+        or schema_kinds != SUPPORTED_OBJECT_KINDS
+    ):
+        issues.append("protocol-v1 schema object kinds differ from the runtime allowlist")
+
+    expected_case_refs = frozenset(
+        f"#/$defs/{kind}_case"
+        for kind in SUPPORTED_OBJECT_KINDS
+    )
+    try:
+        raw_case_refs = [branch["$ref"] for branch in schema["oneOf"]]
+        case_refs = frozenset(raw_case_refs)
+    except (KeyError, TypeError):
+        raw_case_refs = []
+        case_refs = frozenset()
+        issues.append("protocol-v1 schema is missing its per-kind dispatch branches")
+    if len(raw_case_refs) != len(expected_case_refs) or case_refs != expected_case_refs:
+        issues.append("protocol-v1 schema dispatch branches differ from the runtime allowlist")
+
+    definitions = schema.get("$defs")
+    if type(definitions) is not dict:
+        issues.append("protocol-v1 schema is missing its definitions")
+        return issues
+
+    frame = definitions.get("envelope_frame")
+    issues.extend(
+        _exact_object_contract_issues(
+            frame,
+            ENVELOPE_FIELDS_V1,
+            "protocol-v1 nested envelope frame",
+        )
+    )
+    if type(frame) is dict and type(frame.get("properties")) is dict:
+        frame_properties = frame["properties"]
+        if frame_properties.get("protocol_version") != {"type": "integer", "const": 1}:
+            issues.append("protocol-v1 nested frame protocol_version contract drifted")
+        if frame_properties.get("object_version") != {"type": "integer", "const": 1}:
+            issues.append("protocol-v1 nested frame object_version contract drifted")
+        if frame_properties.get("object_id") != {"$ref": "#/$defs/sha256_id"}:
+            issues.append("protocol-v1 nested frame object_id contract drifted")
+        if frame_properties.get("body") != {"type": "object"}:
+            issues.append("protocol-v1 nested frame body contract drifted")
+        try:
+            frame_kinds = frame_properties["object_kind"]["enum"]
+        except (KeyError, TypeError):
+            frame_kinds = []
+        if (
+            len(frame_kinds) != len(SUPPORTED_OBJECT_KINDS)
+            or frozenset(frame_kinds) != SUPPORTED_OBJECT_KINDS
+        ):
+            issues.append("protocol-v1 nested frame object kinds differ from runtime")
+        frame_attestations = frame_properties.get("attestations")
+        if (
+            type(frame_attestations) is not dict
+            or frame_attestations.get("type") != "array"
+            or frame_attestations.get("minItems", 0) != 0
+            or frame_attestations.get("maxItems") != 1
+            or frame_attestations.get("items")
+            != {"$ref": "#/$defs/ed25519_attestation"}
+        ):
+            issues.append("protocol-v1 nested frame attestation contract drifted")
+
+    for kind, expected_fields in SEMANTIC_BODY_FIELDS_BY_KIND_V1.items():
+        body_name = "event_body_common" if kind == "event" else f"{kind}_body"
+        issues.extend(
+            _exact_object_contract_issues(
+                definitions.get(body_name),
+                expected_fields,
+                f"protocol-v1 {kind} body",
+            )
+        )
+
+        case = definitions.get(f"{kind}_case")
+        if type(case) is not dict or type(case.get("properties")) is not dict:
+            issues.append(f"protocol-v1 {kind} case is malformed")
+            continue
+        case_properties = case["properties"]
+        if frozenset(case_properties) != frozenset(
+            {"object_kind", "body", "attestations"}
+        ):
+            issues.append(f"protocol-v1 {kind} case fields drifted")
+        if case_properties.get("object_kind") != {"const": kind}:
+            issues.append(f"protocol-v1 {kind} case discriminator drifted")
+        if case_properties.get("body") != {"$ref": f"#/$defs/{kind}_body"}:
+            issues.append(f"protocol-v1 {kind} case body reference drifted")
+
+        attestation_contract = case_properties.get("attestations")
+        if kind in OPTIONALLY_ATTESTED_OBJECT_KINDS_V1:
+            try:
+                attestation_refs = [
+                    branch["$ref"] for branch in attestation_contract["oneOf"]
+                ]
+            except (KeyError, TypeError):
+                attestation_refs = []
+            expected_attestation_refs = frozenset(
+                {
+                    "#/$defs/no_attestations",
+                    "#/$defs/one_ed25519_attestation",
+                }
+            )
+            if (
+                len(attestation_refs) != len(expected_attestation_refs)
+                or frozenset(attestation_refs) != expected_attestation_refs
+            ):
+                issues.append(f"protocol-v1 {kind} attestation policy drifted")
+        elif attestation_contract != {"$ref": "#/$defs/no_attestations"}:
+            issues.append(f"protocol-v1 {kind} must remain unattested")
+
+    event_body = definitions.get("event_body")
+    try:
+        event_body_refs = [branch["$ref"] for branch in event_body["allOf"]]
+    except (KeyError, TypeError):
+        event_body_refs = []
+    expected_event_body_refs = frozenset(
+        {"#/$defs/event_body_common", "#/$defs/event_variants"}
+    )
+    if (
+        len(event_body_refs) != len(expected_event_body_refs)
+        or frozenset(event_body_refs) != expected_event_body_refs
+    ):
+        issues.append("protocol-v1 event body composition drifted")
+
+    issues.extend(
+        _exact_object_contract_issues(
+            definitions.get("ed25519_attestation"),
+            frozenset({"algorithm", "key_id", "signature_b64"}),
+            "protocol-v1 Ed25519 attestation",
+        )
+    )
+    ed25519_attestation = definitions.get("ed25519_attestation")
+    if type(ed25519_attestation) is dict and type(
+        ed25519_attestation.get("properties")
+    ) is dict:
+        attestation_properties = ed25519_attestation["properties"]
+        if attestation_properties.get("algorithm") != {"const": "ed25519"}:
+            issues.append("protocol-v1 attestation algorithm contract drifted")
+        if attestation_properties.get("key_id") != {
+            "$ref": "#/$defs/ed25519_key_id"
+        }:
+            issues.append("protocol-v1 attestation key contract drifted")
+        if attestation_properties.get("signature_b64") != {
+            "$ref": "#/$defs/ed25519_signature_b64"
+        }:
+            issues.append("protocol-v1 attestation signature contract drifted")
+
+    no_attestations = definitions.get("no_attestations")
+    if (
+        type(no_attestations) is not dict
+        or no_attestations.get("type") != "array"
+        or no_attestations.get("minItems", 0) != 0
+        or no_attestations.get("maxItems") != 0
+    ):
+        issues.append("protocol-v1 no-attestation contract drifted")
+    one_attestation = definitions.get("one_ed25519_attestation")
+    if (
+        type(one_attestation) is not dict
+        or one_attestation.get("type") != "array"
+        or one_attestation.get("minItems") != 1
+        or one_attestation.get("maxItems") != 1
+        or one_attestation.get("items")
+        != {"$ref": "#/$defs/ed25519_attestation"}
+    ):
+        issues.append("protocol-v1 one-attestation contract drifted")
+
+    schema_units: dict[str, str] = {}
+    schema_payload_fields: dict[str, frozenset[str]] = {}
+    try:
+        for variant in definitions["event_variants"]["oneOf"]:
+            properties = variant["properties"]
+            kind = properties["kind"]["const"]
+            if kind in schema_units:
+                issues.append(f"protocol-v1 schema repeats event branch {kind!r}")
+                continue
+            schema_units[kind] = properties["unit"]["const"]
+            payload_name = properties["payload"]["$ref"].removeprefix("#/$defs/")
+            schema_payload_fields[kind] = frozenset(
+                definitions[payload_name]["required"]
+            )
+            issues.extend(
+                _exact_object_contract_issues(
+                    definitions[payload_name],
+                    EVENT_PAYLOAD_FIELDS_BY_KIND_V1[kind],
+                    f"protocol-v1 {kind} event payload",
+                )
+            )
+    except (AttributeError, KeyError, TypeError):
+        issues.append("protocol-v1 schema has malformed event dispatch metadata")
+    if schema_units != dict(EVENT_UNIT_BY_KIND_V1):
+        issues.append("protocol-v1 schema event units differ from the runtime contract")
+    if schema_payload_fields != dict(EVENT_PAYLOAD_FIELDS_BY_KIND_V1):
+        issues.append("protocol-v1 schema event payload fields differ from the runtime contract")
+    return issues
+
+
+def _schema_paths() -> tuple[Path, ...]:
+    return tuple(sorted((ROOT / "schemas").glob("*.json"))) + (PROTOCOL_SCHEMA_PATH,)
+
+
 def _schema_issues() -> list[str]:
     issues: list[str] = []
-    for path in sorted((ROOT / "schemas").glob("*.json")):
+    for path in _schema_paths():
         try:
-            schema = json.loads(path.read_text(encoding="utf-8"))
+            schema = decode_schema_document(path.read_text(encoding="utf-8"))
             validator_for(schema).check_schema(schema)
+            if path == PROTOCOL_SCHEMA_PATH:
+                issues.extend(
+                    f"{path.relative_to(ROOT)}: {issue}"
+                    for issue in protocol_schema_contract_issues(schema)
+                )
+            elif (
+                path in LEGACY_SCHEMA_PATHS
+                and (
+                    type(schema) is not dict
+                    or schema.get("x-etzio-status") != "modeled_non_authoritative"
+                )
+            ):
+                issues.append(
+                    f"{path.relative_to(ROOT)}: legacy schema must remain explicitly "
+                    "modeled and non-authoritative"
+                )
         except (OSError, json.JSONDecodeError, SchemaError, TypeError, ValueError) as exc:
             issues.append(f"{path.relative_to(ROOT)}: invalid schema: {exc}")
     return issues
@@ -288,7 +624,7 @@ def main() -> int:
         for issue in issues:
             print(f"- {issue}")
         return 1
-    schema_count = len(list((ROOT / "schemas").glob("*.json")))
+    schema_count = len(_schema_paths())
     workflow_count = len(
         [
             path

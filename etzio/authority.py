@@ -22,6 +22,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey,
 
 from etzio.crypto_v1 import is_valid_ed25519_public_key
 from etzio.protocol import (
+    SEMANTIC_BODY_FIELDS_BY_KIND_V1,
     EnvelopeV1,
     ProtocolError,
     canonical_dumps,
@@ -45,37 +46,10 @@ MAX_AUTHORITY_REVOCATIONS: Final = 10_000
 _SIGNATURE_DOMAIN: Final = b"etzio.authority-grant.signature.v1\x00"
 _FULL_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 _KEY_ID = re.compile(r"^ed25519:sha256:[0-9a-f]{64}$")
-_GRANT_BODY_FIELDS: Final = frozenset(
-    {
-        "issuer",
-        "subject",
-        "target_snapshot_id",
-        "assets",
-        "permitted_actions",
-        "evidence_digest",
-        "issued_at",
-        "not_before",
-        "expires_at",
-        "max_bytes",
-        "max_candidates",
-        "max_wallclock_seconds",
-    }
-)
+_GRANT_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1["authority_grant"]
 _SIGNED_FIELDS: Final = frozenset({"envelope_bytes", "key_id", "signature_b64"})
 _ATTESTATION_FIELDS: Final = frozenset({"algorithm", "key_id", "signature_b64"})
-_ADMISSION_BODY_FIELDS: Final = frozenset(
-    {
-        "authority_id",
-        "decision_time",
-        "grant_expires_at",
-        "required_actions",
-        "signer_key_id",
-        "signed_grant",
-        "target_snapshot_id",
-        "trust_snapshot",
-        "trust_snapshot_id",
-    }
-)
+_ADMISSION_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1["authority_admission"]
 
 
 class AuthorityError(ValueError):
@@ -228,6 +202,21 @@ class SignedAuthorityGrantV1:
                 "malformed_signature",
                 "signature_b64 must be one canonical Ed25519 signature",
             )
+        try:
+            signature = base64.b64decode(self.signature_b64, validate=True)
+        except (binascii.Error, ValueError) as exc:
+            raise AuthorityError(
+                "malformed_signature",
+                "signature_b64 must be one canonical Ed25519 signature",
+            ) from exc
+        if (
+            len(signature) != 64
+            or base64.b64encode(signature).decode("ascii") != self.signature_b64
+        ):
+            raise AuthorityError(
+                "malformed_signature",
+                "signature_b64 must be one canonical Ed25519 signature",
+            )
 
     def as_raw(self) -> Mapping[str, object]:
         """Return the legacy in-process shape accepted by :func:`admit_authority`."""
@@ -251,6 +240,7 @@ class SignedAuthorityGrantV1:
                 "invalid_envelope",
                 "signed authority input must contain one unattested grant envelope",
             )
+        AuthorityGrantV1.from_envelope(grant_envelope)
         return EnvelopeV1.create(
             AUTHORITY_OBJECT_KIND,
             grant_envelope.body,
@@ -267,7 +257,12 @@ class SignedAuthorityGrantV1:
         return self.to_envelope().to_bytes()
 
     @classmethod
-    def from_bytes(cls, data: bytes | str) -> SignedAuthorityGrantV1:
+    def _from_transport_bytes(
+        cls,
+        data: bytes | str,
+        *,
+        validate_grant: bool,
+    ) -> SignedAuthorityGrantV1:
         try:
             envelope = EnvelopeV1.from_bytes(data)
         except ProtocolError as exc:
@@ -288,11 +283,19 @@ class SignedAuthorityGrantV1:
         unattested = EnvelopeV1.create(AUTHORITY_OBJECT_KIND, envelope.body)
         if unattested.object_id != envelope.object_id:
             raise AuthorityError("object_id_mismatch", "attested grant identity changed")
+        if validate_grant:
+            AuthorityGrantV1.from_envelope(unattested)
         return cls(
             envelope_bytes=unattested.to_bytes(),
             key_id=attestation["key_id"],
             signature_b64=attestation["signature_b64"],
         )
+
+    @classmethod
+    def from_bytes(cls, data: bytes | str) -> SignedAuthorityGrantV1:
+        """Parse one canonical, semantically valid signed authority-grant wire."""
+
+        return cls._from_transport_bytes(data, validate_grant=True)
 
 
 @dataclass(frozen=True, slots=True)
@@ -925,7 +928,13 @@ def _parse_signed_object(
     if isinstance(raw_signed_object, SignedAuthorityGrantV1):
         return raw_signed_object
     if type(raw_signed_object) in {bytes, str}:
-        return SignedAuthorityGrantV1.from_bytes(raw_signed_object)
+        # Admission authenticates the carrier before surfacing grant semantics. The public
+        # wire parser remains strict, while this private path preserves representation-
+        # independent refusal precedence for untrusted admission input.
+        return SignedAuthorityGrantV1._from_transport_bytes(
+            raw_signed_object,
+            validate_grant=False,
+        )
     if not isinstance(raw_signed_object, Mapping):
         raise AuthorityError("unsigned_object", "authority input must be a signed object")
     raw = dict(raw_signed_object)

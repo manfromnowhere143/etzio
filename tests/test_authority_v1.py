@@ -213,6 +213,36 @@ def test_signed_grant_has_one_canonical_protocol_wire_representation() -> None:
     assert len(attested.attestations) == 1
 
 
+def test_signed_grant_wire_producers_require_valid_grant_semantics() -> None:
+    signer = AuthoritySigner.generate()
+    signed = sign_body(signer, {"arbitrary": True})
+    attested = EnvelopeV1.create(
+        "authority_grant",
+        {"arbitrary": True},
+        attestations=[
+            {
+                "algorithm": "ed25519",
+                "key_id": signed.key_id,
+                "signature_b64": signed.signature_b64,
+            }
+        ],
+    )
+
+    with pytest.raises(AuthorityError) as emitted:
+        signed.to_bytes()
+    assert emitted.value.reason_code == "malformed_grant"
+    with pytest.raises(AuthorityError) as parsed:
+        SignedAuthorityGrantV1.from_bytes(attested.to_bytes())
+    assert parsed.value.reason_code == "malformed_grant"
+
+    empty_store = TrustStore.from_keys(())
+    assert decide(signed, empty_store).reason_code == "unknown_key"
+    assert decide(attested.to_bytes(), empty_store).reason_code == "unknown_key"
+    store = trusted_store(signer)
+    assert decide(signed, store).reason_code == "malformed_grant"
+    assert decide(attested.to_bytes(), store).reason_code == "malformed_grant"
+
+
 def test_signed_grant_wire_rejects_unknown_attestation_fields_and_noncanonical_bytes() -> None:
     signer = AuthoritySigner.generate()
     signed = signer.sign(issue_grant())

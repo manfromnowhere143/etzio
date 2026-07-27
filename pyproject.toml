@@ -41,6 +41,9 @@ ignore = ["UP042"]
 [tool.setuptools.packages.find]
 include = ["etzio*"]
 
+[tool.setuptools.package-data]
+etzio = ["schemas/*.json"]
+
 [build-system]
 requires = ["setuptools==83.0.0"]
 build-backend = "setuptools.build_meta"

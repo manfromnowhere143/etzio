@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 import pytest
 import unicodedata2
 from jsonschema import Draft202012Validator
 
+from etzio.evidence import SnapshotFileV1, TargetSnapshotV1
 from etzio.protocol import (
     MAX_CONTAINER_ITEMS,
     MAX_INTEGER,
     MAX_NESTING_DEPTH,
     MIN_INTEGER,
+    SUPPORTED_OBJECT_KINDS,
     UNICODE_VERSION,
     EnvelopeV1,
     ProtocolError,
@@ -23,7 +22,7 @@ from etzio.protocol import (
     strict_loads,
     thaw_json,
 )
-from etzio.protocol.v1 import SUPPORTED_OBJECT_KINDS
+from etzio.schemas import protocol_v1_schema
 
 
 def test_canonical_bytes_and_content_id_are_order_stable():
@@ -201,23 +200,32 @@ def test_envelope_parser_rejects_noncanonical_wire_spellings(mutate):
 
 
 def test_schema_is_valid_and_accepts_canonical_envelope():
-    schema_path = Path(__file__).parents[1] / "schemas" / "protocol.v1.schema.json"
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema = protocol_v1_schema()
     Draft202012Validator.check_schema(schema)
 
-    envelope = EnvelopeV1.create("target_snapshot", {"revision": "abc123"})
+    envelope = TargetSnapshotV1.create(
+        "repository_fixture",
+        (
+            SnapshotFileV1(
+                relative_path="fixture.py",
+                artifact_digest="sha256:" + ("1" * 64),
+                size=128,
+            ),
+        ),
+    ).to_envelope()
     Draft202012Validator(schema).validate(envelope.to_dict())
 
 
 def test_schema_and_runtime_object_kind_allowlists_have_exact_parity():
-    schema_path = Path(__file__).parents[1] / "schemas" / "protocol.v1.schema.json"
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema = protocol_v1_schema()
     schema_kinds = frozenset(schema["properties"]["object_kind"]["enum"])
 
     assert schema_kinds == SUPPORTED_OBJECT_KINDS
     assert EnvelopeV1.create("verification_lease", {"purpose": "modeled_fixture_verification"})
     with pytest.raises(ProtocolError, match="unsupported"):
         EnvelopeV1.create("verification_leases", {"purpose": "modeled_fixture_verification"})
+    with pytest.raises(ProtocolError, match="unsupported"):
+        EnvelopeV1.create("head_checkpoint", {"event_digest": "sha256:" + ("0" * 64)})
 
 
 def test_non_json_values_and_non_utf8_wire_are_rejected():

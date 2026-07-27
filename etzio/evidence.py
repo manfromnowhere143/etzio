@@ -18,7 +18,7 @@ from types import MappingProxyType
 
 import unicodedata2 as unicodedata
 
-from .protocol import EnvelopeV1, content_id, thaw_json
+from .protocol import SEMANTIC_BODY_FIELDS_BY_KIND_V1, EnvelopeV1, content_id, thaw_json
 
 _DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 _EVIDENCE_DOMAIN = b"etzio:evidence:v1\x00"
@@ -183,7 +183,7 @@ def _validate_relative_path(value: str) -> str:
     if unicodedata.normalize("NFC", value) != value:
         raise EvidenceError("snapshot path must be NFC-normalized")
     path = PurePosixPath(value)
-    if path.is_absolute() or ".." in path.parts or "." in path.parts:
+    if value == "." or path.is_absolute() or ".." in path.parts or "." in path.parts:
         raise EvidenceError("snapshot path must be normalized and relative")
     if path.as_posix() != value:
         raise EvidenceError("snapshot path must be normalized and relative")
@@ -280,7 +280,10 @@ class TargetSnapshotV1:
         if envelope.object_kind != "target_snapshot" or envelope.attestations:
             raise EvidenceError("expected an unattested target_snapshot envelope")
         body = thaw_json(envelope.body)
-        if type(body) is not dict or set(body) != {"files", "source"}:
+        if (
+            type(body) is not dict
+            or set(body) != SEMANTIC_BODY_FIELDS_BY_KIND_V1["target_snapshot"]
+        ):
             raise EvidenceError("target snapshot envelope has missing or unknown fields")
         raw_files = body["files"]
         if type(raw_files) is not list:

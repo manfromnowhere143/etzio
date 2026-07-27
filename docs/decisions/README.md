@@ -5,3 +5,4 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 
 - [ADR-0001: Foundation integrity before capability breadth](0001-foundation-integrity-before-breadth.md)
 - [ADR-0002: Canonical governed fixture boundary](0002-canonical-governed-fixture-boundary.md)
+- [ADR-0003: Semantic wire schema and typed-kind closure](0003-semantic-wire-schema-and-typed-kind-closure.md)

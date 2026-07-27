@@ -61,6 +61,8 @@ The protocol-v1 foundation includes:
 
 - canonical JSON with duplicate-key rejection, Unicode 17.0.0 NFC, signed 64-bit integers,
   fixed resource ceilings, and full domain-separated SHA-256 identities;
+- an installed Draft 2020-12 semantic wire schema with exact branches for all eight typed
+  object kinds and all twelve event payload variants;
 - Ed25519 authority and modeled-receipt attestations, including prime-subgroup public-key
   validation before a key can enter a trust snapshot;
 - exact fixture manifests and a private content-addressed evidence store;
@@ -125,12 +127,11 @@ mkdir -m 700 .etzio-state
 The next mission is not more detector breadth. It is completing the finding-admission
 boundary:
 
-1. replace the framing-only JSON Schema with semantic per-kind schemas and parity fixtures;
-2. issue verification leases inside the kernel under the admitted grant;
-3. resolve receipt references from retained CAS bytes;
-4. atomically consume a lease with its accepted signed receipt;
-5. establish a trusted clock and external event-head anchoring; and
-6. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
+1. issue verification leases inside the kernel under the admitted grant;
+2. resolve receipt references from retained CAS bytes;
+3. atomically consume a lease with its accepted signed receipt;
+4. establish a trusted clock and external event-head anchoring; and
+5. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
 
 Only then should Etzio run the benchmark-first EVM pack. Live bounty work remains a later,
 target-specific authorization stage.
@@ -143,6 +144,7 @@ target-specific authorization stage.
 - [Architecture](docs/ARCHITECTURE.md)
 - [Roadmap](docs/ROADMAP.md)
 - [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
+- [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
 - [Architecture decisions](docs/decisions/README.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)

@@ -1,8 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://etzio.local/schemas/target-contract.schema.json",
-  "title": "TargetContract",
-  "description": "The authorization envelope for one hunt. AQUILA enforces it. Missing or ambiguous authorization fails closed.",
+  "title": "Modeled TargetContract",
+  "description": "Legacy behavior-model contract for a proposed authorization envelope. It is non-authoritative; protocol-v1 authority admission uses typed signed grants instead.",
+  "x-etzio-status": "modeled_non_authoritative",
   "type": "object",
   "additionalProperties": false,
   "required": ["program", "authorization", "in_scope", "permitted_actions", "disclosure_channel", "budget"],

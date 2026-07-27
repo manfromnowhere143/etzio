@@ -29,7 +29,8 @@ If `.venv` already contains the exact locked dependencies, skip only environment
 and installation. Status, handoff reading, and validation remain mandatory. Then read
 [README](../README.md), [Charter](../CHARTER.md), [Architecture](ARCHITECTURE.md),
 [Roadmap](ROADMAP.md), [Frontier baseline](FRONTIER_BASELINE.md), [ADR-0001](decisions/0001-foundation-integrity-before-breadth.md),
-and [ADR-0002](decisions/0002-canonical-governed-fixture-boundary.md).
+[ADR-0002](decisions/0002-canonical-governed-fixture-boundary.md), and
+[ADR-0003](decisions/0003-semantic-wire-schema-and-typed-kind-closure.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -39,9 +40,10 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/foundation-integrity-v1`
-- Branch base: `745e860f9db25691b285834853fe23aa2ec73840`
-- Branch-base tree: `42d8401e90900cfdf5e81ba415fdc44d9c51a98f`
+- Current foundation-integrity branch: `agent/semantic-protocol-schemas-v1`
+- Stacked on: `agent/foundation-integrity-v1`
+- Branch base: `ed79b02f6422c728f187224ee1d39424e961ce31`
+- Branch-base tree: `aa6c21d4fb47f669b9944900dfb8ced15baba3b8`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -97,6 +99,9 @@ exact authority
 ### Implemented for the repository-fixture scan
 
 - common protocol-v1 envelopes and strict canonical JSON;
+- installed semantic wire schemas and typed dispatch for every supported object kind;
+- exact closed-field schema/runtime parity for all eight semantic bodies and all twelve
+  event kind, unit, and payload forms;
 - Unicode 17.0.0 NFC, signed 64-bit integers, and fixed resource ceilings;
 - full domain-separated SHA-256 object and event identities;
 - Ed25519 signed authority grants and self-verifying admission records;
@@ -131,9 +136,12 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 On the current candidate bytes, `make verify` passed under both CPython 3.11.15 and
 CPython 3.14.2:
 
-- 290 tests passed;
+- 314 tests passed;
 - Ruff was clean;
-- all four JSON Schemas and repository policy passed;
+- the installed semantic protocol schema, three explicitly modeled legacy schemas, and
+  repository policy passed;
+- the built wheel loaded and metaschema-checked the canonical protocol schema outside the
+  checkout;
 - the governed vulnerable fixture closed with seven candidates and no finding;
 - the governed clean fixture closed with zero candidates; and
 - both modeled regression demonstrations retained their historical outputs.
@@ -147,6 +155,18 @@ Known-bads now cover:
 
 - cross-runtime Unicode identity divergence;
 - duplicate/noncanonical/oversized protocol values;
+- arbitrary semantic bodies, missing/unknown per-kind fields, forbidden or multiple
+  attestations, schema/runtime dispatch drift, and malformed identifier anchors;
+- root/body field removal, body reopening, case-reference substitution, and attestation
+  policy weakening against the repository schema gate;
+- Python/ECMA-262 edge-whitespace divergence and portable U+001C–U+001F, U+0085, and U+FEFF
+  behavior;
+- the untyped `head_checkpoint` name and literal `"."` relative paths;
+- malformed signed-grant Base64 before authority admission;
+- semantically invalid signed-grant wire production/parsing without changing
+  authentication-first admission refusal precedence;
+- schema-valid/runtime-invalid ordering, field-keyed target/trust uniqueness, time,
+  derived-identity, nested-binding, and canonical-wire controls;
 - forged, revoked, wrong-role, wrong-issuer, expired, and wrong-target authority;
 - small-order Ed25519 keys in configured and embedded trust snapshots;
 - target artifact, size, path, mode, symlink, and manifest substitution;
@@ -164,19 +184,18 @@ Known-bads now cover:
 
 ## Open foundation-integrity blockers
 
-1. `protocol.v1.schema.json` validates framing, not semantic per-kind bodies.
-2. Verification leases are not issued by the kernel under an admitted
+1. Verification leases are not issued by the kernel under an admitted
    `modeled_fixture_verification` grant.
-3. Receipt digest membership does not resolve and type-check retained CAS bytes.
-4. Receipt acceptance and lease consumption are not one atomic durable transaction.
-5. Complete receipt adjudication is not part of canonical mission history.
-6. Authority/verifier clock and revocation snapshot freshness are not externally proved.
-7. SQLite event heads are not externally authenticated or anchored.
-8. SQLite retains a documented same-user pathname race.
-9. Separate verifier labels and keys do not prove separate principals, processes, or
+2. Receipt digest membership does not resolve and type-check retained CAS bytes.
+3. Receipt acceptance and lease consumption are not one atomic durable transaction.
+4. Complete receipt adjudication is not part of canonical mission history.
+5. Authority/verifier clock and revocation snapshot freshness are not externally proved.
+6. SQLite event heads are not externally authenticated or anchored.
+7. SQLite retains a documented same-user pathname race.
+8. Separate verifier labels and keys do not prove separate principals, processes, or
    isolation.
-10. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
-    are not implemented.
+9. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
+   are not implemented.
 
 These blockers prevent a finding pipeline and all live-target work.
 
@@ -184,10 +203,10 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-Implement semantic schemas, kernel-issued verification leases, typed CAS resolution,
-atomic receipt acceptance/single-use consumption, canonical adjudication history, trusted
-time, and authenticated external head anchoring. Add concurrency and substitution
-known-bads.
+Next, issue verification leases inside the kernel under the admitted grant. Then add typed
+CAS resolution, atomic receipt acceptance/single-use consumption, canonical adjudication
+history, trusted time, and authenticated external head anchoring with concurrency and
+substitution known-bads.
 
 ### Mission 2 — independent proof plane
 

@@ -1,0 +1,1477 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://etzio.local/schemas/protocol.v1.schema.json",
+  "title": "Etzio Protocol v1 Semantic Wire Objects",
+  "description": "Semantic wire-shape guard for every implemented Etzio protocol-v1 object kind. Typed runtime parsers remain authoritative for canonical bytes, derived identities, cryptography, cross-field and cross-object bindings, aggregate limits, and lifecycle transitions.",
+  "x-etzio-schema-role": "semantic_wire_shape_guard",
+  "x-etzio-runtime-only-invariants": [
+    "canonical UTF-8 JSON spelling, duplicate-key rejection, Unicode 17.0.0 NFC, integer token form, wire bytes, depth, and global node ceilings",
+    "content-derived object, claim, trust-snapshot, key, event, and evidence identities",
+    "lexical array ordering, field-keyed uniqueness, aggregate collection limits, and cross-field time arithmetic",
+    "canonical cryptographic decoding, Ed25519 subgroup validation, signature verification, and signer-to-body binding",
+    "nested object equality, retained CAS membership and type, event-chain lifecycle, authority, budget, and concurrency rules"
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "protocol_version",
+    "object_kind",
+    "object_version",
+    "object_id",
+    "body",
+    "attestations"
+  ],
+  "properties": {
+    "protocol_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "object_kind": {
+      "type": "string",
+      "enum": [
+        "analysis_lease",
+        "authority_admission",
+        "authority_grant",
+        "candidate",
+        "event",
+        "target_snapshot",
+        "verification_lease",
+        "verifier_receipt"
+      ]
+    },
+    "object_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "object_id": {
+      "$ref": "#/$defs/sha256_id"
+    },
+    "body": {
+      "type": "object"
+    },
+    "attestations": {
+      "type": "array",
+      "maxItems": 1,
+      "items": {
+        "$ref": "#/$defs/ed25519_attestation"
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/analysis_lease_case"
+    },
+    {
+      "$ref": "#/$defs/authority_admission_case"
+    },
+    {
+      "$ref": "#/$defs/authority_grant_case"
+    },
+    {
+      "$ref": "#/$defs/candidate_case"
+    },
+    {
+      "$ref": "#/$defs/event_case"
+    },
+    {
+      "$ref": "#/$defs/target_snapshot_case"
+    },
+    {
+      "$ref": "#/$defs/verification_lease_case"
+    },
+    {
+      "$ref": "#/$defs/verifier_receipt_case"
+    }
+  ],
+  "$defs": {
+    "sha256_id": {
+      "type": "string",
+      "minLength": 71,
+      "maxLength": 71,
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "ed25519_key_id": {
+      "type": "string",
+      "minLength": 79,
+      "maxLength": 79,
+      "pattern": "^ed25519:sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "int64": {
+      "type": "integer",
+      "minimum": -9223372036854775808,
+      "maximum": 9223372036854775807
+    },
+    "epoch_second": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9223372036854775807
+    },
+    "positive_int64": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9223372036854775807
+    },
+    "protocol_string": {
+      "type": "string",
+      "maxLength": 1000000
+    },
+    "canonical_nonblank_string": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000000,
+      "pattern": "^[^\\u0009-\\u000d\\u001c-\\u0020\\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000](?:[\\s\\S]*[^\\u0009-\\u000d\\u001c-\\u0020\\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028-\\u2029\\u202f\\u205f\\u3000])?(?![\\s\\S])"
+    },
+    "lease_nonce_128_hex": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 32,
+      "pattern": "^[0-9a-f]{32}(?![\\s\\S])"
+    },
+    "canonical_identity": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{1,127}(?![\\s\\S])"
+    },
+    "snapshot_relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000000,
+      "not": {
+        "enum": [
+          ".",
+          ".."
+        ]
+      },
+      "pattern": "^(?!/)(?!\\.\\.?/)(?![\\s\\S]*//)(?![\\s\\S]*/\\.\\.?(?:/|(?![\\s\\S])))(?![\\s\\S]*\\\\)(?![\\s\\S]*\\u0000)(?![\\s\\S]*/(?![\\s\\S]))[\\s\\S]+(?![\\s\\S])"
+    },
+    "canonical_relative_path": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/snapshot_relative_path"
+        },
+        {
+          "$ref": "#/$defs/canonical_nonblank_string"
+        }
+      ]
+    },
+    "ed25519_public_key_b64": {
+      "type": "string",
+      "minLength": 44,
+      "maxLength": 44,
+      "pattern": "^[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=(?![\\s\\S])"
+    },
+    "ed25519_signature_b64": {
+      "type": "string",
+      "minLength": 88,
+      "maxLength": 88,
+      "pattern": "^[A-Za-z0-9+/]{85}[AQgw]==(?![\\s\\S])"
+    },
+    "ed25519_attestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "key_id",
+        "signature_b64"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "ed25519"
+        },
+        "key_id": {
+          "$ref": "#/$defs/ed25519_key_id"
+        },
+        "signature_b64": {
+          "$ref": "#/$defs/ed25519_signature_b64"
+        }
+      }
+    },
+    "no_attestations": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "one_ed25519_attestation": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "$ref": "#/$defs/ed25519_attestation"
+      }
+    },
+    "canonical_actions": {
+      "oneOf": [
+        {
+          "const": []
+        },
+        {
+          "const": [
+            "modeled_fixture_verification"
+          ]
+        },
+        {
+          "const": [
+            "static_analysis"
+          ]
+        },
+        {
+          "const": [
+            "modeled_fixture_verification",
+            "static_analysis"
+          ]
+        }
+      ]
+    },
+    "canonical_nonempty_actions": {
+      "oneOf": [
+        {
+          "const": [
+            "modeled_fixture_verification"
+          ]
+        },
+        {
+          "const": [
+            "static_analysis"
+          ]
+        },
+        {
+          "const": [
+            "modeled_fixture_verification",
+            "static_analysis"
+          ]
+        }
+      ]
+    },
+    "evidence_digest_array": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/sha256_id"
+      }
+    },
+    "envelope_frame": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocol_version",
+        "object_kind",
+        "object_version",
+        "object_id",
+        "body",
+        "attestations"
+      ],
+      "properties": {
+        "protocol_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "object_kind": {
+          "type": "string",
+          "enum": [
+            "analysis_lease",
+            "authority_admission",
+            "authority_grant",
+            "candidate",
+            "event",
+            "target_snapshot",
+            "verification_lease",
+            "verifier_receipt"
+          ]
+        },
+        "object_version": {
+          "type": "integer",
+          "const": 1
+        },
+        "object_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "body": {
+          "type": "object"
+        },
+        "attestations": {
+          "type": "array",
+          "maxItems": 1,
+          "items": {
+            "$ref": "#/$defs/ed25519_attestation"
+          }
+        }
+      }
+    },
+    "authority_grant_body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issuer",
+        "subject",
+        "target_snapshot_id",
+        "assets",
+        "permitted_actions",
+        "evidence_digest",
+        "issued_at",
+        "not_before",
+        "expires_at",
+        "max_bytes",
+        "max_candidates",
+        "max_wallclock_seconds"
+      ],
+      "properties": {
+        "issuer": {
+          "$ref": "#/$defs/canonical_nonblank_string"
+        },
+        "subject": {
+          "$ref": "#/$defs/canonical_nonblank_string"
+        },
+        "target_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "assets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/canonical_nonblank_string"
+          }
+        },
+        "permitted_actions": {
+          "$ref": "#/$defs/canonical_nonempty_actions"
+        },
+        "evidence_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "issued_at": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "not_before": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "expires_at": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "max_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1073741824
+        },
+        "max_candidates": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "max_wallclock_seconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 86400
+        }
+      }
+    },
+    "authority_trust_key": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issuers",
+        "key_id",
+        "public_key_b64",
+        "roles"
+      ],
+      "properties": {
+        "issuers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/canonical_nonblank_string"
+          }
+        },
+        "key_id": {
+          "$ref": "#/$defs/ed25519_key_id"
+        },
+        "public_key_b64": {
+          "$ref": "#/$defs/ed25519_public_key_b64"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/canonical_nonblank_string"
+          }
+        }
+      }
+    },
+    "authority_trust_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keys",
+        "revoked_grant_ids",
+        "revoked_key_ids"
+      ],
+      "properties": {
+        "keys": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/authority_trust_key"
+          }
+        },
+        "revoked_grant_ids": {
+          "type": "array",
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/sha256_id"
+          }
+        },
+        "revoked_key_ids": {
+          "type": "array",
+          "maxItems": 10000,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/ed25519_key_id"
+          }
+        }
+      }
+    },
+    "unsigned_authority_grant_envelope": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope_frame"
+        },
+        {
+          "properties": {
+            "object_kind": {
+              "const": "authority_grant"
+            },
+            "body": {
+              "$ref": "#/$defs/authority_grant_body"
+            },
+            "attestations": {
+              "$ref": "#/$defs/no_attestations"
+            }
+          }
+        }
+      ]
+    },
+    "signed_authority_grant_envelope": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope_frame"
+        },
+        {
+          "properties": {
+            "object_kind": {
+              "const": "authority_grant"
+            },
+            "body": {
+              "$ref": "#/$defs/authority_grant_body"
+            },
+            "attestations": {
+              "$ref": "#/$defs/one_ed25519_attestation"
+            }
+          }
+        }
+      ]
+    },
+    "authority_admission_body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_id",
+        "decision_time",
+        "grant_expires_at",
+        "required_actions",
+        "signer_key_id",
+        "signed_grant",
+        "target_snapshot_id",
+        "trust_snapshot",
+        "trust_snapshot_id"
+      ],
+      "properties": {
+        "authority_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "decision_time": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "grant_expires_at": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "required_actions": {
+          "$ref": "#/$defs/canonical_actions"
+        },
+        "signer_key_id": {
+          "$ref": "#/$defs/ed25519_key_id"
+        },
+        "signed_grant": {
+          "$ref": "#/$defs/signed_authority_grant_envelope"
+        },
+        "target_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "trust_snapshot": {
+          "$ref": "#/$defs/authority_trust_snapshot"
+        },
+        "trust_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        }
+      }
+    },
+    "snapshot_file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_digest",
+        "relative_path",
+        "size"
+      ],
+      "properties": {
+        "artifact_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "relative_path": {
+          "$ref": "#/$defs/snapshot_relative_path"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 67108864
+        }
+      }
+    },
+    "target_snapshot_body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "files",
+        "source"
+      ],
+      "properties": {
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/snapshot_file"
+          }
+        },
+        "source": {
+          "const": "repository_fixture"
+        }
+      }
+    },
+    "analysis_lease_body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "authority_id",
+        "expires_at",
+        "issued_at",
+        "lease_nonce",
+        "max_bytes",
+        "max_candidates",
+        "max_wallclock_seconds",
+        "mission_id",
+        "target_snapshot_id",
+        "worker_identity"
+      ],
+      "properties": {
+        "action": {
+          "const": "static_analysis"
+        },
+        "authority_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "expires_at": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "issued_at": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "lease_nonce": {
+          "$ref": "#/$defs/lease_nonce_128_hex"
+        },
+        "max_bytes": {
+          "$ref": "#/$defs/positive_int64"
+        },
+        "max_candidates": {
+          "$ref": "#/$defs/positive_int64"
+        },
+        "max_wallclock_seconds": {
+          "$ref": "#/$defs/positive_int64"
+        },
+        "mission_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "target_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "worker_identity": {
+          "const": "VELITES"
+        }
+      }
+    },
+    "candidate_body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "analysis_lease_id",
+        "analyzer_version",
+        "authority_id",
+        "claim_id",
+        "column",
+        "line",
+        "mission_id",
+        "producer_identity",
+        "relative_path",
+        "rule_id",
+        "severity",
+        "source_artifact_digest",
+        "symbol",
+        "target_snapshot_id"
+      ],
+      "properties": {
+        "analysis_lease_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "analyzer_version": {
+          "const": "python_ast.v1"
+        },
+        "authority_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "claim_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "column": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "line": {
+          "$ref": "#/$defs/positive_int64"
+        },
+        "mission_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "producer_identity": {
+          "const": "VELITES"
+        },
+        "relative_path": {
+          "$ref": "#/$defs/canonical_relative_path"
+        },
+        "rule_id": {
+          "$ref": "#/$defs/canonical_nonblank_string"
+        },
+        "severity": {
+          "enum": [
+            "critical",
+            "high",
+            "low",
+            "medium"
+          ]
+        },
+        "source_artifact_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "symbol": {
+          "$ref": "#/$defs/canonical_nonblank_string"
+        },
+        "target_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        }
+      }
+    },
+    "verification_lease_body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purpose",
+        "lease_nonce",
+        "mission_id",
+        "authority_id",
+        "target_snapshot_id",
+        "candidate_id",
+        "candidate_producer_id",
+        "poc_artifact_digest",
+        "evidence_artifact_digests",
+        "environment_digest",
+        "effect_oracle_id",
+        "verifier_id",
+        "verifier_key_id",
+        "issued_at",
+        "expires_at"
+      ],
+      "properties": {
+        "purpose": {
+          "const": "modeled_fixture_verification"
+        },
+        "lease_nonce": {
+          "$ref": "#/$defs/lease_nonce_128_hex"
+        },
+        "mission_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "authority_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "target_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "candidate_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "candidate_producer_id": {
+          "$ref": "#/$defs/canonical_identity"
+        },
+        "poc_artifact_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "evidence_artifact_digests": {
+          "$ref": "#/$defs/evidence_digest_array"
+        },
+        "environment_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "effect_oracle_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "verifier_id": {
+          "$ref": "#/$defs/canonical_identity"
+        },
+        "verifier_key_id": {
+          "$ref": "#/$defs/ed25519_key_id"
+        },
+        "issued_at": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "expires_at": {
+          "$ref": "#/$defs/epoch_second"
+        }
+      }
+    },
+    "verifier_receipt_body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lease_id",
+        "mission_id",
+        "authority_id",
+        "target_snapshot_id",
+        "candidate_id",
+        "candidate_producer_id",
+        "poc_artifact_digest",
+        "evidence_artifact_digests",
+        "environment_digest",
+        "effect_oracle_id",
+        "verifier_id",
+        "verifier_key_id",
+        "evidence_tier",
+        "verdict",
+        "effect_observed",
+        "oracle_satisfied",
+        "completed_at"
+      ],
+      "properties": {
+        "lease_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "mission_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "authority_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "target_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "candidate_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "candidate_producer_id": {
+          "$ref": "#/$defs/canonical_identity"
+        },
+        "poc_artifact_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "evidence_artifact_digests": {
+          "$ref": "#/$defs/evidence_digest_array"
+        },
+        "environment_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "effect_oracle_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "verifier_id": {
+          "$ref": "#/$defs/canonical_identity"
+        },
+        "verifier_key_id": {
+          "$ref": "#/$defs/ed25519_key_id"
+        },
+        "evidence_tier": {
+          "const": "modeled_fixture"
+        },
+        "verdict": {
+          "enum": [
+            "confirmed",
+            "inconclusive",
+            "invalid",
+            "not_reproduced"
+          ]
+        },
+        "effect_observed": {
+          "type": "boolean"
+        },
+        "oracle_satisfied": {
+          "type": "boolean"
+        },
+        "completed_at": {
+          "$ref": "#/$defs/epoch_second"
+        }
+      }
+    },
+    "unsigned_verifier_receipt_envelope": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope_frame"
+        },
+        {
+          "properties": {
+            "object_kind": {
+              "const": "verifier_receipt"
+            },
+            "body": {
+              "$ref": "#/$defs/verifier_receipt_body"
+            },
+            "attestations": {
+              "$ref": "#/$defs/no_attestations"
+            }
+          }
+        }
+      ]
+    },
+    "signed_verifier_receipt_envelope": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/envelope_frame"
+        },
+        {
+          "properties": {
+            "object_kind": {
+              "const": "verifier_receipt"
+            },
+            "body": {
+              "$ref": "#/$defs/verifier_receipt_body"
+            },
+            "attestations": {
+              "$ref": "#/$defs/one_ed25519_attestation"
+            }
+          }
+        }
+      ]
+    },
+    "event_body_common": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_id",
+        "decision_time",
+        "kind",
+        "mission_id",
+        "payload",
+        "prev_digest",
+        "seq",
+        "target_id",
+        "unit"
+      ],
+      "properties": {
+        "authority_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "decision_time": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "kind": {
+          "enum": [
+            "analysis_lease_issued",
+            "authority_admitted",
+            "budget_exhausted",
+            "candidate_recorded",
+            "mission_admission_refused",
+            "mission_closed",
+            "mission_opened",
+            "parse_failed",
+            "scan_cancelled",
+            "scan_completed",
+            "scan_failed",
+            "scan_timed_out"
+          ]
+        },
+        "mission_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "payload": {
+          "type": "object"
+        },
+        "prev_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "seq": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "target_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "unit": {
+          "enum": [
+            "AQUILA",
+            "ETZIO",
+            "VELITES"
+          ]
+        }
+      }
+    },
+    "event_payload_authority_admitted": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "admission",
+        "grant",
+        "key_id",
+        "signature_b64"
+      ],
+      "properties": {
+        "admission": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/envelope_frame"
+            },
+            {
+              "properties": {
+                "object_kind": {
+                  "const": "authority_admission"
+                },
+                "body": {
+                  "$ref": "#/$defs/authority_admission_body"
+                },
+                "attestations": {
+                  "$ref": "#/$defs/no_attestations"
+                }
+              }
+            }
+          ]
+        },
+        "grant": {
+          "$ref": "#/$defs/unsigned_authority_grant_envelope"
+        },
+        "key_id": {
+          "$ref": "#/$defs/ed25519_key_id"
+        },
+        "signature_b64": {
+          "$ref": "#/$defs/ed25519_signature_b64"
+        }
+      }
+    },
+    "event_payload_mission_admission_refused": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason_code",
+        "stage"
+      ],
+      "properties": {
+        "reason_code": {
+          "$ref": "#/$defs/canonical_nonblank_string"
+        },
+        "stage": {
+          "enum": [
+            "admission",
+            "preflight"
+          ]
+        }
+      }
+    },
+    "event_payload_mission_opened": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_snapshot"
+      ],
+      "properties": {
+        "target_snapshot": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/envelope_frame"
+            },
+            {
+              "properties": {
+                "object_kind": {
+                  "const": "target_snapshot"
+                },
+                "body": {
+                  "$ref": "#/$defs/target_snapshot_body"
+                },
+                "attestations": {
+                  "$ref": "#/$defs/no_attestations"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "event_payload_analysis_lease_issued": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lease"
+      ],
+      "properties": {
+        "lease": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/envelope_frame"
+            },
+            {
+              "properties": {
+                "object_kind": {
+                  "const": "analysis_lease"
+                },
+                "body": {
+                  "$ref": "#/$defs/analysis_lease_body"
+                },
+                "attestations": {
+                  "$ref": "#/$defs/no_attestations"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "event_payload_candidate_recorded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate"
+      ],
+      "properties": {
+        "candidate": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/envelope_frame"
+            },
+            {
+              "properties": {
+                "object_kind": {
+                  "const": "candidate"
+                },
+                "body": {
+                  "$ref": "#/$defs/candidate_body"
+                },
+                "attestations": {
+                  "$ref": "#/$defs/no_attestations"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "event_payload_parse_failed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "analysis_lease_id",
+        "parse_failure",
+        "source_artifact_digest"
+      ],
+      "properties": {
+        "analysis_lease_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "parse_failure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "column",
+            "line",
+            "reason_code",
+            "relative_path"
+          ],
+          "properties": {
+            "column": {
+              "$ref": "#/$defs/epoch_second"
+            },
+            "line": {
+              "$ref": "#/$defs/epoch_second"
+            },
+            "reason_code": {
+              "$ref": "#/$defs/canonical_nonblank_string"
+            },
+            "relative_path": {
+              "$ref": "#/$defs/canonical_relative_path"
+            }
+          }
+        },
+        "source_artifact_digest": {
+          "$ref": "#/$defs/sha256_id"
+        }
+      }
+    },
+    "event_payload_scan_completed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "analyzer_version",
+        "bytes_scanned",
+        "candidate_count",
+        "file_count",
+        "parse_failure_count"
+      ],
+      "properties": {
+        "analyzer_version": {
+          "$ref": "#/$defs/canonical_nonblank_string"
+        },
+        "bytes_scanned": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "candidate_count": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "file_count": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "parse_failure_count": {
+          "$ref": "#/$defs/epoch_second"
+        }
+      }
+    },
+    "event_payload_mission_closed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_count",
+        "parse_failure_count",
+        "status"
+      ],
+      "properties": {
+        "candidate_count": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "parse_failure_count": {
+          "$ref": "#/$defs/epoch_second"
+        },
+        "status": {
+          "const": "completed"
+        }
+      }
+    },
+    "event_payload_reason_only": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason_code"
+      ],
+      "properties": {
+        "reason_code": {
+          "$ref": "#/$defs/canonical_nonblank_string"
+        }
+      }
+    },
+    "event_variants": {
+      "oneOf": [
+        {
+          "properties": {
+            "kind": {
+              "const": "analysis_lease_issued"
+            },
+            "unit": {
+              "const": "AQUILA"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_analysis_lease_issued"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "authority_admitted"
+            },
+            "unit": {
+              "const": "AQUILA"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_authority_admitted"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "budget_exhausted"
+            },
+            "unit": {
+              "const": "AQUILA"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_reason_only"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "candidate_recorded"
+            },
+            "unit": {
+              "const": "VELITES"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_candidate_recorded"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "mission_admission_refused"
+            },
+            "unit": {
+              "const": "AQUILA"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_mission_admission_refused"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "mission_closed"
+            },
+            "unit": {
+              "const": "ETZIO"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_mission_closed"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "mission_opened"
+            },
+            "unit": {
+              "const": "ETZIO"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_mission_opened"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "parse_failed"
+            },
+            "unit": {
+              "const": "VELITES"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_parse_failed"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "scan_cancelled"
+            },
+            "unit": {
+              "const": "AQUILA"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_reason_only"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "scan_completed"
+            },
+            "unit": {
+              "const": "VELITES"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_scan_completed"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "scan_failed"
+            },
+            "unit": {
+              "const": "ETZIO"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_reason_only"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "scan_timed_out"
+            },
+            "unit": {
+              "const": "ETZIO"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_reason_only"
+            }
+          }
+        }
+      ]
+    },
+    "event_body": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/event_body_common"
+        },
+        {
+          "$ref": "#/$defs/event_variants"
+        }
+      ]
+    },
+    "analysis_lease_case": {
+      "properties": {
+        "object_kind": {
+          "const": "analysis_lease"
+        },
+        "body": {
+          "$ref": "#/$defs/analysis_lease_body"
+        },
+        "attestations": {
+          "$ref": "#/$defs/no_attestations"
+        }
+      }
+    },
+    "authority_admission_case": {
+      "properties": {
+        "object_kind": {
+          "const": "authority_admission"
+        },
+        "body": {
+          "$ref": "#/$defs/authority_admission_body"
+        },
+        "attestations": {
+          "$ref": "#/$defs/no_attestations"
+        }
+      }
+    },
+    "authority_grant_case": {
+      "properties": {
+        "object_kind": {
+          "const": "authority_grant"
+        },
+        "body": {
+          "$ref": "#/$defs/authority_grant_body"
+        },
+        "attestations": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/no_attestations"
+            },
+            {
+              "$ref": "#/$defs/one_ed25519_attestation"
+            }
+          ]
+        }
+      }
+    },
+    "candidate_case": {
+      "properties": {
+        "object_kind": {
+          "const": "candidate"
+        },
+        "body": {
+          "$ref": "#/$defs/candidate_body"
+        },
+        "attestations": {
+          "$ref": "#/$defs/no_attestations"
+        }
+      }
+    },
+    "event_case": {
+      "properties": {
+        "object_kind": {
+          "const": "event"
+        },
+        "body": {
+          "$ref": "#/$defs/event_body"
+        },
+        "attestations": {
+          "$ref": "#/$defs/no_attestations"
+        }
+      }
+    },
+    "target_snapshot_case": {
+      "properties": {
+        "object_kind": {
+          "const": "target_snapshot"
+        },
+        "body": {
+          "$ref": "#/$defs/target_snapshot_body"
+        },
+        "attestations": {
+          "$ref": "#/$defs/no_attestations"
+        }
+      }
+    },
+    "verification_lease_case": {
+      "properties": {
+        "object_kind": {
+          "const": "verification_lease"
+        },
+        "body": {
+          "$ref": "#/$defs/verification_lease_body"
+        },
+        "attestations": {
+          "$ref": "#/$defs/no_attestations"
+        }
+      }
+    },
+    "verifier_receipt_case": {
+      "properties": {
+        "object_kind": {
+          "const": "verifier_receipt"
+        },
+        "body": {
+          "$ref": "#/$defs/verifier_receipt_body"
+        },
+        "attestations": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/no_attestations"
+            },
+            {
+              "$ref": "#/$defs/one_ed25519_attestation"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -101,9 +101,20 @@ Canonical JSON enforcement includes:
 - fixed wire, string, key, nesting, container, node, and attestation ceilings; and
 - rejection of noncanonical wire spellings during parsing.
 
-The checked-in `protocol.v1.schema.json` describes the common framing envelope and supported
-kind names. It is not yet a semantic schema for each object body. Python typed parsers are
-currently the semantic authority; schema/runtime parity remains an open Gate A item.
+The installed Draft 2020-12 schema is a semantic wire-shape guard for all eight supported
+typed object kinds. It has exact signed and unsigned grant/receipt forms plus twelve event
+kind, unit, and payload branches. One immutable runtime registry closes every top-level
+semantic body field set; repository policy compares the schema's envelope, body,
+attestation, dispatch, event-unit, and event-payload structure against those contracts.
+Parity fixtures validate every runtime-produced form plus known-bad mutations.
+
+JSON Schema is not raw-wire, cryptographic, or lifecycle authority. Typed parsers still
+enforce canonical UTF-8 and Unicode, derived identities, lexical ordering, field-keyed
+uniqueness, aggregate and cross-field limits, Ed25519 validity, nested bindings, authority,
+and event transitions. The schema uses an explicit edge-whitespace class instead of
+dialect-dependent `\s`/`\S`, freezing the Python protocol's nonblank-string semantics
+across Python and ECMA-262-style regex validators. The name `head_checkpoint` is reserved
+but rejected until an authenticated typed contract exists.
 
 ## Authority
 
@@ -283,9 +294,9 @@ scientific or policy authority.
 
 ## Next acceptance gate
 
-Foundation integrity is accepted only when retained evidence shows:
+Semantic per-kind structural parity is retained. Foundation integrity is accepted only
+when retained evidence also shows:
 
-- semantic per-kind schema/runtime parity;
 - kernel-issued, authority-bound verification leases;
 - typed CAS resolution for every receipt reference;
 - atomic receipt acceptance and lease consumption under concurrency;

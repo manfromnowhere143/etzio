@@ -8,7 +8,7 @@ import json
 import re
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Any, TypeAlias
+from typing import Any, Final, TypeAlias
 
 import unicodedata2 as unicodedata
 
@@ -27,24 +27,24 @@ MAX_TOTAL_NODES = 100_000
 MAX_NESTING_DEPTH = 64
 MIN_INTEGER = -(2**63)
 MAX_INTEGER = (2**63) - 1
-SUPPORTED_OBJECT_KINDS = frozenset(
+RESERVED_OBJECT_KINDS = frozenset({"head_checkpoint"})
+SEMANTIC_OBJECT_KINDS = frozenset(
     {
         "analysis_lease",
         "authority_admission",
         "authority_grant",
         "candidate",
         "event",
-        "head_checkpoint",
         "target_snapshot",
         "verification_lease",
         "verifier_receipt",
     }
 )
-
-_CONTENT_DOMAIN = b"etzio.protocol.v1\x00"
-_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$", re.ASCII)
-_CONTENT_ID_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
-_ENVELOPE_FIELDS = frozenset(
+SUPPORTED_OBJECT_KINDS = SEMANTIC_OBJECT_KINDS
+OPTIONALLY_ATTESTED_OBJECT_KINDS_V1: Final = frozenset(
+    {"authority_grant", "verifier_receipt"}
+)
+ENVELOPE_FIELDS_V1: Final = frozenset(
     {
         "attestations",
         "body",
@@ -54,7 +54,130 @@ _ENVELOPE_FIELDS = frozenset(
         "protocol_version",
     }
 )
+SEMANTIC_BODY_FIELDS_BY_KIND_V1: Final = MappingProxyType(
+    {
+        "analysis_lease": frozenset(
+            {
+                "action",
+                "authority_id",
+                "expires_at",
+                "issued_at",
+                "lease_nonce",
+                "max_bytes",
+                "max_candidates",
+                "max_wallclock_seconds",
+                "mission_id",
+                "target_snapshot_id",
+                "worker_identity",
+            }
+        ),
+        "authority_admission": frozenset(
+            {
+                "authority_id",
+                "decision_time",
+                "grant_expires_at",
+                "required_actions",
+                "signer_key_id",
+                "signed_grant",
+                "target_snapshot_id",
+                "trust_snapshot",
+                "trust_snapshot_id",
+            }
+        ),
+        "authority_grant": frozenset(
+            {
+                "assets",
+                "evidence_digest",
+                "expires_at",
+                "issued_at",
+                "issuer",
+                "max_bytes",
+                "max_candidates",
+                "max_wallclock_seconds",
+                "not_before",
+                "permitted_actions",
+                "subject",
+                "target_snapshot_id",
+            }
+        ),
+        "candidate": frozenset(
+            {
+                "analysis_lease_id",
+                "analyzer_version",
+                "authority_id",
+                "claim_id",
+                "column",
+                "line",
+                "mission_id",
+                "producer_identity",
+                "relative_path",
+                "rule_id",
+                "severity",
+                "source_artifact_digest",
+                "symbol",
+                "target_snapshot_id",
+            }
+        ),
+        "event": frozenset(
+            {
+                "authority_id",
+                "decision_time",
+                "kind",
+                "mission_id",
+                "payload",
+                "prev_digest",
+                "seq",
+                "target_id",
+                "unit",
+            }
+        ),
+        "target_snapshot": frozenset({"files", "source"}),
+        "verification_lease": frozenset(
+            {
+                "authority_id",
+                "candidate_id",
+                "candidate_producer_id",
+                "effect_oracle_id",
+                "environment_digest",
+                "evidence_artifact_digests",
+                "expires_at",
+                "issued_at",
+                "lease_nonce",
+                "mission_id",
+                "poc_artifact_digest",
+                "purpose",
+                "target_snapshot_id",
+                "verifier_id",
+                "verifier_key_id",
+            }
+        ),
+        "verifier_receipt": frozenset(
+            {
+                "authority_id",
+                "candidate_id",
+                "candidate_producer_id",
+                "completed_at",
+                "effect_observed",
+                "effect_oracle_id",
+                "environment_digest",
+                "evidence_artifact_digests",
+                "evidence_tier",
+                "lease_id",
+                "mission_id",
+                "oracle_satisfied",
+                "poc_artifact_digest",
+                "target_snapshot_id",
+                "verdict",
+                "verifier_id",
+                "verifier_key_id",
+            }
+        ),
+    }
+)
 
+_CONTENT_DOMAIN = b"etzio.protocol.v1\x00"
+_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$", re.ASCII)
+_CONTENT_ID_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 if unicodedata.unidata_version != UNICODE_VERSION:  # pragma: no cover - dependency invariant
     raise RuntimeError(f"Etzio protocol v1 requires Unicode {UNICODE_VERSION}, got {unicodedata.unidata_version}")
 
@@ -347,8 +470,8 @@ class EnvelopeV1:
             raise ProtocolError("protocol envelope must be a JSON object")
 
         fields = frozenset(decoded)
-        unknown = sorted(fields - _ENVELOPE_FIELDS)
-        missing = sorted(_ENVELOPE_FIELDS - fields)
+        unknown = sorted(fields - ENVELOPE_FIELDS_V1)
+        missing = sorted(ENVELOPE_FIELDS_V1 - fields)
         if unknown:
             raise ProtocolError(f"unknown envelope fields: {', '.join(unknown)}")
         if missing:

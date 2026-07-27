@@ -1,8 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://etzio.local/schemas/verdict.schema.json",
-  "title": "Verdict",
-  "description": "CATO's terminal judgment on a candidate. Only CATO emits this, in a separate isolation boundary from the producer.",
+  "title": "Modeled Verdict",
+  "description": "Legacy behavior-model contract for a proposed CATO verdict. It is non-authoritative and does not prove a separate principal, process, or isolation boundary.",
+  "x-etzio-status": "modeled_non_authoritative",
   "type": "object",
   "additionalProperties": false,
   "required": ["candidate_id", "verdict", "verifier_identity", "reproduced_from_bytes", "reasons"],

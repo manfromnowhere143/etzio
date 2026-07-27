@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 import sqlite3
 import stat
@@ -34,6 +33,7 @@ from etzio.kernel.store import (
 )
 from etzio.mission_v1 import StaticCandidateV1
 from etzio.protocol import EnvelopeV1, content_id, strict_loads
+from etzio.schemas import protocol_v1_schema
 
 MISSION_ID = content_id("mission", {"fixture": "event-store"})
 OTHER_MISSION_ID = content_id("mission", {"fixture": "other-event-store"})
@@ -391,9 +391,7 @@ def test_event_uses_common_envelope_and_protocol_schema() -> None:
     envelope = EnvelopeV1.from_bytes(raw)
     decoded = strict_loads(raw)
 
-    schema_path = Path(__file__).parents[1] / "schemas" / "protocol.v1.schema.json"
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
-    Draft202012Validator(schema).validate(decoded)
+    Draft202012Validator(protocol_v1_schema()).validate(decoded)
 
     assert envelope.object_kind == "event"
     assert envelope.object_id == event.object_id == event.event_digest

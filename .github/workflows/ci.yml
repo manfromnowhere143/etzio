@@ -128,6 +128,8 @@ jobs:
             cd "${smoke_root}"
             "${smoke_root}/venv/bin/python" -c \
               'import etzio; assert etzio.__version__ == "0.0.1"'
+            "${smoke_root}/venv/bin/python" -c \
+              'from jsonschema import Draft202012Validator; from etzio.schemas import protocol_v1_schema; schema = protocol_v1_schema(); Draft202012Validator.check_schema(schema); assert schema["x-etzio-schema-role"] == "semantic_wire_shape_guard"'
             "${smoke_root}/venv/bin/etzio" --fixture clean
           )
 

@@ -2,12 +2,18 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
+import pytest
+
+from etzio.schemas import protocol_v1_schema
 from scripts.validate_repository import (
     action_ref_issues,
     author_record_issues,
+    decode_schema_document,
     mission_state_issues,
+    protocol_schema_contract_issues,
     required_path_issues,
     workflow_permission_issues,
     workflow_syntax_issues,
@@ -21,10 +27,129 @@ def test_mutable_action_tag_is_rejected():
 
 
 def test_missing_required_schema_is_rejected(tmp_path: Path):
-    required = ("schemas/protocol.v1.schema.json",)
+    required = ("etzio/schemas/protocol.v1.schema.json",)
     assert required_path_issues(tmp_path, required) == [
-        "missing required repository file: schemas/protocol.v1.schema.json"
+        "missing required repository file: etzio/schemas/protocol.v1.schema.json"
     ]
+
+
+def test_protocol_schema_contract_rejects_missing_object_branch():
+    schema = deepcopy(protocol_v1_schema())
+    schema["oneOf"].pop()
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("dispatch branches" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_accepts_the_canonical_resource():
+    assert protocol_schema_contract_issues(protocol_v1_schema()) == []
+
+
+def test_protocol_schema_contract_rejects_root_field_and_version_drift():
+    schema = deepcopy(protocol_v1_schema())
+    schema["required"].remove("body")
+    schema["properties"]["unexpected"] = {"type": "boolean"}
+    schema["properties"]["object_version"]["const"] = 2
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("envelope required fields" in issue for issue in issues)
+    assert any("envelope declared fields" in issue for issue in issues)
+    assert any("object_version contract" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_nonfirst_body_field_drift():
+    schema = deepcopy(protocol_v1_schema())
+    schema["$defs"]["candidate_body"]["required"].remove("symbol")
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("candidate body required fields" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_open_or_extra_body_fields():
+    schema = deepcopy(protocol_v1_schema())
+    candidate = schema["$defs"]["candidate_body"]
+    candidate["additionalProperties"] = True
+    candidate["properties"]["ambient_credentials"] = {"type": "boolean"}
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("candidate body must reject unknown" in issue for issue in issues)
+    assert any("candidate body declared fields" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_case_reference_drift():
+    schema = deepcopy(protocol_v1_schema())
+    schema["$defs"]["candidate_case"]["properties"]["body"]["$ref"] = (
+        "#/$defs/analysis_lease_body"
+    )
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("candidate case body reference" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_event_common_body_weakening():
+    schema = deepcopy(protocol_v1_schema())
+    event = schema["$defs"]["event_body_common"]
+    event["required"].remove("payload")
+    event["additionalProperties"] = True
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("event body required fields" in issue for issue in issues)
+    assert any("event body must reject unknown" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_attestation_policy_drift():
+    schema = deepcopy(protocol_v1_schema())
+    schema["$defs"]["candidate_case"]["properties"]["attestations"] = {
+        "$ref": "#/$defs/one_ed25519_attestation"
+    }
+    schema["$defs"]["authority_grant_case"]["properties"]["attestations"][
+        "oneOf"
+    ].pop()
+    schema["$defs"]["one_ed25519_attestation"]["maxItems"] = 2
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("candidate must remain unattested" in issue for issue in issues)
+    assert any("authority_grant attestation policy" in issue for issue in issues)
+    assert any("one-attestation contract" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_attestation_shape_weakening():
+    schema = deepcopy(protocol_v1_schema())
+    attestation = schema["$defs"]["ed25519_attestation"]
+    attestation["required"].remove("signature_b64")
+    attestation["additionalProperties"] = True
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("attestation required fields" in issue for issue in issues)
+    assert any("attestation must reject unknown" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_event_unit_and_payload_drift():
+    schema = deepcopy(protocol_v1_schema())
+    variant = schema["$defs"]["event_variants"]["oneOf"][0]
+    variant["properties"]["unit"]["const"] = "ETZIO"
+    payload_name = variant["properties"]["payload"]["$ref"].removeprefix("#/$defs/")
+    schema["$defs"][payload_name]["required"].append("unexpected")
+    schema["$defs"][payload_name]["additionalProperties"] = True
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("event units" in issue for issue in issues)
+    assert any("event payload fields" in issue for issue in issues)
+    assert any("event payload must reject unknown" in issue for issue in issues)
+
+
+def test_schema_decoder_rejects_duplicate_object_keys():
+    with pytest.raises(ValueError, match="duplicate"):
+        decode_schema_document('{"type":"object","type":"array"}')
 
 
 def test_exact_action_commit_and_local_action_are_accepted():

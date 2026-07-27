@@ -30,7 +30,13 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
 from etzio.crypto_v1 import is_valid_ed25519_public_key
-from etzio.protocol import EnvelopeV1, ProtocolError, content_id, thaw_json
+from etzio.protocol import (
+    SEMANTIC_BODY_FIELDS_BY_KIND_V1,
+    EnvelopeV1,
+    ProtocolError,
+    content_id,
+    thaw_json,
+)
 
 LEASE_OBJECT_KIND: Final = "verification_lease"
 RECEIPT_OBJECT_KIND: Final = "verifier_receipt"
@@ -54,46 +60,8 @@ _FULL_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 _KEY_ID = re.compile(r"^ed25519:sha256:[0-9a-f]{64}$", re.ASCII)
 _NONCE = re.compile(r"^[0-9a-f]{32}$", re.ASCII)
 _IDENTITY = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{1,127}$", re.ASCII)
-_LEASE_BODY_FIELDS: Final = frozenset(
-    {
-        "purpose",
-        "lease_nonce",
-        "mission_id",
-        "authority_id",
-        "target_snapshot_id",
-        "candidate_id",
-        "candidate_producer_id",
-        "poc_artifact_digest",
-        "evidence_artifact_digests",
-        "environment_digest",
-        "effect_oracle_id",
-        "verifier_id",
-        "verifier_key_id",
-        "issued_at",
-        "expires_at",
-    }
-)
-_RECEIPT_BODY_FIELDS: Final = frozenset(
-    {
-        "lease_id",
-        "mission_id",
-        "authority_id",
-        "target_snapshot_id",
-        "candidate_id",
-        "candidate_producer_id",
-        "poc_artifact_digest",
-        "evidence_artifact_digests",
-        "environment_digest",
-        "effect_oracle_id",
-        "verifier_id",
-        "verifier_key_id",
-        "evidence_tier",
-        "verdict",
-        "effect_observed",
-        "oracle_satisfied",
-        "completed_at",
-    }
-)
+_LEASE_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1["verification_lease"]
+_RECEIPT_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1["verifier_receipt"]
 _SIGNED_FIELDS: Final = frozenset({"envelope_bytes", "key_id", "signature_b64"})
 _ATTESTATION_FIELDS: Final = frozenset({"algorithm", "key_id", "signature_b64"})
 _TRUST_SNAPSHOT_FIELDS: Final = frozenset({"keys", "revoked_key_ids", "revoked_lease_ids", "revoked_receipt_ids"})

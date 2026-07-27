@@ -19,6 +19,7 @@ from types import MappingProxyType
 from typing import Any, Final
 
 from ..protocol import (
+    SEMANTIC_BODY_FIELDS_BY_KIND_V1,
     EnvelopeV1,
     ProtocolError,
     canonical_dumps,
@@ -36,57 +37,53 @@ GENESIS_DIGEST: Final = "sha256:d97322dec35e47b77b1045b723936e345978b2223804c19f
 
 _DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}\Z", re.ASCII)
 _KEY_ID_RE = re.compile(r"ed25519:sha256:[0-9a-f]{64}\Z", re.ASCII)
-_BODY_KEYS = frozenset(
+_BODY_KEYS = SEMANTIC_BODY_FIELDS_BY_KIND_V1["event"]
+EVENT_UNIT_BY_KIND_V1: Final = MappingProxyType(
     {
-        "authority_id",
-        "decision_time",
-        "kind",
-        "mission_id",
-        "payload",
-        "prev_digest",
-        "seq",
-        "target_id",
-        "unit",
+        "authority_admitted": "AQUILA",
+        "mission_admission_refused": "AQUILA",
+        "mission_opened": "ETZIO",
+        "analysis_lease_issued": "AQUILA",
+        "candidate_recorded": "VELITES",
+        "parse_failed": "VELITES",
+        "scan_completed": "VELITES",
+        "mission_closed": "ETZIO",
+        "scan_failed": "ETZIO",
+        "scan_timed_out": "ETZIO",
+        "scan_cancelled": "AQUILA",
+        "budget_exhausted": "AQUILA",
     }
 )
-_EVENT_UNITS: Final = {
-    "authority_admitted": "AQUILA",
-    "mission_admission_refused": "AQUILA",
-    "mission_opened": "ETZIO",
-    "analysis_lease_issued": "AQUILA",
-    "candidate_recorded": "VELITES",
-    "parse_failed": "VELITES",
-    "scan_completed": "VELITES",
-    "mission_closed": "ETZIO",
-    "scan_failed": "ETZIO",
-    "scan_timed_out": "ETZIO",
-    "scan_cancelled": "AQUILA",
-    "budget_exhausted": "AQUILA",
-}
-_PAYLOAD_KEYS: Final = {
-    "authority_admitted": frozenset({"admission", "grant", "key_id", "signature_b64"}),
-    "mission_admission_refused": frozenset({"reason_code", "stage"}),
-    "mission_opened": frozenset({"target_snapshot"}),
-    "analysis_lease_issued": frozenset({"lease"}),
-    "candidate_recorded": frozenset({"candidate"}),
-    "parse_failed": frozenset(
-        {"analysis_lease_id", "parse_failure", "source_artifact_digest"}
-    ),
-    "scan_completed": frozenset(
-        {
-            "analyzer_version",
-            "bytes_scanned",
-            "candidate_count",
-            "file_count",
-            "parse_failure_count",
-        }
-    ),
-    "mission_closed": frozenset({"candidate_count", "parse_failure_count", "status"}),
-    "scan_failed": frozenset({"reason_code"}),
-    "scan_timed_out": frozenset({"reason_code"}),
-    "scan_cancelled": frozenset({"reason_code"}),
-    "budget_exhausted": frozenset({"reason_code"}),
-}
+EVENT_PAYLOAD_FIELDS_BY_KIND_V1: Final = MappingProxyType(
+    {
+        "authority_admitted": frozenset(
+            {"admission", "grant", "key_id", "signature_b64"}
+        ),
+        "mission_admission_refused": frozenset({"reason_code", "stage"}),
+        "mission_opened": frozenset({"target_snapshot"}),
+        "analysis_lease_issued": frozenset({"lease"}),
+        "candidate_recorded": frozenset({"candidate"}),
+        "parse_failed": frozenset(
+            {"analysis_lease_id", "parse_failure", "source_artifact_digest"}
+        ),
+        "scan_completed": frozenset(
+            {
+                "analyzer_version",
+                "bytes_scanned",
+                "candidate_count",
+                "file_count",
+                "parse_failure_count",
+            }
+        ),
+        "mission_closed": frozenset(
+            {"candidate_count", "parse_failure_count", "status"}
+        ),
+        "scan_failed": frozenset({"reason_code"}),
+        "scan_timed_out": frozenset({"reason_code"}),
+        "scan_cancelled": frozenset({"reason_code"}),
+        "budget_exhausted": frozenset({"reason_code"}),
+    }
+)
 _PARSE_FAILURE_KEYS: Final = frozenset(
     {"column", "line", "reason_code", "relative_path"}
 )
@@ -156,7 +153,8 @@ def _require_relative_path(value: object) -> str:
     text = _require_nonempty_text("relative_path", value)
     path = PurePosixPath(text)
     if (
-        path.is_absolute()
+        text == "."
+        or path.is_absolute()
         or path.as_posix() != text
         or "." in path.parts
         or ".." in path.parts
@@ -177,12 +175,16 @@ def _validate_payload(
     decision_time: int,
     payload: dict[str, Any],
 ) -> None:
-    expected_unit = _EVENT_UNITS.get(kind)
+    expected_unit = EVENT_UNIT_BY_KIND_V1.get(kind)
     if expected_unit is None:
         raise EventIntegrityError(f"unsupported event kind: {kind!r}")
     if unit != expected_unit:
         raise EventIntegrityError(f"{kind} events must be authored by {expected_unit}")
-    _require_exact_keys(f"{kind} payload", payload, _PAYLOAD_KEYS[kind])
+    _require_exact_keys(
+        f"{kind} payload",
+        payload,
+        EVENT_PAYLOAD_FIELDS_BY_KIND_V1[kind],
+    )
 
     if kind == "authority_admitted":
         from ..authority import (

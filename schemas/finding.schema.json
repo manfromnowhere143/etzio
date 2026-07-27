@@ -1,8 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://etzio.local/schemas/finding.schema.json",
-  "title": "Finding",
-  "description": "A CATO-confirmed vulnerability with a full, traversable evidence chain. No traversal, no finding.",
+  "title": "Modeled Finding",
+  "description": "Legacy behavior-model contract for a proposed finding. It is non-authoritative and is not emitted by the protocol-v1 fixture path.",
+  "x-etzio-status": "modeled_non_authoritative",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "mission_id", "target_revision", "hypothesis_id", "triggering_input", "poc_artifact_digest", "verdict", "severity", "in_scope"],
