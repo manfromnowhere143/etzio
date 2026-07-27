@@ -1,170 +1,269 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint** for the Etzio engine. Last updated 2026-07-25,
-Asia/Jerusalem. This is a handoff contract — not a confirmed vulnerability, not authority to
-touch a live target, not permission to push a remote, and not proof of real-world detection
-quality. Read this file before changing repository bytes.
+Status: **canonical recovery entrypoint**. Updated 2026-07-27, Asia/Jerusalem.
 
-Then read, in order: [README](../README.md) → [Charter](../CHARTER.md) →
-[Architecture](ARCHITECTURE.md) → [Roadmap](ROADMAP.md). Revalidate every claim below from
-repository bytes and the test suite. A chat summary, a model assertion, or a green check does
-not authorize a later action.
+This file describes Etzio only. It is not authority to access a live target, execute an
+exploit, spend money, use credentials, submit a report, or publish the repository. Revalidate
+every statement from checked-out bytes and retained evidence.
 
-**Precedence when records differ:** exact checked-out Git bytes → the test suite result →
-this handoff → dated chat. A newer document does not silently overrule a committed decision.
-
----
-
-## Mission soul
-
-Etzio is an **autonomous vulnerability-research engine** for *authorized* security work
-(bug-bounty scope, written permission, responsible disclosure, local benchmarks). Named for
-the assassin — patient, precise, one clean strike.
-
-The one idea that organizes everything: **a vulnerability is a scientific claim.** "This input
-triggers this exploit" is a falsifiable hypothesis; a bounty submission is a published claim
-with evidence. So Etzio is not a smarter scanner — it is a disciplined *evidence machine* that
-generates candidates cheaply and spends its real effort **killing the false ones and proving
-the true ones with a reproduced exploit.** Precision is the product.
-
-Origin (2026-07-25): built after studying Kritt / "Blockian" (open-kritt), a team that earned
-**$1.5M+ in bug-bounty payouts in blockchain L1 client code** (the Immunefi ecosystem) — not a
-competition prize (that framing was conflated; DARPA AIxCC was won by Team Atlanta). The lesson
-that shaped Etzio: the moat is the **target class + verification discipline**, not the
-orchestrator. open-kritt's own shape is modest — decompose → parallel sandboxed agents →
-compile a PoC → post-script verify → dedup/rank.
-
-Long vision: a self-improving engine that finds real, exploitable bugs at a false-positive
-rate low enough that a human reviewer and a bounty triage team trust its output. Immediate
-mission: prove the architecture one measured vertical slice at a time before any live target.
-
-Etzio learns the *patterns* of Odeya (its evidence-native kernel) and Maestro (its disciplined
-master loop). **It imports none of their code and shares none of their infrastructure.** That
-separation is a law, not a preference.
-
-## Non-negotiable engineering laws
-
-1. **Authorization before action.** Every hunt carries a `TargetContract`. Anything not in
-   scope is out of scope by default; missing authorization fails closed. AQUILA enforces this
-   at the kernel and holds the kill-switch.
-2. **The generator never confirms its own claim.** The unit that proposes a candidate is never
-   the unit that verifies it. CATO verifies in a separate identity and isolation boundary.
-3. **Evidence before claim.** No finding exists without a reproduced PoC — a real artifact
-   re-executed from bytes, never a model's self-reported confidence.
-4. **Nulls and failures are first-class.** "No bug," "blocked," "not reproduced," and
-   "inconclusive" are retained results with equal standing to a finding.
-5. **Every external effect is separately governed.** Egress, paid compute, live-target actions,
-   and disclosure each need an exact scoped grant. Exploit code runs only in hard isolation.
-6. **Claims stay bounded.** Never write "state of the art," "solved," "production-ready," or
-   "beats X" without a named scope, benchmark, date, and retained evidence. Measured numbers
-   below are about *modeled benchmarks*, not the real world.
-7. **Every gate has a known-bad proof that it fires.** A passing test on real intent, not
-   passing prose. The false-positive corpus and the planted-FP fixture exist for this reason.
-8. **Start with the smallest dependency-complete slice.** Add agents/complexity only when a
-   measured bottleneck demands it.
-
-## Current repository recovery identity
-
-- Canonical workspace: `/Users/danielwahnich/workspace/etzio`
-- Branch: `master`
-- Predecessor `HEAD` this handoff descends from:
-  `277a79994ad0305ce4e1873d4bf58cad4c1def0b` (tree `cb09a528fed8dfb3fcacc6c3aa4f91d450fa2ab8`)
-- Canonical remote: **none** (local-only by decision)
-- Remote creation, push, publication, deployment authority: **not granted**
-
-This committed file cannot contain the hash of the commit that contains it. The active branch
-`HEAD` is the subject to resolve; never copy a hash from chat. Run first:
+## Mandatory recovery
 
 ```bash
 cd /Users/danielwahnich/workspace/etzio
+test "$(basename "$(git rev-parse --show-toplevel)")" = "etzio"
 git status --short --branch
 git log --oneline -6
-git remote -v            # expected: empty
-python3 -m pytest -q     # expected: all green
-ruff check etzio tests   # expected: All checks passed!
+git remote -v
+sed -n '1,320p' docs/SESSION_HANDOFF.md
+python3.11 -m venv .venv
+.venv/bin/python -m pip install \
+  --no-input \
+  --require-hashes \
+  --only-binary=:all: \
+  --requirement tools/ci/requirements-ci.lock
+.venv/bin/python -m pip check
+ETZIO_PYTHON=.venv/bin/python make verify
 ```
 
-## What each tranche established (with exact reproduce commands)
+If `.venv` already contains the exact locked dependencies, skip only environment creation
+and installation. Always inspect status and read this handoff. Then read
+[README](../README.md), [Charter](../CHARTER.md), [Architecture](ARCHITECTURE.md),
+[Roadmap](ROADMAP.md), [Frontier baseline](FRONTIER_BASELINE.md), and
+[ADR-0001](decisions/0001-foundation-integrity-before-breadth.md).
 
-All numbers are for **modeled/benchmark targets** and prove *architecture and gate logic*, not
-real-world detection quality. Three commits:
+Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
+memory. A green repository check validates only what it names.
 
-**1 · Foundation — `5c36904`**
-Runnable ETZIO kernel: append-only hash-chained event ledger, mission state machine, master
-loop enforcing the laws in code. Ten-unit roster (ETZIO, SCIPIO, FABIUS, VELITES, MARCELLUS,
-CATO, CAMILLUS, FABRICIUS, AQUILA, MINERVA) as typed ports with deterministic stub bodies.
-- Reproduce: `python3 -m etzio.cli` → 1 confirmed finding, 1 rejected planted false positive,
-  2 first-class nulls, ledger chain intact, out-of-scope fails closed.
+## Project identity
 
-**2 · CATO gate + false-positive harness — `09965f9`**
-CATO is a two-part gate: a candidate becomes a finding only if re-execution both matches the
-producer's claim AND produces a materially impactful effect. Labeled benchmark corpus + FPR
-harness scoring CATO against hidden ground truth.
-- Reproduce: `python3 -m etzio.harness.fpr` → on the corpus: **precision 1.000, FPR 0.000,
-  recall 0.750** (the broken-PoC case is an honest miss, never a false alarm). Bar: FP == 0.
+- Workspace: `/Users/danielwahnich/workspace/etzio`
+- Engine: **Etzio**
+- Canonical branch: `main`
+- Foundation predecessor: `542122752701c62a776cba6cc4c712dc86c11041`
+- Foundation predecessor tree: `ac1cd687052d004b5668aec142faa2adc791623b`
+- Active foundation branch while this packet was written: `agent/repository-foundation`
+- Canonical remote: private `https://github.com/manfromnowhere143/etzio`
+- Verified default branch: `main`
+- Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
-**3 · SCIPIO + VELITES real static analysis — `277a799`**
-Real `ast`-based Python analyzer (no dependencies). SCIPIO maps attack surface (files,
-entrypoints, imports); VELITES detects seven vulnerability classes (code/command injection,
-unsafe deserialization, SQL injection, weak crypto, hardcoded secrets) at exact file:line.
-- Reproduce: `python3 -m etzio.scan` (7/7 planted bugs), `python3 -m etzio.scan etzio/fixtures_code/clean_app.py`
-  (0 findings), `python3 -m etzio.scan --self` (only the intentional fixture; 0 in real source).
-- A static hit is an **execution-pending candidate** with no PoC → CATO returns `inconclusive`.
-  It is never auto-confirmed. A test pins exactly this.
+The remote was created and its private visibility and default branch were verified on
+2026-07-27. Resolve current visibility, checks, and protections from GitHub before relying
+on this record. Do not add co-author trailers or automated author commits.
 
-State of the suite at `277a799`: **15 tests green, ruff clean, zero warnings.**
+Etzio is independent from Odeya, Sentinel, Aweb, Maestro, Telos, Inbar, and every other
+project. A prompt naming Etzio plus a different injected working directory is an identity
+mismatch, not permission to work in the other repository.
 
-## Current hard boundary
+## Founder intent
 
-- **No live target.** Only local benchmark/fixture targets until Phase 2 passes on a real
-  benchmark with a known bug (see Roadmap).
-- **No PoC *execution* yet.** MARCELLUS builds and CATO reproduces PoCs only in hard isolation
-  (microVM/gVisor/Kata) — which needs **Linux + KVM**. This machine is macOS (XNU); the real
-  execution tier does not exist here. Do not run untrusted exploit code on the host.
-- **No remote, no disclosure, no spend.** Disclosure is a separate human-authorized effect.
+Etzio is not a scanner, toy, or one-domain bounty script. It is intended to become an
+enterprise-grade operating system for authorized vulnerability research across languages,
+vulnerability classes, target categories, and defensive workflows.
 
-## Two genuine blockers (credentials do not fix either)
+The engine should:
 
-1. **A Linux+KVM host** for real exploit isolation. An OS fact, not a permission.
-2. **A real authorized program** (e.g. an Immunefi researcher identity + accepted scope). A
-   human/legal enrolment step, not a key that can be handed over.
+- run progressively authorized missions while its capability grows;
+- learn transferable strategy from findings, nulls, failures, cost, and reviewer outcomes;
+- use bounty acceptance and economic value as one hard external signal;
+- preserve scientific, legal, and policy authority outside model workers;
+- expand through versioned domain and technique packs without fragmenting the kernel.
 
-## Next mission, in dependency order
+Blockchain, Solidity, EVM, and eventually L1/client research are the first benchmark and
+economic wedge. They are not the ceiling.
 
-1. **MARCELLUS + real CATO execution** — build a compiling PoC in isolation and reproduce it
-   from bytes. *Requires the Linux/KVM host.* This is the "analyze → prove" crossing.
-2. **FABIUS real hypothesis library** (macOS-ok) — a domain library for the target class
-   (default: blockchain/DeFi — reentrancy, oracle manipulation, signature replay, precision,
-   access control), ranking hypotheses against the SCIPIO surface.
-3. **SCIPIO Solidity surface-mapper** (macOS-ok) — extend recon to Solidity, the high-payout
-   domain, if the target-class decision confirms blockchain.
-4. **CAMILLUS dedup/rank + FABRICIUS disclosure draft** on real candidates.
-5. **MINERVA grounded learning** — record which hypotheses pay off per target class; offline
-   promotion only, no production self-modification.
+## Mission thesis
 
-The governing metric throughout: **false-positive rate on a benchmark.** No slice ships
-without an FPR number. Miss before you cry wolf.
+A vulnerability is a falsifiable claim: a specific input against a specific target revision
+causes a security-relevant effect. A candidate is not a finding. A finding exists only after
+a separately identified verifier reproduces the effect from retained bytes in a clean,
+authorized environment and the kernel validates the receipt.
 
-## Open decisions (Daniel's call)
+The architectural moat is the chain:
 
-- **Target class** — proceeding on default **benchmark-first, aimed at blockchain/Immunefi**
-  (biggest payouts, hardest domain). Redirect to web/SaaS or OSS reshapes SCIPIO + FABIUS.
-- **Remote repo** — stay local (current) or create a **private** GitHub repo (then SHA-pin CI
-  before push, per estate standard).
-- **Linux host** — cloud VM (needs cloud creds + a few $/day) vs. wait, gating mission item 1.
+```text
+exact authority
+  → reproducible target
+  → falsifiable hypothesis
+  → content-bound candidate
+  → isolated exploit artifact
+  → independent reproduction
+  → kernel adjudication
+  → evidence-bound disclosure draft
+  → governed offline learning
+```
 
-## Definition of a proper continuation handoff
+## Current implementation truth
 
-Before ending a future session:
+The repository currently has:
 
-1. inspect the complete diff; stage only the declared scope;
-2. run `ruff check etzio tests && python3 -m pytest -q` — both must pass before and after;
-3. create a scoped local commit with an intentional message (no Co-Authored-By trailer;
-   Daniel's authorship alone);
-4. record branch, commit, tree, checks, open blockers, and absence of remote authority;
-5. **update this file and `docs/MISSION_STATE.json`** when mission state or decisions change;
-6. leave every unsupported claim and incomplete item explicit — bounded, dated, scoped.
+- dataclass contracts and three JSON Schemas;
+- an in-memory mission state and hash-linked event demonstration;
+- deterministic skeletons for the ten named units;
+- a modeled target and eight-case CATO fixture corpus;
+- a standard-library Python AST mapper and six-rule scanner;
+- 15 original behavior tests;
+- professional repository-policy and CI work on the active branch.
 
-The standard is not that the next session feels confident. The standard is that it can recover
-identity, reproduce every number, see every boundary, and know the next safe action without
-trusting the previous session's memory.
+The active repository-foundation branch currently defines 29 tests: 15 original behavior
+regressions and 14 repository-policy known-bads. Local CPython 3.11.15 validation, source
+and wheel builds, an out-of-checkout wheel smoke test, actionlint, and shellcheck pass.
+
+It does not have:
+
+- one aligned versioned runtime/wire protocol;
+- validated, signed, expiring, or revocable authority;
+- a durable immutable ledger, pure reducer, replay, or resume;
+- a real worker protocol or scheduler;
+- stable content-bound candidate identity;
+- isolated MARCELLUS construction;
+- separately isolated CATO verification;
+- kernel-authenticated evidence receipts;
+- a real report package, external effect gateway, cockpit, or learning system;
+- a live-target adapter or authority for a live mission.
+
+The current code is safer mainly because it has no live adapters, not because the intended
+boundaries are enforced.
+
+## Reproduced evidence
+
+Before this tranche, the original repository was independently reproduced under CPython
+3.14.2 and CPython 3.11.15:
+
+- 15 tests passed and Ruff was clean under the then-configured rules;
+- the demo emitted one modeled finding, two nulls, 16 events, and an intact predecessor
+  chain;
+- the CATO fixture corpus produced TP=3, FP=0, TN=4, FN=1;
+- the vulnerable Python fixture produced seven instances across six rule classes;
+- the clean fixture produced zero alerts;
+- the package scan produced only intentional-fixture alerts.
+
+These results are synthetic and narrow. They do not establish real-world precision,
+authorization enforcement, independent verification, event integrity, isolation, or
+superiority. In particular, 0 false positives among four benign cases has a very wide
+confidence interval.
+
+## Architecture audit findings
+
+The 2026-07-27 audit reproduced the following blockers:
+
+1. The lifecycle demo and real Python scanner are disconnected. `etzio.scan` accepts a local
+   path without AQUILA, `TargetContract`, lifecycle state, or events.
+2. `TargetContract` is self-asserted and accepts invalid kinds, blank references, negative
+   budgets, and missing expiry/revocation evidence. `mission_opened` precedes admission.
+3. CATO directly invokes caller-supplied target behavior in the host process and does not
+   independently check `poc_execution` authority.
+4. The kernel trusts a caller-supplied verdict. A forged verifier can confirm mismatched or
+   false candidates because receipt fields are not validated.
+5. `Event.payload` is mutable, the ledger is in-memory, semantic bytes are noncanonical,
+   digests are truncated, appends remain possible after closure, and there is no durable
+   load/replay/anchor protocol.
+6. Runtime `TargetContract` and `Finding` objects do not validate against their checked-in
+   schemas.
+7. Verification and finding minting execute while lifecycle state is still `construct`;
+   `verify` and `adjudicate` are advanced afterward.
+8. Scope refusal emits an event and raises but does not persist a `blocked` projection.
+9. “Reproduced from bytes” and the environment digest are modeled labels, not retained
+   isolated-execution evidence.
+10. Budget, wall-clock, egress, credential, spending, disclosure, and kill controls are not
+    implemented boundaries.
+11. The FPR corpus has only four benign cases; empty metric denominators report misleading
+    perfect values; an always-negative verifier passes the `FP == 0` command-line bar.
+12. The scanner skips syntax failures in its finding path, lacks interprocedural and alias
+    reasoning, may print secret literals, and uses traversal-position candidate IDs.
+13. MINERVA returns only counts and prose; there is no evaluated promotion loop.
+
+These findings are why [ADR-0001](decisions/0001-foundation-integrity-before-breadth.md)
+places integrity before language or finder expansion.
+
+## Frontier conclusion
+
+Open Kritt demonstrates the commercial value of focused domain workflows, repeat runs,
+compiling PoCs, post-validation, and ranking. EVMbench and SCONE-bench demonstrate rapid
+progress on executable smart-contract tasks. ReEVMBench demonstrates contamination,
+stability, scaffold, and real-incident gaps. BountyBench and CVE-Bench show the importance
+and difficulty of broader real systems. Codex Security, Big Sleep, and AIxCC show that deep
+context, validation, patching, and expert-guided workflows can produce real defensive value.
+
+Etzio’s legitimate differentiator is the intended combination of exact authority, durable
+mission replay, independent proof, domain depth, and governed learning. None is accepted
+until Etzio retains its own evidence.
+
+## Current mission order
+
+### Mission A — repository foundation
+
+Finish and integrate:
+
+- exact interpreter and hash-locked dependencies;
+- SHA-pinned least-privilege GitHub Actions;
+- provenance and repository-policy known-bads;
+- honest README, architecture, roadmap, security policy, frontier baseline, and ADR;
+- private remote, required checks, and protected `main`.
+
+### Mission B — foundation integrity
+
+Implement the smallest real vertical slice:
+
+1. one versioned runtime/wire protocol;
+2. contract admission before mission creation;
+3. one real read-only fixture scan through AQUILA and the kernel;
+4. canonical full-SHA identities;
+5. deeply immutable persisted events;
+6. pure deterministic reducer and resume;
+7. kernel validation of independent-verifier receipts;
+8. known-bad tests for every invariant.
+
+### Mission C — independent proof plane
+
+On a separately authorized Linux/KVM host, build isolated MARCELLUS and CATO workers with
+default-deny egress, no ambient credentials, resource ceilings, expiring leases, complete
+receipts, and a tested kill path.
+
+### Mission D — blockchain benchmark wedge
+
+Run pinned historical EVMbench, SCONE-bench, and contamination-controlled real-incident
+subsets. Measure recall, precision, FPR, FDR, exploit/patch success, stability, cost, and
+time. Preserve all excluded, invalid, crashed, timed-out, and negative cases.
+
+### Mission E — progressive authorized research and learning
+
+Admit a specific program contract only after isolation and benchmark gates. Keep every
+external effect human-controlled. Promote MINERVA strategy versions offline through frozen
+holdouts, regressions, signatures, and rollback.
+
+## Authority state
+
+Authorized in this tranche:
+
+- modify and validate the Etzio repository;
+- study public frontier systems and private estate patterns read-only;
+- create `manfromnowhere143/etzio` as a private GitHub repository;
+- push Daniel-authored Etzio changes and configure repository checks.
+
+Not authorized:
+
+- public visibility;
+- deployment;
+- live-target interaction;
+- exploit execution outside repository-owned deterministic fixtures;
+- credential use for a research target;
+- spending;
+- disclosure, submission, publication, or external messaging.
+
+GitHub credentials used solely to publish the authorized private repository are repository
+operations, not mission credentials.
+
+## Continuation standard
+
+Before handoff:
+
+1. inspect the complete diff and all untracked paths;
+2. reproduce the declared checks from the hash-locked environment;
+3. retain exact test, benchmark, commit, tree, workflow, and remote state;
+4. stage only the declared tranche;
+5. commit as Daniel without co-author trailers;
+6. push through a pull request and verify required checks;
+7. update this file and `MISSION_STATE.json`;
+8. leave unsupported claims, open risks, and unimplemented components explicit.
+
+Never infer completion from confident prose. Recover from bytes, evidence, and authority.

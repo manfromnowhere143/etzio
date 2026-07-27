@@ -1,8 +1,9 @@
-"""First-slice admission tests. The architecture must prove itself before scale.
+"""Regression tests for the modeled foundation loop.
 
-These assert the load-bearing laws mechanically, not by inspection:
-  * exactly one confirmed finding (the genuine overflow),
-  * the planted false positive is REJECTED by CATO (not in findings),
+These exercise intended positive and negative branches but do not prove authorization,
+isolation, verifier independence, or ledger durability:
+  * exactly one modeled finding,
+  * the planted negative case is rejected by the CATO stub,
   * the empty hypothesis yields a first-class null,
   * the ledger hash-chain is intact,
   * an out-of-scope action fails closed.

@@ -1,6 +1,7 @@
-"""Phase-1 admission: CATO must have ZERO false positives on the labeled corpus, and must
-still confirm the genuine, well-constructed exploits. Recall < 1.0 is acceptable (the
-broken-PoC case is an honest miss); FP > 0 is not."""
+"""Regression expectations for the tiny modeled CATO fixture corpus.
+
+The counts are not an acceptance claim for real-world precision or recall.
+"""
 
 from __future__ import annotations
 

@@ -1,6 +1,7 @@
-"""Benchmark fixtures for the first vertical slice. A locally-owned deterministic target
-with one planted true bug — so CATO can genuinely re-run a PoC and reject a false positive.
-No live target. Authorization kind is 'benchmark'."""
+"""Repository-owned deterministic fixtures for the modeled foundation loop.
+
+No live target, untrusted execution, or independent verifier is involved.
+"""
 
 from __future__ import annotations
 
@@ -11,10 +12,10 @@ from .contracts import TargetContract
 
 @dataclass
 class BenchmarkTarget:
-    """A tiny deterministic sandbox. run(payload) returns the observed effect.
+    """A tiny deterministic effect model.
 
-    Planted truth: an unbounded withdraw drains the balance. Nothing else does anything —
-    so a candidate that *claims* 'balance_drained' from a benign approve() must fail CATO.
+    Modeled truth: an unbounded withdrawal returns ``balance_drained``. Nothing else has an
+    effect, so a false impact claim follows the negative verdict branch.
     """
     revision: str = "benchmark@0001"
 

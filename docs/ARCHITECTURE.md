@@ -1,178 +1,331 @@
 # Etzio Architecture
 
-Status: proposed foundation, 2026-07-25. Components are design targets unless explicitly
-marked implemented. The kernel skeleton in `etzio/` is implemented at skeleton grade (a
-runnable state machine + master loop + engine ports); the ten units are ports with stub
-bodies until each is closed by a real vertical slice.
+Status: **architecture foundation**, 2026-07-27. This document separates the implemented
+repository from the intended system. “Target” marks a design obligation, not shipped code.
 
-## Verdict
+## Architectural verdict
 
-Etzio is an **evidence-native vulnerability-research operating system**: a deterministic,
-replayable kernel (ETZIO) surrounded by replaceable intelligence units (the roster). The
-kernel never depends on an agent remembering the mission. It owns state, authority, budget,
-the finding ledger, and the *next legal action*. Units propose; the kernel decides what is
-legal; CATO decides what is true.
+Etzio’s intended shape is sound: a small deterministic control kernel surrounded by
+replaceable research workers, with policy authority and independent scientific verification
+kept outside the generative swarm. That is the right foundation for broad vulnerability
+research.
 
-```
-                         ┌─────────────────────────────────────────────┐
-                         │  ETZIO  ·  deterministic kernel + master loop │
-                         │  event ledger · state machine · authority     │
-                         │  budget · idempotency · next legal action     │
-                         └───────────────┬─────────────────────────────┘
-        proposes (never confirms)        │  derives next legal action
-   ┌───────────────┬───────────────┬─────┴──────┬───────────────┬──────────────┐
-   ▼               ▼               ▼            ▼               ▼              ▼
- SCIPIO   →     FABIUS    →     VELITES   →  MARCELLUS  →     CATO    →    CAMILLUS
- recon /       threat model    finder      exploit /       INDEPENDENT   dedup /
- surface map   hypotheses      swarm       PoC build       verify+judge  rank / triage
-                                                               │
-                                                               ▼
-                                                          FABRICIUS  →  disclosure
-   AQUILA  (scope · egress · budget · kill-switch)  spans every stage
-   MINERVA (grounded learning · memory · transfer)  observes every stage, promotes offline only
-```
+The current implementation does not yet realize that shape. It contains two disconnected
+demonstrations:
 
-## Architectural invariants
+1. a governed-looking, in-memory lifecycle using mostly deterministic stubs; and
+2. a real but narrow Python AST scan command that accepts a local path and bypasses the
+   lifecycle, authority, event, and verification layers.
 
-1. Canonical state is an **append-only event ledger**; everything else (dashboards, indexes,
-   caches) is a projection and never the only copy of truth.
-2. **One writer per stage.** Parallelism is for decomposable investigation (VELITES), never
-   for competing mutations of the same finding.
-3. **The generator never supplies the terminal verdict for its own finding** (law 2).
-4. Every consequential transition names its unit, the authority it acted under, its inputs,
-   and the evidence it produced.
-5. **A missing authorization fails closed.** Timeout and retry exhaustion are not findings.
-6. **Artifact integrity and exploit validity are separate.** A correct PoC hash proves
-   identity; only independent reproduction proves the bug.
-7. Every finding is bounded by its `TargetContract`'s declared scope.
+The first engineering mission is to make one small path truthful end to end before adding
+languages, agents, or live adapters.
 
-## The units (planes)
+## Target system
 
-### ETZIO — kernel & master loop
-Deterministic transition system. Validates the target contract, opens a mission, builds the
-work graph, assigns leases, enforces budget and authorization, appends events, survives
-interruption, and derives the next legal action. Units cannot write the ledger directly;
-they submit proposals through typed commands.
-
-Commands: `open_mission`, `authorize_scope`, `record_recon`, `record_hypotheses`,
-`lease_investigation`, `record_candidate`, `build_poc`, `request_verification`,
-`adjudicate_finding`, `triage`, `request_disclosure`, `record_null`, `close_mission`.
-
-### SCIPIO — recon & attack-surface mapping
-Maps the target: repository/protocol structure, entrypoints, trust boundaries, dependency
-graph, and previously disclosed issues. Output is a structured attack surface, not prose.
-
-### FABIUS — threat modeling & hypothesis generation
-From the surface, predicts likely bug classes and emits a **ranked hypothesis list** (an
-attack graph). Each hypothesis is a falsifiable statement with a suggested probe. This is
-where domain expertise concentrates (e.g. for L1/DeFi: reentrancy, oracle manipulation,
-signature replay, integer/precision, access control, consensus edge cases).
-
-### VELITES — the finder swarm
-The open-kritt insight, disciplined: decompose research into **small, well-defined tasks**
-and run them in parallel across investigation agents (static reasoning + dynamic probing).
-Each agent is blind to the others and returns candidates against a fixed schema. VELITES
-*proposes*; it never confirms.
-
-### MARCELLUS — exploit / PoC construction
-Takes a promising candidate and builds a **compiling, reproducing proof-of-concept** inside
-a hard-isolated sandbox (default-deny egress, no ambient credentials, scoped lease). A
-candidate without a constructed PoC never reaches CATO as a finding — it stays a candidate
-or becomes a null.
-
-### CATO — independent verification & adjudication
-A *different execution identity and isolation boundary* from whatever produced the PoC.
-Re-runs the exploit from bytes in a clean environment; applies the evidence ladder
-(schema/integrity → clean re-execution → adversarial critique, preferably a different model
-family). Emits one verdict: `confirmed`, `not_reproduced`, `out_of_scope`, or `inconclusive`.
-CATO is the only unit that can turn a candidate into a finding.
-
-### CAMILLUS — dedup, ranking, triage
-Normalizes confirmed findings to one schema, deduplicates across the swarm (same root cause,
-different surface), and ranks by severity × exploitability × payout class. Produces the
-ordered queue a human reviews.
-
-### FABRICIUS — disclosure & report generation
-Generates a bounty-grade report from the finding's retained evidence: summary, impact,
-reproduction steps, PoC, suggested fix, and the program's required format. Disclosure itself
-is a separate human-authorized effect (law 5) — FABRICIUS drafts; it does not submit.
-
-### AQUILA — governance, authority, scope, safety
-Spans every stage. Enforces the `TargetContract` (in-scope only), owns egress control and
-budget, and holds the kill-switch. Any unit acting outside scope is refused at the kernel.
-
-### MINERVA — grounded learning & memory
-Observes every mission and records what worked: which hypotheses paid off on which target
-class, which probes were dead ends, false-positive patterns CATO caught. Promotes strategy
-changes **offline only**, through shadow evaluation against pinned targets and negative
-fixtures. There is no direct production self-modification path.
-
-## Mission lifecycle
-
-```
-open → authorize → recon → threat_model → investigate → construct → verify
-     → adjudicate → triage → disclose(request) → learn → close
-                 ↘ blocked / null are terminal-visible at any stage ↗
+```text
+                          human / program authority
+                                      │
+                         signed, exact grants and policy
+                                      ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│ AQUILA · policy plane                                                    │
+│ contract admission · scope · budgets · leases · egress · kill · approval │
+└──────────────────────────────┬────────────────────────────────────────────┘
+                               │ admitted commands
+                               ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ETZIO · deterministic control plane                                      │
+│ protocol registry · lifecycle reducer · append-only ledger · scheduler   │
+│ idempotency · recovery · evidence graph · next legal action               │
+└──────────────┬───────────────────────────────┬────────────────────────────┘
+               │ leased work                   │ validated receipts
+               ▼                               ▼
+┌──────────────────────────────┐     ┌──────────────────────────────────────┐
+│ research plane              │     │ independent proof plane              │
+│ SCIPIO → FABIUS → VELITES   │     │ MARCELLUS builder → CATO verifier   │
+│ domain + technique packs    │     │ separate identities and isolation   │
+└──────────────┬───────────────┘     └──────────────────┬───────────────────┘
+               └──────────────────────┬─────────────────┘
+                                      ▼
+                         CAMILLUS → FABRICIUS
+                         adjudication   draft
+                                      │
+                                      ▼
+                       MINERVA offline promotion loop
 ```
 
-`null` and `blocked` are retained outcomes, not failures to hide. Interruptions resume from
-persisted events with a generated handoff — never from conversational memory.
+Workers propose observations and receipts. They do not mutate canonical state or grant
+authority. The kernel validates commands against the protocol, current state, exact lease,
+authority snapshot, evidence digests, and producer identity before appending an event.
 
-## Core objects
+## Planes and responsibilities
 
+### ETZIO — control plane
+
+Target: a deterministic command handler and pure reducer. It owns protocol versions,
+mission state, legal transitions, idempotency, artifact references, and the next legal
+action. It must recover the same state from retained events without conversational memory.
+
+Current: `MasterLoop` directly calls in-process Python objects and mutates `MissionState`.
+There is no command protocol, loader, reducer, durable store, resume, or closed-ledger
+enforcement.
+
+### AQUILA — policy plane
+
+Target: validate and admit a versioned authority envelope before mission creation. Every
+lease binds actor, target revision, allowed operation, resource ceiling, expiry, and
+revocation state. Egress, credentials, spending, live interaction, disclosure, and
+publication remain separate capabilities.
+
+Current: `TargetContract` is a caller-created dataclass. It accepts blank references,
+arbitrary authorization kinds, negative budgets, and unvalidated scope. `Aquila.permit`
+performs simple membership checks. The loop emits `mission_opened` and
+`scope_authorized` without an admission proof.
+
+### SCIPIO — surface plane
+
+Target: emit a versioned attack-surface graph with exact target revision, source provenance,
+entrypoints, trust boundaries, dependencies, build context, and parse/coverage failures.
+
+Current: the demo returns three hard-coded entrypoints. The standalone Python mapper walks
+files with `ast`, records functions and imports, and reports parse errors.
+
+### FABIUS — strategy plane
+
+Target: rank falsifiable hypotheses using domain-pack knowledge, target evidence, expected
+information gain, cost, and risk. Rankings remain reproducible and benchmarkable.
+
+Current: three hard-coded hypotheses.
+
+### VELITES — investigation plane
+
+Target: run small leased probes through versioned technique packs. Static and dynamic
+workers return typed observations and candidates; they never issue findings.
+
+Current: the demo emits two fixed candidates and one null. The standalone analyzer has six
+syntactic Python rule classes covering seven planted instances. It has no interprocedural
+taint, alias analysis, dependency reasoning, or proof construction. Syntax errors are
+skipped by the finding path, candidate IDs depend on traversal position, and snippets may
+expose literal source values.
+
+### MARCELLUS — construction plane
+
+Target: construct minimal exploit proofs inside an isolated worker, returning immutable
+artifact and execution receipts. Builder identity is cryptographically and operationally
+separate from CATO.
+
+Current: returns an existing in-memory `PoCArtifact` unchanged.
+
+### CATO — independent proof plane
+
+Target: rehydrate exact artifact bytes in a fresh environment, execute under a separate
+identity and policy, observe a machine-checkable effect, challenge the result, and return a
+signed verdict receipt. CATO may reject; only the kernel may mint a finding.
+
+Current: directly invokes `target.run(payload)` in the caller’s process. It trusts
+caller-supplied verifier fields and does not enforce a `poc_execution` grant itself.
+`reproduced_from_bytes` and the environment digest are modeled labels, not proof of separate
+execution.
+
+### CAMILLUS — adjudication plane
+
+Target: validate evidence completeness, deduplicate by root cause, calculate severity with a
+versioned rubric, rank review queues, and preserve conflicting interpretations.
+
+Current: deterministic ordering only.
+
+### FABRICIUS — disclosure plane
+
+Target: render a report solely from retained evidence and a program-specific template.
+Submission is a separate one-time human-authorized external effect.
+
+Current: deterministic report prose in memory; no external write.
+
+### MINERVA — learning plane
+
+Target: derive lessons from findings, nulls, failures, costs, and reviewer outcomes. A
+candidate strategy version passes shadow and holdout evaluation before human promotion.
+Training data, benchmark labels, evaluators, policy, and production code are protected from
+direct self-modification.
+
+Current: returns counts and a fixed note.
+
+## One versioned protocol
+
+The intended canonical envelope is:
+
+```text
+ProtocolEnvelope
+  protocol_version
+  object_kind
+  object_version
+  object_id              # full SHA-256 of canonical semantic bytes
+  mission_id
+  target_revision
+  authority_snapshot_id
+  producer_identity
+  created_at
+  body
 ```
-TargetContract      program, in-scope assets, permitted actions, disclosure channel, budget
-Mission             one authorized hunt against one target revision
-AttackSurface       entrypoints, trust boundaries, dependency graph  (SCIPIO)
-Hypothesis          falsifiable bug-class claim + suggested probe + rank  (FABIUS)
-InvestigationTask   one small, well-defined unit of the swarm's work  (VELITES)
-Candidate           a proposed vulnerability, pre-verification  (VELITES / MARCELLUS)
-PoCArtifact         content-addressed, reproducing proof; env digest  (MARCELLUS)
-Verdict             confirmed | not_reproduced | out_of_scope | inconclusive  (CATO)
-Finding             a CATO-confirmed candidate + all its evidence edges
-NullResult          a retained "nothing here under hypothesis H"
-Report              disclosure-grade package  (FABRICIUS)
-AuthorityGrant      a scoped, expiring permission  (AQUILA)
-StrategyLesson      a promoted-offline learning  (MINERVA)
+
+Python runtime objects, JSON wire objects, stored events, tests, and schemas must serialize
+to this contract without special cases. Unknown versions fail closed. Canonicalization must
+reject non-finite numbers, implicit string coercion, duplicate keys, and unrecognized
+security-relevant fields.
+
+Current dataclasses do not satisfy the checked-in JSON Schemas: `TargetContract` and
+`Finding` have different shapes, and tuples do not validate as JSON arrays without explicit
+serialization. Alignment is a blocking task.
+
+## Authority lifecycle
+
+```text
+untrusted contract
+      │ validate syntax, semantics, issuer, signature, time, revocation, target digest
+      ▼
+admitted authority snapshot
+      │ authorize mission creation
+      ▼
+mission_opened
+      │ derive scoped, expiring work leases
+      ▼
+worker receipts
+      │ validate identity + lease + evidence + current state
+      ▼
+canonical events
 ```
 
-Every `Finding` must be traversable to its target revision, triggering input, PoC artifact,
-environment digest, verifier identity, and scope boundary. No traversal, no finding.
+A refusal appends a distinct terminal-visible event and projects the mission to `blocked`.
+Timeout, cancellation, crash, budget exhaustion, revocation, policy denial, and scientific
+non-reproduction are distinct outcomes.
 
-## Recommended implementation shape
+## Event and replay model
 
-Modular monolith (the kernel) plus isolated workers (the units), mirroring the discipline
-that works elsewhere in the estate but sharing none of its code.
+Target events use canonical JSON bytes and full SHA-256 digests. Event payloads are deeply
+immutable values. Each event commits to:
 
+- stream and sequence;
+- protocol and event version;
+- mission and target revision;
+- command and idempotency key;
+- actor and authority snapshot;
+- complete state-relevant payload;
+- prior event digest;
+- deterministic event digest.
+
+The durable store performs compare-and-append against the expected head, fsyncs before
+acknowledgment, refuses appends after terminal closure, and exposes an anchored head. A pure
+reducer reconstructs state and rejects gaps, forks, malformed events, illegal transitions,
+or incompatible versions. Runtime timestamps and diagnostics may be recorded, but cannot
+make semantic replay nondeterministic.
+
+Current `EventLedger` is a mutable in-memory list. Its frozen `Event` contains a mutable
+dictionary; events can be changed after append, appends remain possible after closure, only
+the predecessor linkage is checked, digests are truncated to 96 bits, and `default=str`
+hides noncanonical values. This is not a durable audit ledger.
+
+## Finding admission
+
+A kernel-minted finding must establish all of the following:
+
+1. the candidate ID is content-bound and matches the verdict;
+2. the candidate producer differs from the admitted verifier identity;
+3. the authority snapshot permits the exact target revision and action;
+4. the PoC bytes and environment specification match their full digests;
+5. the isolated execution receipt is authentic, complete, and within lease;
+6. the observed effect satisfies a versioned oracle independent of the producer’s claim;
+7. the verdict is `confirmed`;
+8. every referenced artifact is retained and traversable.
+
+The current kernel checks only a producer/verifier identity string inequality before calling
+the verifier and trusts the returned object. A forged verifier can therefore mint a finding.
+
+## Isolation model
+
+The proof plane requires at least two separately identified workers:
+
+- **builder**: receives candidate evidence and creates an exploit artifact;
+- **verifier**: receives immutable target and artifact bytes, not builder state, and
+  independently executes the oracle.
+
+The initial production candidate is a Linux/KVM microVM profile, with gVisor or Kata
+evaluated where their syscall and operational trade-offs fit. Required controls include:
+default-deny egress, no ambient credentials, immutable base image, measured environment,
+read-only inputs, ephemeral writable layer, cgroup/resource ceilings, seccomp/device
+restrictions, expiring leases, complete stdout/stderr/effect receipts, and a tested
+out-of-band kill path.
+
+No such execution tier exists in this repository.
+
+## Domain and technique packs
+
+Breadth is an adapter problem, not a kernel fork:
+
+```text
+domain pack
+  target/revision resolver
+  authority vocabulary
+  surface schema
+  hypothesis library
+  build and execution profile
+  effect oracles
+  severity/disclosure rules
+  benchmark suite
+
+technique pack
+  tool declaration
+  accepted input protocol
+  output/receipt protocol
+  capability and resource requirements
+  negative fixtures
+  versioned evaluator
 ```
-etzio/
-  kernel/        state machine, event ledger, master loop, commands
-  engines/       the ten units as typed ports + (initially) stub bodies
-  contracts.py   TargetContract, Candidate, Verdict, Finding, NullResult
-schemas/         JSON Schemas for the wire objects (finding, verdict, target-contract)
-tests/           first-slice admission tests (the architecture must prove itself)
-```
 
-Leading reversible candidates (not frozen): Python runtime; content-addressed object store
-for PoC artifacts; microVM/gVisor/Kata isolation for exploit execution; a durable queue for
-the swarm; OpenTelemetry tracing `mission → stage → task → run`. Add nothing heavier until a
-measured bottleneck or a security need demands it.
+The first wedge is benchmark-first EVM, Solidity, and blockchain-client research because
+the ecosystem provides concrete exploits, high-value outcomes, and emerging public
+benchmarks. Python analysis remains a small technique fixture, not the product boundary.
 
-## First vertical slice (the architecture must prove itself before scale)
+## Threat model
 
-The slice is complete when Etzio can, against **one authorized benchmark target with a known
-planted bug**:
+Etzio assumes hostile target bytes, malicious build systems, prompt injection in all
+research inputs, deceptive tool output, compromised or mistaken model workers, forged
+receipts, verifier gaming, artifact substitution, dependency compromise, event tampering,
+credential theft, resource exhaustion, and an operator making an accidental scope mistake.
 
-- validate a `TargetContract` and refuse an out-of-scope action;
-- open a mission and build a work graph under a budget;
-- run SCIPIO → FABIUS → VELITES to produce at least one candidate;
-- have MARCELLUS construct a reproducing PoC in isolation;
-- have **CATO independently reproduce it** and emit `confirmed`;
-- have CATO **reject a planted false-positive** as `not_reproduced`;
-- record a `NullResult` for a hypothesis that found nothing;
-- survive interruption and resume from the ledger;
-- have FABRICIUS render a disclosure-grade report from retained evidence only.
+No single model, worker, signature, consensus, or green CI job is scientific or policy
+authority. Security depends on independently enforced boundaries and replayable evidence.
 
-Passing that slice tests the architecture. Adding more finder agents before it passes adds
-complexity without establishing reliability — and reliability (a low false-positive rate) is
-the entire product.
+## Current evidence and its limits
+
+| Evidence | Observed result | Valid claim |
+|---|---:|---|
+| Original behavior suite | 15 passing tests | modeled paths remain deterministic |
+| CATO fixture corpus | TP=3, FP=0, TN=4, FN=1 | behavior on eight labeled fixtures only |
+| Python vulnerable fixture | 7 planted instances found | six narrow syntactic rule classes |
+| Python clean fixture | 0 alerts | one clean fixture only |
+| Package scan | intentional fixture alerts only | no non-fixture alert under current rules |
+
+The evidence does not establish authorization enforcement, isolation, independent
+verification, event durability, real-world precision, broad recall, or superiority.
+
+## Blocking acceptance criteria
+
+Before capability breadth:
+
+- runtime values validate against one immutable protocol;
+- malformed, expired, revoked, blank, over-budget, and wrong-target authority is refused
+  before `mission_opened`;
+- the real read-only scan path runs only through an admitted lease and kernel;
+- IDs are stable across ordering, process, and machine;
+- immutable events persist and deterministically replay;
+- denial, crash, cancellation, timeout, and revocation project distinctly;
+- the kernel rejects forged, mismatched, self-produced, or incomplete verifier receipts;
+- every invariant has a known-bad fixture.
+
+Before live or executable research:
+
+- MARCELLUS and CATO run in separate proved isolation;
+- a pinned historical benchmark traverses the complete chain from admitted bytes to report;
+- positive and negative holdouts measure precision, recall, stability, time, and cost;
+- the exact external program contract is current and human accepted;
+- external effects remain separately approved and audited.

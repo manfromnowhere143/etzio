@@ -1,12 +1,20 @@
-.PHONY: demo test lint all
+.PHONY: demo test lint policy verify all
+
+ETZIO_PYTHON ?= python3
 
 demo:
-	python3 -m etzio.cli
+	$(ETZIO_PYTHON) -m etzio.cli
 
 test:
-	python3 -m pytest -q
+	$(ETZIO_PYTHON) -m pytest -q
 
 lint:
-	ruff check etzio tests
+	$(ETZIO_PYTHON) -m ruff check etzio tests scripts
 
-all: lint test demo
+policy:
+	$(ETZIO_PYTHON) scripts/validate_repository.py
+
+verify:
+	bash scripts/ci/verify.sh
+
+all: verify

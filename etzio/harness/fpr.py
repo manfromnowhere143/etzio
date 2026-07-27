@@ -1,10 +1,12 @@
-"""False-positive-rate harness. Runs CATO over a labeled corpus and scores its verdicts
-against ground truth. CATO never sees the labels — it only re-executes the PoC.
+"""Modeled false-positive-rate harness.
+
+Runs the in-process CATO stub over a tiny labeled fixture corpus. CATO does not see the
+labels, but this is not isolated or real-world exploit reproduction.
 
     python -m etzio.harness.fpr
 
-Phase-1 admission bar: FP == 0 (zero false positives). Recall may be < 1.0 — an honest miss
-costs a bounty; a false positive costs the program's trust.
+The regression condition is FP == 0. The corpus is too small to establish a real false-
+positive rate, and recall remains intentionally incomplete.
 """
 
 from __future__ import annotations
@@ -81,7 +83,7 @@ def evaluate(cato: Cato | None = None) -> tuple[Metrics, list[dict]]:
 def main() -> int:
     m, rows = evaluate()
     print("=" * 72)
-    print("ETZIO · CATO gate · Phase-1 false-positive harness")
+    print("ETZIO · modeled CATO logic · fixture corpus")
     print("=" * 72)
     print(f"{'case':5} {'ground truth':13} {'CATO verdict':16} {'outcome':7}  detail")
     print("-" * 72)
@@ -93,7 +95,7 @@ def main() -> int:
     print(f"precision={m.precision:.3f}  recall={m.recall:.3f}  "
           f"FPR={m.fpr:.3f}  FDR={m.fdr:.3f}")
     bar = "PASS" if m.fp == 0 else "FAIL"
-    print(f"Phase-1 admission bar (FP == 0): {bar}")
+    print(f"Fixture regression condition (FP == 0): {bar}")
     print("=" * 72)
     return 0 if m.fp == 0 else 1
 

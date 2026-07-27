@@ -14,9 +14,9 @@ venv/
 .mypy_cache/
 .coverage
 htmlcov/
+artifacts/
 
 # Etzio runtime artifacts (never commit PoC payloads or mission ledgers)
-artifacts/
 ledgers/
 *.jsonl
 
