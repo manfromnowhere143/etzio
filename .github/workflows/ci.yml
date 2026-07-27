@@ -1,0 +1,143 @@
+name: CI / Foundation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: etzio-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  repository-policy:
+    name: Repository policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out the complete repository history
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up the canonical Python interpreter
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version-file: .python-version
+
+      - name: Install the hash-locked validation environment
+        run: |
+          python -m pip install \
+            --no-input \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement tools/ci/requirements-ci.lock
+          python -m pip check
+
+      - name: Validate repository policy and known-bads
+        run: |
+          mkdir -p artifacts/ci
+          {
+            python scripts/validate_repository.py
+            python -m pytest -q tests/test_repository_policy.py
+          } 2>&1 | tee artifacts/ci/repository-policy.log
+
+      - name: Prove policy checks did not mutate tracked bytes
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Retain policy evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: repository-policy-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/ci/
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 9
+
+  foundation:
+    name: Foundation / Python ${{ matrix.python-version }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.11.15"
+          - "3.14.2"
+    steps:
+      - name: Check out the exact candidate
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install the hash-locked validation environment
+        run: |
+          python -m pip install \
+            --no-input \
+            --require-hashes \
+            --only-binary=:all: \
+            --requirement tools/ci/requirements-ci.lock
+          python -m pip check
+
+      - name: Reproduce the foundation checks
+        run: |
+          mkdir -p artifacts/ci
+          bash scripts/ci/verify.sh 2>&1 | tee artifacts/ci/foundation-${{ matrix.python-version }}.log
+
+      - name: Build the package without an unpinned build environment
+        run: python -m build --no-isolation
+
+      - name: Install and import the built wheel outside the checkout
+        run: |
+          smoke_root="$(mktemp -d)"
+          trap 'rm -rf "${smoke_root}"' EXIT
+          python -m venv "${smoke_root}/venv"
+          "${smoke_root}/venv/bin/python" -m pip install --no-deps dist/*.whl
+          (
+            cd "${smoke_root}"
+            "${smoke_root}/venv/bin/python" -c \
+              'import etzio; assert etzio.__version__ == "0.0.1"'
+            "${smoke_root}/venv/bin/etzio"
+          )
+
+      - name: Prove validation did not mutate tracked bytes
+        run: |
+          git diff --exit-code
+          git diff --cached --exit-code
+
+      - name: Retain foundation evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: foundation-py${{ matrix.python-version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/ci/
+            dist/
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 9

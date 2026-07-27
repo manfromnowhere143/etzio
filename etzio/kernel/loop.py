@@ -1,11 +1,7 @@
-"""ETZIO master loop — one disciplined pass, not a chaotic swarm. It drives the chain,
-enforces the laws mechanically, and appends every consequential step to the ledger.
+"""Deterministic foundation master-loop demonstration.
 
-Laws enforced here in code (not by convention):
-  * Authorization before action  — AQUILA.permit() gates every stage; refusal fails closed.
-  * Generator never confirms      — a candidate's producer identity may not equal the verifier's.
-  * Evidence before claim         — only a CATO 'confirmed' verdict mints a Finding.
-  * Nulls are first-class         — a hypothesis with no candidate is recorded as a NullResult.
+The loop models the intended stages and retains nulls, but it does not yet enforce admitted
+authority, independent execution, authenticated verifier receipts, or durable replay.
 """
 
 from __future__ import annotations

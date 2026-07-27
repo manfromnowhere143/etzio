@@ -1,8 +1,8 @@
-"""Phase-1 benchmark: a labeled corpus for measuring CATO's false-positive rate.
+"""Tiny labeled fixture corpus for exercising the modeled CATO decision logic.
 
 Each case carries GROUND TRUTH (is the underlying vulnerability real and exploitable?)
-independent of what the candidate *claims*. CATO never sees the ground truth — it only
-re-executes the PoC. The harness then scores CATO's verdicts against truth.
+independent of what the candidate *claims*. The in-process stub does not see the labels; the
+harness scores its deterministic effect-model verdicts against them.
 
 The corpus deliberately includes the hard shapes:
   * genuine bugs with a working PoC              -> CATO must CONFIRM   (true positive)
@@ -10,8 +10,7 @@ The corpus deliberately includes the hard shapes:
   * a benign action honestly labeled             -> CATO must REJECT    (not impactful)
   * a real bug whose PoC is broken/incomplete    -> CATO must REJECT    (honest miss / recall cost)
 
-A vuln engine's whole worth is precision: it may miss (a false negative just costs a
-bounty), but it must not cry wolf (a false positive burns a reviewer and the program).
+These eight fixtures are regression cases, not a statistical quality benchmark.
 """
 
 from __future__ import annotations
@@ -25,7 +24,7 @@ _ASSET = "vault-0002"
 
 @dataclass
 class VaultTarget:
-    """Deterministic sandbox standing in for a smart-contract vault. run(payload) -> effect."""
+    """Deterministic effect model standing in for a smart-contract vault."""
     revision: str = "vault-bench@0002"
 
     _EFFECTS = {

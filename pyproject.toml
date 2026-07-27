@@ -1,26 +1,42 @@
 [project]
 name = "etzio"
 version = "0.0.1"
-description = "Etzio — an evidence-native autonomous vulnerability-research engine (foundation)."
-requires-python = ">=3.10"
+description = "Etzio — an evidence-native authorized vulnerability-research engine (architecture foundation)."
+readme = "README.md"
+requires-python = ">=3.11"
 dependencies = []
+license = "LicenseRef-Proprietary"
+license-files = ["LICENSE.md"]
+authors = [
+  { name = "Daniel Wahnich", email = "cogitoergosum143@gmail.com" },
+]
 
 [project.optional-dependencies]
-dev = ["pytest>=8"]
+dev = [
+  "build==1.5.0",
+  "jsonschema==4.26.0",
+  "pytest==9.0.2",
+  "ruff==0.15.20",
+]
 
 [project.scripts]
 etzio = "etzio.cli:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = ["--strict-config", "--strict-markers"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+ignore = ["UP042"]
+
+[tool.setuptools.packages.find]
+include = ["etzio*"]
 
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools==83.0.0"]
 build-backend = "setuptools.build_meta"

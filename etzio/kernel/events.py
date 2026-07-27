@@ -1,5 +1,8 @@
-"""Append-only event ledger. Canonical state is the event stream; everything else is a
-projection. Replaying the ledger reconstructs the mission exactly — no conversational memory."""
+"""In-memory hash-linked event demonstration.
+
+This module is not yet a durable, deeply immutable, canonical, or replayable ledger. The
+foundation-integrity mission replaces it with persisted events and a pure reducer.
+"""
 
 from __future__ import annotations
 
@@ -29,7 +32,7 @@ class Event:
 
 
 class EventLedger:
-    """In-memory + JSONL-persistable append-only log with a hash chain. One writer: the kernel."""
+    """In-memory hash-linked list used by the deterministic foundation demonstration."""
 
     def __init__(self) -> None:
         self._events: list[Event] = []
@@ -58,7 +61,7 @@ class EventLedger:
         return [e for e in self._events if e.kind == kind]
 
     def verify_chain(self) -> bool:
-        """A tamper check: every event must commit to its predecessor's digest."""
+        """Check predecessor linkage for the current in-memory values."""
         prev = "sha256:genesis"
         for e in self._events:
             if e.prev_digest != prev:

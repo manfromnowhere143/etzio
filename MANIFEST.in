@@ -1,0 +1,14 @@
+include AGENTS.md
+include AUTHORS.md
+include CHARTER.md
+include CONTRIBUTING.md
+include LICENSE.md
+include README.md
+include SECURITY.md
+include Makefile
+recursive-include .github CODEOWNERS *.md *.yml
+recursive-include docs *.json *.md
+recursive-include schemas *.json
+recursive-include scripts *.py *.sh
+recursive-include tests *.py
+recursive-include tools/ci *.in *.lock

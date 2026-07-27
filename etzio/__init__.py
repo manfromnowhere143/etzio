@@ -1,8 +1,8 @@
-"""Etzio — an evidence-native autonomous vulnerability-research engine.
+"""Etzio — an evidence-native authorized vulnerability-research engine.
 
-Foundation grade. The kernel (state machine, event ledger, master loop) is real and
-runnable; the ten units are typed ports with stub bodies until each is closed by a
-vertical slice. See docs/ARCHITECTURE.md.
+Architecture foundation. The repository contains an in-memory lifecycle demonstration,
+typed stub ports, and a narrow Python AST analyzer. See ``docs/ARCHITECTURE.md`` for the
+implemented boundary.
 """
 
 __version__ = "0.0.1"

@@ -1,10 +1,11 @@
-"""The ten units as typed ports. Bodies here are SKELETON stubs: deterministic, clearly
-fake, enough to run the chain end-to-end and prove the architecture. Each real unit is
-closed later by its own vertical slice. A unit proposes; it never writes the ledger, and a
-producer unit never issues its own verdict.
+"""The ten units as typed ports with deterministic foundation stubs.
 
-`Target` is the thing under test. For the foundation it is a tiny deterministic sandbox
-(`BenchmarkTarget`) so CATO can genuinely re-run a PoC and reject a planted false positive.
+They exercise intended branches but do not prove the target architecture. Each unit is
+replaced through an evidence-gated vertical slice.
+
+`Target` is the thing under test. For the foundation it is a tiny deterministic model
+(`BenchmarkTarget`) so the verdict logic can exercise positive and negative branches. It is
+not an execution sandbox or independent verifier.
 """
 
 from __future__ import annotations
@@ -118,18 +119,17 @@ class Marcellus(Unit):
 KNOWN_EXPLOIT_EFFECTS = frozenset({"balance_drained", "price_manipulated", "funds_stolen"})
 
 
-# --- CATO: independent verification & adjudication (the gate) ----------------------------
+# --- CATO: modeled verdict logic; not an independent execution boundary -----------------
 class Cato(Unit):
     def __init__(self, exploit_effects: frozenset[str] = KNOWN_EXPLOIT_EFFECTS) -> None:
         super().__init__("CATO", "verify")
         self.exploit_effects = exploit_effects
 
     def verify(self, candidate: Candidate, contract: TargetContract, target: Target) -> Verdict:
-        # A DIFFERENT identity from the producer. Re-runs the PoC from bytes; trusts the
-        # observed effect, not the producer's claim. This is where false positives die.
-        # A finding requires BOTH: (1) the observed effect matches the claim on re-execution,
-        # and (2) the observed effect is materially impactful. Either failing => not a finding.
-        env = digest({"env": "clean-verify-sandbox", "revision": target.revision})
+        # The stub uses a different identity string, then calls the supplied target directly
+        # in this process. Its effect comparison is a model of the future CATO rule, not
+        # evidence of artifact-byte replay or verifier independence.
+        env = digest({"env": "modeled-in-process-verifier", "revision": target.revision})
         if candidate.poc is None:
             return Verdict(candidate.id, VerdictKind.INCONCLUSIVE, self.identity, False, env,
                            ("no PoC to reproduce",))
@@ -140,8 +140,14 @@ class Cato(Unit):
         claim_matches = observed == candidate.poc.claimed_effect
         is_impactful = observed in self.exploit_effects
         if claim_matches and is_impactful:
-            return Verdict(candidate.id, VerdictKind.CONFIRMED, self.identity, True, env,
-                           (f"re-execution produced impactful effect '{observed}' matching claim",))
+            return Verdict(
+                candidate.id,
+                VerdictKind.CONFIRMED,
+                self.identity,
+                False,
+                env,
+                (f"modeled effect '{observed}' matched the claim and impact allowlist",),
+            )
         if not claim_matches:
             reason = f"claimed '{candidate.poc.claimed_effect}' but re-execution produced '{observed}'"
         else:
@@ -172,7 +178,7 @@ class Fabricius(Unit):
             f"Hypothesis: {finding.hypothesis_id}\n"
             f"Trigger: {finding.triggering_input}\n"
             f"PoC: {finding.poc_artifact_digest} (env {finding.environment_digest})\n"
-            f"Independently reproduced by: {finding.verifier_identity}\n"
+            f"Modeled verifier identity: {finding.verifier_identity}\n"
         )
 
 

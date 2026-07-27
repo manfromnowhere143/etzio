@@ -1,5 +1,8 @@
-"""ETZIO kernel: the deterministic, replayable core. Units propose; the kernel decides
-what is legal and appends the truth. Nothing else writes the ledger."""
+"""ETZIO foundation kernel.
+
+The current objects demonstrate deterministic stage wiring in memory. Durable replay,
+admitted authority, and authenticated receipts remain blocking work.
+"""
 
 from .events import Event, EventLedger
 from .loop import GeneratorIsVerifierError, MasterLoop, ScopeError

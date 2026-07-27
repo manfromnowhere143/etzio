@@ -1,9 +1,9 @@
-"""Run the first-slice demo end-to-end on the benchmark target:
+"""Run the modeled foundation loop on a repository-owned deterministic fixture:
 
     python -m etzio.cli
 
-Proves the architecture wires up: scope enforcement, the full chain, a confirmed finding,
-a rejected false positive, a first-class null, and a tamper-evident ledger.
+This demonstrates branch behavior only. It does not establish authorization enforcement,
+independent reproduction, finding validity, or a durable tamper-evident ledger.
 """
 
 from __future__ import annotations
@@ -27,10 +27,10 @@ def main() -> int:
     print(f"ledger events    : {len(loop.ledger)}")
     print(f"ledger chain ok  : {loop.ledger.verify_chain()}")
     print("-" * 68)
-    print(f"confirmed findings: {len(state.findings)}")
+    print(f"modeled findings  : {len(state.findings)}")
     for f in state.findings:
         print(f"  [{f.severity_level.upper()}] {f.id}  trigger={f.triggering_input}")
-        print(f"        reproduced by {f.verifier_identity}  poc={f.poc_artifact_digest}")
+        print(f"        modeled verifier={f.verifier_identity}  poc={f.poc_artifact_digest}")
     print(f"first-class nulls : {len(state.nulls)}")
     for n in state.nulls:
         print(f"  {n.hypothesis_id}: {n.reason}")

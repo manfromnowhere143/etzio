@@ -1,7 +1,7 @@
-"""Core wire objects for Etzio. Plain dataclasses so the kernel stays dependency-free.
+"""Modeled runtime objects for the Etzio foundation.
 
-These mirror the JSON Schemas under schemas/. A vulnerability is a scientific claim, so
-the object graph is: hypothesis -> candidate -> PoC -> verdict -> finding | null.
+The current dataclasses do not yet implement the versioned wire protocol or align exactly
+with the JSON Schemas under ``schemas/``. That alignment is blocking integrity work.
 """
 
 from __future__ import annotations
@@ -73,8 +73,10 @@ class Hypothesis:
 
 @dataclass(frozen=True)
 class PoCArtifact:
-    """A reproducing proof. `payload` is what gets replayed against the target; `claimed_effect`
-    is what the producer asserts it causes. CATO re-runs it and compares — it does not trust the claim."""
+    """Modeled payload and claimed effect.
+
+    This object is not yet retained artifact bytes or an isolated execution receipt.
+    """
     payload: str
     claimed_effect: str
 

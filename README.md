@@ -1,77 +1,136 @@
 # Etzio
 
-**Etzio is an autonomous vulnerability-research engine.** It turns an *authorized* target
-into a governed, replayable chain: target → hypothesis → exploit → **independent
-verification** → a disclosure-grade finding.
+**An evidence-native operating system for authorized vulnerability research.**
 
-> **Status — 2026-07-25: foundation only.** This repository contains the architecture,
-> the operating laws, the core contracts, and a runnable kernel skeleton. No live
-> targets, no results, and no autonomous discovery capability are claimed yet. Real
-> capability is built one verified vertical slice at a time. Nothing jumps the chain.
+Etzio is being designed to turn an exact, authorized target into a governed and
+replayable research chain:
 
-Etzio is named for the assassin — patient, precise, one clean strike. Its sub-engines
-carry the names of Rome's warriors and censors. Each owns one stage of the hunt.
-
-## The one idea
-
-**A vulnerability is a scientific claim.** "This input triggers this exploit" is a
-falsifiable hypothesis. A bounty submission is a *published claim with evidence*.
-So the engine that finds bugs well is not a smarter scanner — it is a disciplined
-**evidence machine**: it generates candidates cheaply, then spends its real effort
-*killing the false ones* and *proving the true ones* with a reproducing exploit.
-
-That discipline is the whole moat. The orchestration is a few days of work; the
-verification gate is the thing worth building well.
-
-## The chain
-
-```
-Target contract  →  Recon  →  Threat model  →  Investigation swarm  →  Exploit / PoC
-                                                                            │
-        Finding  ←  Disclosure  ←  Triage / rank  ←  Independent verify  ←──┘
+```text
+authority → surface → hypotheses → candidates → exploit proof
+          → independent reproduction → adjudication → disclosure draft → learning
 ```
 
-The unit that *finds* a candidate is never the unit that *confirms* it. A finding is
-not real until an independent verifier reproduces the exploit in clean isolation.
+The long-range mission spans vulnerability classes, languages, target categories, and
+defensive workflows. Blockchain and smart-contract benchmarks are the first economic and
+technical wedge, not the architectural boundary. Target-specific knowledge belongs in
+versioned domain and technique packs; scientific and policy authority remains in the kernel.
 
-## The roster
+> **Current status — architecture foundation, 2026-07-27.**
+> The repository contains a deterministic demonstration loop, typed skeleton ports, a small
+> Python AST analyzer, modeled benchmark fixtures, schemas, tests, and repository-policy CI.
+> It does **not** yet contain a durable replayable kernel, enforceable authorization
+> admission, hard-isolated exploit execution, independent verifier infrastructure, a live
+> target adapter, or a learning system. No production-readiness or state-of-the-art claim is
+> made.
 
-| Unit | Role | Namesake |
-|---|---|---|
-| **ETZIO** | Motherboard: kernel, master loop, mission state, authority, budget, next legal action | Ezio — the assassin |
-| **SCIPIO** | Recon & attack-surface mapping (repo/protocol map, entrypoints, dependency graph) | Scipio Africanus — the strategist who studied Hannibal |
-| **FABIUS** | Threat modeling & hypothesis generation (bug-class prediction, ranked attack graph) | Fabius Maximus — the anticipator |
-| **VELITES** | The finder swarm: decomposed, parallel investigation agents (static + dynamic) | Velites — the skirmishers who probe the line |
-| **MARCELLUS** | Exploit / PoC construction in hard isolation (a *compiling, reproducing* proof) | Marcellus — the Sword of Rome, breaker of walls |
-| **CATO** | Independent verification & adjudication (re-run the PoC; kill false positives; verdict) | Cato the Censor — the incorruptible |
-| **CAMILLUS** | Dedup, ranking, triage (one finding schema, severity, cross-swarm dedup) | Camillus — the reformer who reordered Rome |
-| **FABRICIUS** | Disclosure & report generation (bounty-grade, responsible packaging) | Fabricius — the envoy who could not be bribed |
-| **AQUILA** | Governance: scope & authority enforcement, egress control, budget, kill-switch | Aquila — the legion's sacred standard |
-| **MINERVA** | Grounded learning & memory (what worked, transfer across targets; no self-modify) | Minerva — wisdom and strategy |
+## The thesis
 
-## The laws
+A vulnerability is a scientific claim. A candidate says that a specific input against a
+specific revision causes a security-relevant effect. A finding is warranted only when a
+separate verifier reproduces that effect from retained bytes inside a clean environment.
 
-1. **Authorization before action.** Etzio touches a target only under an explicit,
-   in-scope authorization (bug-bounty scope or written permission). Out of scope fails closed.
-2. **Generator never confirms itself.** The unit that proposes a finding never issues its
-   terminal verdict. Verification is a separate identity and isolation boundary.
-3. **Evidence before claim.** No finding exists without a reproducing artifact — a PoC that
-   an independent verifier re-runs from bytes, not a model asserting confidence.
-4. **Nulls are first-class.** "No bug found," "blocked," "could not reproduce," and
-   "inconclusive" are real, retained results — never silently dropped.
-5. **Every external effect is governed.** Disclosure, network egress, paid compute, and any
-   action against a live target require exact scoped authority and a kill-switch.
+Etzio therefore optimizes for an auditable chain of evidence, not the volume of model prose
+or scanner alerts:
 
-## Independence
+1. authorization is admitted before any target action;
+2. generators cannot confirm their own candidates;
+3. evidence is content-addressed and replayable;
+4. null, blocked, failed, and inconclusive outcomes remain visible;
+5. egress, spending, credentials, live actions, and disclosure are separate authorities;
+6. learning is offline, evaluated, reversible, and unable to rewrite its own authority.
 
-Etzio is independent from Odeya and from Aweb/Maestro in runtime, storage, namespace, and
-control. It *learns their patterns* — Odeya's evidence-native kernel, Maestro's disciplined
-master loop — and **imports none of their code.** That separation is a law, not a preference.
+## System map
 
-## Read next
+| Plane | Unit | Responsibility | Current repository status |
+|---|---|---|---|
+| Control | **ETZIO** | lifecycle kernel, event ledger, next legal action | modeled in memory; integrity work is next |
+| Governance | **AQUILA** | authority, scope, budgets, egress, kill switch | deterministic stub; not a security boundary |
+| Recon | **SCIPIO** | attack-surface and dependency mapping | modeled port plus narrow Python AST mapper |
+| Strategy | **FABIUS** | ranked, falsifiable hypotheses | deterministic stub |
+| Investigation | **VELITES** | decomposed static and dynamic probes | stub plus six-rule Python AST analyzer |
+| Proof | **MARCELLUS** | exploit/PoC construction | pass-through stub; no isolation |
+| Verification | **CATO** | clean independent reproduction and verdict | in-process modeled gate; not independent |
+| Adjudication | **CAMILLUS** | deduplication, severity, ranking | deterministic stub |
+| Disclosure | **FABRICIUS** | evidence-bound report drafting | deterministic stub; no submission |
+| Learning | **MINERVA** | evaluated cross-mission strategy promotion | count-only stub |
 
-- **[Session handoff](docs/SESSION_HANDOFF.md) — the canonical recovery entrypoint. A new
-  session reads this FIRST.** Machine state: [docs/MISSION_STATE.json](docs/MISSION_STATE.json).
-- [Charter](CHARTER.md) — the operating laws in full
-- [Architecture](docs/ARCHITECTURE.md) — planes, the roster, the pipeline, isolation tiers
-- [Roadmap](docs/ROADMAP.md) — build-while-running, slice by slice
+See [Architecture](docs/ARCHITECTURE.md) for the target design and the exact implemented
+boundary.
+
+## What the present evidence establishes
+
+The current suite passes a tiny, synthetic corpus:
+
+- 29 tests: 15 original behavior regressions and 14 repository-policy known-bads;
+- a modeled CATO corpus with TP=3, FP=0, TN=4, FN=1;
+- seven planted instances across six Python AST rule classes;
+- zero alerts on one clean fixture;
+- one intentional fixture-only alert surface in the package scan.
+
+These numbers establish deterministic behavior on those fixtures only. Four benign corpus
+cases are far too few to support a real false-positive claim: observing 0/4 false positives
+still permits a large one-sided 95% upper bound. The scanner also has parse-error and
+coverage limitations documented in [Architecture](docs/ARCHITECTURE.md).
+
+## Reproduce locally
+
+The canonical interpreter is CPython 3.11.15. CI additionally checks CPython 3.14.2.
+
+```bash
+git clone git@github.com:manfromnowhere143/etzio.git
+cd etzio
+python3.11 -m venv .venv
+.venv/bin/python -m pip install \
+  --no-input \
+  --require-hashes \
+  --only-binary=:all: \
+  --requirement tools/ci/requirements-ci.lock
+.venv/bin/python -m pip check
+PATH="$PWD/.venv/bin:$PATH" make verify
+```
+
+The demos operate on local fixtures only:
+
+```bash
+.venv/bin/python -m etzio.cli
+.venv/bin/python -m etzio.harness.fpr
+.venv/bin/python -m etzio.scan
+```
+
+Do not point the current scan command at private or third-party source merely because it
+accepts a path. The command is not yet routed through admitted authority or the kernel.
+
+## Build order
+
+The next mission is **foundation integrity before capability breadth**:
+
+1. one versioned runtime/wire contract;
+2. authorization admission before mission opening;
+3. stable content-bound identities;
+4. immutable canonical full-SHA events with durable replay;
+5. kernel-validated independent-verifier receipts;
+6. known-bad evidence for every invariant.
+
+Only after that slice passes do MARCELLUS and CATO move into genuinely separate Linux/KVM
+isolation. Domain packs, finder swarms, broader benchmarks, and progressively authorized
+live research follow measured gates. See the [Roadmap](docs/ROADMAP.md).
+
+## Authorized use
+
+Etzio is for locally owned fixtures, historical benchmarks, and targets covered by an exact
+bug-bounty scope or written permission. Repository access is not target authorization.
+Exploit execution, network egress, spending, credentials, disclosure, and publication each
+require their own scoped grant. See [Security](SECURITY.md).
+
+## Project record
+
+- [Session handoff](docs/SESSION_HANDOFF.md) — canonical recovery entrypoint
+- [Machine-readable mission state](docs/MISSION_STATE.json)
+- [Charter](CHARTER.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Roadmap](docs/ROADMAP.md)
+- [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
+- [Architecture decisions](docs/decisions/README.md)
+- [Contributing](CONTRIBUTING.md)
+
+Etzio is private and solely authored by [Daniel Wahnich](AUTHORS.md).

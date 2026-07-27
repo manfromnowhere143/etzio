@@ -1,60 +1,105 @@
 {
-  "schema_version": "etzio.mission_state.v1",
-  "updated": "2026-07-25",
+  "schema_version": "etzio.mission_state.v2",
+  "updated": "2026-07-27",
   "engine": "Etzio",
-  "purpose": "autonomous vulnerability-research engine for authorized targets; a vulnerability is a scientific claim; precision is the product",
-  "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
   "workspace": "/Users/danielwahnich/workspace/etzio",
-  "branch": "master",
-  "predecessor_head": "277a79994ad0305ce4e1873d4bf58cad4c1def0b",
-  "predecessor_tree": "cb09a528fed8dfb3fcacc6c3aa4f91d450fa2ab8",
-  "remote": null,
-  "authority_granted": {
-    "remote_create": false,
-    "push": false,
-    "live_target": false,
-    "disclosure": false,
-    "spend": false
+  "canonical_branch": "main",
+  "active_branch": "agent/repository-foundation",
+  "foundation_predecessor": {
+    "commit": "542122752701c62a776cba6cc4c712dc86c11041",
+    "tree": "ac1cd687052d004b5668aec142faa2adc791623b"
   },
-  "status": "foundation + analyze-tier proven on modeled benchmarks; execute-tier not yet built",
-  "commits": [
-    {"sha": "5c36904", "title": "foundation: kernel + roster ports", "proves": "kernel, state machine, ledger, laws-in-code"},
-    {"sha": "09965f9", "title": "CATO gate + FPR harness", "proves": "precision 1.000, FPR 0.000, recall 0.750 on modeled corpus"},
-    {"sha": "277a799", "title": "SCIPIO + VELITES real SAST", "proves": "7/7 planted bugs found, 0 false positives on clean + own source"}
+  "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
+  "author": {
+    "name": "Daniel Wahnich",
+    "email": "cogitoergosum143@gmail.com",
+    "coauthor_trailers_permitted": false
+  },
+  "remote": {
+    "target": "https://github.com/manfromnowhere143/etzio.git",
+    "visibility": "private",
+    "default_branch": "main",
+    "state": "created_and_verified",
+    "verified": "2026-07-27"
+  },
+  "mission": {
+    "purpose": "evidence-native operating system for authorized vulnerability research across target categories",
+    "first_wedge": "benchmark-first blockchain, Solidity, EVM, and later L1/client research",
+    "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel validation",
+    "current_phase": "repository foundation",
+    "next_phase": "foundation integrity"
+  },
+  "authority": {
+    "repository_modify": true,
+    "private_remote_create": true,
+    "push": true,
+    "public_visibility": false,
+    "deployment": false,
+    "live_target": false,
+    "untrusted_exploit_execution": false,
+    "research_credentials": false,
+    "spend": false,
+    "disclosure": false,
+    "publication": false
+  },
+  "implemented": [
+    "in-memory deterministic lifecycle demonstration",
+    "typed skeleton ports for the ten named units",
+    "modeled target and eight-case verdict corpus",
+    "six-rule Python AST analyzer with seven planted instances",
+    "fifteen original behavior tests",
+    "repository-policy and CI foundation on the active tranche"
   ],
-  "claim_boundary": "all numbers are for MODELED/benchmark targets and prove architecture + gate logic only; no real-world detection quality, no live-target result, and no superiority over any tool is claimed",
-  "test_state": {"tests": 15, "status": "green", "ruff": "clean", "warnings": 0},
-  "verify_commands": [
-    "ruff check etzio tests",
-    "python3 -m pytest -q",
-    "python3 -m etzio.cli",
-    "python3 -m etzio.harness.fpr",
-    "python3 -m etzio.scan"
+  "not_implemented": [
+    "aligned versioned runtime and wire protocol",
+    "authorization admission and revocation",
+    "durable immutable event storage and deterministic replay",
+    "stable content-bound candidate identity",
+    "isolated exploit construction",
+    "separately isolated independent verification",
+    "kernel-authenticated verifier receipts",
+    "live target adapters",
+    "governed learning promotion",
+    "research-native cockpit"
   ],
-  "governing_metric": "false-positive rate on a benchmark; no slice ships without an FPR number",
-  "next_authorized_actions": [
-    "FABIUS real hypothesis library for the target class (macOS-ok, no isolation needed)",
-    "SCIPIO Solidity surface-mapper if target class confirms blockchain (macOS-ok)",
-    "CAMILLUS dedup/rank + FABRICIUS disclosure draft on real candidates (macOS-ok)"
+  "baseline_evidence": {
+    "scope": "repository-owned modeled fixtures only",
+    "original_tests": 15,
+    "repository_policy_tests": 14,
+    "current_total_tests": 29,
+    "verdict_corpus": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 4,
+      "fn": 1
+    },
+    "python_rule_classes": 6,
+    "planted_instances": 7,
+    "clean_fixtures": 1,
+    "claim_boundary": "no real-world precision, authorization, isolation, independence, durability, learning, or superiority claim"
+  },
+  "blocking_integrity_work": [
+    "freeze one versioned runtime and wire contract",
+    "admit valid authority before mission opening",
+    "route one real read-only scan through AQUILA and the kernel",
+    "use canonical full-SHA content-bound identities",
+    "persist deeply immutable events with compare-and-append and terminal closure",
+    "reconstruct state through a pure reducer and resume",
+    "validate independent verifier receipts inside the kernel",
+    "prove every invariant with a known-bad fixture"
   ],
-  "blocked_actions": [
-    {"action": "MARCELLUS + real CATO PoC execution", "blocker": "needs Linux+KVM isolation host; macOS cannot host microVM/gVisor/Kata"},
-    {"action": "hunt a real program for money", "blocker": "needs a real authorized program (e.g. Immunefi identity + accepted scope) — a human enrolment step"}
+  "external_blockers": [
+    {
+      "capability": "isolated MARCELLUS and CATO execution",
+      "blocker": "separately authorized Linux/KVM host and accepted isolation profile"
+    },
+    {
+      "capability": "live bounty mission",
+      "blocker": "exact current program scope, human acceptance, isolation gate, and target-specific authority"
+    }
   ],
-  "open_decisions": [
-    {"id": "target_class", "default": "benchmark-first, aimed at blockchain/Immunefi", "owner": "Daniel"},
-    {"id": "remote_repo", "default": "stay local", "owner": "Daniel", "note": "if yes: private + SHA-pin CI before push"},
-    {"id": "linux_host", "default": "wait", "owner": "Daniel", "note": "gates MARCELLUS/real-execution"}
+  "verify": [
+    "ETZIO_PYTHON=.venv/bin/python make verify"
   ],
-  "laws": [
-    "authorization before action (fail closed)",
-    "the generator never confirms its own claim",
-    "evidence before claim (reproduced PoC, not model confidence)",
-    "nulls and failures are first-class",
-    "every external effect is separately governed",
-    "claims stay bounded (scope + benchmark + date + evidence)",
-    "every gate has a known-bad proof it fires",
-    "smallest dependency-complete slice first"
-  ],
-  "independence": "learns patterns of Odeya and Aweb/Maestro; imports none of their code; shares no infrastructure — by law"
+  "decision_record": "docs/decisions/0001-foundation-integrity-before-breadth.md"
 }
