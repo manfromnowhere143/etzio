@@ -62,14 +62,16 @@ outcome, not authority to touch a third-party system.
 The first governed fixture vertical slice now has a canonical protocol envelope, signed
 authority admission, content-addressed target snapshot, stable candidates, lifecycle-checked
 SQLite replay, semantic schemas for every typed wire kind, fail-closed terminal states,
-kernel-issued authority-bound modeled-fixture verification leases, and known-bad controls.
-It remains a narrow candidate-and-assignment proof, not a finding pipeline.
+kernel-issued authority-bound modeled-fixture verification leases, typed CAS resolution for
+every modeled verification input, and known-bad controls. It remains a narrow
+candidate-and-input-resolution proof, not a finding pipeline.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. resolve referenced receipt evidence from retained CAS bytes with exact expected types;
-2. atomically consume each lease with its accepted signed receipt and retain canonical
+1. atomically consume each lease with its accepted signed receipt and retain canonical
    adjudication;
+2. define explicit lease expiry, cancellation, supersession, reassignment, and terminal
+   recovery;
 3. establish a trusted clock boundary and externally anchor event heads; and
 4. prove every new refusal and concurrency invariant with a known-bad.
 

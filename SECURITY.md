@@ -19,19 +19,26 @@ Those controls prove only the bounded fixture slice:
   process; the admission record cannot prove their freshness or the legal validity of
   third-party permission;
 - the content store checks byte identity and private file modes but is not a production
-  access-control or retention service;
+  access-control or retention service. Its no-clobber write path requires Darwin
+  `renameatx_np(RENAME_EXCL)` or Linux libc `renameat2(RENAME_NOREPLACE)` on a supporting
+  filesystem and fails closed when that primitive is unavailable;
 - the SQLite stream is durable and append-only through Etzio's API, but it is not
   externally anchored and retains a documented same-user pathname race;
 - static observations are candidates only; this path creates no PoC or finding;
 - a verification-intent fixture mission can retain an AQUILA-issued lease under the exact
   admitted `modeled_fixture_verification` grant, together with the verifier trust and
   revocation snapshot used for assignment; the lease content-binds that issuance snapshot
-  identity, then stops in nonterminal `awaiting_verification`;
+  identity;
+- ETZIO can resolve every target file and predeclared PoC, supporting-evidence,
+  environment, and oracle-specification input under an exact code-owned CAS type, retain
+  one canonical resolution for the lease, and remain in nonterminal
+  `awaiting_verification`; this establishes byte identity and assigned role at resolution
+  time, not provenance, truth, execution, effect, or current retention;
 - signed modeled-fixture receipts remain contract primitives, not a kernel-integrated
-  acceptance path: CAS-byte resolution, atomic receipt acceptance and lease consumption,
-  canonical adjudication, and independent execution remain open. Modeled receipt decisions
-  distinguish the issuance snapshot from a later decision-time revocation view, but do not
-  establish freshness of either; and
+  acceptance path: atomic receipt acceptance and lease consumption, canonical
+  adjudication, verifier-produced execution evidence, and independent execution remain
+  open. Modeled receipt proposals distinguish the issuance snapshot from a later
+  proposal-time revocation view, but do not establish freshness of either; and
 - the separate `etzio.cli` foundation model executes only its deterministic in-process
   toy target. Its modeled verdicts are not vulnerability evidence.
 

@@ -20,8 +20,9 @@ scientific authority remain in the kernel.
 > signed authority record, resolves immutable content-addressed bytes, executes a narrow
 > Python analyzer under a bounded lease, and commits lifecycle-checked events to SQLite. A
 > verification-intent mission can also retain a kernel-issued, authority-bound
-> modeled-fixture verification lease for a retained candidate and stop in
-> `awaiting_verification`. It does not
+> modeled-fixture verification lease for a retained candidate, resolve every target and
+> predeclared verification-input byte under an exact CAS type, retain that resolution, and
+> stop in `awaiting_verification`. It does not
 > construct or execute exploits, accept a verifier receipt, adjudicate a finding, access a
 > live target, or learn. No production-readiness or superiority claim is made.
 
@@ -61,8 +62,9 @@ manifest fixture → content-addressed target snapshot
 
 An explicit fixture-only kernel path may instead admit both `static_analysis` and
 `modeled_fixture_verification`, retain a completed scan with candidates, issue an AQUILA
-verification lease, and stop in `awaiting_verification`. It is not PoC or verifier
-execution.
+verification lease, resolve its predeclared inputs under code-owned artifact types, retain
+one canonical ETZIO resolution event, and stop in `awaiting_verification`. It is not PoC,
+oracle, or verifier execution.
 
 The command has no arbitrary target-path option. It emits candidates only; neither fixture
 path can mint a finding, execute a PoC, use the network, access credentials, spend,
@@ -72,14 +74,17 @@ The protocol-v1 foundation includes:
 
 - canonical JSON with duplicate-key rejection, Unicode 17.0.0 NFC, signed 64-bit integers,
   fixed resource ceilings, and full domain-separated SHA-256 identities;
-- an installed Draft 2020-12 semantic wire schema with exact branches for all eight typed
-  object kinds and all thirteen event payload variants;
+- an installed Draft 2020-12 semantic wire schema with exact branches for all nine typed
+  object kinds and all fourteen event payload variants;
 - Ed25519 authority and modeled-receipt attestations, including prime-subgroup public-key
   validation before a key can enter a trust snapshot;
 - exact fixture manifests and a private content-addressed evidence store;
 - immutable target, authority, lease, candidate, receipt, and event objects;
 - kernel-issued verification-lease events binding retained authority, target, candidate,
   modeled-fixture grant evidence, and the exact issuance-trust snapshot identity;
+- type-domain-separated verification-input identities plus one replayable resolution event
+  that binds every target, PoC, supporting-evidence, environment, and oracle-specification
+  byte to the retained lease;
 - compare-and-append SQLite storage with replay-time lifecycle validation; and
 - known-bad tests for signature, scope, identity, lifecycle, budget, corruption, replay,
   and filesystem-boundary failures.
@@ -138,10 +143,12 @@ mkdir -m 700 .etzio-state
 ## Open gates and next mission
 
 The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments
-are retained; completing the finding-admission boundary still requires:
+and typed input resolutions are retained; completing the finding-admission boundary still
+requires:
 
-1. resolve every receipt reference from retained CAS bytes with its expected type;
-2. atomically consume a lease with its accepted signed receipt and retain adjudication;
+1. atomically consume a lease with its accepted signed receipt and retain complete
+   adjudication;
+2. close lease expiry, cancellation, supersession, reassignment, and terminal recovery;
 3. establish a trusted clock and external event-head anchoring; and
 4. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
 

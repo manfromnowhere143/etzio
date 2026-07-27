@@ -6,15 +6,19 @@ not truth, authorization, isolation, or exploitability.
 
 from __future__ import annotations
 
+import ctypes
+import errno
 import hashlib
 import os
 import re
+import secrets
 import stat
-import tempfile
-from collections.abc import Mapping
+import sys
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from types import MappingProxyType
+from typing import Final
 
 import unicodedata2 as unicodedata
 
@@ -22,11 +26,21 @@ from .protocol import SEMANTIC_BODY_FIELDS_BY_KIND_V1, EnvelopeV1, content_id, t
 
 _DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 _EVIDENCE_DOMAIN = b"etzio:evidence:v1\x00"
+_TYPED_EVIDENCE_DOMAIN = b"etzio:evidence:typed:v1\x00"
 DEFAULT_MAX_ARTIFACT_BYTES = 16 * 1024 * 1024
 MAX_SNAPSHOT_BYTES_HARD_CEILING = 64 * 1024 * 1024
 MAX_SNAPSHOT_FILES_HARD_CEILING = 256
 DEFAULT_MAX_SNAPSHOT_BYTES = MAX_SNAPSHOT_BYTES_HARD_CEILING
 DEFAULT_MAX_SNAPSHOT_FILES = MAX_SNAPSHOT_FILES_HARD_CEILING
+VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1: Final = MappingProxyType(
+    {
+        "effect_oracle": "modeled_effect_oracle_spec",
+        "environment": "modeled_environment_spec",
+        "evidence": "modeled_supporting_evidence_input",
+        "poc": "modeled_poc_input",
+    }
+)
+VERIFICATION_ARTIFACT_TYPES_V1: Final = frozenset(VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1.values())
 _REPOSITORY_FIXTURE_SOURCE = "repository_fixture"
 _ETZIO_FIXTURE_MANIFEST = MappingProxyType(
     {
@@ -46,10 +60,88 @@ class EvidenceError(ValueError):
     """Evidence bytes or their storage violate the protocol-v1 contract."""
 
 
+def _exclusive_rename_function() -> tuple[object, int] | None:
+    """Return the native dirfd-relative no-clobber rename and platform flag."""
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    if sys.platform == "darwin":
+        function = getattr(libc, "renameatx_np", None)
+        flag = 0x00000004  # RENAME_EXCL from Darwin sys/stdio.h.
+    elif sys.platform.startswith("linux"):
+        function = getattr(libc, "renameat2", None)
+        flag = 0x00000001  # RENAME_NOREPLACE from Linux stdio/renameat2.
+    else:
+        return None
+    if function is None:
+        return None
+    function.argtypes = (
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_uint,
+    )
+    function.restype = ctypes.c_int
+    return function, flag
+
+
+_EXCLUSIVE_RENAME = _exclusive_rename_function()
+
+
+def _rename_noreplace(
+    directory_descriptor: int,
+    source_name: str,
+    target_name: str,
+) -> None:
+    """Atomically publish one name without overwriting an existing artifact."""
+
+    if _EXCLUSIVE_RENAME is None:
+        raise EvidenceError(
+            "atomic no-clobber evidence publication is unsupported on this platform"
+        )
+    function, flag = _EXCLUSIVE_RENAME
+    ctypes.set_errno(0)
+    result = function(
+        directory_descriptor,
+        os.fsencode(source_name),
+        directory_descriptor,
+        os.fsencode(target_name),
+        flag,
+    )
+    if result == 0:
+        return
+    error_number = ctypes.get_errno()
+    if error_number in {errno.EEXIST, errno.ENOTEMPTY}:
+        raise FileExistsError(
+            error_number,
+            os.strerror(error_number),
+            target_name,
+        )
+    raise EvidenceError(
+        "atomic no-clobber evidence publication failed"
+    ) from OSError(error_number, os.strerror(error_number))
+
+
 def evidence_digest(data: bytes) -> str:
     if not isinstance(data, bytes):
         raise EvidenceError("evidence must be bytes")
     return f"sha256:{hashlib.sha256(_EVIDENCE_DOMAIN + data).hexdigest()}"
+
+
+def _validate_verification_artifact_type(value: object) -> str:
+    if type(value) is not str or value not in VERIFICATION_ARTIFACT_TYPES_V1:
+        raise EvidenceError("unknown verification artifact type")
+    return value
+
+
+def typed_evidence_digest(data: bytes, *, artifact_type: str) -> str:
+    """Return a type-domain-separated digest for one modeled verification input."""
+
+    if type(data) is not bytes:
+        raise EvidenceError("typed evidence must be immutable bytes")
+    validated_type = _validate_verification_artifact_type(artifact_type)
+    digest = hashlib.sha256(_TYPED_EVIDENCE_DOMAIN + validated_type.encode("ascii") + b"\x00" + data).hexdigest()
+    return f"sha256:{digest}"
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +156,22 @@ class ArtifactReceipt:
             raise EvidenceError("artifact size must be nonnegative")
 
 
+@dataclass(frozen=True, slots=True)
+class TypedArtifactReceipt:
+    """A retained byte count and identity bound to one closed artifact type."""
+
+    digest: str
+    size: int
+    artifact_type: str
+
+    def __post_init__(self) -> None:
+        if type(self.digest) is not str or not _DIGEST_RE.fullmatch(self.digest):
+            raise EvidenceError("invalid typed evidence digest")
+        if type(self.size) is not int or self.size <= 0:
+            raise EvidenceError("typed artifact size must be positive")
+        _validate_verification_artifact_type(self.artifact_type)
+
+
 class FileEvidenceStore:
     """Private local CAS with exclusive creation, fsync, and rehash-on-read.
 
@@ -71,52 +179,372 @@ class FileEvidenceStore:
     against an operator who controls the filesystem and process identity.
     """
 
-    def __init__(self, root: str | Path, *, max_artifact_bytes: int = DEFAULT_MAX_ARTIFACT_BYTES) -> None:
+    def __init__(
+        self,
+        root: str | Path,
+        *,
+        max_artifact_bytes: int = DEFAULT_MAX_ARTIFACT_BYTES,
+    ) -> None:
         self.root = Path(root)
         if type(max_artifact_bytes) is not int or max_artifact_bytes <= 0:
             raise EvidenceError("max_artifact_bytes must be positive")
         self.max_artifact_bytes = max_artifact_bytes
         if self.root.is_symlink():
             raise EvidenceError("evidence root may not be a symlink")
-        self.root.mkdir(mode=0o700, parents=True, exist_ok=True)
-        if not self.root.is_dir():
-            raise EvidenceError("evidence root is not a directory")
-        os.chmod(self.root, 0o700)
+        created = False
+        try:
+            self.root.mkdir(mode=0o700, parents=True, exist_ok=False)
+            created = True
+        except FileExistsError:
+            pass
+        descriptor = self._open_root()
+        try:
+            if created:
+                os.fchmod(descriptor, 0o700)
+            self._validate_private_directory(
+                os.fstat(descriptor),
+                "evidence root",
+            )
+        finally:
+            os.close(descriptor)
 
     def _path_for(self, digest: str) -> Path:
-        if not _DIGEST_RE.fullmatch(digest):
+        if type(digest) is not str or not _DIGEST_RE.fullmatch(digest):
             raise EvidenceError("invalid evidence digest")
         hexadecimal = digest.removeprefix("sha256:")
         return self.root / hexadecimal[:2] / hexadecimal[2:]
 
     @staticmethod
-    def _read_exact(path: Path, maximum: int) -> bytes:
-        flags = os.O_RDONLY
-        if hasattr(os, "O_NOFOLLOW"):
-            flags |= os.O_NOFOLLOW
+    def _directory_open_flags() -> int:
+        return os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_DIRECTORY", 0) | getattr(os, "O_NOFOLLOW", 0)
+
+    @staticmethod
+    def _artifact_open_flags() -> int:
+        return os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
+
+    @staticmethod
+    def _validate_owner(metadata: os.stat_result, label: str) -> None:
+        if hasattr(os, "geteuid") and metadata.st_uid != os.geteuid():
+            raise EvidenceError(f"{label} must be owned by the effective user")
+
+    @classmethod
+    def _validate_private_directory(
+        cls,
+        metadata: os.stat_result,
+        label: str,
+    ) -> None:
+        if not stat.S_ISDIR(metadata.st_mode):
+            raise EvidenceError(f"{label} is not a directory")
+        cls._validate_owner(metadata, label)
+        if stat.S_IMODE(metadata.st_mode) != 0o700:
+            raise EvidenceError(f"{label} permissions must be exactly 0700")
+
+    @classmethod
+    def _validate_private_artifact(
+        cls,
+        metadata: os.stat_result,
+    ) -> None:
+        if not stat.S_ISREG(metadata.st_mode):
+            raise EvidenceError("evidence artifact is not a regular file")
+        cls._validate_owner(metadata, "evidence artifact")
+        if stat.S_IMODE(metadata.st_mode) != 0o600:
+            raise EvidenceError("evidence artifact permissions must be exactly 0600")
+        if metadata.st_nlink != 1:
+            raise EvidenceError("evidence artifact may not be hard-linked")
+
+    def _open_root(self) -> int:
         try:
-            descriptor = os.open(path, flags)
+            return os.open(self.root, self._directory_open_flags())
         except OSError as exc:
-            raise EvidenceError(f"cannot open evidence artifact: {exc}") from exc
+            raise EvidenceError("cannot securely open evidence root") from exc
+
+    def _open_shard(
+        self,
+        root_descriptor: int,
+        shard_name: str,
+        *,
+        create: bool,
+    ) -> int:
+        created = False
+        if create:
+            try:
+                os.mkdir(
+                    shard_name,
+                    mode=0o700,
+                    dir_fd=root_descriptor,
+                )
+                created = True
+            except FileExistsError:
+                pass
+            except OSError as exc:
+                raise EvidenceError("cannot create evidence shard") from exc
         try:
-            metadata = os.fstat(descriptor)
-            if not stat.S_ISREG(metadata.st_mode):
-                raise EvidenceError("evidence artifact is not a regular file")
-            if stat.S_IMODE(metadata.st_mode) & 0o077:
-                raise EvidenceError("evidence artifact permissions are too broad")
-            chunks: list[bytes] = []
-            total = 0
-            while True:
-                chunk = os.read(descriptor, min(1024 * 1024, maximum + 1 - total))
-                if not chunk:
-                    break
-                chunks.append(chunk)
-                total += len(chunk)
-                if total > maximum:
-                    raise EvidenceError("evidence artifact exceeds configured limit")
-            return b"".join(chunks)
+            descriptor = os.open(
+                shard_name,
+                self._directory_open_flags(),
+                dir_fd=root_descriptor,
+            )
+        except FileNotFoundError:
+            raise
+        except OSError as exc:
+            raise EvidenceError("cannot securely open evidence shard") from exc
+        try:
+            if created:
+                os.fchmod(descriptor, 0o700)
+            self._validate_private_directory(
+                os.fstat(descriptor),
+                "evidence shard",
+            )
+            if created:
+                os.fsync(root_descriptor)
+            return descriptor
+        except Exception:
+            os.close(descriptor)
+            raise
+
+    @staticmethod
+    def _stable_artifact_metadata(
+        metadata: os.stat_result,
+    ) -> tuple[int, int, int, int, int, int, int, int]:
+        return (
+            metadata.st_dev,
+            metadata.st_ino,
+            metadata.st_mode,
+            metadata.st_uid,
+            metadata.st_nlink,
+            metadata.st_size,
+            metadata.st_mtime_ns,
+            metadata.st_ctime_ns,
+        )
+
+    @classmethod
+    def _read_descriptor_exact(
+        cls,
+        descriptor: int,
+        maximum: int,
+    ) -> bytes:
+        before = os.fstat(descriptor)
+        cls._validate_private_artifact(before)
+        if before.st_size > maximum:
+            raise EvidenceError("evidence artifact exceeds configured limit")
+        chunks: list[bytes] = []
+        total = 0
+        while True:
+            chunk = os.read(
+                descriptor,
+                min(1024 * 1024, maximum + 1 - total),
+            )
+            if not chunk:
+                break
+            chunks.append(chunk)
+            total += len(chunk)
+            if total > maximum:
+                raise EvidenceError("evidence artifact exceeds configured limit")
+        after = os.fstat(descriptor)
+        cls._validate_private_artifact(after)
+        if cls._stable_artifact_metadata(before) != (cls._stable_artifact_metadata(after)):
+            raise EvidenceError("evidence artifact changed while being read")
+        return b"".join(chunks)
+
+    @classmethod
+    def _read_from_shard(
+        cls,
+        shard_descriptor: int,
+        artifact_name: str,
+        maximum: int,
+    ) -> bytes:
+        try:
+            descriptor = os.open(
+                artifact_name,
+                cls._artifact_open_flags(),
+                dir_fd=shard_descriptor,
+            )
+        except FileNotFoundError:
+            raise
+        except OSError as exc:
+            raise EvidenceError("cannot securely open evidence artifact") from exc
+        try:
+            return cls._read_descriptor_exact(descriptor, maximum)
         finally:
             os.close(descriptor)
+
+    @classmethod
+    def _read_existing_for_put(
+        cls,
+        shard_descriptor: int,
+        artifact_name: str,
+        maximum: int,
+    ) -> bytes:
+        """Read an existing target after an atomic no-clobber publication."""
+
+        return cls._read_from_shard(
+            shard_descriptor,
+            artifact_name,
+            maximum,
+        )
+
+    def _effective_maximum(self, maximum: int | None) -> int:
+        if maximum is None:
+            return self.max_artifact_bytes
+        if type(maximum) is not int or maximum < 0:
+            raise EvidenceError("artifact read maximum must be a nonnegative integer")
+        return min(maximum, self.max_artifact_bytes)
+
+    @staticmethod
+    def _digest_names(digest: str) -> tuple[str, str]:
+        if type(digest) is not str or not _DIGEST_RE.fullmatch(digest):
+            raise EvidenceError("invalid evidence digest")
+        hexadecimal = digest.removeprefix("sha256:")
+        return hexadecimal[:2], hexadecimal[2:]
+
+    def _read_digest(self, digest: str, maximum: int) -> bytes:
+        shard_name, artifact_name = self._digest_names(digest)
+        root_descriptor = self._open_root()
+        try:
+            self._validate_private_directory(
+                os.fstat(root_descriptor),
+                "evidence root",
+            )
+            shard_descriptor = self._open_shard(
+                root_descriptor,
+                shard_name,
+                create=False,
+            )
+            try:
+                return self._read_from_shard(
+                    shard_descriptor,
+                    artifact_name,
+                    maximum,
+                )
+            finally:
+                os.close(shard_descriptor)
+        except FileNotFoundError as exc:
+            raise EvidenceError("cannot open evidence artifact: not found") from exc
+        finally:
+            os.close(root_descriptor)
+
+    @staticmethod
+    def _temporary_name() -> str:
+        return f".incoming-{secrets.token_hex(16)}"
+
+    def _create_temporary(
+        self,
+        shard_descriptor: int,
+    ) -> tuple[int, str]:
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+        for _ in range(16):
+            temporary_name = self._temporary_name()
+            try:
+                descriptor = os.open(
+                    temporary_name,
+                    flags,
+                    0o600,
+                    dir_fd=shard_descriptor,
+                )
+            except FileExistsError:
+                continue
+            except OSError as exc:
+                raise EvidenceError("cannot create temporary evidence artifact") from exc
+            try:
+                os.fchmod(descriptor, 0o600)
+            except Exception:
+                os.close(descriptor)
+                try:
+                    os.unlink(temporary_name, dir_fd=shard_descriptor)
+                except FileNotFoundError:
+                    pass
+                raise
+            return descriptor, temporary_name
+        raise EvidenceError("cannot allocate a unique temporary evidence artifact")
+
+    def _put_exact(
+        self,
+        data: bytes,
+        *,
+        digest: str,
+        digest_for_data: Callable[[bytes], str],
+    ) -> None:
+        if len(data) > self.max_artifact_bytes:
+            raise EvidenceError("evidence artifact exceeds configured limit")
+        shard_name, artifact_name = self._digest_names(digest)
+        root_descriptor = self._open_root()
+        try:
+            self._validate_private_directory(
+                os.fstat(root_descriptor),
+                "evidence root",
+            )
+            shard_descriptor = self._open_shard(
+                root_descriptor,
+                shard_name,
+                create=True,
+            )
+            try:
+                try:
+                    existing = self._read_existing_for_put(
+                        shard_descriptor,
+                        artifact_name,
+                        self.max_artifact_bytes,
+                    )
+                except FileNotFoundError:
+                    existing = None
+                if existing is not None:
+                    if digest_for_data(existing) != digest:
+                        raise EvidenceError("existing evidence artifact fails digest verification")
+                    os.fsync(shard_descriptor)
+                    return
+
+                descriptor, temporary_name = self._create_temporary(shard_descriptor)
+                temporary_exists = True
+                try:
+                    view = memoryview(data)
+                    written = 0
+                    while written < len(view):
+                        count = os.write(descriptor, view[written:])
+                        if count <= 0:
+                            raise EvidenceError("evidence artifact write made no progress")
+                        written += count
+                    os.fsync(descriptor)
+                    os.close(descriptor)
+                    descriptor = -1
+                    try:
+                        _rename_noreplace(
+                            shard_descriptor,
+                            temporary_name,
+                            artifact_name,
+                        )
+                    except FileExistsError as exc:
+                        existing = self._read_existing_for_put(
+                            shard_descriptor,
+                            artifact_name,
+                            self.max_artifact_bytes,
+                        )
+                        if digest_for_data(existing) != digest:
+                            raise EvidenceError("concurrent evidence artifact fails digest verification") from exc
+                    else:
+                        temporary_exists = False
+                    os.fsync(shard_descriptor)
+                    persisted = self._read_from_shard(
+                        shard_descriptor,
+                        artifact_name,
+                        self.max_artifact_bytes,
+                    )
+                    if len(persisted) != len(data) or digest_for_data(persisted) != digest:
+                        raise EvidenceError("persisted evidence artifact fails post-write verification")
+                finally:
+                    if descriptor >= 0:
+                        os.close(descriptor)
+                    if temporary_exists:
+                        try:
+                            os.unlink(
+                                temporary_name,
+                                dir_fd=shard_descriptor,
+                            )
+                        except FileNotFoundError:
+                            pass
+            finally:
+                os.close(shard_descriptor)
+        finally:
+            os.close(root_descriptor)
 
     def put(self, data: bytes) -> ArtifactReceipt:
         if not isinstance(data, bytes):
@@ -124,56 +552,74 @@ class FileEvidenceStore:
         if len(data) > self.max_artifact_bytes:
             raise EvidenceError("evidence artifact exceeds configured limit")
         digest = evidence_digest(data)
-        target = self._path_for(digest)
-        target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-        os.chmod(target.parent, 0o700)
-
-        if target.exists():
-            existing = self._read_exact(target, self.max_artifact_bytes)
-            if evidence_digest(existing) != digest:
-                raise EvidenceError("existing evidence artifact fails digest verification")
-            return ArtifactReceipt(digest, len(existing))
-
-        descriptor, temporary_name = tempfile.mkstemp(prefix=".incoming-", dir=target.parent)
-        temporary = Path(temporary_name)
-        try:
-            os.fchmod(descriptor, 0o600)
-            view = memoryview(data)
-            written = 0
-            while written < len(view):
-                written += os.write(descriptor, view[written:])
-            os.fsync(descriptor)
-            os.close(descriptor)
-            descriptor = -1
-            try:
-                os.link(temporary, target)
-            except FileExistsError as exc:
-                existing = self._read_exact(target, self.max_artifact_bytes)
-                if evidence_digest(existing) != digest:
-                    raise EvidenceError(
-                        "concurrent evidence artifact fails digest verification"
-                    ) from exc
-            directory = os.open(target.parent, os.O_RDONLY)
-            try:
-                os.fsync(directory)
-            finally:
-                os.close(directory)
-            persisted = self._read_exact(target, self.max_artifact_bytes)
-            if len(persisted) != len(data) or evidence_digest(persisted) != digest:
-                raise EvidenceError(
-                    "persisted evidence artifact fails post-write verification"
-                )
-        finally:
-            if descriptor >= 0:
-                os.close(descriptor)
-            temporary.unlink(missing_ok=True)
+        self._put_exact(
+            data,
+            digest=digest,
+            digest_for_data=evidence_digest,
+        )
         return ArtifactReceipt(digest, len(data))
 
-    def get(self, digest: str) -> bytes:
-        path = self._path_for(digest)
-        data = self._read_exact(path, self.max_artifact_bytes)
+    def put_typed(
+        self,
+        data: bytes,
+        *,
+        artifact_type: str,
+    ) -> TypedArtifactReceipt:
+        if type(data) is not bytes:
+            raise EvidenceError("typed evidence must be immutable bytes")
+        if not data:
+            raise EvidenceError("typed evidence must be nonempty")
+        if len(data) > self.max_artifact_bytes:
+            raise EvidenceError("evidence artifact exceeds configured limit")
+        validated_type = _validate_verification_artifact_type(artifact_type)
+        digest = typed_evidence_digest(
+            data,
+            artifact_type=validated_type,
+        )
+        self._put_exact(
+            data,
+            digest=digest,
+            digest_for_data=lambda retained: typed_evidence_digest(
+                retained,
+                artifact_type=validated_type,
+            ),
+        )
+        return TypedArtifactReceipt(
+            digest=digest,
+            size=len(data),
+            artifact_type=validated_type,
+        )
+
+    def get(
+        self,
+        digest: str,
+        *,
+        maximum: int | None = None,
+    ) -> bytes:
+        data = self._read_digest(digest, self._effective_maximum(maximum))
         if evidence_digest(data) != digest:
             raise EvidenceError("evidence artifact digest mismatch")
+        return data
+
+    def get_typed(
+        self,
+        digest: str,
+        *,
+        expected_type: str,
+        maximum: int | None = None,
+    ) -> bytes:
+        validated_type = _validate_verification_artifact_type(expected_type)
+        data = self._read_digest(digest, self._effective_maximum(maximum))
+        if not data:
+            raise EvidenceError("typed evidence must be nonempty")
+        if (
+            typed_evidence_digest(
+                data,
+                artifact_type=validated_type,
+            )
+            != digest
+        ):
+            raise EvidenceError("evidence artifact digest or type mismatch")
         return data
 
 
@@ -376,7 +822,10 @@ def validate_etzio_fixture_snapshot(
             or snapshot_file.artifact_digest != expected_digest
         ):
             raise EvidenceError("snapshot metadata does not match the Etzio fixture manifest")
-        data = evidence_store.get(snapshot_file.artifact_digest)
+        data = evidence_store.get(
+            snapshot_file.artifact_digest,
+            maximum=expected_size,
+        )
         if len(data) != expected_size or evidence_digest(data) != expected_digest:
             raise EvidenceError("snapshot bytes do not match the Etzio fixture manifest")
 

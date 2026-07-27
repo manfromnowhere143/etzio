@@ -4,10 +4,10 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/kernel-verification-leases-v1",
+  "active_branch": "agent/typed-cas-receipt-evidence-v1",
   "foundation_base": {
-    "commit": "745e860f9db25691b285834853fe23aa2ec73840",
-    "tree": "42d8401e90900cfdf5e81ba415fdc44d9c51a98f"
+    "commit": "816b5081b81581e4dbaac85f479c4f8d535ff86d",
+    "tree": "184b21c9e85151e60b39050bfd22c28cc61cc221"
   },
   "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
   "author": {
@@ -29,7 +29,7 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "typed_cas_resolution_for_receipt_references"
+    "next_gate": "atomic_receipt_acceptance_and_single_use_lease_consumption"
   },
   "authority": {
     "repository_modify": true,
@@ -47,8 +47,8 @@
   },
   "implemented": [
     "canonical protocol-v1 envelope and strict JSON",
-    "installed semantic wire schema and typed dispatch for all eight supported object kinds",
-    "exact closed-field schema/runtime parity for all eight semantic bodies and thirteen event variants",
+    "installed semantic wire schema and typed dispatch for all nine supported object kinds",
+    "exact closed-field schema/runtime parity for all nine semantic bodies and fourteen event variants",
     "Unicode 17.0.0 NFC and fixed protocol resource ceilings",
     "full domain-separated SHA-256 object and event identities",
     "signed authority grants and self-verifying admissions",
@@ -60,6 +60,9 @@
     "distinct refusal, failure, cancellation, timeout, budget, completion, and closure states",
     "kernel-issued authority-bound modeled-fixture verification leases",
     "retained verifier trust and revocation snapshots for replayable lease assignment",
+    "type-domain-separated CAS identities for modeled verification input roles",
+    "canonical per-lease resolution of target and verification input bytes",
+    "CAS-aware exact retry and deterministic historical replay of verification artifact resolutions",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -67,13 +70,13 @@
   "modeled_only": [
     "original in-memory ten-unit behavior loop",
     "modeled target and eight-case verdict corpus",
-    "signed modeled-receipt contract and receipt binding checks",
+    "signed modeled-receipt contract, receipt binding checks, and standalone non-authoritative proposals",
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "typed CAS resolution of every receipt reference",
     "atomic receipt acceptance and single-use lease consumption",
     "canonical retention of complete receipt adjudication inputs",
+    "separately produced execution effect measured-environment and termination outputs",
     "verification lease expiry cancellation supersession and terminal recovery",
     "trusted clock and revocation freshness",
     "authenticated external event-head anchoring",
@@ -93,7 +96,7 @@
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
     "validation_status": "local_release_suite_passed",
-    "test_count": 347,
+    "test_count": 419,
     "validated_runtimes": [
       "CPython 3.11.15",
       "CPython 3.14.2"
@@ -123,6 +126,7 @@
     "docs/decisions/0001-foundation-integrity-before-breadth.md",
     "docs/decisions/0002-canonical-governed-fixture-boundary.md",
     "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md",
-    "docs/decisions/0004-kernel-issued-verification-leases.md"
+    "docs/decisions/0004-kernel-issued-verification-leases.md",
+    "docs/decisions/0005-typed-verification-artifact-resolution.md"
   ]
 }

@@ -45,6 +45,7 @@ EVENT_UNIT_BY_KIND_V1: Final = MappingProxyType(
         "mission_opened": "ETZIO",
         "analysis_lease_issued": "AQUILA",
         "verification_lease_issued": "AQUILA",
+        "verification_artifacts_resolved": "ETZIO",
         "candidate_recorded": "VELITES",
         "parse_failed": "VELITES",
         "scan_completed": "VELITES",
@@ -70,6 +71,7 @@ EVENT_PAYLOAD_FIELDS_BY_KIND_V1: Final = MappingProxyType(
                 "verifier_trust_snapshot_id",
             }
         ),
+        "verification_artifacts_resolved": frozenset({"resolution"}),
         "candidate_recorded": frozenset({"candidate"}),
         "parse_failed": frozenset(
             {"analysis_lease_id", "parse_failure", "source_artifact_digest"}
@@ -106,6 +108,9 @@ EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1: Final = MappingProxyType(
         "analysis_lease_issued": MappingProxyType({"lease": "analysis_lease"}),
         "verification_lease_issued": MappingProxyType(
             {"lease": "verification_lease"}
+        ),
+        "verification_artifacts_resolved": MappingProxyType(
+            {"resolution": "verification_artifact_resolution"}
         ),
         "candidate_recorded": MappingProxyType({"candidate": "candidate"}),
     }
@@ -425,6 +430,39 @@ def _validate_payload(
         if lease.lease_nonce != expected_nonce:
             raise EventIntegrityError(
                 "verification lease nonce is not kernel-derived"
+            )
+        return
+
+    if kind == "verification_artifacts_resolved":
+        from ..verification_artifacts import (
+            VerificationArtifactError,
+            VerificationArtifactResolutionV1,
+        )
+
+        resolution_envelope = _require_nested_envelope(
+            payload,
+            "resolution",
+            "verification_artifact_resolution",
+        )
+        try:
+            resolution = VerificationArtifactResolutionV1.from_envelope(
+                resolution_envelope
+            )
+        except VerificationArtifactError as exc:
+            raise EventIntegrityError(
+                f"verification_artifacts_resolved contains an invalid resolution: {exc}"
+            ) from exc
+        if (
+            resolution.mission_id != mission_id
+            or resolution.authority_id != authority_id
+            or resolution.target_snapshot_id != target_id
+        ):
+            raise EventIntegrityError(
+                "artifact resolution does not match the event identities"
+            )
+        if resolution.resolved_at != decision_time:
+            raise EventIntegrityError(
+                "artifact resolution resolved_at must equal the event decision_time"
             )
         return
 

@@ -176,6 +176,59 @@ def _golden_graph() -> GoldenGraph:
         issued_at=NOW,
         expires_at=NOW + 60,
     )
+    resolution = EnvelopeV1.create(
+        "verification_artifact_resolution",
+        {
+            "authority_id": grant.grant_id,
+            "candidate_id": candidate.candidate_id,
+            "effect_oracle_artifact": {
+                "artifact_digest": _digest("7"),
+                "artifact_type": "modeled_effect_oracle_spec",
+                "size": 32,
+            },
+            "environment_artifact": {
+                "artifact_digest": _digest("6"),
+                "artifact_type": "modeled_environment_spec",
+                "size": 64,
+            },
+            "evidence_artifacts": [
+                {
+                    "artifact_digest": _digest("4"),
+                    "artifact_type": "modeled_supporting_evidence_input",
+                    "size": 16,
+                },
+                {
+                    "artifact_digest": _digest("5"),
+                    "artifact_type": "modeled_supporting_evidence_input",
+                    "size": 24,
+                },
+            ],
+            "mission_id": mission_id,
+            "poc_artifact": {
+                "artifact_digest": _digest("3"),
+                "artifact_type": "modeled_poc_input",
+                "size": 48,
+            },
+            "resolution_profile": "modeled_fixture_typed_cas_v1",
+            "resolved_at": NOW,
+            "target_artifacts": [
+                {
+                    "artifact_digest": _digest("a"),
+                    "artifact_type": "repository_fixture_source",
+                    "relative_path": "fixture/clean.py",
+                    "size": 64,
+                },
+                {
+                    "artifact_digest": _digest("b"),
+                    "artifact_type": "repository_fixture_source",
+                    "relative_path": "fixture/vulnerable.py",
+                    "size": 128,
+                },
+            ],
+            "target_snapshot_id": snapshot.object_id,
+            "verification_lease_id": verification_lease.lease_id,
+        },
+    )
     receipt = VerifierReceiptV1.for_lease(
         verification_lease,
         evidence_tier=MODELED_FIXTURE_TIER,
@@ -203,6 +256,9 @@ def _golden_graph() -> GoldenGraph:
             "lease": verification_lease.to_envelope().to_dict(),
             "verifier_trust_snapshot": verifier_trust_store.to_snapshot_body(),
             "verifier_trust_snapshot_id": verifier_trust_store.snapshot_id,
+        },
+        "verification_artifacts_resolved": {
+            "resolution": resolution.to_dict(),
         },
         "candidate_recorded": {"candidate": candidate.to_envelope().to_dict()},
         "parse_failed": {
@@ -254,6 +310,7 @@ def _golden_graph() -> GoldenGraph:
         "analysis_lease": analysis_lease.to_envelope(),
         "candidate": candidate.to_envelope(),
         "verification_lease": verification_lease.to_envelope(),
+        "verification_artifact_resolution": resolution,
         "verifier_receipt_unsigned": receipt.to_envelope(),
         "verifier_receipt_signed": signed_receipt.to_envelope(),
         "event": events["analysis_lease_issued"].to_envelope(),
@@ -306,6 +363,8 @@ def test_all_event_kind_unit_payload_variants_validate_and_round_trip(
 def test_schema_branch_metadata_has_exact_runtime_parity() -> None:
     schema = protocol_v1_schema()
     assert frozenset(SEMANTIC_BODY_FIELDS_BY_KIND_V1) == SUPPORTED_OBJECT_KINDS
+    assert len(SUPPORTED_OBJECT_KINDS) == 9
+    assert len(EVENT_UNIT_BY_KIND_V1) == 14
     case_refs = {
         branch["$ref"]
         for branch in schema["oneOf"]
@@ -337,6 +396,73 @@ def test_schema_branch_metadata_has_exact_runtime_parity() -> None:
         assert body_schema["additionalProperties"] is False
         assert frozenset(body_schema["required"]) == expected_fields
         assert frozenset(body_schema["properties"]) == expected_fields
+
+
+def test_resolution_schema_closes_profile_artifact_types_and_nested_fields(
+    golden: GoldenGraph,
+    validator: Draft202012Validator,
+) -> None:
+    schema = protocol_v1_schema()
+    assert set(schema["$defs"]["verification_artifact_type"]["enum"]) == {
+        "modeled_effect_oracle_spec",
+        "modeled_environment_spec",
+        "modeled_poc_input",
+        "modeled_supporting_evidence_input",
+        "repository_fixture_source",
+    }
+    resolution = golden.envelopes["verification_artifact_resolution"]
+    body = thaw_json(resolution.body)
+    assert type(body) is dict
+
+    mutations: list[tuple[str, dict[str, object]]] = []
+
+    wrong_profile = thaw_json(resolution.body)
+    assert type(wrong_profile) is dict
+    wrong_profile["resolution_profile"] = "caller_selected"
+    mutations.append(("wrong profile", wrong_profile))
+
+    wrong_poc_type = thaw_json(resolution.body)
+    assert type(wrong_poc_type) is dict
+    wrong_poc_type["poc_artifact"]["artifact_type"] = "modeled_environment_spec"
+    mutations.append(("wrong PoC type", wrong_poc_type))
+
+    unknown_evidence_type = thaw_json(resolution.body)
+    assert type(unknown_evidence_type) is dict
+    unknown_evidence_type["evidence_artifacts"][0]["artifact_type"] = (
+        "unregistered_artifact"
+    )
+    mutations.append(("unknown evidence type", unknown_evidence_type))
+
+    wrong_target_type = thaw_json(resolution.body)
+    assert type(wrong_target_type) is dict
+    wrong_target_type["target_artifacts"][0]["artifact_type"] = (
+        "modeled_supporting_evidence_input"
+    )
+    mutations.append(("wrong target type", wrong_target_type))
+
+    missing_nested_field = thaw_json(resolution.body)
+    assert type(missing_nested_field) is dict
+    missing_nested_field["environment_artifact"].pop("size")
+    mutations.append(("missing nested field", missing_nested_field))
+
+    unknown_nested_field = thaw_json(resolution.body)
+    assert type(unknown_nested_field) is dict
+    unknown_nested_field["effect_oracle_artifact"]["untrusted"] = True
+    mutations.append(("unknown nested field", unknown_nested_field))
+
+    empty_typed_artifact = thaw_json(resolution.body)
+    assert type(empty_typed_artifact) is dict
+    empty_typed_artifact["poc_artifact"]["size"] = 0
+    mutations.append(("empty typed artifact", empty_typed_artifact))
+
+    for label, mutated_body in mutations:
+        mutated = EnvelopeV1.create(
+            "verification_artifact_resolution",
+            mutated_body,
+        )
+        _assert_schema_rejects(validator, mutated.to_dict(), label)
+        with pytest.raises(SemanticProtocolError):
+            parse_semantic_envelope(mutated)
 
 
 def test_every_kind_rejects_missing_and_unknown_body_fields(
@@ -409,6 +535,7 @@ def test_attestation_cardinality_and_shape_are_fail_closed(
         "target_snapshot",
         "analysis_lease",
         "candidate",
+        "verification_artifact_resolution",
         "verification_lease",
         "event",
     ):
@@ -635,6 +762,21 @@ def test_schema_valid_runtime_invalid_cases_are_explicitly_retained(
         (
             "lexical evidence order",
             EnvelopeV1.create("verification_lease", verification_body),
+        )
+    )
+
+    resolution_body = thaw_json(
+        golden.envelopes["verification_artifact_resolution"].body
+    )
+    assert type(resolution_body) is dict
+    resolution_body["target_artifacts"].reverse()
+    runtime_only.append(
+        (
+            "lexical resolution target order",
+            EnvelopeV1.create(
+                "verification_artifact_resolution",
+                resolution_body,
+            ),
         )
     )
 

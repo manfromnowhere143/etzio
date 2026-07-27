@@ -36,6 +36,7 @@ SEMANTIC_OBJECT_KINDS = frozenset(
         "candidate",
         "event",
         "target_snapshot",
+        "verification_artifact_resolution",
         "verification_lease",
         "verifier_receipt",
     }
@@ -132,6 +133,22 @@ SEMANTIC_BODY_FIELDS_BY_KIND_V1: Final = MappingProxyType(
             }
         ),
         "target_snapshot": frozenset({"files", "source"}),
+        "verification_artifact_resolution": frozenset(
+            {
+                "authority_id",
+                "candidate_id",
+                "effect_oracle_artifact",
+                "environment_artifact",
+                "evidence_artifacts",
+                "mission_id",
+                "poc_artifact",
+                "resolution_profile",
+                "resolved_at",
+                "target_artifacts",
+                "target_snapshot_id",
+                "verification_lease_id",
+            }
+        ),
         "verification_lease": frozenset(
             {
                 "authority_id",

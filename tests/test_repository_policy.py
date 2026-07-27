@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+import scripts.validate_repository as repository_policy
 from etzio.schemas import protocol_v1_schema
 from scripts.validate_repository import (
     action_ref_issues,
@@ -44,6 +45,107 @@ def test_protocol_schema_contract_rejects_missing_object_branch():
 
 def test_protocol_schema_contract_accepts_the_canonical_resource():
     assert protocol_schema_contract_issues(protocol_v1_schema()) == []
+
+
+def test_protocol_policy_freezes_runtime_resolution_registries(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        repository_policy,
+        "RESOLUTION_PROFILE_V1",
+        "caller_selected_profile",
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "RESOLUTION_BODY_FIELDS_V1",
+        frozenset({"mission_id"}),
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "VERIFICATION_ARTIFACT_BINDING_FIELDS_V1",
+        frozenset({"artifact_digest"}),
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "TARGET_ARTIFACT_BINDING_FIELDS_V1",
+        frozenset({"artifact_digest", "relative_path"}),
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "VERIFICATION_ARTIFACT_TYPES_V1",
+        frozenset({"modeled_poc_input"}),
+    )
+
+    issues = protocol_schema_contract_issues(protocol_v1_schema())
+
+    assert any("runtime resolution profile" in issue for issue in issues)
+    assert any("runtime resolution body fields" in issue for issue in issues)
+    assert any(
+        "runtime verification artifact binding fields" in issue
+        for issue in issues
+    )
+    assert any(
+        "runtime target artifact binding fields" in issue for issue in issues
+    )
+    assert any(
+        "runtime verification artifact type registry" in issue
+        for issue in issues
+    )
+
+
+def test_protocol_policy_freezes_exact_v1_object_and_event_counts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        repository_policy,
+        "SUPPORTED_OBJECT_KINDS",
+        frozenset(set(repository_policy.SUPPORTED_OBJECT_KINDS) - {"candidate"}),
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "EVENT_UNIT_BY_KIND_V1",
+        {
+            key: value
+            for key, value in repository_policy.EVENT_UNIT_BY_KIND_V1.items()
+            if key != "candidate_recorded"
+        },
+    )
+
+    issues = protocol_schema_contract_issues(protocol_v1_schema())
+
+    assert any("semantic object-kind count" in issue for issue in issues)
+    assert any("event-kind count" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_resolution_contract_drift():
+    schema = deepcopy(protocol_v1_schema())
+    definitions = schema["$defs"]
+    definitions["verification_artifact_type"]["enum"].append("caller_defined")
+    definitions["verification_artifact_binding"]["required"].remove("size")
+    definitions["verification_artifact_binding"]["properties"]["size"][
+        "minimum"
+    ] = 0
+    definitions["verification_target_artifact_binding"]["properties"][
+        "artifact_type"
+    ] = {"type": "string"}
+    definitions["modeled_poc_artifact_binding"]["allOf"][1]["properties"][
+        "artifact_type"
+    ] = {"const": "modeled_environment_spec"}
+    resolution = definitions["verification_artifact_resolution_body"]
+    resolution["properties"]["resolution_profile"] = {"type": "string"}
+    resolution["properties"]["evidence_artifacts"]["maxItems"] = 257
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("artifact type registry drifted" in issue for issue in issues)
+    assert any("artifact binding required fields" in issue for issue in issues)
+    assert any("artifact size contract drifted" in issue for issue in issues)
+    assert any(
+        "target artifact artifact_type contract" in issue for issue in issues
+    )
+    assert any("modeled poc artifact binding role contract" in issue for issue in issues)
+    assert any("resolution resolution_profile contract" in issue for issue in issues)
+    assert any("resolution evidence_artifacts contract" in issue for issue in issues)
 
 
 def test_protocol_schema_contract_rejects_root_field_and_version_drift():
@@ -144,6 +246,43 @@ def test_protocol_schema_contract_rejects_inline_nested_event_envelope_drift():
     )
     assert any(
         "verification_lease_issued.lease" in issue and "unattested" in issue
+        for issue in issues
+    )
+
+
+def test_protocol_schema_contract_rejects_resolution_event_envelope_drift():
+    schema = deepcopy(protocol_v1_schema())
+    variants = schema["$defs"]["event_variants"]["oneOf"]
+    resolved = next(
+        branch
+        for branch in variants
+        if branch["properties"]["kind"]["const"]
+        == "verification_artifacts_resolved"
+    )
+    payload_name = resolved["properties"]["payload"]["$ref"].removeprefix(
+        "#/$defs/"
+    )
+    nested = schema["$defs"][payload_name]["properties"]["resolution"]
+    constraints = nested["allOf"][1]["properties"]
+    constraints["object_kind"]["const"] = "verification_lease"
+    constraints["body"]["$ref"] = "#/$defs/verification_lease_body"
+    constraints["attestations"]["$ref"] = "#/$defs/one_ed25519_attestation"
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any(
+        "verification_artifacts_resolved.resolution" in issue
+        and "discriminator" in issue
+        for issue in issues
+    )
+    assert any(
+        "verification_artifacts_resolved.resolution" in issue
+        and "body reference" in issue
+        for issue in issues
+    )
+    assert any(
+        "verification_artifacts_resolved.resolution" in issue
+        and "unattested" in issue
         for issue in issues
     )
 

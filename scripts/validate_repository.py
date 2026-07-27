@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from etzio.evidence import VERIFICATION_ARTIFACT_TYPES_V1  # noqa: E402
 from etzio.kernel.events_v1 import (  # noqa: E402
     EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1,
     EVENT_PAYLOAD_FIELDS_BY_KIND_V1,
@@ -33,6 +34,13 @@ from etzio.protocol import (  # noqa: E402
 from etzio.verification import (  # noqa: E402
     VERIFIER_TRUST_KEY_FIELDS_V1,
     VERIFIER_TRUST_SNAPSHOT_FIELDS_V1,
+)
+from etzio.verification_artifacts import (  # noqa: E402
+    RESOLUTION_BODY_FIELDS_V1,
+    RESOLUTION_PROFILE_V1,
+    TARGET_ARTIFACT_BINDING_FIELDS_V1,
+    TARGET_ARTIFACT_TYPE_V1,
+    VERIFICATION_ARTIFACT_BINDING_FIELDS_V1,
 )
 
 EXPECTED_AUTHOR = ("Daniel Wahnich", "cogitoergosum143@gmail.com")
@@ -73,6 +81,40 @@ LEGACY_SCHEMA_PATHS = frozenset(
         ROOT / "schemas/finding.schema.json",
         ROOT / "schemas/target-contract.schema.json",
         ROOT / "schemas/verdict.schema.json",
+    }
+)
+EXPECTED_SEMANTIC_OBJECT_KIND_COUNT_V1 = 9
+EXPECTED_EVENT_KIND_COUNT_V1 = 14
+EXPECTED_RESOLUTION_PROFILE_V1 = "modeled_fixture_typed_cas_v1"
+EXPECTED_VERIFICATION_ARTIFACT_TYPES_V1 = frozenset(
+    {
+        "modeled_effect_oracle_spec",
+        "modeled_environment_spec",
+        "modeled_poc_input",
+        "modeled_supporting_evidence_input",
+        "repository_fixture_source",
+    }
+)
+EXPECTED_VERIFICATION_ARTIFACT_BINDING_FIELDS_V1 = frozenset(
+    {"artifact_digest", "artifact_type", "size"}
+)
+EXPECTED_TARGET_ARTIFACT_BINDING_FIELDS_V1 = frozenset(
+    {"artifact_digest", "artifact_type", "relative_path", "size"}
+)
+EXPECTED_RESOLUTION_BODY_FIELDS_V1 = frozenset(
+    {
+        "authority_id",
+        "candidate_id",
+        "effect_oracle_artifact",
+        "environment_artifact",
+        "evidence_artifacts",
+        "mission_id",
+        "poc_artifact",
+        "resolution_profile",
+        "resolved_at",
+        "target_artifacts",
+        "target_snapshot_id",
+        "verification_lease_id",
     }
 )
 
@@ -341,6 +383,163 @@ def _nested_event_envelope_contract_issues(
     return issues
 
 
+def _verification_artifact_schema_contract_issues(
+    definitions: dict[str, object],
+) -> list[str]:
+    """Freeze the structural side of the typed-CAS resolution record."""
+
+    issues: list[str] = []
+    artifact_type = definitions.get("verification_artifact_type")
+    if type(artifact_type) is not dict:
+        issues.append("protocol-v1 verification artifact type registry is malformed")
+    else:
+        raw_types = artifact_type.get("enum")
+        if (
+            artifact_type.get("type") != "string"
+            or type(raw_types) is not list
+            or any(type(value) is not str for value in raw_types)
+            or len(raw_types) != len(EXPECTED_VERIFICATION_ARTIFACT_TYPES_V1)
+            or frozenset(raw_types) != EXPECTED_VERIFICATION_ARTIFACT_TYPES_V1
+        ):
+            issues.append(
+                "protocol-v1 verification artifact type registry drifted"
+            )
+
+    artifact_binding = definitions.get("verification_artifact_binding")
+    issues.extend(
+        _exact_object_contract_issues(
+            artifact_binding,
+            EXPECTED_VERIFICATION_ARTIFACT_BINDING_FIELDS_V1,
+            "protocol-v1 verification artifact binding",
+        )
+    )
+    if type(artifact_binding) is dict and type(
+        artifact_binding.get("properties")
+    ) is dict:
+        properties = artifact_binding["properties"]
+        if properties.get("artifact_digest") != {"$ref": "#/$defs/sha256_id"}:
+            issues.append(
+                "protocol-v1 verification artifact digest reference drifted"
+            )
+        if properties.get("artifact_type") != {
+            "$ref": "#/$defs/verification_artifact_type"
+        }:
+            issues.append(
+                "protocol-v1 verification artifact type reference drifted"
+            )
+        if properties.get("size") != {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 67108864,
+        }:
+            issues.append("protocol-v1 verification artifact size contract drifted")
+
+    target_binding = definitions.get("verification_target_artifact_binding")
+    issues.extend(
+        _exact_object_contract_issues(
+            target_binding,
+            EXPECTED_TARGET_ARTIFACT_BINDING_FIELDS_V1,
+            "protocol-v1 verification target artifact binding",
+        )
+    )
+    if type(target_binding) is dict and type(
+        target_binding.get("properties")
+    ) is dict:
+        properties = target_binding["properties"]
+        expected_target_properties = {
+            "artifact_digest": {"$ref": "#/$defs/sha256_id"},
+            "artifact_type": {"const": "repository_fixture_source"},
+            "relative_path": {"$ref": "#/$defs/snapshot_relative_path"},
+            "size": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 67108864,
+            },
+        }
+        for field, expected in expected_target_properties.items():
+            if properties.get(field) != expected:
+                issues.append(
+                    "protocol-v1 verification target artifact "
+                    f"{field} contract drifted"
+                )
+
+    role_bindings = {
+        "modeled_effect_oracle_artifact_binding": "modeled_effect_oracle_spec",
+        "modeled_environment_artifact_binding": "modeled_environment_spec",
+        "modeled_poc_artifact_binding": "modeled_poc_input",
+        "modeled_supporting_evidence_artifact_binding": (
+            "modeled_supporting_evidence_input"
+        ),
+    }
+    for name, expected_type in role_bindings.items():
+        value = definitions.get(name)
+        expected = [
+            {"$ref": "#/$defs/verification_artifact_binding"},
+            {"properties": {"artifact_type": {"const": expected_type}}},
+        ]
+        if type(value) is not dict or value.get("allOf") != expected:
+            issues.append(
+                f"protocol-v1 {name.replace('_', ' ')} role contract drifted"
+            )
+
+    resolution = definitions.get("verification_artifact_resolution_body")
+    issues.extend(
+        _exact_object_contract_issues(
+            resolution,
+            EXPECTED_RESOLUTION_BODY_FIELDS_V1,
+            "protocol-v1 verification artifact resolution body",
+        )
+    )
+    if type(resolution) is not dict or type(resolution.get("properties")) is not dict:
+        return issues
+    properties = resolution["properties"]
+    exact_properties = {
+        "authority_id": {"$ref": "#/$defs/sha256_id"},
+        "candidate_id": {"$ref": "#/$defs/sha256_id"},
+        "effect_oracle_artifact": {
+            "$ref": "#/$defs/modeled_effect_oracle_artifact_binding"
+        },
+        "environment_artifact": {
+            "$ref": "#/$defs/modeled_environment_artifact_binding"
+        },
+        "mission_id": {"$ref": "#/$defs/sha256_id"},
+        "poc_artifact": {"$ref": "#/$defs/modeled_poc_artifact_binding"},
+        "resolution_profile": {"const": EXPECTED_RESOLUTION_PROFILE_V1},
+        "resolved_at": {"$ref": "#/$defs/epoch_second"},
+        "target_snapshot_id": {"$ref": "#/$defs/sha256_id"},
+        "verification_lease_id": {"$ref": "#/$defs/sha256_id"},
+    }
+    for field, expected in exact_properties.items():
+        if properties.get(field) != expected:
+            issues.append(
+                "protocol-v1 verification artifact resolution "
+                f"{field} contract drifted"
+            )
+    expected_arrays = {
+        "evidence_artifacts": (
+            "#/$defs/modeled_supporting_evidence_artifact_binding",
+            256,
+        ),
+        "target_artifacts": (
+            "#/$defs/verification_target_artifact_binding",
+            256,
+        ),
+    }
+    for field, (item_ref, maximum) in expected_arrays.items():
+        if properties.get(field) != {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": maximum,
+            "uniqueItems": True,
+            "items": {"$ref": item_ref},
+        }:
+            issues.append(
+                "protocol-v1 verification artifact resolution "
+                f"{field} contract drifted"
+            )
+    return issues
+
+
 def protocol_schema_contract_issues(schema: object) -> list[str]:
     """Check load-bearing schema/runtime structure for exact parity."""
 
@@ -355,6 +554,29 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
         issues.append("protocol-v1 schema must declare the semantic wire-shape role")
     if frozenset(SEMANTIC_BODY_FIELDS_BY_KIND_V1) != SUPPORTED_OBJECT_KINDS:
         issues.append("protocol-v1 runtime body registry differs from its kind allowlist")
+    if len(SUPPORTED_OBJECT_KINDS) != EXPECTED_SEMANTIC_OBJECT_KIND_COUNT_V1:
+        issues.append("protocol-v1 runtime semantic object-kind count drifted")
+    if len(EVENT_UNIT_BY_KIND_V1) != EXPECTED_EVENT_KIND_COUNT_V1:
+        issues.append("protocol-v1 runtime event-kind count drifted")
+    if RESOLUTION_PROFILE_V1 != EXPECTED_RESOLUTION_PROFILE_V1:
+        issues.append("protocol-v1 runtime resolution profile drifted")
+    if RESOLUTION_BODY_FIELDS_V1 != EXPECTED_RESOLUTION_BODY_FIELDS_V1:
+        issues.append("protocol-v1 runtime resolution body fields drifted")
+    if (
+        VERIFICATION_ARTIFACT_BINDING_FIELDS_V1
+        != EXPECTED_VERIFICATION_ARTIFACT_BINDING_FIELDS_V1
+    ):
+        issues.append("protocol-v1 runtime verification artifact binding fields drifted")
+    if (
+        TARGET_ARTIFACT_BINDING_FIELDS_V1
+        != EXPECTED_TARGET_ARTIFACT_BINDING_FIELDS_V1
+    ):
+        issues.append("protocol-v1 runtime target artifact binding fields drifted")
+    if (
+        frozenset((*VERIFICATION_ARTIFACT_TYPES_V1, TARGET_ARTIFACT_TYPE_V1))
+        != EXPECTED_VERIFICATION_ARTIFACT_TYPES_V1
+    ):
+        issues.append("protocol-v1 runtime verification artifact type registry drifted")
 
     issues.extend(
         _exact_object_contract_issues(
@@ -416,6 +638,7 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
     if type(definitions) is not dict:
         issues.append("protocol-v1 schema is missing its definitions")
         return issues
+    issues.extend(_verification_artifact_schema_contract_issues(definitions))
 
     frame = definitions.get("envelope_frame")
     issues.extend(

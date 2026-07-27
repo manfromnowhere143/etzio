@@ -42,6 +42,7 @@ class MissionProjection:
     candidate_events: tuple[EventV1, ...]
     parse_failures: tuple[EventV1, ...]
     verification_lease_events: tuple[EventV1, ...]
+    verification_artifact_resolution_events: tuple[EventV1, ...]
     refusal: EventV1 | None
     failure_event: EventV1 | None
     scan_summary: EventV1 | None
@@ -98,7 +99,10 @@ def _transition(phase: str, kind: str) -> str:
         if kind in _FAILURE_PHASES:
             return _FAILURE_PHASES[kind]
     elif phase == "awaiting_verification":
-        if kind == "verification_lease_issued":
+        if kind in {
+            "verification_lease_issued",
+            "verification_artifacts_resolved",
+        }:
             return "awaiting_verification"
     raise ReductionError(f"illegal event transition: {phase} -> {kind}")
 
@@ -145,7 +149,10 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
     candidate_ids: set[str] = set()
     candidate_events_by_id: dict[str, EventV1] = {}
     verification_lease_events: list[EventV1] = []
+    verification_artifact_resolution_events: list[EventV1] = []
     verification_lease_ids: set[str] = set()
+    verification_leases_by_id: dict[str, object] = {}
+    resolved_verification_lease_ids: set[str] = set()
     leased_candidate_ids: set[str] = set()
     admitted_grant: object | None = None
     admitted_admission: object | None = None
@@ -477,8 +484,100 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                     "verification lease count exceeds the admitted candidate ceiling"
                 )
             verification_lease_ids.add(lease.lease_id)
+            verification_leases_by_id[lease.lease_id] = lease
             leased_candidate_ids.add(lease.candidate_id)
             verification_lease_events.append(event)
+        elif event.kind == "verification_artifacts_resolved":
+            from ..verification import VerificationLeaseV1
+            from ..verification_artifacts import (
+                MAX_RESOLUTION_ARTIFACT_BYTES_V1,
+                MAX_TYPED_VERIFICATION_INPUT_BYTES_V1,
+                VerificationArtifactResolutionV1,
+            )
+
+            resolution = VerificationArtifactResolutionV1.from_envelope(
+                _nested_envelope(event, "resolution")
+            )
+            lease_value = verification_leases_by_id.get(
+                resolution.verification_lease_id
+            )
+            if not isinstance(lease_value, VerificationLeaseV1):
+                raise ReductionError(
+                    "artifact resolution references no prior verification lease"
+                )
+            lease = lease_value
+            if resolution.verification_lease_id in resolved_verification_lease_ids:
+                raise ReductionError(
+                    "verification lease already has an artifact resolution"
+                )
+            if (
+                resolution.mission_id != mission_id
+                or resolution.authority_id != authority_id
+                or resolution.target_snapshot_id != target_id
+                or resolution.candidate_id != lease.candidate_id
+            ):
+                raise ReductionError(
+                    "artifact resolution differs from retained mission bindings"
+                )
+            if resolution.resolved_at != event.decision_time:
+                raise ReductionError("artifact resolution time differs from its event")
+            if not (lease.issued_at <= resolution.resolved_at < lease.expires_at):
+                raise ReductionError(
+                    "artifact resolution is outside the verification lease window"
+                )
+            if target_snapshot is None:
+                raise ReductionError(
+                    "artifact resolution has no retained target snapshot"
+                )
+            expected_targets = tuple(
+                (
+                    snapshot_file.artifact_digest,
+                    snapshot_file.relative_path,
+                    snapshot_file.size,
+                )
+                for snapshot_file in target_snapshot.files
+            )
+            actual_targets = tuple(
+                (
+                    binding.artifact_digest,
+                    binding.relative_path,
+                    binding.size,
+                )
+                for binding in resolution.target_artifacts
+            )
+            if actual_targets != expected_targets:
+                raise ReductionError(
+                    "artifact resolution target bindings differ from the retained snapshot"
+                )
+            if (
+                resolution.poc_artifact.artifact_digest != lease.poc_artifact_digest
+                or resolution.environment_artifact.artifact_digest
+                != lease.environment_digest
+                or resolution.effect_oracle_artifact.artifact_digest
+                != lease.effect_oracle_id
+                or tuple(
+                    artifact.artifact_digest
+                    for artifact in resolution.evidence_artifacts
+                )
+                != lease.evidence_artifact_digests
+            ):
+                raise ReductionError(
+                    "artifact resolution differs from verification lease artifacts"
+                )
+            if admitted_grant is None:
+                raise ReductionError(
+                    "artifact resolution has no admitted authority grant"
+                )
+            if (
+                resolution.total_bytes > admitted_grant.max_bytes
+                or resolution.typed_input_bytes > MAX_TYPED_VERIFICATION_INPUT_BYTES_V1
+                or resolution.total_bytes > MAX_RESOLUTION_ARTIFACT_BYTES_V1
+            ):
+                raise ReductionError(
+                    "artifact resolution exceeds the admitted byte ceiling"
+                )
+            resolved_verification_lease_ids.add(resolution.verification_lease_id)
+            verification_artifact_resolution_events.append(event)
         elif event.kind == "mission_closed":
             if (
                 admitted_admission is not None
@@ -535,6 +634,9 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
         candidate_events=tuple(candidates),
         parse_failures=tuple(failures),
         verification_lease_events=tuple(verification_lease_events),
+        verification_artifact_resolution_events=tuple(
+            verification_artifact_resolution_events
+        ),
         refusal=refusal,
         failure_event=failure,
         scan_summary=scan_summary,

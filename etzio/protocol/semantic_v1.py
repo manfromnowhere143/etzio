@@ -50,6 +50,11 @@ def parse_semantic_envelope(envelope: EnvelopeV1) -> object:
 
             return VerificationLeaseV1.from_envelope(envelope)
 
+        if envelope.object_kind == "verification_artifact_resolution":
+            from etzio.verification_artifacts import VerificationArtifactResolutionV1
+
+            return VerificationArtifactResolutionV1.from_envelope(envelope)
+
         if envelope.object_kind == "candidate":
             from etzio.mission_v1 import StaticCandidateV1
 

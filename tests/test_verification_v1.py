@@ -1,24 +1,40 @@
 from __future__ import annotations
 
 import base64
+import tempfile
 from dataclasses import FrozenInstanceError, replace
 
 import pytest
 
 import etzio.verification as verification
+from etzio.evidence import (
+    VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1,
+    FileEvidenceStore,
+    SnapshotFileV1,
+    TargetSnapshotV1,
+    evidence_digest,
+    read_etzio_fixture,
+    typed_evidence_digest,
+)
 from etzio.protocol import EnvelopeV1, canonical_dumps, strict_loads, thaw_json
 from etzio.verification import (
     MODELED_FIXTURE_TIER,
     VERIFIER_ROLE,
     SignedVerifierReceiptV1,
     TrustedVerifierKey,
-    VerificationDecision,
     VerificationError,
     VerificationLeaseV1,
+    VerificationProposal,
     VerifierReceiptV1,
     VerifierSigner,
     VerifierTrustStore,
     validate_verifier_receipt,
+)
+from etzio.verification_artifacts import (
+    TARGET_ARTIFACT_TYPE_V1,
+    TargetArtifactBindingV1,
+    VerificationArtifactBindingV1,
+    VerificationArtifactResolutionV1,
 )
 
 NOW = 2_000_000_000
@@ -30,14 +46,58 @@ def digest(character: str) -> str:
 
 MISSION_ID = digest("1")
 AUTHORITY_ID = digest("2")
-TARGET_ID = digest("3")
 CANDIDATE_ID = digest("4")
-POC_DIGEST = digest("5")
-EVIDENCE_DIGESTS = (digest("6"), digest("7"))
-ENVIRONMENT_DIGEST = digest("8")
-ORACLE_ID = digest("9")
 PRODUCER_ID = "VELITES"
 VERIFIER_ID = "CATO"
+
+TARGET_PATH, TARGET_BYTES = read_etzio_fixture(
+    "vulnerable_app.py",
+    maximum=1024 * 1024,
+)
+TARGET_FILE = SnapshotFileV1(
+    relative_path=TARGET_PATH,
+    artifact_digest=evidence_digest(TARGET_BYTES),
+    size=len(TARGET_BYTES),
+)
+TARGET_SNAPSHOT = TargetSnapshotV1.create(
+    "repository_fixture",
+    (TARGET_FILE,),
+)
+TARGET_ID = TARGET_SNAPSHOT.object_id
+
+POC_BYTES = b"modeled fixture poc input"
+ENVIRONMENT_BYTES = b"modeled fixture environment specification"
+ORACLE_BYTES = b"modeled fixture effect oracle specification"
+EVIDENCE_BYTES = (
+    b"modeled fixture supporting evidence alpha",
+    b"modeled fixture supporting evidence beta",
+)
+POC_DIGEST = typed_evidence_digest(
+    POC_BYTES,
+    artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["poc"],
+)
+ENVIRONMENT_DIGEST = typed_evidence_digest(
+    ENVIRONMENT_BYTES,
+    artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["environment"],
+)
+ORACLE_ID = typed_evidence_digest(
+    ORACLE_BYTES,
+    artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["effect_oracle"],
+)
+_EVIDENCE_BY_DIGEST = {
+    typed_evidence_digest(
+        data,
+        artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["evidence"],
+    ): data
+    for data in EVIDENCE_BYTES
+}
+EVIDENCE_DIGESTS = tuple(sorted(_EVIDENCE_BY_DIGEST))
+_TYPED_BYTES_BY_DIGEST = {
+    POC_DIGEST: POC_BYTES,
+    ENVIRONMENT_DIGEST: ENVIRONMENT_BYTES,
+    ORACLE_ID: ORACLE_BYTES,
+    **_EVIDENCE_BY_DIGEST,
+}
 
 
 @pytest.fixture
@@ -120,15 +180,77 @@ def trusted_store(
     )
 
 
-def retained_evidence(lease: VerificationLeaseV1) -> frozenset[str]:
-    return frozenset(
-        {
-            lease.poc_artifact_digest,
-            *lease.evidence_artifact_digests,
-            lease.environment_digest,
+def resolution_for_lease(
+    lease: VerificationLeaseV1,
+    **overrides: object,
+) -> VerificationArtifactResolutionV1:
+    def binding(digest_value: str, role: str) -> VerificationArtifactBindingV1:
+        retained = _TYPED_BYTES_BY_DIGEST.get(digest_value)
+        return VerificationArtifactBindingV1(
+            artifact_digest=digest_value,
+            artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1[role],
+            size=1 if retained is None else len(retained),
+        )
+
+    values: dict[str, object] = {
+        "authority_id": lease.authority_id,
+        "candidate_id": lease.candidate_id,
+        "effect_oracle_artifact": binding(
             lease.effect_oracle_id,
-        }
+            "effect_oracle",
+        ),
+        "environment_artifact": binding(
+            lease.environment_digest,
+            "environment",
+        ),
+        "evidence_artifacts": tuple(
+            binding(value, "evidence")
+            for value in lease.evidence_artifact_digests
+        ),
+        "mission_id": lease.mission_id,
+        "poc_artifact": binding(lease.poc_artifact_digest, "poc"),
+        "resolved_at": NOW,
+        "target_artifacts": (
+            TargetArtifactBindingV1(
+                artifact_digest=TARGET_FILE.artifact_digest,
+                artifact_type=TARGET_ARTIFACT_TYPE_V1,
+                relative_path=TARGET_FILE.relative_path,
+                size=TARGET_FILE.size,
+            ),
+        ),
+        "target_snapshot_id": lease.target_snapshot_id,
+        "verification_lease_id": lease.lease_id,
+    }
+    values.update(overrides)
+    return VerificationArtifactResolutionV1.issue(**values)  # type: ignore[arg-type]
+
+
+def populate_resolution_bytes(
+    store: FileEvidenceStore,
+    lease: VerificationLeaseV1,
+    *,
+    omitted_digests: frozenset[str] = frozenset(),
+) -> None:
+    if TARGET_FILE.artifact_digest not in omitted_digests:
+        assert store.put(TARGET_BYTES).digest == TARGET_FILE.artifact_digest
+    typed_roles = (
+        ("poc", lease.poc_artifact_digest),
+        *(
+            ("evidence", value)
+            for value in lease.evidence_artifact_digests
+        ),
+        ("environment", lease.environment_digest),
+        ("effect_oracle", lease.effect_oracle_id),
     )
+    for role, digest_value in typed_roles:
+        data = _TYPED_BYTES_BY_DIGEST.get(digest_value)
+        if data is None or digest_value in omitted_digests:
+            continue
+        receipt = store.put_typed(
+            data,
+            artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1[role],
+        )
+        assert receipt.digest == digest_value
 
 
 def decide(
@@ -139,19 +261,37 @@ def decide(
     decision_time: int = NOW + 11,
     expected_verdict: str = "confirmed",
     consumed_lease_ids: frozenset[str] = frozenset(),
-    retained_evidence_digests: frozenset[str] | None = None,
-) -> VerificationDecision:
-    return validate_verifier_receipt(
-        signed,
-        store,
-        lease=lease,
-        decision_time=decision_time,
-        expected_verdict=expected_verdict,
-        consumed_lease_ids=consumed_lease_ids,
-        retained_evidence_digests=(
-            retained_evidence(lease) if retained_evidence_digests is None else retained_evidence_digests
-        ),
-    )
+    artifact_resolution: VerificationArtifactResolutionV1 | None = None,
+    target_snapshot: TargetSnapshotV1 = TARGET_SNAPSHOT,
+    evidence_store: FileEvidenceStore | None = None,
+    omitted_digests: frozenset[str] = frozenset(),
+) -> VerificationProposal:
+    def run(local_store: FileEvidenceStore) -> VerificationProposal:
+        populate_resolution_bytes(
+            local_store,
+            lease,
+            omitted_digests=omitted_digests,
+        )
+        return validate_verifier_receipt(
+            signed,
+            store,
+            lease=lease,
+            decision_time=decision_time,
+            expected_verdict=expected_verdict,
+            consumed_lease_ids=consumed_lease_ids,
+            artifact_resolution=(
+                resolution_for_lease(lease)
+                if artifact_resolution is None
+                else artifact_resolution
+            ),
+            target_snapshot=target_snapshot,
+            evidence_store=local_store,
+        )
+
+    if evidence_store is not None:
+        return run(evidence_store)
+    with tempfile.TemporaryDirectory() as temporary:
+        return run(FileEvidenceStore(temporary))
 
 
 def sign_raw(
@@ -172,7 +312,7 @@ def sign_envelope(signer: VerifierSigner, envelope: EnvelopeV1) -> SignedVerifie
     return sign_raw(signer, envelope.to_bytes())
 
 
-def test_valid_modeled_fixture_receipt_is_exactly_bound_and_does_not_mint_finding(
+def test_valid_receipt_produces_a_context_bound_proposal_and_no_finding(
     signer: VerifierSigner,
 ) -> None:
     lease = issue_lease(signer)
@@ -187,14 +327,15 @@ def test_valid_modeled_fixture_receipt_is_exactly_bound_and_does_not_mint_findin
 
     decision = decide(signer.sign(receipt), trusted_store(signer), lease)
 
-    assert decision == VerificationDecision(
-        accepted=True,
+    assert decision == VerificationProposal(
+        eligible=True,
         lease_id=lease.lease_id,
         receipt_id=receipt.receipt_id,
         verdict="confirmed",
-        reason_code="accepted",
+        reason_code="proposal_valid",
         issuance_trust_snapshot_id=lease.issuance_trust_snapshot_id,
         decision_trust_snapshot_id=trusted_store(signer).snapshot_id,
+        artifact_resolution_id=resolution_for_lease(lease).resolution_id,
     )
     assert not hasattr(decision, "finding_id")
     assert lease.lease_id == lease.to_envelope().object_id
@@ -202,7 +343,329 @@ def test_valid_modeled_fixture_receipt_is_exactly_bound_and_does_not_mint_findin
     assert signer.sign(receipt).envelope_bytes == canonical_dumps(strict_loads(signer.sign(receipt).envelope_bytes))
 
 
-def test_receipt_decision_distinguishes_issuance_and_later_trust_snapshots(
+def test_one_signed_receipt_can_only_propose_under_unsigned_resolution_contexts(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    signed = signer.sign(issue_receipt(lease))
+    first = decide(
+        signed,
+        trusted_store(signer),
+        lease,
+        artifact_resolution=resolution_for_lease(
+            lease,
+            resolved_at=NOW,
+        ),
+    )
+    second = decide(
+        signed,
+        trusted_store(signer),
+        lease,
+        artifact_resolution=resolution_for_lease(
+            lease,
+            resolved_at=NOW + 1,
+        ),
+    )
+
+    assert first.eligible and second.eligible
+    assert first.artifact_resolution_id != second.artifact_resolution_id
+    assert not hasattr(first, "accepted")
+
+
+@pytest.mark.parametrize(
+    ("overrides", "reason"),
+    [
+        ({"verification_lease_id": digest("a")}, "resolution_lease_mismatch"),
+        ({"mission_id": digest("a")}, "resolution_mission_mismatch"),
+        ({"authority_id": digest("a")}, "resolution_authority_mismatch"),
+        ({"target_snapshot_id": digest("a")}, "resolution_target_mismatch"),
+        ({"candidate_id": digest("a")}, "resolution_candidate_mismatch"),
+        ({"resolved_at": NOW - 1}, "resolution_before_lease"),
+        ({"resolved_at": NOW + 100}, "resolution_after_expiry"),
+    ],
+)
+def test_modeled_receipt_requires_the_exact_lease_resolution(
+    signer: VerifierSigner,
+    overrides: dict[str, object],
+    reason: str,
+) -> None:
+    lease = issue_lease(signer)
+    resolution = resolution_for_lease(lease, **overrides)
+
+    decision = decide(
+        signer.sign(issue_receipt(lease)),
+        trusted_store(signer),
+        lease,
+        artifact_resolution=resolution,
+    )
+
+    assert decision.reason_code == reason
+
+
+@pytest.mark.parametrize("resolved_at", (NOW + 1, NOW + 2))
+def test_resolution_must_strictly_precede_receipt_completion(
+    signer: VerifierSigner,
+    resolved_at: int,
+) -> None:
+    lease = issue_lease(signer)
+    receipt = issue_receipt(lease, completed_at=NOW + 1)
+    resolution = resolution_for_lease(lease, resolved_at=resolved_at)
+
+    decision = decide(
+        signer.sign(receipt),
+        trusted_store(signer),
+        lease,
+        artifact_resolution=resolution,
+        decision_time=NOW + 3,
+    )
+
+    assert decision.reason_code == "resolution_after_receipt"
+
+
+def test_resolution_artifact_and_target_substitution_fail_before_positive_proposal(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    signed = signer.sign(issue_receipt(lease))
+    wrong_poc = VerificationArtifactBindingV1(
+        artifact_digest=digest("a"),
+        artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["poc"],
+        size=1,
+    )
+    wrong_target = TargetArtifactBindingV1(
+        artifact_digest=digest("b"),
+        artifact_type=TARGET_ARTIFACT_TYPE_V1,
+        relative_path=TARGET_FILE.relative_path,
+        size=TARGET_FILE.size,
+    )
+
+    assert (
+        decide(
+            signed,
+            trusted_store(signer),
+            lease,
+            artifact_resolution=resolution_for_lease(
+                lease,
+                poc_artifact=wrong_poc,
+            ),
+        ).reason_code
+        == "resolution_poc_digest_mismatch"
+    )
+    assert (
+        decide(
+            signed,
+            trusted_store(signer),
+            lease,
+            artifact_resolution=resolution_for_lease(
+                lease,
+                target_artifacts=(wrong_target,),
+            ),
+        ).reason_code
+        == "resolution_target_artifacts_mismatch"
+    )
+
+
+def test_signature_and_receipt_binding_checks_precede_all_cas_reads(
+    signer: VerifierSigner,
+) -> None:
+    class CountingStore(FileEvidenceStore):
+        def __init__(self, root: str) -> None:
+            super().__init__(root)
+            self.read_count = 0
+
+        def get(self, digest_value: str, *, maximum: int | None = None) -> bytes:
+            self.read_count += 1
+            return super().get(digest_value, maximum=maximum)
+
+        def get_typed(
+            self,
+            digest_value: str,
+            *,
+            expected_type: str,
+            maximum: int | None = None,
+        ) -> bytes:
+            self.read_count += 1
+            return super().get_typed(
+                digest_value,
+                expected_type=expected_type,
+                maximum=maximum,
+            )
+
+    lease = issue_lease(signer)
+    resolution = resolution_for_lease(lease)
+    receipt = issue_receipt(lease)
+    signed = signer.sign(receipt)
+    forger = VerifierSigner.generate()
+    forged = {
+        **dict(signed.as_raw()),
+        "signature_b64": base64.b64encode(
+            forger.private_key.sign(
+                verification._SIGNATURE_DOMAIN + signed.envelope_bytes
+            )
+        ).decode("ascii"),
+    }
+    substituted = signer.sign(
+        issue_receipt(lease, candidate_id=digest("a"))
+    )
+    other_signer = VerifierSigner.generate()
+    signer_mismatch = sign_envelope(
+        signer,
+        issue_receipt(
+            lease,
+            verifier_key_id=other_signer.key_id,
+        ).to_envelope(),
+    )
+    unsupported_tier_body = receipt_values(lease)
+    unsupported_tier_body["evidence_artifact_digests"] = list(
+        EVIDENCE_DIGESTS
+    )
+    unsupported_tier_body["evidence_tier"] = "kvm_isolated"
+    unsupported_tier = sign_envelope(
+        signer,
+        EnvelopeV1.create("verifier_receipt", unsupported_tier_body),
+    )
+    wrong_verdict = signer.sign(
+        issue_receipt(
+            lease,
+            verdict="not_reproduced",
+            effect_observed=False,
+            oracle_satisfied=False,
+        )
+    )
+    future_receipt = signer.sign(
+        issue_receipt(lease, completed_at=NOW + 20)
+    )
+    cases = (
+        (
+            forged,
+            trusted_store(signer),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "invalid_signature",
+        ),
+        (
+            signed,
+            trusted_store(signer, revoked_key_ids=(signer.key_id,)),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "key_revoked",
+        ),
+        (
+            signed,
+            trusted_store(signer, roles=frozenset({"auditor"})),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "key_missing_verifier_role",
+        ),
+        (
+            signed,
+            trusted_store(signer, revoked_lease_ids=(lease.lease_id,)),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "lease_revoked",
+        ),
+        (
+            signed,
+            trusted_store(signer),
+            NOW + 11,
+            "confirmed",
+            frozenset({lease.lease_id}),
+            "lease_already_consumed",
+        ),
+        (
+            signed,
+            trusted_store(signer),
+            NOW + 100,
+            "confirmed",
+            frozenset(),
+            "lease_expired",
+        ),
+        (
+            signed,
+            trusted_store(
+                signer,
+                revoked_receipt_ids=(receipt.receipt_id,),
+            ),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "receipt_revoked",
+        ),
+        (
+            signer_mismatch,
+            trusted_store(signer),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "signer_key_mismatch",
+        ),
+        (
+            substituted,
+            trusted_store(signer),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "candidate_mismatch",
+        ),
+        (
+            unsupported_tier,
+            trusted_store(signer),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "unsupported_evidence_tier",
+        ),
+        (
+            wrong_verdict,
+            trusted_store(signer),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "verdict_mismatch",
+        ),
+        (
+            future_receipt,
+            trusted_store(signer),
+            NOW + 10,
+            "confirmed",
+            frozenset(),
+            "receipt_from_future",
+        ),
+    )
+
+    with tempfile.TemporaryDirectory() as temporary:
+        evidence_store = CountingStore(temporary)
+        reasons = tuple(
+            validate_verifier_receipt(
+                raw_receipt,
+                trust,
+                lease=lease,
+                decision_time=decision_time,
+                expected_verdict=expected_verdict,
+                consumed_lease_ids=consumed,
+                artifact_resolution=resolution,
+                target_snapshot=TARGET_SNAPSHOT,
+                evidence_store=evidence_store,
+            ).reason_code
+            for (
+                raw_receipt,
+                trust,
+                decision_time,
+                expected_verdict,
+                consumed,
+                _,
+            ) in cases
+        )
+
+    assert reasons == tuple(case[-1] for case in cases)
+    assert evidence_store.read_count == 0
+
+
+def test_receipt_proposal_distinguishes_issuance_and_later_trust_snapshots(
     signer: VerifierSigner,
 ) -> None:
     issuance_store = trusted_store(signer)
@@ -225,7 +688,7 @@ def test_receipt_decision_distinguishes_issuance_and_later_trust_snapshots(
 
     decision = decide(signer.sign(receipt), decision_store, lease)
 
-    assert decision.accepted
+    assert decision.eligible
     assert decision.issuance_trust_snapshot_id == issuance_store.snapshot_id
     assert decision.decision_trust_snapshot_id == decision_store.snapshot_id
     assert (
@@ -255,7 +718,7 @@ def test_signed_receipt_has_one_canonical_attestation_and_round_trips(
     }
     assert restored == signed
     assert restored.to_bytes() == wire
-    assert decide(wire, trusted_store(signer), lease).accepted
+    assert decide(wire, trusted_store(signer), lease).eligible
 
 
 def test_signed_receipt_wire_rejects_missing_multiple_or_malformed_attestations(
@@ -431,11 +894,11 @@ def test_caller_snapshot_rejects_an_already_consumed_lease_sequentially(
     signed = signer.sign(issue_receipt(lease))
     store = trusted_store(signer)
 
-    assert decide(signed, store, lease).accepted
+    assert decide(signed, store, lease).eligible
     replay = decide(signed, store, lease, consumed_lease_ids=frozenset({lease.lease_id}))
 
-    assert replay == VerificationDecision(
-        accepted=False,
+    assert replay == VerificationProposal(
+        eligible=False,
         lease_id=None,
         receipt_id=None,
         verdict=None,
@@ -581,8 +1044,9 @@ def test_revoked_receipt_and_lease_fail_closed(signer: VerifierSigner) -> None:
     ("decision_time", "reason"),
     [
         (NOW - 1, "lease_not_yet_valid"),
-        (NOW, "accepted"),
-        (NOW + 99, "accepted"),
+        (NOW, "receipt_from_future"),
+        (NOW + 1, "proposal_valid"),
+        (NOW + 99, "proposal_valid"),
         (NOW + 100, "lease_expired"),
     ],
 )
@@ -592,7 +1056,7 @@ def test_lease_window_is_half_open(
     reason: str,
 ) -> None:
     lease = issue_lease(signer)
-    receipt = issue_receipt(lease, completed_at=NOW)
+    receipt = issue_receipt(lease, completed_at=NOW + 1)
 
     decision = decide(
         signer.sign(receipt),
@@ -744,21 +1208,45 @@ def test_verdict_observation_combinations_fail_closed(
     assert decision.reason_code == reason
 
 
-def test_every_referenced_digest_must_exist_in_the_caller_membership_snapshot(
+def test_every_resolved_reference_must_be_re_read_from_the_exact_cas_domain(
     signer: VerifierSigner,
 ) -> None:
     lease = issue_lease(signer)
     signed = signer.sign(issue_receipt(lease))
-    required = retained_evidence(lease)
+    required = (
+        (
+            TARGET_FILE.artifact_digest,
+            "resolved_target_unavailable",
+        ),
+        (
+            lease.poc_artifact_digest,
+            "resolved_poc_artifact_unavailable",
+        ),
+        *tuple(
+            (
+                value,
+                f"resolved_evidence_{index}_artifact_unavailable",
+            )
+            for index, value in enumerate(lease.evidence_artifact_digests)
+        ),
+        (
+            lease.environment_digest,
+            "resolved_environment_artifact_unavailable",
+        ),
+        (
+            lease.effect_oracle_id,
+            "resolved_effect_oracle_artifact_unavailable",
+        ),
+    )
 
-    for missing in required:
+    for missing, reason in required:
         decision = decide(
             signed,
             trusted_store(signer),
             lease,
-            retained_evidence_digests=required - {missing},
+            omitted_digests=frozenset({missing}),
         )
-        assert decision.reason_code == "referenced_evidence_missing"
+        assert decision.reason_code == reason
 
 
 def test_claimed_kvm_or_production_tier_is_rejected_despite_trusted_signature(
@@ -870,21 +1358,6 @@ def test_fixed_collection_ceilings_fail_closed_before_signature_verification(
         ).reason_code
         == "invalid_consumed_lease_ids"
     )
-
-    class OversizedEvidenceSet(set[str]):
-        def __len__(self) -> int:
-            return verification.MAX_RETAINED_EVIDENCE_DIGESTS + 1
-
-    assert (
-        decide(
-            signed,
-            trusted_store(signer),
-            lease,
-            retained_evidence_digests=OversizedEvidenceSet(),
-        ).reason_code
-        == "invalid_retained_evidence"
-    )
-
 
 def test_signed_receipt_wire_and_signature_have_fixed_tight_ceilings(
     signer: VerifierSigner,

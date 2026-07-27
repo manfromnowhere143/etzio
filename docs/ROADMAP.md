@@ -53,7 +53,7 @@ Status: **running**.
 
 Implemented in this phase:
 
-- installed semantic per-kind wire schemas for all eight typed objects and all thirteen event
+- installed semantic per-kind wire schemas for all nine typed objects and all fourteen event
   variants;
 - runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and
 - fail-closed rejection of untyped reserved kinds, malformed signed-grant encoding, and
@@ -63,21 +63,30 @@ Implemented in this phase:
 - retained verifier trust and revocation evidence with exact candidate, producer, target,
   authority, verifier, key, issuance-trust identity, time, and expiry bindings; and
 - a replayable nonterminal `awaiting_verification` state with substitution and conflicting
-  reissuance known-bads.
+  reissuance known-bads;
+- type-domain-separated CAS identities for the PoC, supporting-evidence, environment, and
+  effect-oracle specification roles;
+- canonical per-lease resolution of every target and verification-input byte with exact
+  role, type, size, order, time, and retained-state bindings; and
+- replay, current-CAS revalidation, aggregate-bound, substitution, crash, retry, and
+  concurrent-writer known-bads for the resolution boundary.
 
 Remaining required:
 
-1. typed CAS resolution of target, PoC, environment, oracle, and evidence artifacts;
-2. canonical retention of receipt decision inputs, signed receipt, and adjudication;
-3. atomic receipt acceptance and single-use lease consumption under concurrent writers;
+1. canonical retention of receipt decision inputs, signed receipt, and adjudication;
+2. atomic receipt acceptance and single-use lease consumption under concurrent writers;
+3. separately content-bound execution, effect, measured-environment, and termination
+   outputs;
 4. explicit lease expiry, cancellation, supersession, and terminal recovery semantics;
 5. trusted time and revocation freshness;
 6. authenticated, externally anchored event heads; and
 7. known-bads for every new refusal, substitution, replay, and concurrency condition.
 
-Acceptance: an authority-bound modeled verification assignment and a modeled receipt may be
-validated today, but no receipt or finding-admission claim is accepted until the remaining
-conditions above are retained and replayable.
+Acceptance: an authority-bound modeled verification assignment and every predeclared input
+can be resolved and retained today. A modeled receipt can produce only a standalone
+proposal after matching that resolution and revalidating CAS bytes; no receipt or
+finding-admission claim is accepted until the remaining conditions above are retained and
+replayable.
 
 ## Phase 2 — independent proof plane
 

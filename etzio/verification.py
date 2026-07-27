@@ -2,16 +2,21 @@
 
 This module authenticates a configured verifier identity and binds its signed result to
 one exact, expiring verification lease.  It does not prove that the result is true, that
-the lease was kernel-issued or admitted under a grant, that referenced digests resolve to
-retained CAS bytes, or that the signer was actually independent.  It does not claim
-process, container, VM, KVM, or hardware isolation.  The only evidence tier admitted by
-this foundation boundary is ``modeled_fixture``.
+the lease or artifact resolution was kernel-issued and retained, or that the signer was
+actually independent. It requires the exact modeled resolution and revalidates its current
+CAS bytes, but that establishes byte identity and assigned input role only. It does not
+claim process, container, VM, KVM, or hardware isolation. The only evidence tier admitted
+by this foundation boundary is ``modeled_fixture``.
 
-Lease consumption must be committed atomically by the lifecycle kernel alongside the
-accepted receipt event.  :func:`validate_verifier_receipt` observes the caller-supplied
-set of already-consumed lease IDs but deliberately does not mutate external state.
-The lease binds its issuance-trust snapshot identity, while receipt decisions separately
-identify the supplied decision-time revocation view. These are deterministic retrospective
+Lease consumption must be committed atomically by the lifecycle kernel alongside any
+future accepted receipt event. :func:`validate_verifier_receipt` observes the
+caller-supplied set of already-consumed lease IDs but deliberately does not mutate external
+state or accept a receipt into mission history. Its positive result is an explicitly
+non-authoritative modeled proposal for a future kernel command. The receipt does not yet
+sign the resolution ID; the proposal's resolution ID identifies evaluation context, not an
+authenticated receipt claim.
+The lease binds its issuance-trust snapshot identity, while receipt proposals separately
+identify the supplied proposal-time revocation view. These are deterministic retrospective
 identities; this module does not establish snapshot continuity, freshness, or trusted time.
 """
 
@@ -31,12 +36,24 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
 from etzio.crypto_v1 import is_valid_ed25519_public_key
+from etzio.evidence import (
+    VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1,
+    EvidenceError,
+    FileEvidenceStore,
+    TargetSnapshotV1,
+    validate_etzio_fixture_snapshot,
+)
 from etzio.protocol import (
     SEMANTIC_BODY_FIELDS_BY_KIND_V1,
     EnvelopeV1,
     ProtocolError,
     content_id,
     thaw_json,
+)
+from etzio.verification_artifacts import (
+    TARGET_ARTIFACT_TYPE_V1,
+    VerificationArtifactBindingV1,
+    VerificationArtifactResolutionV1,
 )
 
 LEASE_OBJECT_KIND: Final = "verification_lease"
@@ -53,7 +70,6 @@ MAX_TRUSTED_VERIFIER_KEYS: Final = 64
 MAX_VERIFIER_ROLES: Final = 16
 MAX_VERIFIER_REVOCATIONS: Final = 10_000
 MAX_CONSUMED_LEASE_IDS: Final = 100_000
-MAX_RETAINED_EVIDENCE_DIGESTS: Final = 100_000
 MAX_EPOCH_SECOND: Final = (2**63) - 1
 
 _SIGNATURE_DOMAIN: Final = b"etzio.verifier-receipt.signature.v1\x00"
@@ -778,34 +794,36 @@ class VerifierTrustStore:
 
 
 @dataclass(frozen=True, slots=True)
-class VerificationDecision:
-    """A minimal receipt-admission result; this type never represents a finding.
+class VerificationProposal:
+    """A non-authoritative modeled receipt-validation proposal.
 
-    The accepted result distinguishes the lease's issuance-trust identity from the
-    decision-time revocation view. The lifecycle kernel must resolve the issuance
-    snapshot from canonical history and retain the decision snapshot body with any
+    An eligible proposal distinguishes the lease's issuance-trust identity from the
+    proposal-time revocation view and records the supplied resolution context. It does not
+    prove that the lease, grant, or resolution was retained. The lifecycle kernel must load
+    those values from canonical history and retain the decision snapshot body with any
     future atomic receipt admission.
     """
 
-    accepted: bool
+    eligible: bool
     lease_id: str | None
     receipt_id: str | None
     verdict: str | None
     reason_code: str
     issuance_trust_snapshot_id: str | None = None
     decision_trust_snapshot_id: str | None = None
+    artifact_resolution_id: str | None = None
 
     def __post_init__(self) -> None:
-        if type(self.accepted) is not bool:
-            raise VerificationError("invalid_decision", "accepted must be a bool")
-        if self.accepted:
+        if type(self.eligible) is not bool:
+            raise VerificationError("invalid_proposal", "eligible must be a bool")
+        if self.eligible:
             if (
                 self.lease_id is None
                 or _FULL_DIGEST.fullmatch(self.lease_id) is None
                 or self.receipt_id is None
                 or _FULL_DIGEST.fullmatch(self.receipt_id) is None
                 or self.verdict not in VERDICTS
-                or self.reason_code != "accepted"
+                or self.reason_code != "proposal_valid"
                 or self.issuance_trust_snapshot_id is None
                 or _FULL_DIGEST.fullmatch(
                     self.issuance_trust_snapshot_id
@@ -816,8 +834,13 @@ class VerificationDecision:
                     self.decision_trust_snapshot_id
                 )
                 is None
+                or self.artifact_resolution_id is None
+                or _FULL_DIGEST.fullmatch(self.artifact_resolution_id) is None
             ):
-                raise VerificationError("invalid_decision", "accepted decision fields are inconsistent")
+                raise VerificationError(
+                    "invalid_proposal",
+                    "eligible proposal fields are inconsistent",
+                )
         elif any(
             value is not None
             for value in (
@@ -826,9 +849,13 @@ class VerificationDecision:
                 self.verdict,
                 self.issuance_trust_snapshot_id,
                 self.decision_trust_snapshot_id,
+                self.artifact_resolution_id,
             )
         ):
-            raise VerificationError("invalid_decision", "refused decisions cannot expose untrusted receipt claims")
+            raise VerificationError(
+                "invalid_proposal",
+                "ineligible proposals cannot expose untrusted receipt claims",
+            )
 
 
 def verifier_key_id(public_key_bytes: bytes) -> str:
@@ -847,14 +874,20 @@ def validate_verifier_receipt(
     decision_time: int,
     expected_verdict: str,
     consumed_lease_ids: Set[str],
-    retained_evidence_digests: Set[str],
-) -> VerificationDecision:
+    artifact_resolution: VerificationArtifactResolutionV1,
+    target_snapshot: TargetSnapshotV1,
+    evidence_store: FileEvidenceStore,
+) -> VerificationProposal:
     """Authenticate and validate one exact modeled-fixture verifier receipt.
 
-    Acceptance authenticates the configured verifier's signature and validates the
-    receipt/lease/evidence bindings.  It does not prove the scientific claim and does
-    not mint a finding.  The caller must atomically persist lease consumption with any
-    accepted receipt event; a pre-read set alone is not a concurrency primitive.
+    Proposal validation authenticates the configured verifier's signature, validates the
+    receipt/lease/resolution bindings, and re-reads every resolved CAS artifact under its
+    code-owned type. It does not prove the scientific claim, establish that the supplied
+    resolution was kernel-retained, or mint a finding. The caller must atomically persist
+    lease consumption with any future accepted receipt event; a pre-read set alone is not a
+    concurrency primitive. A positive proposal is not receipt acceptance, and its
+    ``artifact_resolution_id`` is supplied evaluation context rather than a field signed by
+    the current receipt contract.
     """
 
     if not isinstance(trust_store, VerifierTrustStore):
@@ -865,16 +898,17 @@ def validate_verifier_receipt(
         return _refuse("invalid_decision_time")
     if type(expected_verdict) is not str or expected_verdict not in VERDICTS:
         return _refuse("invalid_expected_verdict")
+    if not isinstance(artifact_resolution, VerificationArtifactResolutionV1):
+        return _refuse("invalid_artifact_resolution")
+    if not isinstance(target_snapshot, TargetSnapshotV1):
+        return _refuse("invalid_target_snapshot")
+    if not isinstance(evidence_store, FileEvidenceStore):
+        return _refuse("invalid_evidence_store")
     try:
         consumed = _validated_digest_set(
             consumed_lease_ids,
             "invalid_consumed_lease_ids",
             MAX_CONSUMED_LEASE_IDS,
-        )
-        retained = _validated_digest_set(
-            retained_evidence_digests,
-            "invalid_retained_evidence",
-            MAX_RETAINED_EVIDENCE_DIGESTS,
         )
         signed = _parse_signed_receipt(raw_signed_receipt)
     except VerificationError as exc:
@@ -964,24 +998,150 @@ def validate_verifier_receipt(
     if verdict_reason is not None:
         return _refuse(verdict_reason)
 
-    referenced_evidence = {
-        receipt.poc_artifact_digest,
-        *receipt.evidence_artifact_digests,
-        receipt.environment_digest,
-        receipt.effect_oracle_id,
-    }
-    if not referenced_evidence.issubset(retained):
-        return _refuse("referenced_evidence_missing")
+    resolution_reason = _artifact_resolution_reason(
+        artifact_resolution,
+        target_snapshot=target_snapshot,
+        evidence_store=evidence_store,
+        lease=lease,
+        receipt=receipt,
+        decision_time=decision_time,
+    )
+    if resolution_reason is not None:
+        return _refuse(resolution_reason)
 
-    return VerificationDecision(
-        accepted=True,
+    return VerificationProposal(
+        eligible=True,
         lease_id=lease.lease_id,
         receipt_id=receipt.receipt_id,
         verdict=receipt.verdict,
-        reason_code="accepted",
+        reason_code="proposal_valid",
         issuance_trust_snapshot_id=lease.issuance_trust_snapshot_id,
         decision_trust_snapshot_id=trust_store.snapshot_id,
+        artifact_resolution_id=artifact_resolution.resolution_id,
     )
+
+
+def _artifact_resolution_reason(
+    resolution: VerificationArtifactResolutionV1,
+    *,
+    target_snapshot: TargetSnapshotV1,
+    evidence_store: FileEvidenceStore,
+    lease: VerificationLeaseV1,
+    receipt: VerifierReceiptV1,
+    decision_time: int,
+) -> str | None:
+    """Revalidate one supplied resolution without treating it as retained authority."""
+
+    identity_comparisons = (
+        (resolution.verification_lease_id, lease.lease_id, "resolution_lease_mismatch"),
+        (resolution.mission_id, lease.mission_id, "resolution_mission_mismatch"),
+        (resolution.authority_id, lease.authority_id, "resolution_authority_mismatch"),
+        (resolution.target_snapshot_id, lease.target_snapshot_id, "resolution_target_mismatch"),
+        (resolution.candidate_id, lease.candidate_id, "resolution_candidate_mismatch"),
+        (target_snapshot.object_id, lease.target_snapshot_id, "target_snapshot_mismatch"),
+    )
+    for actual, expected, reason in identity_comparisons:
+        if actual != expected:
+            return reason
+    if resolution.resolved_at < lease.issued_at:
+        return "resolution_before_lease"
+    if resolution.resolved_at >= lease.expires_at:
+        return "resolution_after_expiry"
+    if resolution.resolved_at >= receipt.completed_at:
+        return "resolution_after_receipt"
+    if resolution.resolved_at > decision_time:
+        return "resolution_from_future"
+
+    target_metadata = tuple(
+        (
+            value.artifact_digest,
+            value.artifact_type,
+            value.relative_path,
+            value.size,
+        )
+        for value in resolution.target_artifacts
+    )
+    expected_target_metadata = tuple(
+        (
+            value.artifact_digest,
+            TARGET_ARTIFACT_TYPE_V1,
+            value.relative_path,
+            value.size,
+        )
+        for value in target_snapshot.files
+    )
+    if target_metadata != expected_target_metadata:
+        return "resolution_target_artifacts_mismatch"
+
+    if len(resolution.evidence_artifacts) != len(lease.evidence_artifact_digests):
+        return "resolution_evidence_artifacts_mismatch"
+    binding_values: list[
+        tuple[str, VerificationArtifactBindingV1, str, str]
+    ] = [
+        (
+            "poc",
+            resolution.poc_artifact,
+            lease.poc_artifact_digest,
+            VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["poc"],
+        ),
+    ]
+    binding_values.extend(
+        (
+            f"evidence_{index}",
+            binding,
+            expected_digest,
+            VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["evidence"],
+        )
+        for index, (binding, expected_digest) in enumerate(
+            zip(
+                resolution.evidence_artifacts,
+                lease.evidence_artifact_digests,
+                strict=True,
+            )
+        )
+    )
+    binding_values.extend(
+        [
+            (
+                "environment",
+                resolution.environment_artifact,
+                lease.environment_digest,
+                VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["environment"],
+            ),
+            (
+                "effect_oracle",
+                resolution.effect_oracle_artifact,
+                lease.effect_oracle_id,
+                VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["effect_oracle"],
+            ),
+        ]
+    )
+    bindings = tuple(binding_values)
+    for role, binding, expected_digest, expected_type in bindings:
+        if binding.artifact_digest != expected_digest:
+            return f"resolution_{role}_digest_mismatch"
+        if binding.artifact_type != expected_type:
+            return f"resolution_{role}_type_mismatch"
+        if binding.size <= 0:
+            return f"resolution_{role}_empty"
+
+    try:
+        validate_etzio_fixture_snapshot(target_snapshot, evidence_store)
+    except EvidenceError:
+        return "resolved_target_unavailable"
+
+    for role, binding, _, _ in bindings:
+        try:
+            data = evidence_store.get_typed(
+                binding.artifact_digest,
+                expected_type=binding.artifact_type,
+                maximum=binding.size,
+            )
+        except EvidenceError:
+            return f"resolved_{role}_artifact_unavailable"
+        if len(data) != binding.size:
+            return f"resolved_{role}_artifact_size_mismatch"
+    return None
 
 
 def _validate_lease_values(values: Mapping[str, object]) -> None:
@@ -1361,9 +1521,9 @@ def _protocol_reason(exc: ProtocolError) -> str:
     return "invalid_envelope"
 
 
-def _refuse(reason_code: str) -> VerificationDecision:
-    return VerificationDecision(
-        accepted=False,
+def _refuse(reason_code: str) -> VerificationProposal:
+    return VerificationProposal(
+        eligible=False,
         lease_id=None,
         receipt_id=None,
         verdict=None,
