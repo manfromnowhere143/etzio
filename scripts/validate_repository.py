@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from etzio.kernel.events_v1 import (  # noqa: E402
+    EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1,
     EVENT_PAYLOAD_FIELDS_BY_KIND_V1,
     EVENT_UNIT_BY_KIND_V1,
 )
@@ -28,6 +29,10 @@ from etzio.protocol import (  # noqa: E402
     OPTIONALLY_ATTESTED_OBJECT_KINDS_V1,
     SEMANTIC_BODY_FIELDS_BY_KIND_V1,
     SUPPORTED_OBJECT_KINDS,
+)
+from etzio.verification import (  # noqa: E402
+    VERIFIER_TRUST_KEY_FIELDS_V1,
+    VERIFIER_TRUST_SNAPSHOT_FIELDS_V1,
 )
 
 EXPECTED_AUTHOR = ("Daniel Wahnich", "cogitoergosum143@gmail.com")
@@ -50,6 +55,7 @@ REQUIRED_PATHS = (
     "docs/decisions/0001-foundation-integrity-before-breadth.md",
     "docs/decisions/0002-canonical-governed-fixture-boundary.md",
     "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md",
+    "docs/decisions/0004-kernel-issued-verification-leases.md",
     "docs/decisions/README.md",
     "schemas/finding.schema.json",
     "etzio/schemas/__init__.py",
@@ -272,6 +278,69 @@ def _exact_object_contract_issues(
     return issues
 
 
+def _resolve_direct_local_ref(
+    value: object,
+    definitions: dict[str, object],
+) -> object:
+    """Resolve an exact local-definition reference, retaining fail-closed structure."""
+
+    seen: set[str] = set()
+    while type(value) is dict and frozenset(value) == frozenset({"$ref"}):
+        reference = value.get("$ref")
+        if type(reference) is not str or not reference.startswith("#/$defs/"):
+            return None
+        name = reference.removeprefix("#/$defs/")
+        if not name or "/" in name or name in seen:
+            return None
+        seen.add(name)
+        value = definitions.get(name)
+    return value
+
+
+def _nested_event_envelope_contract_issues(
+    value: object,
+    definitions: dict[str, object],
+    expected_kind: str,
+    label: str,
+) -> list[str]:
+    """Require an unsigned, exactly typed envelope in a retained event payload."""
+
+    resolved = _resolve_direct_local_ref(value, definitions)
+    if type(resolved) is not dict:
+        return [f"{label} must contain a typed nested envelope contract"]
+
+    branches = resolved.get("allOf")
+    if type(branches) is not list or len(branches) != 2:
+        return [f"{label} nested envelope composition drifted"]
+
+    frame_ref = {"$ref": "#/$defs/envelope_frame"}
+    frame_count = sum(branch == frame_ref for branch in branches)
+    contract_branches = [branch for branch in branches if branch != frame_ref]
+    if frame_count != 1 or len(contract_branches) != 1:
+        return [f"{label} nested envelope frame drifted"]
+
+    contract = _resolve_direct_local_ref(contract_branches[0], definitions)
+    if (
+        type(contract) is not dict
+        or frozenset(contract) != frozenset({"properties"})
+        or type(contract.get("properties")) is not dict
+    ):
+        return [f"{label} nested envelope constraints drifted"]
+
+    properties = contract["properties"]
+    expected_fields = frozenset({"object_kind", "body", "attestations"})
+    issues: list[str] = []
+    if frozenset(properties) != expected_fields:
+        issues.append(f"{label} nested envelope constraint fields drifted")
+    if properties.get("object_kind") != {"const": expected_kind}:
+        issues.append(f"{label} nested envelope discriminator drifted")
+    if properties.get("body") != {"$ref": f"#/$defs/{expected_kind}_body"}:
+        issues.append(f"{label} nested envelope body reference drifted")
+    if properties.get("attestations") != {"$ref": "#/$defs/no_attestations"}:
+        issues.append(f"{label} nested envelope must remain unattested")
+    return issues
+
+
 def protocol_schema_contract_issues(schema: object) -> list[str]:
     """Check load-bearing schema/runtime structure for exact parity."""
 
@@ -432,6 +501,90 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
         elif attestation_contract != {"$ref": "#/$defs/no_attestations"}:
             issues.append(f"protocol-v1 {kind} must remain unattested")
 
+    issues.extend(
+        _exact_object_contract_issues(
+            definitions.get("verifier_trust_key"),
+            VERIFIER_TRUST_KEY_FIELDS_V1,
+            "protocol-v1 verifier trust key",
+        )
+    )
+    issues.extend(
+        _exact_object_contract_issues(
+            definitions.get("verifier_trust_snapshot"),
+            VERIFIER_TRUST_SNAPSHOT_FIELDS_V1,
+            "protocol-v1 verifier trust snapshot",
+        )
+    )
+    verification_event_payload = definitions.get(
+        "event_payload_verification_lease_issued"
+    )
+    verification_event_properties = (
+        verification_event_payload.get("properties")
+        if type(verification_event_payload) is dict
+        else None
+    )
+    if type(verification_event_properties) is not dict:
+        issues.append(
+            "protocol-v1 verification lease event properties are malformed"
+        )
+    else:
+        if verification_event_properties.get(
+            "verifier_trust_snapshot"
+        ) != {"$ref": "#/$defs/verifier_trust_snapshot"}:
+            issues.append(
+                "protocol-v1 verification lease event trust snapshot "
+                "reference drifted"
+            )
+        if verification_event_properties.get(
+            "verifier_trust_snapshot_id"
+        ) != {"$ref": "#/$defs/sha256_id"}:
+            issues.append(
+                "protocol-v1 verification lease event trust snapshot ID "
+                "reference drifted"
+            )
+
+    event_body_common = definitions.get("event_body_common")
+    event_body_common_properties = (
+        event_body_common.get("properties")
+        if type(event_body_common) is dict
+        else None
+    )
+    if type(event_body_common_properties) is not dict:
+        issues.append("protocol-v1 event common body properties are malformed")
+    else:
+        event_kind_contract = event_body_common_properties.get("kind")
+        raw_event_kinds = (
+            event_kind_contract.get("enum")
+            if type(event_kind_contract) is dict
+            else None
+        )
+        if (
+            type(raw_event_kinds) is not list
+            or any(type(kind) is not str for kind in raw_event_kinds)
+            or len(raw_event_kinds) != len(EVENT_UNIT_BY_KIND_V1)
+            or frozenset(raw_event_kinds) != frozenset(EVENT_UNIT_BY_KIND_V1)
+        ):
+            issues.append(
+                "protocol-v1 event common kind enum differs from the runtime contract"
+            )
+
+        expected_event_units = frozenset(EVENT_UNIT_BY_KIND_V1.values())
+        event_unit_contract = event_body_common_properties.get("unit")
+        raw_event_units = (
+            event_unit_contract.get("enum")
+            if type(event_unit_contract) is dict
+            else None
+        )
+        if (
+            type(raw_event_units) is not list
+            or any(type(unit) is not str for unit in raw_event_units)
+            or len(raw_event_units) != len(expected_event_units)
+            or frozenset(raw_event_units) != expected_event_units
+        ):
+            issues.append(
+                "protocol-v1 event common unit enum differs from the runtime contract"
+            )
+
     event_body = definitions.get("event_body")
     try:
         event_body_refs = [branch["$ref"] for branch in event_body["allOf"]]
@@ -499,16 +652,33 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
                 continue
             schema_units[kind] = properties["unit"]["const"]
             payload_name = properties["payload"]["$ref"].removeprefix("#/$defs/")
-            schema_payload_fields[kind] = frozenset(
-                definitions[payload_name]["required"]
-            )
+            payload_schema = definitions[payload_name]
+            schema_payload_fields[kind] = frozenset(payload_schema["required"])
             issues.extend(
                 _exact_object_contract_issues(
-                    definitions[payload_name],
+                    payload_schema,
                     EVENT_PAYLOAD_FIELDS_BY_KIND_V1[kind],
                     f"protocol-v1 {kind} event payload",
                 )
             )
+            payload_properties = payload_schema.get("properties")
+            for field, expected_kind in EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1.get(
+                kind,
+                {},
+            ).items():
+                nested_schema = (
+                    payload_properties.get(field)
+                    if type(payload_properties) is dict
+                    else None
+                )
+                issues.extend(
+                    _nested_event_envelope_contract_issues(
+                        nested_schema,
+                        definitions,
+                        expected_kind,
+                        f"protocol-v1 {kind}.{field}",
+                    )
+                )
     except (AttributeError, KeyError, TypeError):
         issues.append("protocol-v1 schema has malformed event dispatch metadata")
     if schema_units != dict(EVENT_UNIT_BY_KIND_V1):

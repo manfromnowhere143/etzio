@@ -14,6 +14,7 @@ from collections.abc import Callable
 from ..analysis import PYTHON_SAST_VERSION, analyze_python_bytes
 from ..authority import (
     AdmissionDecision,
+    AuthorityAdmissionV1,
     SignedAuthorityGrantV1,
     TrustStore,
     admit_authority,
@@ -25,7 +26,13 @@ from ..evidence import (
     validate_etzio_fixture_snapshot,
 )
 from ..mission_v1 import AnalysisLeaseV1, StaticCandidateV1
-from ..protocol import ProtocolError, content_id, thaw_json
+from ..protocol import (
+    EnvelopeV1,
+    ProtocolError,
+    canonical_dumps,
+    content_id,
+    thaw_json,
+)
 from .events_v1 import GENESIS_DIGEST, EventV1
 from .reducer import MissionProjection, ProjectionPhase, reduce_events
 from .store import SQLiteEventStore
@@ -34,6 +41,11 @@ _FULL_SHA = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 UNADMITTED_AUTHORITY_ID = content_id(
     "unadmitted_authority",
     {"meaning": "no_authority_was_admitted"},
+)
+_STATIC_ANALYSIS_ACTIONS = ("static_analysis",)
+_FIXTURE_VERIFICATION_ACTIONS = (
+    "modeled_fixture_verification",
+    "static_analysis",
 )
 
 
@@ -287,7 +299,81 @@ def run_fixture_scan(
     cancel_requested: bool = False,
     monotonic_ns: Callable[[], int] = time.monotonic_ns,
 ) -> MissionProjection:
-    """Admit, execute, persist, and recover one repository-fixture static scan."""
+    """Run a candidate-only fixture scan and close it after scan completion."""
+
+    return _run_fixture_scan(
+        mission_id=mission_id,
+        snapshot=snapshot,
+        signed_authority=signed_authority,
+        trust_store=trust_store,
+        evidence_store=evidence_store,
+        event_store=event_store,
+        decision_time=decision_time,
+        required_actions=_STATIC_ANALYSIS_ACTIONS,
+        retain_for_verification=False,
+        cancel_requested=cancel_requested,
+        monotonic_ns=monotonic_ns,
+    )
+
+
+def prepare_fixture_scan_for_verification(
+    *,
+    mission_id: str,
+    snapshot: TargetSnapshotV1,
+    signed_authority: SignedAuthorityGrantV1 | bytes | str,
+    trust_store: TrustStore,
+    evidence_store: FileEvidenceStore,
+    event_store: SQLiteEventStore,
+    decision_time: int,
+    cancel_requested: bool = False,
+    monotonic_ns: Callable[[], int] = time.monotonic_ns,
+) -> MissionProjection:
+    """Run an explicitly verification-authorized scan and retain its candidates.
+
+    A scan with candidates remains at ``scan_completed`` until the kernel issues
+    verification leases. A zero-candidate scan closes normally. This function executes
+    no proof artifact and cannot mint a receipt or finding.
+    """
+
+    return _run_fixture_scan(
+        mission_id=mission_id,
+        snapshot=snapshot,
+        signed_authority=signed_authority,
+        trust_store=trust_store,
+        evidence_store=evidence_store,
+        event_store=event_store,
+        decision_time=decision_time,
+        required_actions=_FIXTURE_VERIFICATION_ACTIONS,
+        retain_for_verification=True,
+        cancel_requested=cancel_requested,
+        monotonic_ns=monotonic_ns,
+    )
+
+
+def _retained_required_actions(retained: tuple[EventV1, ...]) -> tuple[str, ...]:
+    payload = thaw_json(retained[0].payload)
+    admission = AuthorityAdmissionV1.from_envelope(
+        EnvelopeV1.from_bytes(canonical_dumps(payload["admission"]))
+    )
+    return admission.required_actions
+
+
+def _run_fixture_scan(
+    *,
+    mission_id: str,
+    snapshot: TargetSnapshotV1,
+    signed_authority: SignedAuthorityGrantV1 | bytes | str,
+    trust_store: TrustStore,
+    evidence_store: FileEvidenceStore,
+    event_store: SQLiteEventStore,
+    decision_time: int,
+    required_actions: tuple[str, ...],
+    retain_for_verification: bool,
+    cancel_requested: bool,
+    monotonic_ns: Callable[[], int],
+) -> MissionProjection:
+    """Shared implementation for the two explicit fixture-scan mission contracts."""
+
     mission_id = _require_mission_id(mission_id)
     if not isinstance(snapshot, TargetSnapshotV1):
         raise FixtureMissionError("snapshot must be a TargetSnapshotV1")
@@ -306,8 +392,23 @@ def run_fixture_scan(
         if projection.target_id != snapshot.object_id:
             raise FixtureMissionError("mission ID is already bound to another target snapshot")
         if projection.is_terminal:
+            if (
+                projection.phase is ProjectionPhase.CLOSED
+                and _retained_required_actions(retained) != required_actions
+            ):
+                raise FixtureMissionError(
+                    "resume mission intent differs from the retained admission"
+                )
+            return projection
+        if _retained_required_actions(retained) != required_actions:
+            raise FixtureMissionError(
+                "resume mission intent differs from the retained admission"
+            )
+        if projection.phase is ProjectionPhase.AWAITING_VERIFICATION:
             return projection
         if projection.phase is ProjectionPhase.SCAN_COMPLETED:
+            if retain_for_verification and projection.candidate_events:
+                return projection
             if projection.scan_summary is None:
                 raise FixtureMissionError("completed scan omitted its retained summary")
             retained = _append_checked(
@@ -336,7 +437,7 @@ def run_fixture_scan(
         trust_store,
         decision_time=decision_time,
         expected_target_snapshot_id=snapshot.object_id,
-        required_actions=("static_analysis",),
+        required_actions=required_actions,
     )
     if not retained and not decision.accepted:
         return _refuse_initial_mission(
@@ -377,7 +478,8 @@ def run_fixture_scan(
             raise FixtureMissionError("mission ID is already bound to another authority")
         admitted_payload = thaw_json(retained[0].payload)
         if (
-            admitted_payload["grant"] != decision.grant.to_envelope().to_dict()
+            admitted_payload["grant"]
+            != decision.grant.to_envelope().to_dict()
             or admitted_payload["key_id"] != signed.key_id
             or admitted_payload["signature_b64"] != signed.signature_b64
         ):
@@ -603,6 +705,9 @@ def run_fixture_scan(
             raise FixtureMissionError("retained scan summary differs from deterministic replay")
     else:
         raise FixtureMissionError(f"cannot complete fixture scan from phase {projection.phase.value}")
+
+    if retain_for_verification and candidate_count:
+        return reduce_events(retained)
 
     retained = _append_checked(
         event_store,

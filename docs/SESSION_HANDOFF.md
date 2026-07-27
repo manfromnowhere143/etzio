@@ -29,8 +29,9 @@ If `.venv` already contains the exact locked dependencies, skip only environment
 and installation. Status, handoff reading, and validation remain mandatory. Then read
 [README](../README.md), [Charter](../CHARTER.md), [Architecture](ARCHITECTURE.md),
 [Roadmap](ROADMAP.md), [Frontier baseline](FRONTIER_BASELINE.md), [ADR-0001](decisions/0001-foundation-integrity-before-breadth.md),
-[ADR-0002](decisions/0002-canonical-governed-fixture-boundary.md), and
-[ADR-0003](decisions/0003-semantic-wire-schema-and-typed-kind-closure.md).
+[ADR-0002](decisions/0002-canonical-governed-fixture-boundary.md),
+[ADR-0003](decisions/0003-semantic-wire-schema-and-typed-kind-closure.md), and
+[ADR-0004](decisions/0004-kernel-issued-verification-leases.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -40,10 +41,10 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/semantic-protocol-schemas-v1`
-- Stacked on: `agent/foundation-integrity-v1`
-- Branch base: `ed79b02f6422c728f187224ee1d39424e961ce31`
-- Branch-base tree: `aa6c21d4fb47f669b9944900dfb8ced15baba3b8`
+- Current foundation-integrity branch: `agent/kernel-verification-leases-v1`
+- Stacked on: `agent/semantic-protocol-schemas-v1`
+- Branch base: `fbfa6ed8bb51d4482cfc350d1c7ade38ba324777`
+- Branch-base tree: `3b0b5e35118f6cf1f37b7ed9aab6063bb5a34cbc`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -100,7 +101,7 @@ exact authority
 
 - common protocol-v1 envelopes and strict canonical JSON;
 - installed semantic wire schemas and typed dispatch for every supported object kind;
-- exact closed-field schema/runtime parity for all eight semantic bodies and all twelve
+- exact closed-field schema/runtime parity for all eight semantic bodies and all thirteen
   event kind, unit, and payload forms;
 - Unicode 17.0.0 NFC, signed 64-bit integers, and fixed resource ceilings;
 - full domain-separated SHA-256 object and event identities;
@@ -110,20 +111,25 @@ exact authority
 - bounded analysis leases and stable candidate/claim identities;
 - byte-bound Python AST analysis with no production filesystem walker;
 - lifecycle-validated append-only SQLite storage and deterministic replay;
+- kernel-issued verification leases under the exact admitted
+  `modeled_fixture_verification` grant;
+- complete verifier trust and revocation evidence retained with each issuance;
+- replay-checked authority, target, candidate, producer, verifier, key,
+  `issuance_trust_snapshot_id`, time, and expiry bindings;
+- nonterminal `awaiting_verification` lifecycle state for verification-intent missions;
 - fail-closed refusal, cancellation, failure, timeout, budget, completion, and closure;
 - recoverable deterministic fixture scans without duplicate outputs; and
 - a supported fixture-only CLI that emits candidates and never findings.
 
-### Implemented as modeled contract primitives only
+### Implemented as modeled receipt contract primitives only
 
-- distinct verification leases;
-- verifier trust snapshots and revocations;
 - canonical one-attestation signed verifier receipts;
-- exact receipt/lease/digest/time/verdict bindings and resource ceilings.
+- exact receipt/lease/digest/time/verdict bindings and resource ceilings; and
+- distinct issuance- and decision-trust snapshot identities in modeled receipt decisions.
 
-Receipt validation authenticates a configured modeled statement. It does not establish
-kernel issuance, CAS evidence, atomic single use, actual independence, isolation, or a
-finding.
+Lease issuance now records an authorized modeled assignment. Receipt validation still only
+authenticates a configured modeled statement. It does not establish CAS evidence, atomic
+single use, actual independence, isolation, adjudication, or a finding.
 
 ### Retained behavior models
 
@@ -136,7 +142,7 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 On the current candidate bytes, `make verify` passed under both CPython 3.11.15 and
 CPython 3.14.2:
 
-- 314 tests passed;
+- 347 tests passed;
 - Ruff was clean;
 - the installed semantic protocol schema, three explicitly modeled legacy schemas, and
   repository policy passed;
@@ -176,6 +182,13 @@ Known-bads now cover:
 - action substitution and byte/time/output budget overflow before persistence;
 - candidate mission/authority/lease/source substitution;
 - receipt signature, verifier, lease, verdict, time, and digest substitution;
+- verification issuance without the exact admitted action, against an unknown or substituted
+  candidate, under a malformed/substituted trust snapshot, to the candidate producer, or
+  to an unknown, revoked, or wrong-role verifier key;
+- verification lease target, authority, time, expiry, event-unit, and conflicting
+  reissuance substitution;
+- issuance-trust identity substitution, decision-trust separation, and post-commit
+  different-candidate interleaving;
 - oversized receipt/trust/revocation/evidence collections;
 - crash-after-append replay without duplicate candidates;
 - late recovery before lease issuance and completed-scan closure after grant/trust
@@ -184,12 +197,12 @@ Known-bads now cover:
 
 ## Open foundation-integrity blockers
 
-1. Verification leases are not issued by the kernel under an admitted
-   `modeled_fixture_verification` grant.
-2. Receipt digest membership does not resolve and type-check retained CAS bytes.
-3. Receipt acceptance and lease consumption are not one atomic durable transaction.
-4. Complete receipt adjudication is not part of canonical mission history.
-5. Authority/verifier clock and revocation snapshot freshness are not externally proved.
+1. Receipt digest membership does not resolve and type-check retained CAS bytes.
+2. Receipt acceptance and lease consumption are not one atomic durable transaction.
+3. Complete receipt adjudication is not part of canonical mission history.
+4. Authority/verifier clock and revocation snapshot freshness are not externally proved.
+5. Issued leases have no canonical expiry, cancellation, supersession, reassignment, or
+   terminal recovery event.
 6. SQLite event heads are not externally authenticated or anchored.
 7. SQLite retains a documented same-user pathname race.
 8. Separate verifier labels and keys do not prove separate principals, processes, or
@@ -203,10 +216,10 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-Next, issue verification leases inside the kernel under the admitted grant. Then add typed
-CAS resolution, atomic receipt acceptance/single-use consumption, canonical adjudication
-history, trusted time, and authenticated external head anchoring with concurrency and
-substitution known-bads.
+Next, resolve every receipt reference from retained CAS bytes with its expected type. Then
+add atomic receipt acceptance/single-use consumption, canonical adjudication history,
+trusted time, and authenticated external head anchoring with concurrency and substitution
+known-bads.
 
 ### Mission 2 — independent proof plane
 

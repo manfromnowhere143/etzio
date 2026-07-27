@@ -149,6 +149,7 @@ SEMANTIC_BODY_FIELDS_BY_KIND_V1: Final = MappingProxyType(
                 "target_snapshot_id",
                 "verifier_id",
                 "verifier_key_id",
+                "issuance_trust_snapshot_id",
             }
         ),
         "verifier_receipt": frozenset(

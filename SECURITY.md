@@ -5,11 +5,13 @@ currently approved for live targets or untrusted exploit execution.
 
 ## Current security boundary
 
-The only supported executable research path is the repository-owned clean or vulnerable
-Python fixture selected by `etzio --fixture ...`. That path admits a signed, expiring
-fixture grant; resolves an exact manifest-backed content-addressed snapshot; emits stable
-candidate observations; and persists a lifecycle-checked hash chain in a private SQLite
-store. The supported command has no arbitrary target-path argument.
+The only supported research bytes are the repository-owned clean or vulnerable Python
+fixture. The `etzio --fixture ...` command admits a signed, expiring fixture grant; resolves
+an exact manifest-backed content-addressed snapshot; emits stable candidate observations;
+and persists a lifecycle-checked hash chain in a private SQLite store. The supported command
+has no arbitrary target-path argument. An explicit fixture-only kernel path can retain a
+completed candidate scan for modeled verification assignment; it does not execute the
+assignment.
 
 Those controls prove only the bounded fixture slice:
 
@@ -21,9 +23,15 @@ Those controls prove only the bounded fixture slice:
 - the SQLite stream is durable and append-only through Etzio's API, but it is not
   externally anchored and retains a documented same-user pathname race;
 - static observations are candidates only; this path creates no PoC or finding;
-- verifier leases and signed modeled-fixture receipts are contract primitives, not a
-  kernel-integrated acceptance path: authoritative lease issuance, CAS-byte resolution,
-  atomic lease consumption, and independent execution remain open; and
+- a verification-intent fixture mission can retain an AQUILA-issued lease under the exact
+  admitted `modeled_fixture_verification` grant, together with the verifier trust and
+  revocation snapshot used for assignment; the lease content-binds that issuance snapshot
+  identity, then stops in nonterminal `awaiting_verification`;
+- signed modeled-fixture receipts remain contract primitives, not a kernel-integrated
+  acceptance path: CAS-byte resolution, atomic receipt acceptance and lease consumption,
+  canonical adjudication, and independent execution remain open. Modeled receipt decisions
+  distinguish the issuance snapshot from a later decision-time revocation view, but do not
+  establish freshness of either; and
 - the separate `etzio.cli` foundation model executes only its deterministic in-process
   toy target. Its modeled verdicts are not vulnerability evidence.
 

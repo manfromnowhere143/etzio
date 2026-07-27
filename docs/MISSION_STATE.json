@@ -4,7 +4,7 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/semantic-protocol-schemas-v1",
+  "active_branch": "agent/kernel-verification-leases-v1",
   "foundation_base": {
     "commit": "745e860f9db25691b285834853fe23aa2ec73840",
     "tree": "42d8401e90900cfdf5e81ba415fdc44d9c51a98f"
@@ -29,7 +29,7 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "kernel_issued_authority_bound_verification_leases"
+    "next_gate": "typed_cas_resolution_for_receipt_references"
   },
   "authority": {
     "repository_modify": true,
@@ -48,7 +48,7 @@
   "implemented": [
     "canonical protocol-v1 envelope and strict JSON",
     "installed semantic wire schema and typed dispatch for all eight supported object kinds",
-    "exact closed-field schema/runtime parity for all eight semantic bodies and twelve event variants",
+    "exact closed-field schema/runtime parity for all eight semantic bodies and thirteen event variants",
     "Unicode 17.0.0 NFC and fixed protocol resource ceilings",
     "full domain-separated SHA-256 object and event identities",
     "signed authority grants and self-verifying admissions",
@@ -58,28 +58,32 @@
     "byte-bound Python AST analyzer without a production filesystem walker",
     "lifecycle-validated append-only SQLite event streams and replay",
     "distinct refusal, failure, cancellation, timeout, budget, completion, and closure states",
+    "kernel-issued authority-bound modeled-fixture verification leases",
+    "retained verifier trust and revocation snapshots for replayable lease assignment",
+    "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
   ],
   "modeled_only": [
     "original in-memory ten-unit behavior loop",
     "modeled target and eight-case verdict corpus",
-    "verification lease and signed modeled-receipt contract",
-    "verifier trust snapshot and receipt binding checks",
+    "signed modeled-receipt contract and receipt binding checks",
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "kernel-issued authority-bound verification leases",
     "typed CAS resolution of every receipt reference",
     "atomic receipt acceptance and single-use lease consumption",
     "canonical retention of complete receipt adjudication inputs",
+    "verification lease expiry cancellation supersession and terminal recovery",
     "trusted clock and revocation freshness",
     "authenticated external event-head anchoring",
+    "closure of the documented SQLite same-user pathname race",
     "proved verifier principal, process, and isolation separation"
   ],
   "not_implemented": [
     "isolated exploit construction",
     "separately isolated independent verification",
+    "kernel acceptance of verifier receipts and canonical adjudication",
     "kernel-minted findings",
     "live target adapters",
     "blockchain domain pack",
@@ -89,7 +93,7 @@
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
     "validation_status": "local_release_suite_passed",
-    "test_count": 314,
+    "test_count": 347,
     "validated_runtimes": [
       "CPython 3.11.15",
       "CPython 3.14.2"
@@ -118,6 +122,7 @@
   "decision_records": [
     "docs/decisions/0001-foundation-integrity-before-breadth.md",
     "docs/decisions/0002-canonical-governed-fixture-boundary.md",
-    "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md"
+    "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md",
+    "docs/decisions/0004-kernel-issued-verification-leases.md"
   ]
 }

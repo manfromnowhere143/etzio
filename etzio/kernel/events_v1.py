@@ -44,6 +44,7 @@ EVENT_UNIT_BY_KIND_V1: Final = MappingProxyType(
         "mission_admission_refused": "AQUILA",
         "mission_opened": "ETZIO",
         "analysis_lease_issued": "AQUILA",
+        "verification_lease_issued": "AQUILA",
         "candidate_recorded": "VELITES",
         "parse_failed": "VELITES",
         "scan_completed": "VELITES",
@@ -62,6 +63,13 @@ EVENT_PAYLOAD_FIELDS_BY_KIND_V1: Final = MappingProxyType(
         "mission_admission_refused": frozenset({"reason_code", "stage"}),
         "mission_opened": frozenset({"target_snapshot"}),
         "analysis_lease_issued": frozenset({"lease"}),
+        "verification_lease_issued": frozenset(
+            {
+                "lease",
+                "verifier_trust_snapshot",
+                "verifier_trust_snapshot_id",
+            }
+        ),
         "candidate_recorded": frozenset({"candidate"}),
         "parse_failed": frozenset(
             {"analysis_lease_id", "parse_failure", "source_artifact_digest"}
@@ -82,6 +90,24 @@ EVENT_PAYLOAD_FIELDS_BY_KIND_V1: Final = MappingProxyType(
         "scan_timed_out": frozenset({"reason_code"}),
         "scan_cancelled": frozenset({"reason_code"}),
         "budget_exhausted": frozenset({"reason_code"}),
+    }
+)
+EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1: Final = MappingProxyType(
+    {
+        "authority_admitted": MappingProxyType(
+            {
+                "admission": "authority_admission",
+                "grant": "authority_grant",
+            }
+        ),
+        "mission_opened": MappingProxyType(
+            {"target_snapshot": "target_snapshot"}
+        ),
+        "analysis_lease_issued": MappingProxyType({"lease": "analysis_lease"}),
+        "verification_lease_issued": MappingProxyType(
+            {"lease": "verification_lease"}
+        ),
+        "candidate_recorded": MappingProxyType({"candidate": "candidate"}),
     }
 )
 _PARSE_FAILURE_KEYS: Final = frozenset(
@@ -173,6 +199,7 @@ def _validate_payload(
     authority_id: str,
     target_id: str,
     decision_time: int,
+    prev_digest: str,
     payload: dict[str, Any],
 ) -> None:
     expected_unit = EVENT_UNIT_BY_KIND_V1.get(kind)
@@ -314,6 +341,93 @@ def _validate_payload(
             )
         return
 
+    if kind == "verification_lease_issued":
+        from ..verification import (
+            VERIFIER_ROLE,
+            VerificationError,
+            VerificationLeaseV1,
+            VerifierTrustStore,
+            derive_verification_lease_nonce,
+        )
+
+        lease_envelope = _require_nested_envelope(
+            payload, "lease", "verification_lease"
+        )
+        snapshot_id = _require_digest(
+            "verifier_trust_snapshot_id",
+            payload["verifier_trust_snapshot_id"],
+        )
+        try:
+            lease = VerificationLeaseV1.from_envelope(lease_envelope)
+            verifier_trust = VerifierTrustStore.from_snapshot_body(
+                payload["verifier_trust_snapshot"],
+                expected_snapshot_id=snapshot_id,
+            )
+        except VerificationError as exc:
+            raise EventIntegrityError(
+                "verification_lease_issued contains invalid verification evidence: "
+                f"{exc}"
+            ) from exc
+        if (
+            lease.mission_id != mission_id
+            or lease.authority_id != authority_id
+            or lease.target_snapshot_id != target_id
+        ):
+            raise EventIntegrityError(
+                "verification lease does not match the event identities"
+            )
+        if lease.issued_at != decision_time:
+            raise EventIntegrityError(
+                "verification lease issued_at must equal the event decision_time"
+            )
+        if lease.candidate_producer_id == lease.verifier_id:
+            raise EventIntegrityError(
+                "verification lease cannot assign the candidate producer"
+            )
+        trusted_key = verifier_trust.keys.get(lease.verifier_key_id)
+        if trusted_key is None:
+            raise EventIntegrityError(
+                "verification lease references an unknown verifier key"
+            )
+        if lease.verifier_key_id in verifier_trust.revoked_key_ids:
+            raise EventIntegrityError(
+                "verification lease references a revoked verifier key"
+            )
+        if VERIFIER_ROLE not in trusted_key.roles:
+            raise EventIntegrityError(
+                "verification lease key lacks the modeled verifier role"
+            )
+        if trusted_key.verifier_id != lease.verifier_id:
+            raise EventIntegrityError(
+                "verification lease verifier identity differs from its trusted key"
+            )
+        if lease.issuance_trust_snapshot_id != snapshot_id:
+            raise EventIntegrityError(
+                "verification lease does not bind its retained trust snapshot"
+            )
+        expected_nonce = derive_verification_lease_nonce(
+            prior_event_digest=prev_digest,
+            mission_id=lease.mission_id,
+            authority_id=lease.authority_id,
+            target_snapshot_id=lease.target_snapshot_id,
+            candidate_id=lease.candidate_id,
+            candidate_producer_id=lease.candidate_producer_id,
+            poc_artifact_digest=lease.poc_artifact_digest,
+            evidence_artifact_digests=lease.evidence_artifact_digests,
+            environment_digest=lease.environment_digest,
+            effect_oracle_id=lease.effect_oracle_id,
+            verifier_id=lease.verifier_id,
+            verifier_key_id=lease.verifier_key_id,
+            issued_at=lease.issued_at,
+            expires_at=lease.expires_at,
+            issuance_trust_snapshot_id=snapshot_id,
+        )
+        if lease.lease_nonce != expected_nonce:
+            raise EventIntegrityError(
+                "verification lease nonce is not kernel-derived"
+            )
+        return
+
     if kind == "candidate_recorded":
         from ..mission_v1 import MissionProtocolError, StaticCandidateV1
 
@@ -430,6 +544,7 @@ class EventV1:
                 authority_id=self.authority_id,
                 target_id=self.target_id,
                 decision_time=self.decision_time,
+                prev_digest=self.prev_digest,
                 payload=payload,
             )
             expected = EnvelopeV1.create("event", self._body(payload))

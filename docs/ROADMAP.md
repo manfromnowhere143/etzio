@@ -53,24 +53,31 @@ Status: **running**.
 
 Implemented in this phase:
 
-- installed semantic per-kind wire schemas for all eight typed objects and all twelve event
+- installed semantic per-kind wire schemas for all eight typed objects and all thirteen event
   variants;
 - runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and
 - fail-closed rejection of untyped reserved kinds, malformed signed-grant encoding, and
-  `"."` relative paths.
+  `"."` relative paths;
+- kernel-issued verification leases under the exact admitted
+  `modeled_fixture_verification` grant;
+- retained verifier trust and revocation evidence with exact candidate, producer, target,
+  authority, verifier, key, issuance-trust identity, time, and expiry bindings; and
+- a replayable nonterminal `awaiting_verification` state with substitution and conflicting
+  reissuance known-bads.
 
 Remaining required:
 
-1. verification leases issued by the kernel under the exact admitted grant;
-2. typed CAS resolution of target, PoC, environment, oracle, and evidence artifacts;
-3. canonical retention of trust snapshot, decision inputs, signed receipt, and result;
-4. atomic receipt acceptance and single-use lease consumption under concurrent writers;
+1. typed CAS resolution of target, PoC, environment, oracle, and evidence artifacts;
+2. canonical retention of receipt decision inputs, signed receipt, and adjudication;
+3. atomic receipt acceptance and single-use lease consumption under concurrent writers;
+4. explicit lease expiry, cancellation, supersession, and terminal recovery semantics;
 5. trusted time and revocation freshness;
 6. authenticated, externally anchored event heads; and
 7. known-bads for every new refusal, substitution, replay, and concurrency condition.
 
-Acceptance: a modeled receipt may be authenticated today, but no finding-admission claim is
-accepted until the implemented and remaining conditions above are retained and replayable.
+Acceptance: an authority-bound modeled verification assignment and a modeled receipt may be
+validated today, but no receipt or finding-admission claim is accepted until the remaining
+conditions above are retained and replayable.
 
 ## Phase 2 — independent proof plane
 

@@ -59,6 +59,7 @@ def issue_lease(signer: VerifierSigner, **overrides: object) -> VerificationLeas
         "effect_oracle_id": ORACLE_ID,
         "verifier_id": VERIFIER_ID,
         "verifier_key_id": signer.key_id,
+        "issuance_trust_snapshot_id": trusted_store(signer).snapshot_id,
         "issued_at": NOW,
         "expires_at": NOW + 100,
     }
@@ -192,12 +193,45 @@ def test_valid_modeled_fixture_receipt_is_exactly_bound_and_does_not_mint_findin
         receipt_id=receipt.receipt_id,
         verdict="confirmed",
         reason_code="accepted",
-        trust_snapshot_id=trusted_store(signer).snapshot_id,
+        issuance_trust_snapshot_id=lease.issuance_trust_snapshot_id,
+        decision_trust_snapshot_id=trusted_store(signer).snapshot_id,
     )
     assert not hasattr(decision, "finding_id")
     assert lease.lease_id == lease.to_envelope().object_id
     assert receipt.receipt_id == receipt.to_envelope().object_id
     assert signer.sign(receipt).envelope_bytes == canonical_dumps(strict_loads(signer.sign(receipt).envelope_bytes))
+
+
+def test_receipt_decision_distinguishes_issuance_and_later_trust_snapshots(
+    signer: VerifierSigner,
+) -> None:
+    issuance_store = trusted_store(signer)
+    lease = issue_lease(
+        signer,
+        issuance_trust_snapshot_id=issuance_store.snapshot_id,
+    )
+    receipt = issue_receipt(lease)
+    additional_signer = VerifierSigner.generate()
+    decision_store = VerifierTrustStore.from_keys(
+        (
+            issuance_store.keys[signer.key_id],
+            TrustedVerifierKey(
+                verifier_id="MARCELLUS",
+                public_key_bytes=additional_signer.public_key_bytes,
+                roles=frozenset({VERIFIER_ROLE}),
+            ),
+        )
+    )
+
+    decision = decide(signer.sign(receipt), decision_store, lease)
+
+    assert decision.accepted
+    assert decision.issuance_trust_snapshot_id == issuance_store.snapshot_id
+    assert decision.decision_trust_snapshot_id == decision_store.snapshot_id
+    assert (
+        decision.issuance_trust_snapshot_id
+        != decision.decision_trust_snapshot_id
+    )
 
 
 def test_signed_receipt_has_one_canonical_attestation_and_round_trips(
@@ -296,6 +330,7 @@ def test_lease_and_receipt_are_deeply_immutable_and_have_exact_v1_fields(
         "effect_oracle_id",
         "verifier_id",
         "verifier_key_id",
+        "issuance_trust_snapshot_id",
         "issued_at",
         "expires_at",
     )
@@ -309,6 +344,45 @@ def test_lease_id_changes_with_nonce_and_rejects_detached_semantics(signer: Veri
     with pytest.raises(VerificationError) as caught:
         replace(first, lease_id=digest("f"))
     assert caught.value.reason_code == "object_id_mismatch"
+
+
+def test_lease_identity_binds_the_exact_issuance_trust_snapshot(
+    signer: VerifierSigner,
+) -> None:
+    first = issue_lease(signer)
+    additional_signer = VerifierSigner.generate()
+    alternate_store = VerifierTrustStore.from_keys(
+        (
+            trusted_store(signer).keys[signer.key_id],
+            TrustedVerifierKey(
+                verifier_id="MARCELLUS",
+                public_key_bytes=additional_signer.public_key_bytes,
+                roles=frozenset({VERIFIER_ROLE}),
+            ),
+        )
+    )
+    second = issue_lease(
+        signer,
+        issuance_trust_snapshot_id=alternate_store.snapshot_id,
+    )
+
+    assert first.issuance_trust_snapshot_id != (
+        second.issuance_trust_snapshot_id
+    )
+    assert first.lease_nonce == second.lease_nonce
+    assert first.lease_id != second.lease_id
+
+
+def test_verification_lease_rejects_cross_role_artifact_aliasing(
+    signer: VerifierSigner,
+) -> None:
+    with pytest.raises(VerificationError) as caught:
+        issue_lease(
+            signer,
+            environment_digest=POC_DIGEST,
+        )
+
+    assert caught.value.reason_code == "artifact_role_collision"
 
 
 def test_unsigned_unknown_transport_fields_and_forged_signature_fail_closed(

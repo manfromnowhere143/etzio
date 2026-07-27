@@ -13,8 +13,10 @@ outside the generative workers.
 
 The first truthful vertical slice now exists. A signed fixture authority is admitted before
 mission opening; exact target bytes are retained by digest; VELITES analyzes those bytes
-under a bounded lease; canonical events are durably appended and replayed. This is meaningful
-foundation progress, but it is candidate generation—not a finding pipeline.
+under a bounded lease; canonical events are durably appended and replayed; and AQUILA can
+issue an authority-bound modeled-fixture verification lease for a retained candidate. This
+is meaningful foundation progress, but it is candidate generation plus verification
+assignment—not a finding pipeline.
 
 ## Target system
 
@@ -64,16 +66,19 @@ repository fixture manifest
   → mission_opened
   → AnalysisLeaseV1
   → StaticCandidateV1 / explicit parse failure
-  → scan terminal
-  → mission_closed
+  → scan_completed
+  ├─ ordinary fixture scan → mission_closed
+  └─ verification intent → VerificationLeaseV1 → awaiting_verification
 ```
 
 Only `clean_app.py` and `vulnerable_app.py` from the immutable repository manifest are
 admitted. `etzio.scan` has no arbitrary filesystem-target argument. The analyzer itself
 takes bytes and owns no filesystem walker.
 
-The path cannot create a PoC or finding. Network access, credentials, spending, disclosure,
-publication, and live-target interaction are absent.
+The verification-intent branch records an assignment only. The path cannot create or
+execute a PoC, accept a receipt, adjudicate a finding, or consume a verification lease.
+Network access, credentials, spending, disclosure, publication, and live-target interaction
+are absent.
 
 ## Protocol v1
 
@@ -102,7 +107,7 @@ Canonical JSON enforcement includes:
 - rejection of noncanonical wire spellings during parsing.
 
 The installed Draft 2020-12 schema is a semantic wire-shape guard for all eight supported
-typed object kinds. It has exact signed and unsigned grant/receipt forms plus twelve event
+typed object kinds. It has exact signed and unsigned grant/receipt forms plus thirteen event
 kind, unit, and payload branches. One immutable runtime registry closes every top-level
 semantic body field set; repository policy compares the schema's envelope, body,
 attestation, dispatch, event-unit, and event-payload structure against those contracts.
@@ -174,11 +179,12 @@ authority, target, decision time, typed payload, and previous event digest.
 - prevents updates and deletes through database triggers; and
 - reconstructs state exclusively through the reducer.
 
-The reducer cross-validates embedded authority, target, lease, and candidate objects. It
-enforces the exact `static_analysis` action and rejects target-byte, lease-time,
-candidate/output-count, and retained-epoch time violations before the offending row is
-inserted. Refusal, failure, cancellation, timeout, budget exhaustion, completed scan, and
-closed mission remain distinct.
+The reducer cross-validates embedded authority, target, lease, candidate, and verifier
+trust objects. It enforces the exact action for each lifecycle step and rejects target-byte,
+lease-time, verifier-role/identity/revocation, candidate/output-count, and retained-epoch
+time violations before the offending row is inserted. Refusal, failure, cancellation,
+timeout, budget exhaustion, completed scan, awaiting verification, and closed mission
+remain distinct.
 
 Limits:
 
@@ -208,24 +214,39 @@ alias analysis, dependency reasoning, dynamic proof, exploit construction, or br
 
 ## Verification boundary
 
-`VerificationLeaseV1` and `VerifierReceiptV1` model exact bindings for one fixture receipt.
-The verification lease has its own `verification_lease` object kind, avoiding type confusion
-with analysis leases. Signed receipts have a canonical exactly-one-attestation wire form,
-strict size/count limits, verifier trust snapshots, revocations, time checks, verdict
-consistency checks, and exact lease/evidence-digest bindings.
+`VerificationLeaseV1` and `VerifierReceiptV1` bind one modeled fixture assignment and
+receipt. The verification lease has its own `verification_lease` object kind, avoiding type
+confusion with analysis leases. The kernel now issues that lease from retained mission
+state only after the exact grant admits `modeled_fixture_verification`. The AQUILA
+`verification_lease_issued` event retains the lease, the complete verifier trust and
+revocation snapshot, and its content identity. The lease itself binds that
+`issuance_trust_snapshot_id`. Replay checks the exact authority, target, candidate,
+producer, verifier key, role, issuance-trust identity, issue time, and bounded expiry
+before reconstructing nonterminal `awaiting_verification`.
 
-This boundary authenticates a configured modeled verifier’s statement. It never mints a
-finding.
+Signed receipts retain a canonical exactly-one-attestation wire form, strict size/count
+limits, time and verdict consistency checks, and exact lease/evidence-digest bindings.
+Modeled decisions expose separate issuance- and decision-trust snapshot IDs so a later
+revocation view cannot rewrite assignment history; decision-snapshot freshness is not
+proved.
+Those remain modeled contract checks: no canonical lifecycle event accepts a receipt or
+mints a finding.
 
 Still open:
 
-1. the kernel must issue the verification lease under the admitted grant;
-2. referenced digests must resolve to typed retained CAS bytes;
-3. acceptance and single-use lease consumption must commit atomically;
-4. the complete decision inputs and signed receipt must enter canonical mission history;
-5. freshness of clock and trust snapshot must be established; and
-6. different labels/keys must be replaced by proved process, principal, and isolation
+1. referenced digests must resolve to expected typed retained CAS bytes;
+2. acceptance and single-use lease consumption must commit atomically;
+3. the complete decision inputs, signed receipt, and adjudication must enter canonical
+   mission history;
+4. freshness of clock and trust snapshot must be established; and
+5. different labels/keys must be replaced by proved process, principal, and isolation
    separation.
+
+This tranche deliberately permits one lifetime lease per candidate. It has no canonical
+expiry, cancellation, supersession, or reassignment event once a lease is issued, so an
+`awaiting_verification` mission cannot yet terminate or recover from an unavailable
+verifier. That lifecycle must be closed with the receipt-admission work rather than by
+silently reopening or overwriting a lease.
 
 ## Modeled components
 
@@ -294,12 +315,13 @@ scientific or policy authority.
 
 ## Next acceptance gate
 
-Semantic per-kind structural parity is retained. Foundation integrity is accepted only
-when retained evidence also shows:
+Kernel-issued, authority-bound modeled-fixture verification leases and semantic per-kind
+structural parity are retained. The next gate is typed CAS resolution for every receipt
+reference. Foundation integrity is accepted only when retained evidence also shows:
 
-- kernel-issued, authority-bound verification leases;
-- typed CAS resolution for every receipt reference;
+- exact expected-type resolution for every referenced receipt artifact;
 - atomic receipt acceptance and lease consumption under concurrency;
+- canonical retention of complete adjudication evidence;
 - trusted time and externally anchored event heads; and
 - every new consequential invariant rejecting a known-bad.
 

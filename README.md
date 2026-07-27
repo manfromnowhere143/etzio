@@ -18,9 +18,12 @@ scientific authority remain in the kernel.
 > **Status — architecture foundation, 2026-07-27.**
 > One repository-fixture candidate-generation path is implemented end to end. It admits a
 > signed authority record, resolves immutable content-addressed bytes, executes a narrow
-> Python analyzer under a bounded lease, and commits lifecycle-checked events to SQLite.
-> It does not construct exploits, verify findings independently, access a live target, or
-> learn. No production-readiness or superiority claim is made.
+> Python analyzer under a bounded lease, and commits lifecycle-checked events to SQLite. A
+> verification-intent mission can also retain a kernel-issued, authority-bound
+> modeled-fixture verification lease for a retained candidate and stop in
+> `awaiting_verification`. It does not
+> construct or execute exploits, accept a verifier receipt, adjudicate a finding, access a
+> live target, or learn. No production-readiness or superiority claim is made.
 
 ## Why Etzio
 
@@ -41,7 +44,8 @@ That yields six operating laws:
 
 ## Implemented vertical slice
 
-The supported `etzio` command can analyze only the two repository-owned manifest fixtures:
+The supported `etzio` command can analyze only the two repository-owned manifest fixtures
+and closes each completed scan:
 
 ```text
 manifest fixture → content-addressed target snapshot
@@ -51,22 +55,31 @@ manifest fixture → content-addressed target snapshot
   → byte-bound Python AST observations
   → stable candidate envelopes
   → append-only lifecycle-validated SQLite events
-  → deterministic replay and terminal closure
+  → deterministic replay
+  → terminal closure
 ```
 
-The command has no arbitrary target-path option. It emits candidates only; it cannot mint a
-finding, execute a PoC, use the network, access credentials, spend, disclose, or publish.
+An explicit fixture-only kernel path may instead admit both `static_analysis` and
+`modeled_fixture_verification`, retain a completed scan with candidates, issue an AQUILA
+verification lease, and stop in `awaiting_verification`. It is not PoC or verifier
+execution.
+
+The command has no arbitrary target-path option. It emits candidates only; neither fixture
+path can mint a finding, execute a PoC, use the network, access credentials, spend,
+disclose, or publish.
 
 The protocol-v1 foundation includes:
 
 - canonical JSON with duplicate-key rejection, Unicode 17.0.0 NFC, signed 64-bit integers,
   fixed resource ceilings, and full domain-separated SHA-256 identities;
 - an installed Draft 2020-12 semantic wire schema with exact branches for all eight typed
-  object kinds and all twelve event payload variants;
+  object kinds and all thirteen event payload variants;
 - Ed25519 authority and modeled-receipt attestations, including prime-subgroup public-key
   validation before a key can enter a trust snapshot;
 - exact fixture manifests and a private content-addressed evidence store;
 - immutable target, authority, lease, candidate, receipt, and event objects;
+- kernel-issued verification-lease events binding retained authority, target, candidate,
+  modeled-fixture grant evidence, and the exact issuance-trust snapshot identity;
 - compare-and-append SQLite storage with replay-time lifecycle validation; and
 - known-bad tests for signature, scope, identity, lifecycle, budget, corruption, replay,
   and filesystem-boundary failures.
@@ -76,12 +89,12 @@ The protocol-v1 foundation includes:
 | Plane | Unit | Responsibility | Repository status |
 |---|---|---|---|
 | Control | **ETZIO** | protocol, lifecycle, event ledger, replay | implemented for the fixture scan |
-| Governance | **AQUILA** | authority, scope, budgets, leases | implemented for fixture `static_analysis` only |
+| Governance | **AQUILA** | authority, scope, budgets, leases | fixture analysis and modeled-verification lease issuance implemented |
 | Recon | **SCIPIO** | target and attack-surface mapping | modeled |
 | Strategy | **FABIUS** | ranked falsifiable hypotheses | modeled |
 | Investigation | **VELITES** | leased probes and candidates | narrow byte-bound Python AST slice |
 | Proof | **MARCELLUS** | isolated exploit construction | modeled; isolation absent |
-| Verification | **CATO** | independent reproduction and verdict | receipt contract modeled; not kernel-integrated |
+| Verification | **CATO** | independent reproduction and verdict | receipt contract modeled; no execution or acceptance path |
 | Adjudication | **CAMILLUS** | evidence completeness, dedup, severity | modeled |
 | Disclosure | **FABRICIUS** | evidence-bound report draft | modeled; no external write |
 | Learning | **MINERVA** | evaluated offline strategy promotion | modeled |
@@ -124,14 +137,13 @@ mkdir -m 700 .etzio-state
 
 ## Open gates and next mission
 
-The next mission is not more detector breadth. It is completing the finding-admission
-boundary:
+The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments
+are retained; completing the finding-admission boundary still requires:
 
-1. issue verification leases inside the kernel under the admitted grant;
-2. resolve receipt references from retained CAS bytes;
-3. atomically consume a lease with its accepted signed receipt;
-4. establish a trusted clock and external event-head anchoring; and
-5. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
+1. resolve every receipt reference from retained CAS bytes with its expected type;
+2. atomically consume a lease with its accepted signed receipt and retain adjudication;
+3. establish a trusted clock and external event-head anchoring; and
+4. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
 
 Only then should Etzio run the benchmark-first EVM pack. Live bounty work remains a later,
 target-specific authorization stage.

@@ -39,9 +39,13 @@ from etzio.protocol import (
 from etzio.schemas import protocol_v1_schema
 from etzio.verification import (
     MODELED_FIXTURE_TIER,
+    VERIFIER_ROLE,
+    TrustedVerifierKey,
     VerificationLeaseV1,
     VerifierReceiptV1,
     VerifierSigner,
+    VerifierTrustStore,
+    derive_verification_lease_nonce,
 )
 
 NOW = 1_750_000_000
@@ -129,8 +133,17 @@ def _golden_graph() -> GoldenGraph:
         source_artifact_digest=_digest("b"),
     )
     verifier_signer = VerifierSigner.generate()
-    verification_lease = VerificationLeaseV1.issue(
-        lease_nonce="2" * 32,
+    verifier_trust_store = VerifierTrustStore.from_keys(
+        (
+            TrustedVerifierKey(
+                verifier_id="CATO",
+                public_key_bytes=verifier_signer.public_key_bytes,
+                roles=frozenset({VERIFIER_ROLE}),
+            ),
+        )
+    )
+    verification_nonce = derive_verification_lease_nonce(
+        prior_event_digest=GENESIS_DIGEST,
         mission_id=mission_id,
         authority_id=grant.grant_id,
         target_snapshot_id=snapshot.object_id,
@@ -142,6 +155,24 @@ def _golden_graph() -> GoldenGraph:
         effect_oracle_id=_digest("7"),
         verifier_id="CATO",
         verifier_key_id=verifier_signer.key_id,
+        issued_at=NOW,
+        expires_at=NOW + 60,
+        issuance_trust_snapshot_id=verifier_trust_store.snapshot_id,
+    )
+    verification_lease = VerificationLeaseV1.issue(
+        lease_nonce=verification_nonce,
+        mission_id=mission_id,
+        authority_id=grant.grant_id,
+        target_snapshot_id=snapshot.object_id,
+        candidate_id=candidate.candidate_id,
+        candidate_producer_id="VELITES",
+        poc_artifact_digest=_digest("3"),
+        evidence_artifact_digests=(_digest("4"), _digest("5")),
+        environment_digest=_digest("6"),
+        effect_oracle_id=_digest("7"),
+        verifier_id="CATO",
+        verifier_key_id=verifier_signer.key_id,
+        issuance_trust_snapshot_id=verifier_trust_store.snapshot_id,
         issued_at=NOW,
         expires_at=NOW + 60,
     )
@@ -168,6 +199,11 @@ def _golden_graph() -> GoldenGraph:
         },
         "mission_opened": {"target_snapshot": snapshot.to_envelope().to_dict()},
         "analysis_lease_issued": {"lease": analysis_lease.to_envelope().to_dict()},
+        "verification_lease_issued": {
+            "lease": verification_lease.to_envelope().to_dict(),
+            "verifier_trust_snapshot": verifier_trust_store.to_snapshot_body(),
+            "verifier_trust_snapshot_id": verifier_trust_store.snapshot_id,
+        },
         "candidate_recorded": {"candidate": candidate.to_envelope().to_dict()},
         "parse_failed": {
             "analysis_lease_id": analysis_lease.lease_id,

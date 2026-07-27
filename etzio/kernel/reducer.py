@@ -21,6 +21,7 @@ class ProjectionPhase(str, Enum):
     OPEN = "open"
     ANALYZING = "analyzing"
     SCAN_COMPLETED = "scan_completed"
+    AWAITING_VERIFICATION = "awaiting_verification"
     CLOSED = "closed"
     REFUSED = "refused"
     FAILED = "failed"
@@ -40,6 +41,7 @@ class MissionProjection:
     events: tuple[EventV1, ...]
     candidate_events: tuple[EventV1, ...]
     parse_failures: tuple[EventV1, ...]
+    verification_lease_events: tuple[EventV1, ...]
     refusal: EventV1 | None
     failure_event: EventV1 | None
     scan_summary: EventV1 | None
@@ -89,10 +91,15 @@ def _transition(phase: str, kind: str) -> str:
         if kind in _FAILURE_PHASES:
             return _FAILURE_PHASES[kind]
     elif phase == "scan_completed":
+        if kind == "verification_lease_issued":
+            return "awaiting_verification"
         if kind == "mission_closed":
             return "closed"
         if kind in _FAILURE_PHASES:
             return _FAILURE_PHASES[kind]
+    elif phase == "awaiting_verification":
+        if kind == "verification_lease_issued":
+            return "awaiting_verification"
     raise ReductionError(f"illegal event transition: {phase} -> {kind}")
 
 
@@ -115,7 +122,9 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
     as the first and sole event.  The successful minimal lifecycle is:
 
     ``authority_admitted → mission_opened → analysis_lease_issued → outputs* →
-    scan_completed → mission_closed``.
+    scan_completed → mission_closed``. A verification-intended stream instead continues
+    through one or more ``verification_lease_issued`` events and remains nonterminal
+    pending a later receipt-admission tranche.
     """
 
     retained = tuple(events)
@@ -134,6 +143,10 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
     candidates: list[EventV1] = []
     failures: list[EventV1] = []
     candidate_ids: set[str] = set()
+    candidate_events_by_id: dict[str, EventV1] = {}
+    verification_lease_events: list[EventV1] = []
+    verification_lease_ids: set[str] = set()
+    leased_candidate_ids: set[str] = set()
     admitted_grant: object | None = None
     admitted_admission: object | None = None
     target_snapshot: object | None = None
@@ -281,6 +294,7 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                     "candidate source artifact is absent from the target snapshot"
                 )
             candidate_ids.add(candidate.candidate_id)
+            candidate_events_by_id[candidate.candidate_id] = event
             candidates.append(event)
         elif event.kind == "parse_failed":
             if analysis_lease is None:
@@ -369,7 +383,113 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
             ):
                 raise ReductionError("scan_completed exceeds its analysis lease")
             scan_summary = event
+        elif event.kind == "verification_lease_issued":
+            from ..verification import (
+                VERIFIER_ROLE,
+                VerificationLeaseV1,
+                VerifierTrustStore,
+            )
+
+            lease = VerificationLeaseV1.from_envelope(
+                _nested_envelope(event, "lease")
+            )
+            verifier_trust = VerifierTrustStore.from_snapshot_body(
+                thaw_json(event.payload)["verifier_trust_snapshot"],
+                expected_snapshot_id=event.payload[
+                    "verifier_trust_snapshot_id"
+                ],
+            )
+            if admitted_grant is None or admitted_admission is None:
+                raise ReductionError(
+                    "verification lease has no admitted authority evidence"
+                )
+            if (
+                "modeled_fixture_verification"
+                not in admitted_admission.required_actions
+                or "modeled_fixture_verification"
+                not in admitted_grant.permitted_actions
+            ):
+                raise ReductionError(
+                    "verification lease lacks admitted "
+                    "modeled_fixture_verification authority"
+                )
+            candidate_event = candidate_events_by_id.get(lease.candidate_id)
+            if candidate_event is None:
+                raise ReductionError(
+                    "verification lease references no retained candidate"
+                )
+            if (
+                lease.mission_id != mission_id
+                or lease.authority_id != authority_id
+                or lease.target_snapshot_id != target_id
+                or lease.candidate_producer_id != candidate_event.unit
+            ):
+                raise ReductionError(
+                    "verification lease differs from retained mission bindings"
+                )
+            if lease.issued_at != event.decision_time:
+                raise ReductionError(
+                    "verification lease issued_at differs from its event"
+                )
+            grant_deadline = min(
+                admitted_grant.expires_at,
+                admitted_admission.decision_time
+                + admitted_grant.max_wallclock_seconds,
+            )
+            if not (
+                admitted_admission.decision_time
+                <= lease.issued_at
+                < lease.expires_at
+                <= grant_deadline
+            ):
+                raise ReductionError(
+                    "verification lease exceeds the admitted authority window"
+                )
+            if lease.candidate_producer_id == lease.verifier_id:
+                raise ReductionError(
+                    "verification lease assigns the candidate producer"
+                )
+            trusted_key = verifier_trust.keys.get(lease.verifier_key_id)
+            if (
+                trusted_key is None
+                or lease.verifier_key_id in verifier_trust.revoked_key_ids
+                or VERIFIER_ROLE not in trusted_key.roles
+                or trusted_key.verifier_id != lease.verifier_id
+                or lease.issuance_trust_snapshot_id
+                != event.payload["verifier_trust_snapshot_id"]
+            ):
+                raise ReductionError(
+                    "verification lease lacks an eligible retained verifier"
+                )
+            if lease.lease_id in verification_lease_ids:
+                raise ReductionError(
+                    "duplicate verification lease identity in mission stream"
+                )
+            if lease.candidate_id in leased_candidate_ids:
+                raise ReductionError(
+                    "candidate already has a verification lease"
+                )
+            if (
+                len(verification_lease_events) + 1
+                > admitted_grant.max_candidates
+            ):
+                raise ReductionError(
+                    "verification lease count exceeds the admitted candidate ceiling"
+                )
+            verification_lease_ids.add(lease.lease_id)
+            leased_candidate_ids.add(lease.candidate_id)
+            verification_lease_events.append(event)
         elif event.kind == "mission_closed":
+            if (
+                admitted_admission is not None
+                and "modeled_fixture_verification"
+                in admitted_admission.required_actions
+                and candidates
+            ):
+                raise ReductionError(
+                    "verification-intended mission with candidates cannot close "
+                    "before receipt adjudication"
+                )
             if event.payload["candidate_count"] != len(candidates):
                 raise ReductionError(
                     "mission_closed candidate_count does not match retained candidates"
@@ -398,6 +518,7 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
         "open": ProjectionPhase.OPEN,
         "analyzing": ProjectionPhase.ANALYZING,
         "scan_completed": ProjectionPhase.SCAN_COMPLETED,
+        "awaiting_verification": ProjectionPhase.AWAITING_VERIFICATION,
         "closed": ProjectionPhase.CLOSED,
         "refused": ProjectionPhase.REFUSED,
         "failed": ProjectionPhase.FAILED,
@@ -413,6 +534,7 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
         events=retained,
         candidate_events=tuple(candidates),
         parse_failures=tuple(failures),
+        verification_lease_events=tuple(verification_lease_events),
         refusal=refusal,
         failure_event=failure,
         scan_summary=scan_summary,

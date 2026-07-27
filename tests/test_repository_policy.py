@@ -103,6 +103,112 @@ def test_protocol_schema_contract_rejects_event_common_body_weakening():
     assert any("event body must reject unknown" in issue for issue in issues)
 
 
+def test_protocol_schema_contract_rejects_event_common_enum_drift():
+    schema = deepcopy(protocol_v1_schema())
+    event_properties = schema["$defs"]["event_body_common"]["properties"]
+    event_properties["kind"]["enum"].append("untyped_event")
+    event_properties["unit"]["enum"].append("UNTRUSTED")
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("event common kind enum" in issue for issue in issues)
+    assert any("event common unit enum" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_inline_nested_event_envelope_drift():
+    schema = deepcopy(protocol_v1_schema())
+    variants = schema["$defs"]["event_variants"]["oneOf"]
+    verification_lease_issued = next(
+        branch
+        for branch in variants
+        if branch["properties"]["kind"]["const"] == "verification_lease_issued"
+    )
+    payload_name = verification_lease_issued["properties"]["payload"][
+        "$ref"
+    ].removeprefix("#/$defs/")
+    nested = schema["$defs"][payload_name]["properties"]["lease"]
+    constraints = nested["allOf"][1]["properties"]
+    constraints["object_kind"]["const"] = "analysis_lease"
+    constraints["body"]["$ref"] = "#/$defs/analysis_lease_body"
+    constraints["attestations"]["$ref"] = "#/$defs/one_ed25519_attestation"
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any(
+        "verification_lease_issued.lease" in issue and "discriminator" in issue
+        for issue in issues
+    )
+    assert any(
+        "verification_lease_issued.lease" in issue and "body reference" in issue
+        for issue in issues
+    )
+    assert any(
+        "verification_lease_issued.lease" in issue and "unattested" in issue
+        for issue in issues
+    )
+
+
+def test_protocol_schema_contract_rejects_verifier_trust_contract_drift():
+    schema = deepcopy(protocol_v1_schema())
+    snapshot = schema["$defs"]["verifier_trust_snapshot"]
+    snapshot["required"].remove("revoked_lease_ids")
+    snapshot["additionalProperties"] = True
+    key = schema["$defs"]["verifier_trust_key"]
+    key["required"].remove("verifier_id")
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any(
+        "verifier trust snapshot required fields" in issue
+        for issue in issues
+    )
+    assert any(
+        "verifier trust snapshot must reject unknown" in issue
+        for issue in issues
+    )
+    assert any(
+        "verifier trust key required fields" in issue
+        for issue in issues
+    )
+
+
+def test_protocol_schema_contract_rejects_verifier_trust_reference_drift():
+    schema = deepcopy(protocol_v1_schema())
+    payload = schema["$defs"]["event_payload_verification_lease_issued"]
+    payload["properties"]["verifier_trust_snapshot"] = {"type": "object"}
+    payload["properties"]["verifier_trust_snapshot_id"] = {"type": "string"}
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("event trust snapshot reference" in issue for issue in issues)
+    assert any(
+        "event trust snapshot ID reference" in issue for issue in issues
+    )
+
+
+def test_protocol_schema_contract_rejects_direct_ref_to_signed_nested_envelope():
+    schema = deepcopy(protocol_v1_schema())
+    variants = schema["$defs"]["event_variants"]["oneOf"]
+    authority_admitted = next(
+        branch
+        for branch in variants
+        if branch["properties"]["kind"]["const"] == "authority_admitted"
+    )
+    payload_name = authority_admitted["properties"]["payload"]["$ref"].removeprefix(
+        "#/$defs/"
+    )
+    schema["$defs"][payload_name]["properties"]["grant"] = {
+        "$ref": "#/$defs/signed_authority_grant_envelope"
+    }
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any(
+        "authority_admitted.grant" in issue and "unattested" in issue
+        for issue in issues
+    )
+
+
 def test_protocol_schema_contract_rejects_attestation_policy_drift():
     schema = deepcopy(protocol_v1_schema())
     schema["$defs"]["candidate_case"]["properties"]["attestations"] = {

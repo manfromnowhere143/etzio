@@ -10,8 +10,9 @@ this foundation boundary is ``modeled_fixture``.
 Lease consumption must be committed atomically by the lifecycle kernel alongside the
 accepted receipt event.  :func:`validate_verifier_receipt` observes the caller-supplied
 set of already-consumed lease IDs but deliberately does not mutate external state.
-Verifier trust snapshots are deterministic retrospective evidence; this module does not
-establish that a supplied snapshot or clock was fresh at decision time.
+The lease binds its issuance-trust snapshot identity, while receipt decisions separately
+identify the supplied decision-time revocation view. These are deterministic retrospective
+identities; this module does not establish snapshot continuity, freshness, or trusted time.
 """
 
 from __future__ import annotations
@@ -64,8 +65,17 @@ _LEASE_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1["verification_lease"
 _RECEIPT_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1["verifier_receipt"]
 _SIGNED_FIELDS: Final = frozenset({"envelope_bytes", "key_id", "signature_b64"})
 _ATTESTATION_FIELDS: Final = frozenset({"algorithm", "key_id", "signature_b64"})
-_TRUST_SNAPSHOT_FIELDS: Final = frozenset({"keys", "revoked_key_ids", "revoked_lease_ids", "revoked_receipt_ids"})
-_TRUST_SNAPSHOT_KEY_FIELDS: Final = frozenset({"key_id", "public_key_b64", "roles", "verifier_id"})
+VERIFIER_TRUST_SNAPSHOT_FIELDS_V1: Final = frozenset(
+    {
+        "keys",
+        "revoked_key_ids",
+        "revoked_lease_ids",
+        "revoked_receipt_ids",
+    }
+)
+VERIFIER_TRUST_KEY_FIELDS_V1: Final = frozenset(
+    {"key_id", "public_key_b64", "roles", "verifier_id"}
+)
 
 
 class VerificationError(ValueError):
@@ -76,13 +86,57 @@ class VerificationError(ValueError):
         self.reason_code = reason_code
 
 
+def derive_verification_lease_nonce(
+    *,
+    prior_event_digest: str,
+    mission_id: str,
+    authority_id: str,
+    target_snapshot_id: str,
+    candidate_id: str,
+    candidate_producer_id: str,
+    poc_artifact_digest: str,
+    evidence_artifact_digests: tuple[str, ...],
+    environment_digest: str,
+    effect_oracle_id: str,
+    verifier_id: str,
+    verifier_key_id: str,
+    issued_at: int,
+    expires_at: int,
+    issuance_trust_snapshot_id: str,
+) -> str:
+    """Derive public nonce material for one canonical kernel issuance event."""
+
+    digest = content_id(
+        "verification_lease_nonce",
+        {
+            "authority_id": authority_id,
+            "candidate_id": candidate_id,
+            "candidate_producer_id": candidate_producer_id,
+            "effect_oracle_id": effect_oracle_id,
+            "environment_digest": environment_digest,
+            "evidence_artifact_digests": list(evidence_artifact_digests),
+            "expires_at": expires_at,
+            "issued_at": issued_at,
+            "mission_id": mission_id,
+            "poc_artifact_digest": poc_artifact_digest,
+            "prior_event_digest": prior_event_digest,
+            "target_snapshot_id": target_snapshot_id,
+            "verifier_id": verifier_id,
+            "verifier_key_id": verifier_key_id,
+            "issuance_trust_snapshot_id": issuance_trust_snapshot_id,
+        },
+    )
+    return digest.removeprefix("sha256:")[:32]
+
+
 @dataclass(frozen=True, slots=True)
 class VerificationLeaseV1:
-    """One immutable, content-addressed assignment to a named verifier key.
+    """One immutable, content-addressed modeled assignment value.
 
-    ``lease_nonce`` is a caller-generated 128-bit uniqueness value represented by
-    exactly 32 lowercase hexadecimal characters.  It is public uniqueness material,
-    not a secret or an authentication token.
+    Construction alone grants no authority. A lease is kernel-issued only when the
+    lifecycle reducer accepts its canonical ``verification_lease_issued`` event.
+    ``lease_nonce`` is public 128-bit uniqueness material, not a secret or an
+    authentication token.
     """
 
     lease_id: str
@@ -98,6 +152,7 @@ class VerificationLeaseV1:
     effect_oracle_id: str
     verifier_id: str
     verifier_key_id: str
+    issuance_trust_snapshot_id: str
     issued_at: int
     expires_at: int
 
@@ -125,6 +180,7 @@ class VerificationLeaseV1:
         effect_oracle_id: str,
         verifier_id: str,
         verifier_key_id: str,
+        issuance_trust_snapshot_id: str,
         issued_at: int,
         expires_at: int,
     ) -> VerificationLeaseV1:
@@ -143,6 +199,7 @@ class VerificationLeaseV1:
             "effect_oracle_id": effect_oracle_id,
             "verifier_id": verifier_id,
             "verifier_key_id": verifier_key_id,
+            "issuance_trust_snapshot_id": issuance_trust_snapshot_id,
             "issued_at": issued_at,
             "expires_at": expires_at,
         }
@@ -197,6 +254,7 @@ class VerificationLeaseV1:
             "effect_oracle_id": self.effect_oracle_id,
             "verifier_id": self.verifier_id,
             "verifier_key_id": self.verifier_key_id,
+            "issuance_trust_snapshot_id": self.issuance_trust_snapshot_id,
             "issued_at": self.issued_at,
             "expires_at": self.expires_at,
         }
@@ -723,8 +781,10 @@ class VerifierTrustStore:
 class VerificationDecision:
     """A minimal receipt-admission result; this type never represents a finding.
 
-    The accepted result identifies the exact verifier trust snapshot. The lifecycle
-    kernel must retain that snapshot body with any future atomic receipt admission.
+    The accepted result distinguishes the lease's issuance-trust identity from the
+    decision-time revocation view. The lifecycle kernel must resolve the issuance
+    snapshot from canonical history and retain the decision snapshot body with any
+    future atomic receipt admission.
     """
 
     accepted: bool
@@ -732,7 +792,8 @@ class VerificationDecision:
     receipt_id: str | None
     verdict: str | None
     reason_code: str
-    trust_snapshot_id: str | None = None
+    issuance_trust_snapshot_id: str | None = None
+    decision_trust_snapshot_id: str | None = None
 
     def __post_init__(self) -> None:
         if type(self.accepted) is not bool:
@@ -745,8 +806,16 @@ class VerificationDecision:
                 or _FULL_DIGEST.fullmatch(self.receipt_id) is None
                 or self.verdict not in VERDICTS
                 or self.reason_code != "accepted"
-                or self.trust_snapshot_id is None
-                or _FULL_DIGEST.fullmatch(self.trust_snapshot_id) is None
+                or self.issuance_trust_snapshot_id is None
+                or _FULL_DIGEST.fullmatch(
+                    self.issuance_trust_snapshot_id
+                )
+                is None
+                or self.decision_trust_snapshot_id is None
+                or _FULL_DIGEST.fullmatch(
+                    self.decision_trust_snapshot_id
+                )
+                is None
             ):
                 raise VerificationError("invalid_decision", "accepted decision fields are inconsistent")
         elif any(
@@ -755,7 +824,8 @@ class VerificationDecision:
                 self.lease_id,
                 self.receipt_id,
                 self.verdict,
-                self.trust_snapshot_id,
+                self.issuance_trust_snapshot_id,
+                self.decision_trust_snapshot_id,
             )
         ):
             raise VerificationError("invalid_decision", "refused decisions cannot expose untrusted receipt claims")
@@ -909,7 +979,8 @@ def validate_verifier_receipt(
         receipt_id=receipt.receipt_id,
         verdict=receipt.verdict,
         reason_code="accepted",
-        trust_snapshot_id=trust_store.snapshot_id,
+        issuance_trust_snapshot_id=lease.issuance_trust_snapshot_id,
+        decision_trust_snapshot_id=trust_store.snapshot_id,
     )
 
 
@@ -927,12 +998,24 @@ def _validate_lease_values(values: Mapping[str, object]) -> None:
         "poc_artifact_digest",
         "environment_digest",
         "effect_oracle_id",
+        "issuance_trust_snapshot_id",
     ):
         _validate_digest(values[field], field)
     _validate_identity(values["candidate_producer_id"], "candidate_producer_id")
     _validate_identity(values["verifier_id"], "verifier_id")
     _validate_key_id(values["verifier_key_id"], "verifier_key_id")
     _validate_evidence_tuple(values["evidence_artifact_digests"])
+    artifact_roles = (
+        values["poc_artifact_digest"],
+        *values["evidence_artifact_digests"],
+        values["environment_digest"],
+        values["effect_oracle_id"],
+    )
+    if len(set(artifact_roles)) != len(artifact_roles):
+        raise VerificationError(
+            "artifact_role_collision",
+            "verification artifact roles must use distinct content identities",
+        )
     _validate_times(values["issued_at"], values["expires_at"])
 
 
@@ -1076,7 +1159,11 @@ def _decode_canonical_signature(value: object) -> bytes:
 
 
 def _trust_store_from_snapshot_body(body: object) -> VerifierTrustStore:
-    if type(body) is not dict or len(body) != len(_TRUST_SNAPSHOT_FIELDS) or set(body) != _TRUST_SNAPSHOT_FIELDS:
+    if (
+        type(body) is not dict
+        or len(body) != len(VERIFIER_TRUST_SNAPSHOT_FIELDS_V1)
+        or set(body) != VERIFIER_TRUST_SNAPSHOT_FIELDS_V1
+    ):
         raise VerificationError(
             "invalid_trust_snapshot",
             "trust snapshot has missing or unknown fields",
@@ -1111,8 +1198,8 @@ def _trust_store_from_snapshot_body(body: object) -> VerifierTrustStore:
     for entry in keys:
         if (
             type(entry) is not dict
-            or len(entry) != len(_TRUST_SNAPSHOT_KEY_FIELDS)
-            or set(entry) != _TRUST_SNAPSHOT_KEY_FIELDS
+            or len(entry) != len(VERIFIER_TRUST_KEY_FIELDS_V1)
+            or set(entry) != VERIFIER_TRUST_KEY_FIELDS_V1
         ):
             raise VerificationError(
                 "invalid_trust_snapshot",
