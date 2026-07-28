@@ -1,6 +1,6 @@
 # Etzio Roadmap
 
-Status: **architecture foundation**, updated 2026-07-27.
+Status: **architecture foundation**, updated 2026-07-28.
 
 The roadmap advances by retained evidence, not calendar dates. A phase may start only when
 its predecessor’s named acceptance conditions are reproduced.
@@ -53,7 +53,7 @@ Status: **running**.
 
 Implemented in this phase:
 
-- installed semantic per-kind wire schemas for all nine typed objects and all fourteen event
+- installed semantic per-kind wire schemas for all nine typed objects and all fifteen event
   variants;
 - runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and
 - fail-closed rejection of untyped reserved kinds, malformed signed-grant encoding, and
@@ -69,24 +69,40 @@ Implemented in this phase:
 - canonical per-lease resolution of every target and verification-input byte with exact
   role, type, size, order, time, and retained-state bindings; and
 - replay, current-CAS revalidation, aggregate-bound, substitution, crash, retry, and
-  concurrent-writer known-bads for the resolution boundary.
+  concurrent-writer known-bads for the resolution boundary;
+- signed receipt binding of the exact retained resolution plus four distinct execution,
+  effect, measured-environment, and termination output digest/size pairs;
+- fixed-order current-CAS revalidation of every output under a code-owned type and the
+  authority grant's one non-resetting byte ceiling;
+- one canonical receipt-admission event retaining the exact signed receipt, decision trust
+  snapshot, adjudication profile, and derived output bindings;
+- atomic single-use lease consumption, CAS-free committed retry, deterministic conflicting
+  receipt refusal after a competing commit is visible, and bounded one-retry reconciliation
+  of identical submissions under SQLite contention;
+- retryable `StoreBusyError` classification for SQLite `BUSY` or `LOCKED`, without
+  reclassifying bounded-contention exhaustion as corruption; and
+- reducer, schema, repository-policy, signature, revocation, substitution, byte-budget,
+  CAS-loss, direct-append, crash, retry, and concurrency known-bads for modeled-receipt
+  admission.
 
 Remaining required:
 
-1. canonical retention of receipt decision inputs, signed receipt, and adjudication;
-2. atomic receipt acceptance and single-use lease consumption under concurrent writers;
-3. separately content-bound execution, effect, measured-environment, and termination
-   outputs;
-4. explicit lease expiry, cancellation, supersession, and terminal recovery semantics;
-5. trusted time and revocation freshness;
-6. authenticated, externally anchored event heads; and
+1. explicit lease expiry, cancellation, supersession, reassignment, and terminal recovery
+   semantics;
+2. trusted time and revocation freshness;
+3. authenticated, externally anchored event heads;
+4. atomic retention shared by filesystem CAS and the SQLite event commit, or an equivalent
+   replay-safe protocol;
+5. closure of the documented same-user SQLite pathname race;
+6. structured independently produced execution evidence with a common measured run
+   identity; and
 7. known-bads for every new refusal, substitution, replay, and concurrency condition.
 
-Acceptance: an authority-bound modeled verification assignment and every predeclared input
-can be resolved and retained today. A modeled receipt can produce only a standalone
-proposal after matching that resolution and revalidating CAS bytes; no receipt or
-finding-admission claim is accepted until the remaining conditions above are retained and
-replayable.
+Current retained boundary: an authority-bound modeled verification assignment, every
+predeclared input, and one authenticated modeled receipt can be resolved and retained today.
+Receipt admission and lease consumption are one event. This authenticates a modeled
+statement and preserves its output descriptors and verdict; it does not establish
+execution, independence, truth, or a finding.
 
 ## Phase 2 — independent proof plane
 

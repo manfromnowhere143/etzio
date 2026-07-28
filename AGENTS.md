@@ -63,17 +63,22 @@ The first governed fixture vertical slice now has a canonical protocol envelope,
 authority admission, content-addressed target snapshot, stable candidates, lifecycle-checked
 SQLite replay, semantic schemas for every typed wire kind, fail-closed terminal states,
 kernel-issued authority-bound modeled-fixture verification leases, typed CAS resolution for
-every modeled verification input, and known-bad controls. It remains a narrow
-candidate-and-input-resolution proof, not a finding pipeline.
+every modeled verification input, atomic modeled-receipt admission, single-use lease
+consumption, and known-bad controls. The receipt signs the retained resolution and four
+typed output digest/size pairs, but those opaque outputs do not establish execution or a
+finding.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. atomically consume each lease with its accepted signed receipt and retain canonical
-   adjudication;
-2. define explicit lease expiry, cancellation, supersession, reassignment, and terminal
+1. define explicit lease expiry, cancellation, supersession, reassignment, and terminal
    recovery;
-3. establish a trusted clock boundary and externally anchor event heads; and
-4. prove every new refusal and concurrency invariant with a known-bad.
+2. establish a trusted clock boundary, revocation freshness, and externally anchor event
+   heads;
+3. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
+   pathname race;
+4. replace opaque modeled outputs with structured independently produced execution
+   evidence; and
+5. prove every new refusal and concurrency invariant with a known-bad.
 
 Then build MARCELLUS and independent CATO execution on an explicitly accepted Linux/KVM
 profile before the benchmark-first EVM domain pack.

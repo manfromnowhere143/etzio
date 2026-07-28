@@ -42,9 +42,7 @@ SEMANTIC_OBJECT_KINDS = frozenset(
     }
 )
 SUPPORTED_OBJECT_KINDS = SEMANTIC_OBJECT_KINDS
-OPTIONALLY_ATTESTED_OBJECT_KINDS_V1: Final = frozenset(
-    {"authority_grant", "verifier_receipt"}
-)
+OPTIONALLY_ATTESTED_OBJECT_KINDS_V1: Final = frozenset({"authority_grant", "verifier_receipt"})
 ENVELOPE_FIELDS_V1: Final = frozenset(
     {
         "attestations",
@@ -171,20 +169,29 @@ SEMANTIC_BODY_FIELDS_BY_KIND_V1: Final = MappingProxyType(
         ),
         "verifier_receipt": frozenset(
             {
+                "artifact_resolution_id",
                 "authority_id",
                 "candidate_id",
                 "candidate_producer_id",
                 "completed_at",
                 "effect_observed",
                 "effect_oracle_id",
+                "effect_output_digest",
+                "effect_output_size",
                 "environment_digest",
                 "evidence_artifact_digests",
                 "evidence_tier",
+                "execution_output_digest",
+                "execution_output_size",
                 "lease_id",
+                "measured_environment_output_digest",
+                "measured_environment_output_size",
                 "mission_id",
                 "oracle_satisfied",
                 "poc_artifact_digest",
                 "target_snapshot_id",
+                "termination_output_digest",
+                "termination_output_size",
                 "verdict",
                 "verifier_id",
                 "verifier_key_id",

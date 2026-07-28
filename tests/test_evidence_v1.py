@@ -13,6 +13,8 @@ import etzio.evidence as evidence
 from etzio.evidence import (
     VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1,
     VERIFICATION_ARTIFACT_TYPES_V1,
+    VERIFICATION_INPUT_ARTIFACT_TYPE_BY_ROLE_V1,
+    VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1,
     ArtifactReceipt,
     EvidenceError,
     FileEvidenceStore,
@@ -29,15 +31,29 @@ from etzio.evidence import (
 
 
 def test_typed_artifact_registry_and_digest_vectors_are_exact_and_immutable():
-    assert dict(VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1) == {
+    expected_inputs = {
         "effect_oracle": "modeled_effect_oracle_spec",
         "environment": "modeled_environment_spec",
         "evidence": "modeled_supporting_evidence_input",
         "poc": "modeled_poc_input",
     }
+    expected_outputs = {
+        "effect_output": "modeled_effect_output",
+        "execution_output": "modeled_execution_output",
+        "measured_environment_output": "modeled_measured_environment_output",
+        "termination_output": "modeled_termination_output",
+    }
+    assert dict(VERIFICATION_INPUT_ARTIFACT_TYPE_BY_ROLE_V1) == expected_inputs
+    assert dict(VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1) == expected_outputs
+    assert dict(VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1) == {
+        **expected_inputs,
+        **expected_outputs,
+    }
     assert VERIFICATION_ARTIFACT_TYPES_V1 == frozenset(VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1.values())
     with pytest.raises(TypeError):
         VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["poc"] = "changed"  # type: ignore[index]
+    with pytest.raises(TypeError):
+        VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["effect_output"] = "changed"  # type: ignore[index]
 
     assert evidence_digest(b"exact bytes") == (
         "sha256:0c3353c8b645c751e1919e28cd21b20c6fd9ff6dddae6ab42741e1eab66c804a"

@@ -24,6 +24,7 @@ from etzio.kernel.events_v1 import (  # noqa: E402
     EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1,
     EVENT_PAYLOAD_FIELDS_BY_KIND_V1,
     EVENT_UNIT_BY_KIND_V1,
+    RECEIPT_ADMISSION_PROFILE_V1,
 )
 from etzio.protocol import (  # noqa: E402
     ENVELOPE_FIELDS_V1,
@@ -84,14 +85,21 @@ LEGACY_SCHEMA_PATHS = frozenset(
     }
 )
 EXPECTED_SEMANTIC_OBJECT_KIND_COUNT_V1 = 9
-EXPECTED_EVENT_KIND_COUNT_V1 = 14
+EXPECTED_EVENT_KIND_COUNT_V1 = 15
 EXPECTED_RESOLUTION_PROFILE_V1 = "modeled_fixture_typed_cas_v1"
+EXPECTED_RECEIPT_ADJUDICATION_PROFILE_V1 = (
+    "modeled_fixture_receipt_admission_v1"
+)
 EXPECTED_VERIFICATION_ARTIFACT_TYPES_V1 = frozenset(
     {
         "modeled_effect_oracle_spec",
+        "modeled_effect_output",
         "modeled_environment_spec",
+        "modeled_execution_output",
+        "modeled_measured_environment_output",
         "modeled_poc_input",
         "modeled_supporting_evidence_input",
+        "modeled_termination_output",
         "repository_fixture_source",
     }
 )
@@ -115,6 +123,48 @@ EXPECTED_RESOLUTION_BODY_FIELDS_V1 = frozenset(
         "target_artifacts",
         "target_snapshot_id",
         "verification_lease_id",
+    }
+)
+EXPECTED_VERIFIER_RECEIPT_BODY_FIELDS_V1 = frozenset(
+    {
+        "artifact_resolution_id",
+        "authority_id",
+        "candidate_id",
+        "candidate_producer_id",
+        "completed_at",
+        "effect_observed",
+        "effect_oracle_id",
+        "effect_output_digest",
+        "effect_output_size",
+        "environment_digest",
+        "evidence_artifact_digests",
+        "evidence_tier",
+        "execution_output_digest",
+        "execution_output_size",
+        "lease_id",
+        "measured_environment_output_digest",
+        "measured_environment_output_size",
+        "mission_id",
+        "oracle_satisfied",
+        "poc_artifact_digest",
+        "target_snapshot_id",
+        "termination_output_digest",
+        "termination_output_size",
+        "verdict",
+        "verifier_id",
+        "verifier_key_id",
+    }
+)
+EXPECTED_RECEIPT_ADMISSION_PAYLOAD_FIELDS_V1 = frozenset(
+    {
+        "adjudication_profile",
+        "decision_trust_snapshot",
+        "decision_trust_snapshot_id",
+        "effect_output_artifact",
+        "execution_output_artifact",
+        "measured_environment_output_artifact",
+        "receipt",
+        "termination_output_artifact",
     }
 )
 
@@ -344,8 +394,10 @@ def _nested_event_envelope_contract_issues(
     definitions: dict[str, object],
     expected_kind: str,
     label: str,
+    *,
+    expected_attestations_ref: str = "#/$defs/no_attestations",
 ) -> list[str]:
-    """Require an unsigned, exactly typed envelope in a retained event payload."""
+    """Require an exactly typed envelope with the named attestation contract."""
 
     resolved = _resolve_direct_local_ref(value, definitions)
     if type(resolved) is not dict:
@@ -378,8 +430,15 @@ def _nested_event_envelope_contract_issues(
         issues.append(f"{label} nested envelope discriminator drifted")
     if properties.get("body") != {"$ref": f"#/$defs/{expected_kind}_body"}:
         issues.append(f"{label} nested envelope body reference drifted")
-    if properties.get("attestations") != {"$ref": "#/$defs/no_attestations"}:
-        issues.append(f"{label} nested envelope must remain unattested")
+    if properties.get("attestations") != {
+        "$ref": expected_attestations_ref
+    }:
+        if expected_attestations_ref == "#/$defs/one_ed25519_attestation":
+            issues.append(
+                f"{label} nested envelope must require one Ed25519 attestation"
+            )
+        else:
+            issues.append(f"{label} nested envelope must remain unattested")
     return issues
 
 
@@ -465,10 +524,20 @@ def _verification_artifact_schema_contract_issues(
 
     role_bindings = {
         "modeled_effect_oracle_artifact_binding": "modeled_effect_oracle_spec",
+        "modeled_effect_output_artifact_binding": "modeled_effect_output",
         "modeled_environment_artifact_binding": "modeled_environment_spec",
+        "modeled_execution_output_artifact_binding": (
+            "modeled_execution_output"
+        ),
+        "modeled_measured_environment_output_artifact_binding": (
+            "modeled_measured_environment_output"
+        ),
         "modeled_poc_artifact_binding": "modeled_poc_input",
         "modeled_supporting_evidence_artifact_binding": (
             "modeled_supporting_evidence_input"
+        ),
+        "modeled_termination_output_artifact_binding": (
+            "modeled_termination_output"
         ),
     }
     for name, expected_type in role_bindings.items():
@@ -540,6 +609,111 @@ def _verification_artifact_schema_contract_issues(
     return issues
 
 
+def _receipt_admission_schema_contract_issues(
+    definitions: dict[str, object],
+) -> list[str]:
+    """Freeze the signed modeled-receipt admission wire boundary."""
+
+    issues: list[str] = []
+    receipt = definitions.get("verifier_receipt_body")
+    issues.extend(
+        _exact_object_contract_issues(
+            receipt,
+            EXPECTED_VERIFIER_RECEIPT_BODY_FIELDS_V1,
+            "protocol-v1 verifier receipt body",
+        )
+    )
+    receipt_properties = (
+        receipt.get("properties") if type(receipt) is dict else None
+    )
+    if type(receipt_properties) is dict:
+        for field in (
+            "artifact_resolution_id",
+            "effect_output_digest",
+            "execution_output_digest",
+            "measured_environment_output_digest",
+            "termination_output_digest",
+        ):
+            if receipt_properties.get(field) != {
+                "$ref": "#/$defs/sha256_id"
+            }:
+                issues.append(
+                    f"protocol-v1 verifier receipt {field} contract drifted"
+                )
+        expected_output_size = {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 67_108_864,
+        }
+        for field in (
+            "effect_output_size",
+            "execution_output_size",
+            "measured_environment_output_size",
+            "termination_output_size",
+        ):
+            if receipt_properties.get(field) != expected_output_size:
+                issues.append(
+                    f"protocol-v1 verifier receipt {field} contract drifted"
+                )
+
+    payload = definitions.get("event_payload_verifier_receipt_admitted")
+    issues.extend(
+        _exact_object_contract_issues(
+            payload,
+            EXPECTED_RECEIPT_ADMISSION_PAYLOAD_FIELDS_V1,
+            "protocol-v1 verifier receipt admission event payload",
+        )
+    )
+    payload_properties = (
+        payload.get("properties") if type(payload) is dict else None
+    )
+    if type(payload_properties) is not dict:
+        return issues
+
+    expected_properties = {
+        "adjudication_profile": {
+            "const": EXPECTED_RECEIPT_ADJUDICATION_PROFILE_V1
+        },
+        "decision_trust_snapshot": {
+            "$ref": "#/$defs/verifier_trust_snapshot"
+        },
+        "decision_trust_snapshot_id": {"$ref": "#/$defs/sha256_id"},
+        "effect_output_artifact": {
+            "$ref": "#/$defs/modeled_effect_output_artifact_binding"
+        },
+        "execution_output_artifact": {
+            "$ref": "#/$defs/modeled_execution_output_artifact_binding"
+        },
+        "measured_environment_output_artifact": {
+            "$ref": (
+                "#/$defs/"
+                "modeled_measured_environment_output_artifact_binding"
+            )
+        },
+        "termination_output_artifact": {
+            "$ref": "#/$defs/modeled_termination_output_artifact_binding"
+        },
+    }
+    for field, expected in expected_properties.items():
+        if payload_properties.get(field) != expected:
+            issues.append(
+                "protocol-v1 verifier receipt admission "
+                f"{field} contract drifted"
+            )
+    issues.extend(
+        _nested_event_envelope_contract_issues(
+            payload_properties.get("receipt"),
+            definitions,
+            "verifier_receipt",
+            "protocol-v1 verifier_receipt_admitted.receipt",
+            expected_attestations_ref=(
+                "#/$defs/one_ed25519_attestation"
+            ),
+        )
+    )
+    return issues
+
+
 def protocol_schema_contract_issues(schema: object) -> list[str]:
     """Check load-bearing schema/runtime structure for exact parity."""
 
@@ -562,6 +736,28 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
         issues.append("protocol-v1 runtime resolution profile drifted")
     if RESOLUTION_BODY_FIELDS_V1 != EXPECTED_RESOLUTION_BODY_FIELDS_V1:
         issues.append("protocol-v1 runtime resolution body fields drifted")
+    if (
+        SEMANTIC_BODY_FIELDS_BY_KIND_V1.get("verifier_receipt")
+        != EXPECTED_VERIFIER_RECEIPT_BODY_FIELDS_V1
+    ):
+        issues.append("protocol-v1 runtime verifier receipt body fields drifted")
+    if EVENT_UNIT_BY_KIND_V1.get("verifier_receipt_admitted") != "ETZIO":
+        issues.append("protocol-v1 runtime receipt admission event unit drifted")
+    if RECEIPT_ADMISSION_PROFILE_V1 != EXPECTED_RECEIPT_ADJUDICATION_PROFILE_V1:
+        issues.append("protocol-v1 runtime receipt admission profile drifted")
+    if (
+        EVENT_PAYLOAD_FIELDS_BY_KIND_V1.get("verifier_receipt_admitted")
+        != EXPECTED_RECEIPT_ADMISSION_PAYLOAD_FIELDS_V1
+    ):
+        issues.append(
+            "protocol-v1 runtime receipt admission payload fields drifted"
+        )
+    if EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1.get(
+        "verifier_receipt_admitted"
+    ) != {"receipt": "verifier_receipt"}:
+        issues.append(
+            "protocol-v1 runtime receipt admission nested envelope map drifted"
+        )
     if (
         VERIFICATION_ARTIFACT_BINDING_FIELDS_V1
         != EXPECTED_VERIFICATION_ARTIFACT_BINDING_FIELDS_V1
@@ -639,6 +835,7 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
         issues.append("protocol-v1 schema is missing its definitions")
         return issues
     issues.extend(_verification_artifact_schema_contract_issues(definitions))
+    issues.extend(_receipt_admission_schema_contract_issues(definitions))
 
     frame = definitions.get("envelope_frame")
     issues.extend(
@@ -900,6 +1097,14 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
                         definitions,
                         expected_kind,
                         f"protocol-v1 {kind}.{field}",
+                        expected_attestations_ref=(
+                            "#/$defs/one_ed25519_attestation"
+                            if (
+                                kind == "verifier_receipt_admitted"
+                                and field == "receipt"
+                            )
+                            else "#/$defs/no_attestations"
+                        ),
                     )
                 )
     except (AttributeError, KeyError, TypeError):

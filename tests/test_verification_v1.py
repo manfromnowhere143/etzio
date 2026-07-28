@@ -3,12 +3,14 @@ from __future__ import annotations
 import base64
 import tempfile
 from dataclasses import FrozenInstanceError, replace
+from pathlib import Path
 
 import pytest
 
 import etzio.verification as verification
 from etzio.evidence import (
     VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1,
+    VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1,
     FileEvidenceStore,
     SnapshotFileV1,
     TargetSnapshotV1,
@@ -18,16 +20,21 @@ from etzio.evidence import (
 )
 from etzio.protocol import EnvelopeV1, canonical_dumps, strict_loads, thaw_json
 from etzio.verification import (
+    MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1,
     MODELED_FIXTURE_TIER,
     VERIFIER_ROLE,
+    AuthenticatedVerifierReceiptV1,
     SignedVerifierReceiptV1,
     TrustedVerifierKey,
     VerificationError,
     VerificationLeaseV1,
+    VerificationOutputArtifactsV1,
     VerificationProposal,
     VerifierReceiptV1,
     VerifierSigner,
     VerifierTrustStore,
+    authenticate_verifier_receipt,
+    revalidate_verifier_receipt_artifacts,
     validate_verifier_receipt,
 )
 from etzio.verification_artifacts import (
@@ -72,6 +79,23 @@ EVIDENCE_BYTES = (
     b"modeled fixture supporting evidence alpha",
     b"modeled fixture supporting evidence beta",
 )
+OUTPUT_BYTES_BY_ROLE = {
+    "execution_output": b"modeled verifier execution output",
+    "effect_output": b"modeled verifier effect output",
+    "measured_environment_output": b"modeled measured-environment output",
+    "termination_output": b"modeled verifier termination output",
+}
+OUTPUT_DIGEST_BY_ROLE = {
+    role: typed_evidence_digest(
+        data,
+        artifact_type=VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[role],
+    )
+    for role, data in OUTPUT_BYTES_BY_ROLE.items()
+}
+OUTPUT_SIZE_BY_ROLE = {
+    role: len(data)
+    for role, data in OUTPUT_BYTES_BY_ROLE.items()
+}
 POC_DIGEST = typed_evidence_digest(
     POC_BYTES,
     artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["poc"],
@@ -98,6 +122,39 @@ _TYPED_BYTES_BY_DIGEST = {
     ORACLE_ID: ORACLE_BYTES,
     **_EVIDENCE_BY_DIGEST,
 }
+
+
+def expected_output_artifacts() -> VerificationOutputArtifactsV1:
+    def binding(role: str) -> VerificationArtifactBindingV1:
+        return VerificationArtifactBindingV1(
+            artifact_digest=OUTPUT_DIGEST_BY_ROLE[role],
+            artifact_type=VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[role],
+            size=OUTPUT_SIZE_BY_ROLE[role],
+        )
+
+    return VerificationOutputArtifactsV1(
+        execution_output_artifact=binding("execution_output"),
+        effect_output_artifact=binding("effect_output"),
+        measured_environment_output_artifact=binding("measured_environment_output"),
+        termination_output_artifact=binding("termination_output"),
+    )
+
+
+def install_raw_cas_file(
+    store: FileEvidenceStore,
+    artifact_digest: str,
+    *,
+    size: int,
+) -> None:
+    hexadecimal = artifact_digest.removeprefix("sha256:")
+    shard = store.root / hexadecimal[:2]
+    shard.mkdir(mode=0o700, exist_ok=True)
+    shard.chmod(0o700)
+    artifact = shard / hexadecimal[2:]
+    artifact.touch(mode=0o600)
+    artifact.chmod(0o600)
+    with artifact.open("r+b") as stream:
+        stream.truncate(size)
 
 
 @pytest.fixture
@@ -132,6 +189,7 @@ def receipt_values(
     **overrides: object,
 ) -> dict[str, object]:
     values: dict[str, object] = {
+        "artifact_resolution_id": resolution_for_lease(lease).resolution_id,
         "lease_id": lease.lease_id,
         "mission_id": lease.mission_id,
         "authority_id": lease.authority_id,
@@ -142,6 +200,16 @@ def receipt_values(
         "evidence_artifact_digests": lease.evidence_artifact_digests,
         "environment_digest": lease.environment_digest,
         "effect_oracle_id": lease.effect_oracle_id,
+        "execution_output_digest": OUTPUT_DIGEST_BY_ROLE["execution_output"],
+        "execution_output_size": OUTPUT_SIZE_BY_ROLE["execution_output"],
+        "effect_output_digest": OUTPUT_DIGEST_BY_ROLE["effect_output"],
+        "effect_output_size": OUTPUT_SIZE_BY_ROLE["effect_output"],
+        "measured_environment_output_digest": OUTPUT_DIGEST_BY_ROLE["measured_environment_output"],
+        "measured_environment_output_size": OUTPUT_SIZE_BY_ROLE[
+            "measured_environment_output"
+        ],
+        "termination_output_digest": OUTPUT_DIGEST_BY_ROLE["termination_output"],
+        "termination_output_size": OUTPUT_SIZE_BY_ROLE["termination_output"],
         "verifier_id": lease.verifier_id,
         "verifier_key_id": lease.verifier_key_id,
         "evidence_tier": MODELED_FIXTURE_TIER,
@@ -203,10 +271,7 @@ def resolution_for_lease(
             lease.environment_digest,
             "environment",
         ),
-        "evidence_artifacts": tuple(
-            binding(value, "evidence")
-            for value in lease.evidence_artifact_digests
-        ),
+        "evidence_artifacts": tuple(binding(value, "evidence") for value in lease.evidence_artifact_digests),
         "mission_id": lease.mission_id,
         "poc_artifact": binding(lease.poc_artifact_digest, "poc"),
         "resolved_at": NOW,
@@ -235,10 +300,7 @@ def populate_resolution_bytes(
         assert store.put(TARGET_BYTES).digest == TARGET_FILE.artifact_digest
     typed_roles = (
         ("poc", lease.poc_artifact_digest),
-        *(
-            ("evidence", value)
-            for value in lease.evidence_artifact_digests
-        ),
+        *(("evidence", value) for value in lease.evidence_artifact_digests),
         ("environment", lease.environment_digest),
         ("effect_oracle", lease.effect_oracle_id),
     )
@@ -249,6 +311,20 @@ def populate_resolution_bytes(
         receipt = store.put_typed(
             data,
             artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1[role],
+        )
+        assert receipt.digest == digest_value
+    for role in (
+        "execution_output",
+        "effect_output",
+        "measured_environment_output",
+        "termination_output",
+    ):
+        digest_value = OUTPUT_DIGEST_BY_ROLE[role]
+        if digest_value in omitted_digests:
+            continue
+        receipt = store.put_typed(
+            OUTPUT_BYTES_BY_ROLE[role],
+            artifact_type=VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[role],
         )
         assert receipt.digest == digest_value
 
@@ -265,6 +341,7 @@ def decide(
     target_snapshot: TargetSnapshotV1 = TARGET_SNAPSHOT,
     evidence_store: FileEvidenceStore | None = None,
     omitted_digests: frozenset[str] = frozenset(),
+    maximum_output_bytes: int = MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1,
 ) -> VerificationProposal:
     def run(local_store: FileEvidenceStore) -> VerificationProposal:
         populate_resolution_bytes(
@@ -279,13 +356,10 @@ def decide(
             decision_time=decision_time,
             expected_verdict=expected_verdict,
             consumed_lease_ids=consumed_lease_ids,
-            artifact_resolution=(
-                resolution_for_lease(lease)
-                if artifact_resolution is None
-                else artifact_resolution
-            ),
+            artifact_resolution=(resolution_for_lease(lease) if artifact_resolution is None else artifact_resolution),
             target_snapshot=target_snapshot,
             evidence_store=local_store,
+            maximum_output_bytes=maximum_output_bytes,
         )
 
     if evidence_store is not None:
@@ -316,8 +390,20 @@ def test_valid_receipt_produces_a_context_bound_proposal_and_no_finding(
     signer: VerifierSigner,
 ) -> None:
     lease = issue_lease(signer)
+    resolution = resolution_for_lease(lease)
     receipt = VerifierReceiptV1.for_lease(
         lease,
+        artifact_resolution_id=resolution.resolution_id,
+        execution_output_digest=OUTPUT_DIGEST_BY_ROLE["execution_output"],
+        execution_output_size=OUTPUT_SIZE_BY_ROLE["execution_output"],
+        effect_output_digest=OUTPUT_DIGEST_BY_ROLE["effect_output"],
+        effect_output_size=OUTPUT_SIZE_BY_ROLE["effect_output"],
+        measured_environment_output_digest=OUTPUT_DIGEST_BY_ROLE["measured_environment_output"],
+        measured_environment_output_size=OUTPUT_SIZE_BY_ROLE[
+            "measured_environment_output"
+        ],
+        termination_output_digest=OUTPUT_DIGEST_BY_ROLE["termination_output"],
+        termination_output_size=OUTPUT_SIZE_BY_ROLE["termination_output"],
         evidence_tier=MODELED_FIXTURE_TIER,
         verdict="confirmed",
         effect_observed=True,
@@ -335,7 +421,8 @@ def test_valid_receipt_produces_a_context_bound_proposal_and_no_finding(
         reason_code="proposal_valid",
         issuance_trust_snapshot_id=lease.issuance_trust_snapshot_id,
         decision_trust_snapshot_id=trusted_store(signer).snapshot_id,
-        artifact_resolution_id=resolution_for_lease(lease).resolution_id,
+        artifact_resolution_id=resolution.resolution_id,
+        output_artifacts=expected_output_artifacts(),
     )
     assert not hasattr(decision, "finding_id")
     assert lease.lease_id == lease.to_envelope().object_id
@@ -343,7 +430,388 @@ def test_valid_receipt_produces_a_context_bound_proposal_and_no_finding(
     assert signer.sign(receipt).envelope_bytes == canonical_dumps(strict_loads(signer.sign(receipt).envelope_bytes))
 
 
-def test_one_signed_receipt_can_only_propose_under_unsigned_resolution_contexts(
+def test_pure_authentication_binds_resolution_and_outputs_without_cas(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    resolution = resolution_for_lease(lease)
+    receipt = issue_receipt(lease)
+
+    authenticated = authenticate_verifier_receipt(
+        signer.sign(receipt),
+        trusted_store(signer),
+        lease=lease,
+        artifact_resolution=resolution,
+        decision_time=NOW + 10,
+        expected_verdict=None,
+    )
+
+    assert authenticated == AuthenticatedVerifierReceiptV1(
+        signed_receipt=signer.sign(receipt),
+        receipt=receipt,
+        lease=lease,
+        artifact_resolution=resolution,
+        decision_trust_snapshot_id=trusted_store(signer).snapshot_id,
+    )
+    assert authenticated.receipt.artifact_resolution_id == resolution.resolution_id
+    assert authenticated.receipt.execution_output_digest == OUTPUT_DIGEST_BY_ROLE["execution_output"]
+    assert authenticated.receipt.execution_output_size == OUTPUT_SIZE_BY_ROLE["execution_output"]
+
+
+def test_authenticated_result_rejects_incoherent_direct_construction(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    receipt = issue_receipt(lease)
+    authenticated = authenticate_verifier_receipt(
+        signer.sign(receipt),
+        trusted_store(signer),
+        lease=lease,
+        artifact_resolution=resolution_for_lease(lease),
+        decision_time=NOW + 11,
+    )
+    alternate = issue_receipt(
+        lease,
+        execution_output_digest=digest("a"),
+    )
+
+    with pytest.raises(VerificationError) as caught:
+        replace(authenticated, receipt=alternate)
+
+    assert caught.value.reason_code == "invalid_authenticated_receipt"
+
+
+def test_receipt_output_roles_are_required_unique_and_disjoint_from_inputs(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+
+    with pytest.raises(VerificationError) as duplicate:
+        issue_receipt(
+            lease,
+            execution_output_digest=OUTPUT_DIGEST_BY_ROLE["effect_output"],
+        )
+    assert duplicate.value.reason_code == "output_artifact_role_collision"
+
+    with pytest.raises(VerificationError) as input_alias:
+        issue_receipt(
+            lease,
+            execution_output_digest=lease.poc_artifact_digest,
+        )
+    assert input_alias.value.reason_code == "output_input_artifact_collision"
+
+    body = receipt_values(lease)
+    body.pop("termination_output_digest")
+    with pytest.raises(VerificationError) as missing:
+        VerifierReceiptV1.from_envelope(
+            EnvelopeV1.create(
+                "verifier_receipt",
+                {
+                    **body,
+                    "evidence_artifact_digests": list(lease.evidence_artifact_digests),
+                },
+            )
+        )
+    assert missing.value.reason_code == "malformed_receipt"
+
+    missing_size_body = receipt_values(lease)
+    missing_size_body.pop("termination_output_size")
+    with pytest.raises(VerificationError) as missing_size:
+        VerifierReceiptV1.from_envelope(
+            EnvelopeV1.create(
+                "verifier_receipt",
+                {
+                    **missing_size_body,
+                    "evidence_artifact_digests": list(
+                        lease.evidence_artifact_digests
+                    ),
+                },
+            )
+        )
+    assert missing_size.value.reason_code == "malformed_receipt"
+
+
+@pytest.mark.parametrize(
+    ("value", "reason"),
+    [
+        (0, "invalid_execution_output_size"),
+        (True, "invalid_execution_output_size"),
+        (
+            MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1 + 1,
+            "invalid_execution_output_size",
+        ),
+    ],
+)
+def test_signed_output_sizes_are_strict_positive_bounded_integers(
+    signer: VerifierSigner,
+    value: object,
+    reason: str,
+) -> None:
+    lease = issue_lease(signer)
+
+    with pytest.raises(VerificationError) as caught:
+        issue_receipt(
+            lease,
+            execution_output_size=value,
+        )
+
+    assert caught.value.reason_code == reason
+
+
+def test_authentication_rejects_a_signed_invalid_output_size(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    body = receipt_values(lease)
+    body["execution_output_size"] = False
+    body["evidence_artifact_digests"] = list(lease.evidence_artifact_digests)
+    signed = sign_envelope(
+        signer,
+        EnvelopeV1.create("verifier_receipt", body),
+    )
+
+    with pytest.raises(VerificationError) as caught:
+        authenticate_verifier_receipt(
+            signed,
+            trusted_store(signer),
+            lease=lease,
+            artifact_resolution=resolution_for_lease(lease),
+            decision_time=NOW + 11,
+        )
+
+    assert caught.value.reason_code == "invalid_execution_output_size"
+
+
+def test_signed_output_size_aggregate_has_one_64_mib_ceiling(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    per_role = (MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1 // 4) + 1
+
+    with pytest.raises(VerificationError) as caught:
+        issue_receipt(
+            lease,
+            execution_output_size=per_role,
+            effect_output_size=per_role,
+            measured_environment_output_size=per_role,
+            termination_output_size=per_role,
+        )
+
+    assert caught.value.reason_code == "verification_output_byte_ceiling_exceeded"
+
+
+def test_signed_output_digest_may_not_alias_a_resolved_target_artifact(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    receipt = issue_receipt(
+        lease,
+        execution_output_digest=TARGET_FILE.artifact_digest,
+    )
+
+    with pytest.raises(VerificationError) as caught:
+        authenticate_verifier_receipt(
+            signer.sign(receipt),
+            trusted_store(signer),
+            lease=lease,
+            artifact_resolution=resolution_for_lease(lease),
+            decision_time=NOW + 11,
+        )
+
+    assert caught.value.reason_code == "output_resolution_artifact_collision"
+
+
+@pytest.mark.parametrize(
+    ("role", "reason"),
+    [
+        (
+            "execution_output",
+            "resolved_execution_output_artifact_unavailable",
+        ),
+        ("effect_output", "resolved_effect_output_artifact_unavailable"),
+        (
+            "measured_environment_output",
+            "resolved_measured_environment_output_artifact_unavailable",
+        ),
+        (
+            "termination_output",
+            "resolved_termination_output_artifact_unavailable",
+        ),
+    ],
+)
+def test_every_signed_output_digest_must_resolve_under_its_code_owned_type(
+    signer: VerifierSigner,
+    role: str,
+    reason: str,
+) -> None:
+    lease = issue_lease(signer)
+
+    decision = decide(
+        signer.sign(issue_receipt(lease)),
+        trusted_store(signer),
+        lease,
+        omitted_digests=frozenset({OUTPUT_DIGEST_BY_ROLE[role]}),
+    )
+
+    assert decision.reason_code == reason
+
+
+def test_swapped_signed_output_roles_fail_the_typed_cas_domain(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    receipt = issue_receipt(
+        lease,
+        execution_output_digest=OUTPUT_DIGEST_BY_ROLE["effect_output"],
+        effect_output_digest=OUTPUT_DIGEST_BY_ROLE["execution_output"],
+    )
+
+    decision = decide(
+        signer.sign(receipt),
+        trusted_store(signer),
+        lease,
+    )
+
+    assert decision.reason_code == "resolved_execution_output_artifact_unavailable"
+
+
+def test_output_resolution_uses_fixed_role_order_and_exact_derived_bindings(
+    signer: VerifierSigner,
+    tmp_path: Path,
+) -> None:
+    class OrderedStore(FileEvidenceStore):
+        def __init__(self, root: str) -> None:
+            super().__init__(root)
+            self.typed_reads: list[str] = []
+
+        def get_typed(
+            self,
+            digest_value: str,
+            *,
+            expected_type: str,
+            maximum: int | None = None,
+        ) -> bytes:
+            self.typed_reads.append(expected_type)
+            return super().get_typed(
+                digest_value,
+                expected_type=expected_type,
+                maximum=maximum,
+            )
+
+    lease = issue_lease(signer)
+    store = OrderedStore(str(tmp_path))
+    receipt = issue_receipt(lease)
+    populate_resolution_bytes(store, lease)
+    authenticated = authenticate_verifier_receipt(
+        signer.sign(receipt),
+        trusted_store(signer),
+        lease=lease,
+        artifact_resolution=resolution_for_lease(lease),
+        decision_time=NOW + 11,
+        expected_verdict=None,
+    )
+    output_artifacts = revalidate_verifier_receipt_artifacts(
+        authenticated,
+        target_snapshot=TARGET_SNAPSHOT,
+        evidence_store=store,
+    )
+
+    assert output_artifacts == expected_output_artifacts()
+    assert store.typed_reads[-4:] == [
+        VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["execution_output"],
+        VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["effect_output"],
+        VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["measured_environment_output"],
+        VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["termination_output"],
+    ]
+
+
+def test_output_aggregate_uses_one_nonresetting_byte_allowance(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+    total = sum(len(value) for value in OUTPUT_BYTES_BY_ROLE.values())
+
+    decision = decide(
+        signer.sign(issue_receipt(lease)),
+        trusted_store(signer),
+        lease,
+        maximum_output_bytes=total - 1,
+    )
+
+    assert decision.reason_code == "verification_output_byte_ceiling_exceeded"
+
+
+@pytest.mark.parametrize(
+    "signed_size",
+    [
+        OUTPUT_SIZE_BY_ROLE["execution_output"] - 1,
+        OUTPUT_SIZE_BY_ROLE["execution_output"] + 1,
+    ],
+)
+def test_cas_output_size_must_exactly_equal_the_signed_size(
+    signer: VerifierSigner,
+    signed_size: int,
+) -> None:
+    lease = issue_lease(signer)
+
+    decision = decide(
+        signer.sign(
+            issue_receipt(
+                lease,
+                execution_output_size=signed_size,
+            )
+        ),
+        trusted_store(signer),
+        lease,
+    )
+
+    assert decision.reason_code == "resolved_execution_output_artifact_size_mismatch"
+
+
+def test_empty_signed_output_cannot_become_a_positive_binding(
+    signer: VerifierSigner,
+    tmp_path: Path,
+) -> None:
+    lease = issue_lease(signer)
+    store = FileEvidenceStore(tmp_path)
+    empty_output_digest = typed_evidence_digest(
+        b"",
+        artifact_type=VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[
+            "execution_output"
+        ],
+    )
+    install_raw_cas_file(store, empty_output_digest, size=0)
+
+    decision = decide(
+        signer.sign(
+            issue_receipt(
+                lease,
+                execution_output_digest=empty_output_digest,
+            )
+        ),
+        trusted_store(signer),
+        lease,
+        evidence_store=store,
+    )
+
+    assert decision.reason_code == "resolved_execution_output_artifact_size_mismatch"
+
+
+def test_single_signed_output_cannot_exceed_the_fixed_64_mib_ceiling(
+    signer: VerifierSigner,
+) -> None:
+    lease = issue_lease(signer)
+
+    with pytest.raises(VerificationError) as caught:
+        issue_receipt(
+            lease,
+            execution_output_size=MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1 + 1,
+        )
+
+    assert caught.value.reason_code == "invalid_execution_output_size"
+
+
+def test_one_signed_receipt_binds_exactly_one_resolution_context(
     signer: VerifierSigner,
 ) -> None:
     lease = issue_lease(signer)
@@ -367,8 +835,8 @@ def test_one_signed_receipt_can_only_propose_under_unsigned_resolution_contexts(
         ),
     )
 
-    assert first.eligible and second.eligible
-    assert first.artifact_resolution_id != second.artifact_resolution_id
+    assert first.eligible
+    assert second.reason_code == "artifact_resolution_mismatch"
     assert not hasattr(first, "accepted")
 
 
@@ -393,7 +861,12 @@ def test_modeled_receipt_requires_the_exact_lease_resolution(
     resolution = resolution_for_lease(lease, **overrides)
 
     decision = decide(
-        signer.sign(issue_receipt(lease)),
+        signer.sign(
+            issue_receipt(
+                lease,
+                artifact_resolution_id=resolution.resolution_id,
+            )
+        ),
         trusted_store(signer),
         lease,
         artifact_resolution=resolution,
@@ -408,8 +881,12 @@ def test_resolution_must_strictly_precede_receipt_completion(
     resolved_at: int,
 ) -> None:
     lease = issue_lease(signer)
-    receipt = issue_receipt(lease, completed_at=NOW + 1)
     resolution = resolution_for_lease(lease, resolved_at=resolved_at)
+    receipt = issue_receipt(
+        lease,
+        artifact_resolution_id=resolution.resolution_id,
+        completed_at=NOW + 1,
+    )
 
     decision = decide(
         signer.sign(receipt),
@@ -426,7 +903,6 @@ def test_resolution_artifact_and_target_substitution_fail_before_positive_propos
     signer: VerifierSigner,
 ) -> None:
     lease = issue_lease(signer)
-    signed = signer.sign(issue_receipt(lease))
     wrong_poc = VerificationArtifactBindingV1(
         artifact_digest=digest("a"),
         artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1["poc"],
@@ -438,28 +914,40 @@ def test_resolution_artifact_and_target_substitution_fail_before_positive_propos
         relative_path=TARGET_FILE.relative_path,
         size=TARGET_FILE.size,
     )
+    wrong_poc_resolution = resolution_for_lease(
+        lease,
+        poc_artifact=wrong_poc,
+    )
+    wrong_target_resolution = resolution_for_lease(
+        lease,
+        target_artifacts=(wrong_target,),
+    )
 
     assert (
         decide(
-            signed,
+            signer.sign(
+                issue_receipt(
+                    lease,
+                    artifact_resolution_id=wrong_poc_resolution.resolution_id,
+                )
+            ),
             trusted_store(signer),
             lease,
-            artifact_resolution=resolution_for_lease(
-                lease,
-                poc_artifact=wrong_poc,
-            ),
+            artifact_resolution=wrong_poc_resolution,
         ).reason_code
         == "resolution_poc_digest_mismatch"
     )
     assert (
         decide(
-            signed,
+            signer.sign(
+                issue_receipt(
+                    lease,
+                    artifact_resolution_id=(wrong_target_resolution.resolution_id),
+                )
+            ),
             trusted_store(signer),
             lease,
-            artifact_resolution=resolution_for_lease(
-                lease,
-                target_artifacts=(wrong_target,),
-            ),
+            artifact_resolution=wrong_target_resolution,
         ).reason_code
         == "resolution_target_artifacts_mismatch"
     )
@@ -499,14 +987,11 @@ def test_signature_and_receipt_binding_checks_precede_all_cas_reads(
     forged = {
         **dict(signed.as_raw()),
         "signature_b64": base64.b64encode(
-            forger.private_key.sign(
-                verification._SIGNATURE_DOMAIN + signed.envelope_bytes
-            )
+            forger.private_key.sign(verification._SIGNATURE_DOMAIN + signed.envelope_bytes)
         ).decode("ascii"),
     }
-    substituted = signer.sign(
-        issue_receipt(lease, candidate_id=digest("a"))
-    )
+    substituted = signer.sign(issue_receipt(lease, candidate_id=digest("a")))
+    substituted_resolution = signer.sign(issue_receipt(lease, artifact_resolution_id=digest("a")))
     other_signer = VerifierSigner.generate()
     signer_mismatch = sign_envelope(
         signer,
@@ -516,9 +1001,7 @@ def test_signature_and_receipt_binding_checks_precede_all_cas_reads(
         ).to_envelope(),
     )
     unsupported_tier_body = receipt_values(lease)
-    unsupported_tier_body["evidence_artifact_digests"] = list(
-        EVIDENCE_DIGESTS
-    )
+    unsupported_tier_body["evidence_artifact_digests"] = list(EVIDENCE_DIGESTS)
     unsupported_tier_body["evidence_tier"] = "kvm_isolated"
     unsupported_tier = sign_envelope(
         signer,
@@ -532,9 +1015,7 @@ def test_signature_and_receipt_binding_checks_precede_all_cas_reads(
             oracle_satisfied=False,
         )
     )
-    future_receipt = signer.sign(
-        issue_receipt(lease, completed_at=NOW + 20)
-    )
+    future_receipt = signer.sign(issue_receipt(lease, completed_at=NOW + 20))
     cases = (
         (
             forged,
@@ -610,6 +1091,14 @@ def test_signature_and_receipt_binding_checks_precede_all_cas_reads(
             "confirmed",
             frozenset(),
             "candidate_mismatch",
+        ),
+        (
+            substituted_resolution,
+            trusted_store(signer),
+            NOW + 11,
+            "confirmed",
+            frozenset(),
+            "artifact_resolution_mismatch",
         ),
         (
             unsupported_tier,
@@ -691,10 +1180,7 @@ def test_receipt_proposal_distinguishes_issuance_and_later_trust_snapshots(
     assert decision.eligible
     assert decision.issuance_trust_snapshot_id == issuance_store.snapshot_id
     assert decision.decision_trust_snapshot_id == decision_store.snapshot_id
-    assert (
-        decision.issuance_trust_snapshot_id
-        != decision.decision_trust_snapshot_id
-    )
+    assert decision.issuance_trust_snapshot_id != decision.decision_trust_snapshot_id
 
 
 def test_signed_receipt_has_one_canonical_attestation_and_round_trips(
@@ -797,6 +1283,35 @@ def test_lease_and_receipt_are_deeply_immutable_and_have_exact_v1_fields(
         "issued_at",
         "expires_at",
     )
+    assert tuple(VerifierReceiptV1.__dataclass_fields__) == (
+        "receipt_id",
+        "artifact_resolution_id",
+        "lease_id",
+        "mission_id",
+        "authority_id",
+        "target_snapshot_id",
+        "candidate_id",
+        "candidate_producer_id",
+        "poc_artifact_digest",
+        "evidence_artifact_digests",
+        "environment_digest",
+        "effect_oracle_id",
+        "execution_output_digest",
+        "execution_output_size",
+        "effect_output_digest",
+        "effect_output_size",
+        "measured_environment_output_digest",
+        "measured_environment_output_size",
+        "termination_output_digest",
+        "termination_output_size",
+        "verifier_id",
+        "verifier_key_id",
+        "evidence_tier",
+        "verdict",
+        "effect_observed",
+        "oracle_satisfied",
+        "completed_at",
+    )
 
 
 def test_lease_id_changes_with_nonce_and_rejects_detached_semantics(signer: VerifierSigner) -> None:
@@ -829,9 +1344,7 @@ def test_lease_identity_binds_the_exact_issuance_trust_snapshot(
         issuance_trust_snapshot_id=alternate_store.snapshot_id,
     )
 
-    assert first.issuance_trust_snapshot_id != (
-        second.issuance_trust_snapshot_id
-    )
+    assert first.issuance_trust_snapshot_id != (second.issuance_trust_snapshot_id)
     assert first.lease_nonce == second.lease_nonce
     assert first.lease_id != second.lease_id
 
@@ -1358,6 +1871,7 @@ def test_fixed_collection_ceilings_fail_closed_before_signature_verification(
         ).reason_code
         == "invalid_consumed_lease_ids"
     )
+
 
 def test_signed_receipt_wire_and_signature_have_fixed_tight_ceilings(
     signer: VerifierSigner,

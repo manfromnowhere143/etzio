@@ -231,6 +231,15 @@ def _golden_graph() -> GoldenGraph:
     )
     receipt = VerifierReceiptV1.for_lease(
         verification_lease,
+        artifact_resolution_id=resolution.object_id,
+        execution_output_digest=_digest("8"),
+        execution_output_size=64,
+        effect_output_digest=_digest("9"),
+        effect_output_size=32,
+        measured_environment_output_digest=_digest("e"),
+        measured_environment_output_size=48,
+        termination_output_digest=_digest("f"),
+        termination_output_size=24,
         evidence_tier=MODELED_FIXTURE_TIER,
         verdict="confirmed",
         effect_observed=True,
@@ -259,6 +268,38 @@ def _golden_graph() -> GoldenGraph:
         },
         "verification_artifacts_resolved": {
             "resolution": resolution.to_dict(),
+        },
+        "verifier_receipt_admitted": {
+            "adjudication_profile": (
+                "modeled_fixture_receipt_admission_v1"
+            ),
+            "decision_trust_snapshot": (
+                verifier_trust_store.to_snapshot_body()
+            ),
+            "decision_trust_snapshot_id": verifier_trust_store.snapshot_id,
+            "effect_output_artifact": {
+                "artifact_digest": receipt.effect_output_digest,
+                "artifact_type": "modeled_effect_output",
+                "size": 32,
+            },
+            "execution_output_artifact": {
+                "artifact_digest": receipt.execution_output_digest,
+                "artifact_type": "modeled_execution_output",
+                "size": 64,
+            },
+            "measured_environment_output_artifact": {
+                "artifact_digest": (
+                    receipt.measured_environment_output_digest
+                ),
+                "artifact_type": "modeled_measured_environment_output",
+                "size": 48,
+            },
+            "receipt": signed_receipt.to_envelope().to_dict(),
+            "termination_output_artifact": {
+                "artifact_digest": receipt.termination_output_digest,
+                "artifact_type": "modeled_termination_output",
+                "size": 24,
+            },
         },
         "candidate_recorded": {"candidate": candidate.to_envelope().to_dict()},
         "parse_failed": {
@@ -296,7 +337,9 @@ def _golden_graph() -> GoldenGraph:
             unit=EVENT_UNIT_BY_KIND_V1[kind],
             authority_id=grant.grant_id,
             target_id=snapshot.object_id,
-            decision_time=NOW,
+            decision_time=(
+                NOW + 11 if kind == "verifier_receipt_admitted" else NOW
+            ),
             payload=payload,
             prev_digest=GENESIS_DIGEST,
         )
@@ -364,7 +407,7 @@ def test_schema_branch_metadata_has_exact_runtime_parity() -> None:
     schema = protocol_v1_schema()
     assert frozenset(SEMANTIC_BODY_FIELDS_BY_KIND_V1) == SUPPORTED_OBJECT_KINDS
     assert len(SUPPORTED_OBJECT_KINDS) == 9
-    assert len(EVENT_UNIT_BY_KIND_V1) == 14
+    assert len(EVENT_UNIT_BY_KIND_V1) == 15
     case_refs = {
         branch["$ref"]
         for branch in schema["oneOf"]
@@ -405,9 +448,13 @@ def test_resolution_schema_closes_profile_artifact_types_and_nested_fields(
     schema = protocol_v1_schema()
     assert set(schema["$defs"]["verification_artifact_type"]["enum"]) == {
         "modeled_effect_oracle_spec",
+        "modeled_effect_output",
         "modeled_environment_spec",
+        "modeled_execution_output",
+        "modeled_measured_environment_output",
         "modeled_poc_input",
         "modeled_supporting_evidence_input",
+        "modeled_termination_output",
         "repository_fixture_source",
     }
     resolution = golden.envelopes["verification_artifact_resolution"]
@@ -460,6 +507,114 @@ def test_resolution_schema_closes_profile_artifact_types_and_nested_fields(
             "verification_artifact_resolution",
             mutated_body,
         )
+        _assert_schema_rejects(validator, mutated.to_dict(), label)
+        with pytest.raises(SemanticProtocolError):
+            parse_semantic_envelope(mutated)
+
+
+def test_receipt_admission_schema_requires_signed_closed_typed_evidence(
+    golden: GoldenGraph,
+    validator: Draft202012Validator,
+) -> None:
+    admitted = golden.events["verifier_receipt_admitted"]
+    assert admitted.kind == "verifier_receipt_admitted"
+    assert admitted.unit == "ETZIO"
+    assert "finding" not in admitted.to_canonical_bytes().decode("utf-8")
+
+    canonical_body = thaw_json(admitted.to_envelope().body)
+    assert type(canonical_body) is dict
+    canonical_payload = canonical_body["payload"]
+    assert type(canonical_payload) is dict
+    assert set(canonical_payload) == {
+        "adjudication_profile",
+        "decision_trust_snapshot",
+        "decision_trust_snapshot_id",
+        "effect_output_artifact",
+        "execution_output_artifact",
+        "measured_environment_output_artifact",
+        "receipt",
+        "termination_output_artifact",
+    }
+
+    mutations: list[tuple[str, dict[str, object]]] = []
+
+    missing_field = thaw_json(admitted.to_envelope().body)
+    missing_field["payload"].pop("termination_output_artifact")
+    mutations.append(("missing admission field", missing_field))
+
+    unknown_field = thaw_json(admitted.to_envelope().body)
+    unknown_field["payload"]["finding_id"] = _digest("0")
+    mutations.append(("finding field", unknown_field))
+
+    wrong_profile = thaw_json(admitted.to_envelope().body)
+    wrong_profile["payload"]["adjudication_profile"] = "caller_selected"
+    mutations.append(("wrong adjudication profile", wrong_profile))
+
+    unattested = thaw_json(admitted.to_envelope().body)
+    unattested["payload"]["receipt"]["attestations"] = []
+    mutations.append(("unattested receipt", unattested))
+
+    multi_attested = thaw_json(admitted.to_envelope().body)
+    receipt_attestations = multi_attested["payload"]["receipt"][
+        "attestations"
+    ]
+    receipt_attestations.append(dict(receipt_attestations[0]))
+    mutations.append(("multi-attested receipt", multi_attested))
+
+    wrong_kind = thaw_json(admitted.to_envelope().body)
+    nested_receipt = wrong_kind["payload"]["receipt"]
+    wrong_kind["payload"]["receipt"] = EnvelopeV1.create(
+        "verification_lease",
+        nested_receipt["body"],
+        attestations=nested_receipt["attestations"],
+    ).to_dict()
+    mutations.append(("wrong nested receipt kind", wrong_kind))
+
+    wrong_output_type = thaw_json(admitted.to_envelope().body)
+    wrong_output_type["payload"]["effect_output_artifact"][
+        "artifact_type"
+    ] = "modeled_execution_output"
+    mutations.append(("wrong output artifact type", wrong_output_type))
+
+    receipt_size_fields = (
+        "effect_output_size",
+        "execution_output_size",
+        "measured_environment_output_size",
+        "termination_output_size",
+    )
+    for field in receipt_size_fields:
+        missing_size = thaw_json(admitted.to_envelope().body)
+        missing_size["payload"]["receipt"]["body"].pop(field)
+        mutations.append((f"missing signed {field}", missing_size))
+
+        for value_label, invalid_value in (
+            ("boolean", True),
+            ("string", "64"),
+            ("zero", 0),
+            ("over 64 MiB", 67_108_865),
+        ):
+            invalid_size = thaw_json(admitted.to_envelope().body)
+            invalid_size["payload"]["receipt"]["body"][field] = invalid_value
+            mutations.append(
+                (f"{value_label} signed {field}", invalid_size)
+            )
+
+    legacy_digest_only_wire = thaw_json(admitted.to_envelope().body)
+    nested_receipt = legacy_digest_only_wire["payload"]["receipt"]
+    legacy_body = dict(nested_receipt["body"])
+    for field in receipt_size_fields:
+        legacy_body.pop(field)
+    legacy_digest_only_wire["payload"]["receipt"] = EnvelopeV1.create(
+        "verifier_receipt",
+        legacy_body,
+        attestations=nested_receipt["attestations"],
+    ).to_dict()
+    mutations.append(
+        ("legacy digest-only receipt wire", legacy_digest_only_wire)
+    )
+
+    for label, mutated_body in mutations:
+        mutated = EnvelopeV1.create("event", mutated_body)
         _assert_schema_rejects(validator, mutated.to_dict(), label)
         with pytest.raises(SemanticProtocolError):
             parse_semantic_envelope(mutated)

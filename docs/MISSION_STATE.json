@@ -1,13 +1,13 @@
 {
   "schema_version": "etzio.mission_state.v2",
-  "updated": "2026-07-27",
+  "updated": "2026-07-28",
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/typed-cas-receipt-evidence-v1",
+  "active_branch": "agent/atomic-receipt-adjudication-v1",
   "foundation_base": {
-    "commit": "816b5081b81581e4dbaac85f479c4f8d535ff86d",
-    "tree": "184b21c9e85151e60b39050bfd22c28cc61cc221"
+    "commit": "1e0c8ad271f19acfd862cc3dba3bd9502bed638b",
+    "tree": "4782fec37a6384298ef188f92dd6e4e4801b4816"
   },
   "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
   "author": {
@@ -19,7 +19,7 @@
     "target": "https://github.com/manfromnowhere143/etzio.git",
     "visibility": "private",
     "default_branch": "main",
-    "verified": "2026-07-27",
+    "verified": "2026-07-28",
     "merge_policy": "squash_only_delete_branch",
     "actions_default_token": "read_only",
     "branch_protection": "unavailable_on_current_private_repository_plan"
@@ -29,7 +29,7 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "atomic_receipt_acceptance_and_single_use_lease_consumption"
+    "next_gate": "verification_lease_recovery_semantics"
   },
   "authority": {
     "repository_modify": true,
@@ -48,7 +48,7 @@
   "implemented": [
     "canonical protocol-v1 envelope and strict JSON",
     "installed semantic wire schema and typed dispatch for all nine supported object kinds",
-    "exact closed-field schema/runtime parity for all nine semantic bodies and fourteen event variants",
+    "exact closed-field schema/runtime parity for all nine semantic bodies and fifteen event variants",
     "Unicode 17.0.0 NFC and fixed protocol resource ceilings",
     "full domain-separated SHA-256 object and event identities",
     "signed authority grants and self-verifying admissions",
@@ -63,6 +63,12 @@
     "type-domain-separated CAS identities for modeled verification input roles",
     "canonical per-lease resolution of target and verification input bytes",
     "CAS-aware exact retry and deterministic historical replay of verification artifact resolutions",
+    "signed modeled receipts binding retained resolution and four typed output digest-size pairs",
+    "code-owned typed CAS identities and fixed-order validation for modeled execution effect measured-environment and termination outputs",
+    "canonical receipt-admission history retaining decision trust evidence and derived output bindings",
+    "atomic modeled-receipt admission and single-use verification-lease consumption",
+    "dedicated transaction-bound receipt append with repeated current-CAS validation",
+    "CAS-free committed receipt retry, deterministic crash recovery, one bounded SQLite-contention retry, identical-commit reconciliation, and retryable StoreBusyError exhaustion",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -70,23 +76,21 @@
   "modeled_only": [
     "original in-memory ten-unit behavior loop",
     "modeled target and eight-case verdict corpus",
-    "signed modeled-receipt contract, receipt binding checks, and standalone non-authoritative proposals",
+    "opaque modeled output semantics without a structured execution run identity",
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "atomic receipt acceptance and single-use lease consumption",
-    "canonical retention of complete receipt adjudication inputs",
-    "separately produced execution effect measured-environment and termination outputs",
-    "verification lease expiry cancellation supersession and terminal recovery",
+    "verification lease expiry cancellation supersession reassignment and terminal recovery",
     "trusted clock and revocation freshness",
     "authenticated external event-head anchoring",
+    "atomic retention shared by filesystem CAS and SQLite event commit",
+    "structured independently produced execution effect measured-environment and termination evidence",
     "closure of the documented SQLite same-user pathname race",
     "proved verifier principal, process, and isolation separation"
   ],
   "not_implemented": [
     "isolated exploit construction",
     "separately isolated independent verification",
-    "kernel acceptance of verifier receipts and canonical adjudication",
     "kernel-minted findings",
     "live target adapters",
     "blockchain domain pack",
@@ -96,7 +100,7 @@
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
     "validation_status": "local_release_suite_passed",
-    "test_count": 419,
+    "test_count": 463,
     "validated_runtimes": [
       "CPython 3.11.15",
       "CPython 3.14.2"
@@ -127,6 +131,7 @@
     "docs/decisions/0002-canonical-governed-fixture-boundary.md",
     "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md",
     "docs/decisions/0004-kernel-issued-verification-leases.md",
-    "docs/decisions/0005-typed-verification-artifact-resolution.md"
+    "docs/decisions/0005-typed-verification-artifact-resolution.md",
+    "docs/decisions/0006-atomic-modeled-receipt-admission.md"
   ]
 }

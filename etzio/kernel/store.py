@@ -35,12 +35,29 @@ class EventStoreCorruptionError(EventStoreError):
     """Raised when retained rows cannot reconstruct a valid canonical stream."""
 
 
+class StoreBusyError(EventStoreError):
+    """Raised when bounded SQLite lock acquisition ends in retryable contention."""
+
+
 class StaleHeadError(EventStoreError):
     """Raised when compare-and-append observes a different mission head."""
 
 
 class ClosedStreamError(EventStoreError):
     """Raised when an append targets a terminal mission stream."""
+
+
+def _sqlite_store_failure(
+    context: str,
+    error: sqlite3.DatabaseError,
+) -> EventStoreError:
+    error_code = getattr(error, "sqlite_errorcode", None)
+    if type(error_code) is int and (error_code & 0xFF) in {
+        sqlite3.SQLITE_BUSY,
+        sqlite3.SQLITE_LOCKED,
+    }:
+        return StoreBusyError(f"{context}: SQLite storage is busy")
+    return EventStoreCorruptionError(f"{context}: {error}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -412,7 +429,12 @@ class SQLiteEventStore:
             synchronous = self._connection.execute("PRAGMA synchronous").fetchone()
             foreign_keys = self._connection.execute("PRAGMA foreign_keys").fetchone()
             mode = stat.S_IMODE(os.lstat(self.path).st_mode)
-        except (OSError, sqlite3.DatabaseError) as exc:
+        except sqlite3.DatabaseError as exc:
+            raise _sqlite_store_failure(
+                "could not read store diagnostics",
+                exc,
+            ) from exc
+        except OSError as exc:
             raise EventStoreCorruptionError(
                 f"could not read store diagnostics: {exc}"
             ) from exc
@@ -456,7 +478,7 @@ class SQLiteEventStore:
                 (mission_id,),
             ).fetchall()
         except sqlite3.DatabaseError as exc:
-            raise EventStoreCorruptionError(f"could not read mission stream: {exc}") from exc
+            raise _sqlite_store_failure("could not read mission stream", exc) from exc
         return rows
 
     @staticmethod
@@ -528,50 +550,110 @@ class SQLiteEventStore:
         events = self.load(mission_id)
         return events[-1].event_digest if events else GENESIS_DIGEST
 
-    def append(self, event: EventV1, *, expected_head: str) -> EventV1:
-        """Atomically compare the expected head and append exactly one event."""
-
+    @staticmethod
+    def _validate_append_request(event: EventV1, expected_head: str) -> None:
         if not isinstance(event, EventV1):
             raise EventStoreError("append requires EventV1")
-        if not isinstance(expected_head, str) or _DIGEST_RE.fullmatch(expected_head) is None:
+        if (
+            not isinstance(expected_head, str)
+            or _DIGEST_RE.fullmatch(expected_head) is None
+        ):
             raise EventStoreError("expected_head must be a full lowercase sha256 digest")
         try:
             event.verify()
         except EventIntegrityError as exc:
             raise EventStoreError(f"refusing invalid event: {exc}") from exc
 
+    def _prepare_append_locked(
+        self,
+        event: EventV1,
+        *,
+        expected_head: str,
+    ) -> tuple[EventV1, ...]:
+        events = self._decode_rows(
+            event.mission_id,
+            self._rows(event.mission_id),
+        )
+        if events:
+            self._validate_retained_lifecycle(events)
+        actual_head = events[-1].event_digest if events else GENESIS_DIGEST
+        if expected_head != actual_head:
+            raise StaleHeadError(
+                f"stale mission head: expected {expected_head}, retained {actual_head}"
+            )
+        if events and events[-1].kind in TERMINAL_KINDS:
+            raise ClosedStreamError(f"mission ended with {events[-1].kind}")
+        expected_seq = len(events)
+        if event.seq != expected_seq:
+            raise EventStoreError(
+                f"event sequence gap or fork: expected {expected_seq}, got {event.seq}"
+            )
+        if event.prev_digest != actual_head:
+            raise StaleHeadError(
+                f"event predecessor {event.prev_digest} does not match head {actual_head}"
+            )
+        self._validate_proposed_lifecycle((*events, event))
+        return events
+
+    def _insert_event_locked(self, event: EventV1) -> None:
+        canonical = event.to_canonical_bytes()
+        self._connection.execute(
+            """
+            INSERT INTO events (
+                mission_id, seq, digest, prev_digest, kind, canonical
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                event.mission_id,
+                event.seq,
+                event.event_digest,
+                event.prev_digest,
+                event.kind,
+                sqlite3.Binary(canonical),
+            ),
+        )
+
+    def _append_verified_event(
+        self,
+        event: EventV1,
+        *,
+        expected_head: str,
+        receipt_evidence_store: object | None = None,
+    ) -> EventV1:
+        is_receipt_admission = event.kind == "verifier_receipt_admitted"
+        has_receipt_evidence_store = receipt_evidence_store is not None
+        if is_receipt_admission != has_receipt_evidence_store:
+            raise EventStoreError(
+                "receipt-admission events and current-CAS validation must be paired"
+            )
         try:
             self._connection.execute("BEGIN IMMEDIATE")
-            events = self._decode_rows(event.mission_id, self._rows(event.mission_id))
-            if events:
-                self._validate_retained_lifecycle(events)
-            actual_head = events[-1].event_digest if events else GENESIS_DIGEST
-            if expected_head != actual_head:
-                raise StaleHeadError(f"stale mission head: expected {expected_head}, retained {actual_head}")
-            if events and events[-1].kind in TERMINAL_KINDS:
-                raise ClosedStreamError(f"mission ended with {events[-1].kind}")
-            expected_seq = len(events)
-            if event.seq != expected_seq:
-                raise EventStoreError(f"event sequence gap or fork: expected {expected_seq}, got {event.seq}")
-            if event.prev_digest != actual_head:
-                raise StaleHeadError(f"event predecessor {event.prev_digest} does not match head {actual_head}")
-            self._validate_proposed_lifecycle((*events, event))
-            canonical = event.to_canonical_bytes()
-            self._connection.execute(
-                """
-                INSERT INTO events (
-                    mission_id, seq, digest, prev_digest, kind, canonical
-                ) VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    event.mission_id,
-                    event.seq,
-                    event.event_digest,
-                    event.prev_digest,
-                    event.kind,
-                    sqlite3.Binary(canonical),
-                ),
+            events = self._prepare_append_locked(
+                event,
+                expected_head=expected_head,
             )
+            if receipt_evidence_store is not None:
+                from .receipt_admission import (
+                    validate_retained_receipt_admission_event,
+                )
+
+                try:
+                    validate_retained_receipt_admission_event(
+                        retained=events,
+                        event=event,
+                        evidence_store=receipt_evidence_store,
+                    )
+                except (ProtocolError, KeyError, TypeError, ValueError) as exc:
+                    reason_code = getattr(
+                        exc,
+                        "reason_code",
+                        "invalid_receipt_admission",
+                    )
+                    raise EventStoreError(
+                        "receipt admission current-CAS validation failed "
+                        f"({reason_code}): {exc}"
+                    ) from exc
+            self._insert_event_locked(event)
             self._connection.execute("COMMIT")
             return event
         except (StaleHeadError, ClosedStreamError, EventStoreError):
@@ -588,7 +670,54 @@ class SQLiteEventStore:
         except sqlite3.DatabaseError as exc:
             if self._connection.in_transaction:
                 self._connection.execute("ROLLBACK")
-            raise EventStoreCorruptionError(f"event append failed: {exc}") from exc
+            raise _sqlite_store_failure("event append failed", exc) from exc
+        except BaseException:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise
+
+    def append(self, event: EventV1, *, expected_head: str) -> EventV1:
+        """Atomically append one ordinary event.
+
+        Receipt admissions are reserved because their current CAS validation must execute
+        under the same writer transaction as the canonical event insertion.
+        """
+
+        self._validate_append_request(event, expected_head)
+        if event.kind == "verifier_receipt_admitted":
+            raise EventStoreError(
+                "verifier_receipt_admitted requires append_receipt_admission"
+            )
+        return self._append_verified_event(
+            event,
+            expected_head=expected_head,
+        )
+
+    def append_receipt_admission(
+        self,
+        event: EventV1,
+        *,
+        expected_head: str,
+        evidence_store: object,
+    ) -> EventV1:
+        """Atomically validate current CAS and retain one receipt admission."""
+
+        from ..evidence import FileEvidenceStore
+
+        self._validate_append_request(event, expected_head)
+        if event.kind != "verifier_receipt_admitted":
+            raise EventStoreError(
+                "append_receipt_admission requires verifier_receipt_admitted"
+            )
+        if not isinstance(evidence_store, FileEvidenceStore):
+            raise EventStoreError(
+                "append_receipt_admission requires a FileEvidenceStore"
+            )
+        return self._append_verified_event(
+            event,
+            expected_head=expected_head,
+            receipt_evidence_store=evidence_store,
+        )
 
     def store_checkpoint(self, checkpoint: SignedCheckpoint) -> SignedCheckpoint:
         """Retain opaque signed-head data without claiming that it has been verified."""
@@ -640,7 +769,7 @@ class SQLiteEventStore:
         except sqlite3.DatabaseError as exc:
             if self._connection.in_transaction:
                 self._connection.execute("ROLLBACK")
-            raise EventStoreCorruptionError(f"checkpoint storage failed: {exc}") from exc
+            raise _sqlite_store_failure("checkpoint storage failed", exc) from exc
 
     def load_checkpoints(self, mission_id: str) -> tuple[SignedCheckpoint, ...]:
         """Load retained signature data in deterministic order."""
@@ -662,7 +791,7 @@ class SQLiteEventStore:
                 (mission_id,),
             ).fetchall()
         except sqlite3.DatabaseError as exc:
-            raise EventStoreCorruptionError(f"could not read checkpoints: {exc}") from exc
+            raise _sqlite_store_failure("could not read checkpoints", exc) from exc
         try:
             return tuple(SignedCheckpoint(*row) for row in rows)
         except (ProtocolError, TypeError, ValueError) as exc:

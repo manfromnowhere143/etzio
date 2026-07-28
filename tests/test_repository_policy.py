@@ -93,6 +93,61 @@ def test_protocol_policy_freezes_runtime_resolution_registries(
     )
 
 
+def test_protocol_policy_freezes_runtime_receipt_admission_contracts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    body_fields = dict(repository_policy.SEMANTIC_BODY_FIELDS_BY_KIND_V1)
+    body_fields["verifier_receipt"] = frozenset({"lease_id"})
+    monkeypatch.setattr(
+        repository_policy,
+        "SEMANTIC_BODY_FIELDS_BY_KIND_V1",
+        body_fields,
+    )
+
+    event_units = dict(repository_policy.EVENT_UNIT_BY_KIND_V1)
+    event_units["verifier_receipt_admitted"] = "AQUILA"
+    monkeypatch.setattr(
+        repository_policy,
+        "EVENT_UNIT_BY_KIND_V1",
+        event_units,
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "RECEIPT_ADMISSION_PROFILE_V1",
+        "changed_receipt_admission_profile",
+    )
+
+    payload_fields = dict(repository_policy.EVENT_PAYLOAD_FIELDS_BY_KIND_V1)
+    payload_fields["verifier_receipt_admitted"] = frozenset({"receipt"})
+    monkeypatch.setattr(
+        repository_policy,
+        "EVENT_PAYLOAD_FIELDS_BY_KIND_V1",
+        payload_fields,
+    )
+
+    nested_fields = dict(
+        repository_policy.EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1
+    )
+    nested_fields["verifier_receipt_admitted"] = {
+        "receipt": "verification_lease"
+    }
+    monkeypatch.setattr(
+        repository_policy,
+        "EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1",
+        nested_fields,
+    )
+
+    issues = protocol_schema_contract_issues(protocol_v1_schema())
+
+    assert any("runtime verifier receipt body fields" in issue for issue in issues)
+    assert any("receipt admission event unit" in issue for issue in issues)
+    assert any("receipt admission profile" in issue for issue in issues)
+    assert any("receipt admission payload fields" in issue for issue in issues)
+    assert any(
+        "receipt admission nested envelope map" in issue for issue in issues
+    )
+
+
 def test_protocol_policy_freezes_exact_v1_object_and_event_counts(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -131,6 +186,9 @@ def test_protocol_schema_contract_rejects_resolution_contract_drift():
     definitions["modeled_poc_artifact_binding"]["allOf"][1]["properties"][
         "artifact_type"
     ] = {"const": "modeled_environment_spec"}
+    definitions["modeled_termination_output_artifact_binding"]["allOf"][1][
+        "properties"
+    ]["artifact_type"] = {"const": "modeled_execution_output"}
     resolution = definitions["verification_artifact_resolution_body"]
     resolution["properties"]["resolution_profile"] = {"type": "string"}
     resolution["properties"]["evidence_artifacts"]["maxItems"] = 257
@@ -144,8 +202,94 @@ def test_protocol_schema_contract_rejects_resolution_contract_drift():
         "target artifact artifact_type contract" in issue for issue in issues
     )
     assert any("modeled poc artifact binding role contract" in issue for issue in issues)
+    assert any(
+        "modeled termination output artifact binding role contract" in issue
+        for issue in issues
+    )
     assert any("resolution resolution_profile contract" in issue for issue in issues)
     assert any("resolution evidence_artifacts contract" in issue for issue in issues)
+
+
+def test_protocol_schema_contract_rejects_receipt_admission_contract_drift():
+    schema = deepcopy(protocol_v1_schema())
+    definitions = schema["$defs"]
+    receipt = definitions["verifier_receipt_body"]
+    receipt["required"].remove("artifact_resolution_id")
+    receipt["properties"]["execution_output_digest"] = {"type": "string"}
+    for field in (
+        "effect_output_size",
+        "execution_output_size",
+        "measured_environment_output_size",
+        "termination_output_size",
+    ):
+        receipt["properties"][field] = {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 67_108_865,
+        }
+
+    payload = definitions["event_payload_verifier_receipt_admitted"]
+    payload["required"].remove("termination_output_artifact")
+    payload["properties"]["adjudication_profile"] = {"type": "string"}
+    payload["properties"]["decision_trust_snapshot"] = {"type": "object"}
+    payload["properties"]["effect_output_artifact"] = {
+        "$ref": "#/$defs/modeled_execution_output_artifact_binding"
+    }
+
+    signed_receipt = definitions["signed_verifier_receipt_envelope"]
+    constraints = signed_receipt["allOf"][1]["properties"]
+    constraints["object_kind"]["const"] = "verification_lease"
+    constraints["body"]["$ref"] = "#/$defs/verification_lease_body"
+    constraints["attestations"]["$ref"] = "#/$defs/no_attestations"
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("verifier receipt body required fields" in issue for issue in issues)
+    assert any(
+        "verifier receipt execution_output_digest contract" in issue
+        for issue in issues
+    )
+    for field in (
+        "effect_output_size",
+        "execution_output_size",
+        "measured_environment_output_size",
+        "termination_output_size",
+    ):
+        assert any(
+            f"verifier receipt {field} contract" in issue
+            for issue in issues
+        )
+    assert any(
+        "receipt admission event payload required fields" in issue
+        for issue in issues
+    )
+    assert any(
+        "receipt admission adjudication_profile contract" in issue
+        for issue in issues
+    )
+    assert any(
+        "receipt admission decision_trust_snapshot contract" in issue
+        for issue in issues
+    )
+    assert any(
+        "receipt admission effect_output_artifact contract" in issue
+        for issue in issues
+    )
+    assert any(
+        "verifier_receipt_admitted.receipt" in issue
+        and "discriminator" in issue
+        for issue in issues
+    )
+    assert any(
+        "verifier_receipt_admitted.receipt" in issue
+        and "body reference" in issue
+        for issue in issues
+    )
+    assert any(
+        "verifier_receipt_admitted.receipt" in issue
+        and "one Ed25519 attestation" in issue
+        for issue in issues
+    )
 
 
 def test_protocol_schema_contract_rejects_root_field_and_version_drift():

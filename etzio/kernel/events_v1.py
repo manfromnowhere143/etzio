@@ -30,6 +30,7 @@ from ..protocol import (
 
 PROTOCOL_VERSION: Final = 1
 EVENT_VERSION: Final = 1
+RECEIPT_ADMISSION_PROFILE_V1: Final = "modeled_fixture_receipt_admission_v1"
 
 # SHA-256("etzio.event.v1.genesis").  This fixed, domain-specific sentinel represents the
 # predecessor of sequence zero; it is not an externally anchored checkpoint.
@@ -46,6 +47,7 @@ EVENT_UNIT_BY_KIND_V1: Final = MappingProxyType(
         "analysis_lease_issued": "AQUILA",
         "verification_lease_issued": "AQUILA",
         "verification_artifacts_resolved": "ETZIO",
+        "verifier_receipt_admitted": "ETZIO",
         "candidate_recorded": "VELITES",
         "parse_failed": "VELITES",
         "scan_completed": "VELITES",
@@ -72,6 +74,18 @@ EVENT_PAYLOAD_FIELDS_BY_KIND_V1: Final = MappingProxyType(
             }
         ),
         "verification_artifacts_resolved": frozenset({"resolution"}),
+        "verifier_receipt_admitted": frozenset(
+            {
+                "adjudication_profile",
+                "decision_trust_snapshot",
+                "decision_trust_snapshot_id",
+                "effect_output_artifact",
+                "execution_output_artifact",
+                "measured_environment_output_artifact",
+                "receipt",
+                "termination_output_artifact",
+            }
+        ),
         "candidate_recorded": frozenset({"candidate"}),
         "parse_failed": frozenset(
             {"analysis_lease_id", "parse_failure", "source_artifact_digest"}
@@ -111,6 +125,9 @@ EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1: Final = MappingProxyType(
         ),
         "verification_artifacts_resolved": MappingProxyType(
             {"resolution": "verification_artifact_resolution"}
+        ),
+        "verifier_receipt_admitted": MappingProxyType(
+            {"receipt": "verifier_receipt"}
         ),
         "candidate_recorded": MappingProxyType({"candidate": "candidate"}),
     }
@@ -178,6 +195,29 @@ def _require_nested_envelope(
     if envelope.attestations:
         raise EventIntegrityError(f"{field} envelope must not contain attestations")
     return envelope
+
+
+def _require_signed_verifier_receipt(
+    payload: dict[str, Any],
+) -> tuple[EnvelopeV1, object]:
+    """Decode the one event field that deliberately retains an attested envelope."""
+
+    value = payload["receipt"]
+    if type(value) is not dict:
+        raise EventIntegrityError("receipt must be a protocol envelope object")
+    try:
+        canonical = canonical_dumps(value)
+        from ..verification import SignedVerifierReceiptV1
+
+        signed = SignedVerifierReceiptV1.from_bytes(canonical)
+        envelope = signed.to_envelope()
+    except (ProtocolError, ValueError) as exc:
+        raise EventIntegrityError(
+            f"receipt is not a canonical exactly-one-attested verifier receipt: {exc}"
+        ) from exc
+    if envelope.to_bytes() != canonical:
+        raise EventIntegrityError("receipt envelope is not canonical")
+    return envelope, signed
 
 
 def _require_relative_path(value: object) -> str:
@@ -463,6 +503,107 @@ def _validate_payload(
         if resolution.resolved_at != decision_time:
             raise EventIntegrityError(
                 "artifact resolution resolved_at must equal the event decision_time"
+            )
+        return
+
+    if kind == "verifier_receipt_admitted":
+        from ..evidence import VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1
+        from ..verification import (
+            VerificationError,
+            VerificationOutputArtifactsV1,
+            VerifierReceiptV1,
+            VerifierTrustStore,
+        )
+        from ..verification_artifacts import (
+            VerificationArtifactBindingV1,
+            VerificationArtifactError,
+        )
+
+        if payload["adjudication_profile"] != RECEIPT_ADMISSION_PROFILE_V1:
+            raise EventIntegrityError(
+                "verifier receipt admission uses an unsupported adjudication profile"
+            )
+        snapshot_id = _require_digest(
+            "decision_trust_snapshot_id",
+            payload["decision_trust_snapshot_id"],
+        )
+        try:
+            trust_store = VerifierTrustStore.from_snapshot_body(
+                payload["decision_trust_snapshot"],
+                expected_snapshot_id=snapshot_id,
+            )
+            receipt_envelope, signed = _require_signed_verifier_receipt(payload)
+            unattested = EnvelopeV1.from_bytes(signed.envelope_bytes)
+            receipt = VerifierReceiptV1.from_envelope(unattested)
+            output_artifacts = VerificationOutputArtifactsV1(
+                execution_output_artifact=VerificationArtifactBindingV1.from_dict(
+                    payload["execution_output_artifact"]
+                ),
+                effect_output_artifact=VerificationArtifactBindingV1.from_dict(
+                    payload["effect_output_artifact"]
+                ),
+                measured_environment_output_artifact=(
+                    VerificationArtifactBindingV1.from_dict(
+                        payload["measured_environment_output_artifact"]
+                    )
+                ),
+                termination_output_artifact=VerificationArtifactBindingV1.from_dict(
+                    payload["termination_output_artifact"]
+                ),
+            )
+        except (VerificationError, VerificationArtifactError, ProtocolError) as exc:
+            raise EventIntegrityError(
+                f"verifier_receipt_admitted contains invalid decision evidence: {exc}"
+            ) from exc
+        if (
+            receipt_envelope.object_id != receipt.receipt_id
+            or receipt.mission_id != mission_id
+            or receipt.authority_id != authority_id
+            or receipt.target_snapshot_id != target_id
+            or receipt.completed_at > decision_time
+            or trust_store.snapshot_id != snapshot_id
+        ):
+            raise EventIntegrityError(
+                "verifier receipt admission differs from the event identities or time"
+            )
+        expected_outputs = (
+            (
+                output_artifacts.execution_output_artifact,
+                receipt.execution_output_digest,
+                receipt.execution_output_size,
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["execution_output"],
+            ),
+            (
+                output_artifacts.effect_output_artifact,
+                receipt.effect_output_digest,
+                receipt.effect_output_size,
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["effect_output"],
+            ),
+            (
+                output_artifacts.measured_environment_output_artifact,
+                receipt.measured_environment_output_digest,
+                receipt.measured_environment_output_size,
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[
+                    "measured_environment_output"
+                ],
+            ),
+            (
+                output_artifacts.termination_output_artifact,
+                receipt.termination_output_digest,
+                receipt.termination_output_size,
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[
+                    "termination_output"
+                ],
+            ),
+        )
+        if any(
+            binding.artifact_digest != digest
+            or binding.size != size
+            or binding.artifact_type != artifact_type
+            for binding, digest, size, artifact_type in expected_outputs
+        ):
+            raise EventIntegrityError(
+                "verifier receipt admission output bindings differ from the signed receipt"
             )
         return
 

@@ -1,6 +1,6 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-07-27, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-07-28, Asia/Jerusalem.
 
 This file describes Etzio only. It is not authority to access a live target, execute an
 exploit, use research credentials, spend, disclose, publish, deploy, or change repository
@@ -32,7 +32,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0002](decisions/0002-canonical-governed-fixture-boundary.md),
 [ADR-0003](decisions/0003-semantic-wire-schema-and-typed-kind-closure.md), and
 [ADR-0004](decisions/0004-kernel-issued-verification-leases.md), and
-[ADR-0005](decisions/0005-typed-verification-artifact-resolution.md).
+[ADR-0005](decisions/0005-typed-verification-artifact-resolution.md), and
+[ADR-0006](decisions/0006-atomic-modeled-receipt-admission.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -42,17 +43,17 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/typed-cas-receipt-evidence-v1`
-- Stacked on: `agent/kernel-verification-leases-v1`
-- Branch base: `816b5081b81581e4dbaac85f479c4f8d535ff86d`
-- Branch-base tree: `184b21c9e85151e60b39050bfd22c28cc61cc221`
+- Current foundation-integrity branch: `agent/atomic-receipt-adjudication-v1`
+- Stacked on: `agent/typed-cas-receipt-evidence-v1`
+- Branch base: `1e0c8ad271f19acfd862cc3dba3bd9502bed638b`
+- Branch-base tree: `4782fec37a6384298ef188f92dd6e4e4801b4816`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
 Resolve the current branch head, pull request, workflow state, visibility, and default branch
 from Git and GitHub. Do not infer them from this dated packet.
 
-The private remote and `main` default branch were verified on 2026-07-27. Read-only Actions
+The private remote and `main` default branch were verified on 2026-07-28. Read-only Actions
 permissions, SHA-pinned actions, squash-only merging, and automatic branch deletion were
 configured. GitHub branch protection/rulesets were unavailable for this private repository
 on the current account plan; never change visibility to obtain them.
@@ -102,7 +103,7 @@ exact authority
 
 - common protocol-v1 envelopes and strict canonical JSON;
 - installed semantic wire schemas and typed dispatch for every supported object kind;
-- exact closed-field schema/runtime parity for all nine semantic bodies and all fourteen
+- exact closed-field schema/runtime parity for all nine semantic bodies and all fifteen
   event kind, unit, and payload forms;
 - Unicode 17.0.0 NFC, signed 64-bit integers, and fixed resource ceilings;
 - full domain-separated SHA-256 object and event identities;
@@ -123,25 +124,41 @@ exact authority
   fixed aggregate bound shared with the grant's one signed `max_bytes` ceiling;
 - one canonical `verification_artifacts_resolved` event per lease with replay, retry,
   crash-recovery, and concurrent-writer controls;
+- type-domain-separated identities for modeled execution, effect, measured-environment,
+  and termination outputs;
+- a canonical signed receipt binding the retained resolution plus each output's exact
+  digest and positive bounded size;
+- authentication-first receipt checks under a retained decision trust/revocation snapshot,
+  followed by fixed-order target, input, and output CAS revalidation;
+- one `verifier_receipt_admitted` event that atomically retains the complete modeled
+  decision and records single-use lease consumption;
+- a dedicated receipt-admission store path that repeats current-CAS validation from locked
+  retained history before insertion, while generic append rejects the reserved event;
+- CAS-free exact committed retry, crash recovery, one bounded SQLite-contention retry,
+  same-receipt reconciliation when an identical commit becomes visible, retryable
+  `StoreBusyError` on persistent `BUSY` or `LOCKED`, conflicting-receipt refusal, and
+  distinct-lease stale-head semantics;
 - nonterminal `awaiting_verification` lifecycle state for verification-intent missions;
 - fail-closed refusal, cancellation, failure, timeout, budget, completion, and closure;
 - recoverable deterministic fixture scans without duplicate outputs; and
 - a supported fixture-only CLI that emits candidates and never findings.
 
-### Implemented as modeled receipt contract primitives only
+### Implemented for modeled receipt admission
 
 - canonical one-attestation signed verifier receipts;
-- exact receipt/lease/digest/time/verdict bindings and resource ceilings; and
+- exact receipt/lease/resolution/output-digest/output-size/time/verdict bindings and
+  resource ceilings;
 - distinct issuance- and proposal-time trust snapshot identities in modeled receipt
   proposals; and
 - matching typed-resolution and current-CAS revalidation before a positive standalone
-  modeled proposal.
+  modeled proposal or first canonical admission.
 
 Lease issuance records an authorized modeled assignment, and resolution records exact
-predeclared input bytes and roles. Receipt validation still only authenticates a configured
-modeled statement and produces a non-authoritative proposal. The receipt does not yet sign
-the supplied resolution identity. Validation does not establish verifier-produced
-evidence, atomic single use, actual independence, isolation, adjudication, or a finding.
+predeclared input bytes and roles. Receipt admission authenticates and atomically retains a
+configured modeled statement while consuming its lease. Its four output artifacts are
+opaque typed bytes grouped by one signature. This does not establish that an execution
+occurred, that one run produced the outputs, that their contents are true, or that the
+verifier was independent or isolated. It does not mint a finding.
 
 ### Retained behavior models
 
@@ -154,7 +171,7 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 On the current candidate bytes, `make verify` passed under both CPython 3.11.15 and
 CPython 3.14.2:
 
-- 419 tests passed;
+- 463 tests passed;
 - Ruff was clean;
 - the installed semantic protocol schema, three explicitly modeled legacy schemas, and
   repository policy passed;
@@ -193,7 +210,8 @@ Known-bads now cover:
   unit, and post-terminal append;
 - action substitution and byte/time/output budget overflow before persistence;
 - candidate mission/authority/lease/source substitution;
-- receipt signature, verifier, lease, verdict, time, and digest substitution;
+- receipt signature, verifier, lease, resolution, verdict, time, output digest, and signed
+  output-size substitution;
 - verification issuance without the exact admitted action, against an unknown or substituted
   candidate, under a malformed/substituted trust snapshot, to the candidate producer, or
   to an unknown, revoked, or wrong-role verifier key;
@@ -215,6 +233,18 @@ Known-bads now cover:
 - caller-selected unsigned resolution contexts promoted beyond non-authoritative proposal
   status, noncausal resolution/receipt times, and consequential receipt refusals that would
   otherwise reach CAS reads;
+- missing, empty, corrupt, wrong-type, swapped, colliding, individually oversized,
+  aggregate-oversized, or signed-size-mismatched modeled output artifacts;
+- unattested, multiply attested, malformed, forged, revoked, wrong-role, or substituted
+  receipt-admission decision evidence;
+- receipt reuse, lease double consumption, exact committed retry after CAS loss and head
+  advancement, identical and conflicting submission races, and distinct-lease stale-head
+  races;
+- bounded SQLite writer contention, identical-commit reconciliation after one retry, and
+  retryable `StoreBusyError` exhaustion without a corruption classification;
+- generic and direct-internal append bypass, receipt-event/evidence-store pairing mismatch,
+  wrong-kind dedicated append, direct undersized-output event injection, and rollback with
+  unchanged history on dedicated CAS validation failure;
 - crash-after-append replay without duplicate candidates;
 - late recovery before lease issuance and completed-scan closure after grant/trust
   changes; and
@@ -222,18 +252,18 @@ Known-bads now cover:
 
 ## Open foundation-integrity blockers
 
-1. Receipt acceptance and lease consumption are not one atomic durable transaction.
-2. Complete receipt adjudication is not part of canonical mission history.
-3. Predeclared verification inputs do not include separately produced execution, effect,
-   measured-environment, or termination outputs.
-4. Authority/verifier clock and revocation snapshot freshness are not externally proved.
-5. Issued leases have no canonical expiry, cancellation, supersession, reassignment, or
+1. Issued leases have no canonical expiry, cancellation, supersession, reassignment, or
    terminal recovery event.
-6. SQLite event heads are not externally authenticated or anchored.
-7. SQLite retains a documented same-user pathname race.
-8. Separate verifier labels and keys do not prove separate principals, processes, or
+2. Authority/verifier clock and revocation snapshot freshness are not externally proved.
+3. SQLite event heads are not externally authenticated or anchored.
+4. The filesystem CAS and SQLite event commit do not share one transaction; bytes can
+   disappear after the dedicated append validates them.
+5. SQLite retains a documented same-user pathname race.
+6. Modeled output artifacts are opaque signed descriptors, not structured evidence tied to
+   an independently measured execution identity.
+7. Separate verifier labels and keys do not prove separate principals, processes, or
    isolation.
-9. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
+8. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
    are not implemented.
 
 These blockers prevent a finding pipeline and all live-target work.
@@ -242,10 +272,11 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-Next, add atomic receipt acceptance/single-use consumption and canonical adjudication
-history, including separately produced execution outputs. Then close lease recovery,
-trusted time, and authenticated external head anchoring with concurrency and substitution
-known-bads.
+Next, define canonical lease expiry, cancellation, supersession, reassignment, and terminal
+recovery. Then close trusted time, revocation freshness, and authenticated external head
+anchoring with concurrency and substitution known-bads. Atomic filesystem-CAS/SQLite
+retention and closure of the same-user pathname race also remain mandatory before a finding
+pipeline can be accepted.
 
 ### Mission 2 — independent proof plane
 

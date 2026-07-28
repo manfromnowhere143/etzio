@@ -1,6 +1,6 @@
 # Etzio Architecture
 
-Status: **architecture foundation**, 2026-07-27.
+Status: **architecture foundation**, 2026-07-28.
 
 This document distinguishes implemented, modeled, proposed, and blocked behavior. A green
 test proves only its named fixture and invariant.
@@ -16,8 +16,11 @@ mission opening; exact target bytes are retained by digest; VELITES analyzes tho
 under a bounded lease; canonical events are durably appended and replayed; and AQUILA can
 issue an authority-bound modeled-fixture verification lease for a retained candidate.
 ETZIO can then resolve every predeclared input under a code-owned CAS type and retain the
-exact resolution. This is meaningful foundation progress, but it is candidate generation,
-verification assignment, and input resolution—not a finding pipeline.
+exact resolution. It can also authenticate one modeled receipt that signs the resolution
+and four typed output digest/size pairs, retain the complete decision evidence, and consume
+the lease in the same event append. This is meaningful foundation progress, but it is
+candidate generation, verification assignment, byte resolution, and modeled-statement
+admission—not a finding pipeline.
 
 ## Target system
 
@@ -71,6 +74,8 @@ repository fixture manifest
   ├─ ordinary fixture scan → mission_closed
   └─ verification intent → VerificationLeaseV1
                            → VerificationArtifactResolutionV1
+                           → signed VerifierReceiptV1
+                           → verifier_receipt_admitted
                            → awaiting_verification
 ```
 
@@ -78,10 +83,13 @@ Only `clean_app.py` and `vulnerable_app.py` from the immutable repository manife
 admitted. `etzio.scan` has no arbitrary filesystem-target argument. The analyzer itself
 takes bytes and owns no filesystem walker.
 
-The verification-intent branch records an assignment and resolves its predeclared bytes.
-The path cannot create or execute a PoC, run an oracle, accept a receipt, adjudicate a
-finding, or consume a verification lease. Network access, credentials, spending,
-disclosure, publication, and live-target interaction are absent.
+The verification-intent branch records an assignment, resolves its predeclared bytes, and
+can admit one authenticated modeled receipt while consuming its lease. Four separately
+typed output artifacts must already exist in the fixture evidence store; Etzio binds their
+exact signed digests and sizes but does not produce, parse, or execute them. The path cannot
+create or execute a PoC, run an oracle, establish an observed effect, or adjudicate a
+finding. Network access, credentials, spending, disclosure, publication, and live-target
+interaction are absent.
 
 ## Protocol v1
 
@@ -110,7 +118,7 @@ Canonical JSON enforcement includes:
 - rejection of noncanonical wire spellings during parsing.
 
 The installed Draft 2020-12 schema is a semantic wire-shape guard for all nine supported
-typed object kinds. It has exact signed and unsigned grant/receipt forms plus fourteen event
+typed object kinds. It has exact signed and unsigned grant/receipt forms plus fifteen event
 kind, unit, and payload branches. One immutable runtime registry closes every top-level
 semantic body field set; repository policy compares the schema's envelope, body,
 attestation, dispatch, event-unit, and event-payload structure against those contracts.
@@ -166,10 +174,11 @@ verification inputs use a separate type-domain digest:
 sha256("etzio:evidence:typed:v1\0" || exact_type || "\0" || raw_bytes)
 ```
 
-The closed roles are PoC input, supporting-evidence input, environment specification, and
-effect-oracle specification. Generic reads cannot erase typed identity, typed reads reject
-generic or wrong-type identities, and the kernel—not a caller—derives the expected type
-from each lease field.
+The closed input roles are PoC, supporting evidence, environment specification, and
+effect-oracle specification. The closed modeled-output roles are execution, effect,
+measured environment, and termination. Generic reads cannot erase typed identity, typed
+reads reject generic or wrong-type identities, and the kernel—not a caller—derives the
+expected type from each lease or receipt field.
 
 CAS publication is dirfd-relative and atomically no-clobber on supported Darwin
 `renameatx_np(RENAME_EXCL)` and Linux libc `renameat2(RENAME_NOREPLACE)` filesystems. Etzio
@@ -200,12 +209,14 @@ authority, target, decision time, typed payload, and previous event digest.
 - prevents updates and deletes through database triggers; and
 - reconstructs state exclusively through the reducer.
 
-The reducer cross-validates embedded authority, target, lease, candidate, and verifier
-trust objects. It enforces the exact action for each lifecycle step and rejects target-byte,
-lease-time, verifier-role/identity/revocation, candidate/output-count, and retained-epoch
-time violations before the offending row is inserted. Refusal, failure, cancellation,
-timeout, budget exhaustion, completed scan, awaiting verification, and closed mission
-remain distinct.
+The reducer cross-validates embedded authority, target, lease, candidate, resolution,
+verifier trust, signed receipt, and output-binding objects. It reauthenticates receipt
+signatures from the retained decision trust snapshot, enforces exact signed output
+digest/type/size bindings and one cumulative grant budget, and derives consumed leases
+solely from admitted receipt events. It rejects lifecycle, identity, role, revocation,
+time, duplicate-use, and budget violations before the offending row is inserted. Refusal,
+failure, cancellation, timeout, budget exhaustion, completed scan, awaiting verification,
+and closed mission remain distinct.
 
 Limits:
 
@@ -256,30 +267,52 @@ grant's single signed `max_bytes` ceiling; resolution cannot reinterpret it as a
 per-action allowance.
 
 Signed receipts retain a canonical exactly-one-attestation wire form, strict size/count
-limits, time and verdict consistency checks, exact lease bindings, and a requirement for
-the supplied matching typed resolution plus current CAS revalidation. The current receipt
-does not sign the resolution ID, so standalone validation produces only an
-evaluation-context-bound proposal. Modeled proposals expose separate issuance- and
-proposal-time trust snapshot IDs so a later revocation view cannot rewrite assignment
-history; snapshot freshness is not proved. No canonical lifecycle event accepts a receipt
-or mints a finding.
+limits, time and verdict consistency checks, and exact lease bindings. The signed body also
+binds the retained resolution identity and four distinct positive output digest/size pairs.
+The supported command derives the lease and unique resolution from canonical history,
+authenticates the receipt under a complete decision-time trust snapshot before CAS access,
+then revalidates the target, resolved inputs, and outputs. Resolution plus output bytes use
+the grant's one non-resetting `max_bytes` ceiling.
+
+One ETZIO `verifier_receipt_admitted` event retains the signed receipt, decision trust body
+and identity, adjudication profile, and four code-derived typed output bindings. The same
+append is the lease-consumption fact, so replay rejects a second receipt for that lease.
+Every authenticated allowed verdict consumes the lease and remains visible. On SQLite
+`BUSY` or `LOCKED`, the command makes exactly one append retry and then reconciles retained
+history. If an identical submission commits during that bounded contention window, both
+callers return the same event. Persistent contention remains a retryable `StoreBusyError`,
+not corruption; once a competing commit is visible, conflicting-receipt or distinct-lease
+stale-head semantics apply. An exact retry after commit returns retained history without
+depending on current CAS availability, including after head advancement or byte deletion.
+
+This is modeled-statement admission, not scientific finding admission. Typed output bytes
+are opaque. Their shared receipt proves that one trusted key signed the group, not that one
+measured execution produced them or that their contents are true. The pure reducer can
+validate signed descriptors but cannot replay mutable CAS reads. Generic append therefore
+reserves and rejects this event kind; a dedicated store path repeats current-CAS validation
+against locked history before insertion. That privileged writer path remains a trusted
+service boundary until event heads are externally authenticated.
 
 Still open:
 
-1. acceptance and single-use lease consumption must commit atomically;
-2. the complete decision inputs, signed receipt, and adjudication must enter canonical
-   mission history;
-3. verifier-produced execution, effect, measured-environment, and termination outputs must
-   be content-bound separately from the predeclared inputs;
-4. freshness of clock and trust snapshot must be established; and
-5. different labels/keys must be replaced by proved process, principal, and isolation
+1. lease expiry, cancellation, supersession, reassignment, and terminal recovery must enter
+   canonical history;
+2. freshness of clock and trust snapshots must be established;
+3. event heads must be authenticated outside the mutable SQLite store;
+4. the filesystem CAS and SQLite event commit need shared atomic retention or an equivalent
+   replay-safe protocol;
+5. the documented same-user SQLite pathname race must be closed;
+6. opaque modeled outputs must become structured, independently produced execution
+   evidence with an exact run identity; and
+7. different labels/keys must be replaced by proved process, principal, and isolation
    separation.
 
 This tranche deliberately permits one lifetime lease per candidate and one resolution per
 lease. It has no canonical expiry, cancellation, supersession, or reassignment event once a
-lease is issued, so an `awaiting_verification` mission cannot yet terminate or recover from
-an unavailable verifier. That lifecycle must be closed with the receipt-admission work
-rather than by silently reopening or overwriting a lease.
+lease is issued. An admitted receipt consumes that lease, but an `awaiting_verification`
+mission still cannot terminate or recover from an expired or unavailable verifier. The
+next lifecycle tranche must add explicit recovery events rather than silently reopening or
+overwriting a lease.
 
 ## Modeled components
 
@@ -349,13 +382,16 @@ scientific or policy authority.
 ## Next acceptance gate
 
 Kernel-issued, authority-bound modeled-fixture verification leases, typed input-resolution
-history, and semantic per-kind structural parity are retained. The next gate is atomic
-receipt acceptance and single-use lease consumption. Foundation integrity is accepted only
-when retained evidence also shows:
+history, and atomic modeled-receipt admission with single-use consumption are retained. The
+next gate is explicit lease expiry, cancellation, supersession, reassignment, and terminal
+recovery. Foundation integrity is accepted only when retained evidence also shows:
 
-- atomic receipt acceptance and lease consumption under concurrency;
-- canonical retention of complete adjudication evidence;
-- trusted time and externally anchored event heads; and
+- fail-closed recovery for every lease outcome and concurrent transition;
+- trusted time and revocation freshness;
+- authenticated, externally anchored event heads;
+- atomic retention across filesystem CAS and the SQLite event commit;
+- closure of the same-user SQLite pathname race; and
 - every new consequential invariant rejecting a known-bad.
 
-Linux/KVM isolation is the next gate after that—not a substitute for it.
+Structured Linux/KVM execution evidence and proved MARCELLUS/CATO separation follow; they
+are not implied by modeled output artifacts.

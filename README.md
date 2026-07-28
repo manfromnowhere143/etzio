@@ -15,16 +15,18 @@ Solidity, EVM, and later L1/client research are the first benchmark and economic
 the architectural ceiling. Domain knowledge belongs in versioned packs; policy and
 scientific authority remain in the kernel.
 
-> **Status — architecture foundation, 2026-07-27.**
+> **Status — architecture foundation, 2026-07-28.**
 > One repository-fixture candidate-generation path is implemented end to end. It admits a
 > signed authority record, resolves immutable content-addressed bytes, executes a narrow
 > Python analyzer under a bounded lease, and commits lifecycle-checked events to SQLite. A
 > verification-intent mission can also retain a kernel-issued, authority-bound
 > modeled-fixture verification lease for a retained candidate, resolve every target and
-> predeclared verification-input byte under an exact CAS type, retain that resolution, and
-> stop in `awaiting_verification`. It does not
-> construct or execute exploits, accept a verifier receipt, adjudicate a finding, access a
-> live target, or learn. No production-readiness or superiority claim is made.
+> predeclared verification-input byte under an exact CAS type, and atomically admit one
+> authenticated modeled receipt while consuming its lease. The receipt signs the retained
+> resolution and four exact typed output digest/size pairs. The mission remains in
+> `awaiting_verification`. Etzio does not construct or execute exploits, establish that
+> those opaque outputs came from an execution, adjudicate a finding, access a live target,
+> or learn. No production-readiness or superiority claim is made.
 
 ## Why Etzio
 
@@ -63,8 +65,10 @@ manifest fixture → content-addressed target snapshot
 An explicit fixture-only kernel path may instead admit both `static_analysis` and
 `modeled_fixture_verification`, retain a completed scan with candidates, issue an AQUILA
 verification lease, resolve its predeclared inputs under code-owned artifact types, retain
-one canonical ETZIO resolution event, and stop in `awaiting_verification`. It is not PoC,
-oracle, or verifier execution.
+one canonical ETZIO resolution event, and admit one signed modeled receipt. A single
+`verifier_receipt_admitted` event retains the decision trust snapshot and four code-derived
+typed output bindings while consuming the lease. This is authenticated statement
+retention—not PoC, oracle, or verifier execution and not finding adjudication.
 
 The command has no arbitrary target-path option. It emits candidates only; neither fixture
 path can mint a finding, execute a PoC, use the network, access credentials, spend,
@@ -75,7 +79,7 @@ The protocol-v1 foundation includes:
 - canonical JSON with duplicate-key rejection, Unicode 17.0.0 NFC, signed 64-bit integers,
   fixed resource ceilings, and full domain-separated SHA-256 identities;
 - an installed Draft 2020-12 semantic wire schema with exact branches for all nine typed
-  object kinds and all fourteen event payload variants;
+  object kinds and all fifteen event payload variants;
 - Ed25519 authority and modeled-receipt attestations, including prime-subgroup public-key
   validation before a key can enter a trust snapshot;
 - exact fixture manifests and a private content-addressed evidence store;
@@ -85,6 +89,12 @@ The protocol-v1 foundation includes:
 - type-domain-separated verification-input identities plus one replayable resolution event
   that binds every target, PoC, supporting-evidence, environment, and oracle-specification
   byte to the retained lease;
+- a signed receipt binding that exact resolution plus execution, effect,
+  measured-environment, and termination output digest/size pairs under four separate
+  code-owned CAS types;
+- one atomic receipt-admission event that retains the complete decision trust view,
+  preserves every allowed verdict, and derives single-use lease consumption through
+  replay;
 - compare-and-append SQLite storage with replay-time lifecycle validation; and
 - known-bad tests for signature, scope, identity, lifecycle, budget, corruption, replay,
   and filesystem-boundary failures.
@@ -99,7 +109,7 @@ The protocol-v1 foundation includes:
 | Strategy | **FABIUS** | ranked falsifiable hypotheses | modeled |
 | Investigation | **VELITES** | leased probes and candidates | narrow byte-bound Python AST slice |
 | Proof | **MARCELLUS** | isolated exploit construction | modeled; isolation absent |
-| Verification | **CATO** | independent reproduction and verdict | receipt contract modeled; no execution or acceptance path |
+| Verification | **CATO** | independent reproduction and verdict | CATO behavior modeled; ETZIO receipt admission implemented; execution and independence absent |
 | Adjudication | **CAMILLUS** | evidence completeness, dedup, severity | modeled |
 | Disclosure | **FABRICIUS** | evidence-bound report draft | modeled; no external write |
 | Learning | **MINERVA** | evaluated offline strategy promotion | modeled |
@@ -142,15 +152,17 @@ mkdir -m 700 .etzio-state
 
 ## Open gates and next mission
 
-The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments
-and typed input resolutions are retained; completing the finding-admission boundary still
-requires:
+The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments,
+typed input resolutions, and atomic modeled-receipt admission are retained; completing the
+foundation-integrity boundary still requires:
 
-1. atomically consume a lease with its accepted signed receipt and retain complete
-   adjudication;
-2. close lease expiry, cancellation, supersession, reassignment, and terminal recovery;
-3. establish a trusted clock and external event-head anchoring; and
-4. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
+1. close lease expiry, cancellation, supersession, reassignment, and terminal recovery;
+2. establish a trusted clock, revocation freshness, and external event-head anchoring;
+3. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
+   pathname race;
+4. replace opaque modeled outputs with structured, independently produced execution
+   evidence; and
+5. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
 
 Only then should Etzio run the benchmark-first EVM pack. Live bounty work remains a later,
 target-specific authorization stage.

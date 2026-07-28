@@ -649,9 +649,13 @@
       "type": "string",
       "enum": [
         "modeled_effect_oracle_spec",
+        "modeled_effect_output",
         "modeled_environment_spec",
+        "modeled_execution_output",
+        "modeled_measured_environment_output",
         "modeled_poc_input",
         "modeled_supporting_evidence_input",
+        "modeled_termination_output",
         "repository_fixture_source"
       ]
     },
@@ -728,6 +732,62 @@
           "properties": {
             "artifact_type": {
               "const": "modeled_effect_oracle_spec"
+            }
+          }
+        }
+      ]
+    },
+    "modeled_execution_output_artifact_binding": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/verification_artifact_binding"
+        },
+        {
+          "properties": {
+            "artifact_type": {
+              "const": "modeled_execution_output"
+            }
+          }
+        }
+      ]
+    },
+    "modeled_effect_output_artifact_binding": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/verification_artifact_binding"
+        },
+        {
+          "properties": {
+            "artifact_type": {
+              "const": "modeled_effect_output"
+            }
+          }
+        }
+      ]
+    },
+    "modeled_measured_environment_output_artifact_binding": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/verification_artifact_binding"
+        },
+        {
+          "properties": {
+            "artifact_type": {
+              "const": "modeled_measured_environment_output"
+            }
+          }
+        }
+      ]
+    },
+    "modeled_termination_output_artifact_binding": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/verification_artifact_binding"
+        },
+        {
+          "properties": {
+            "artifact_type": {
+              "const": "modeled_termination_output"
             }
           }
         }
@@ -1024,6 +1084,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "artifact_resolution_id",
         "lease_id",
         "mission_id",
         "authority_id",
@@ -1034,6 +1095,14 @@
         "evidence_artifact_digests",
         "environment_digest",
         "effect_oracle_id",
+        "execution_output_digest",
+        "execution_output_size",
+        "effect_output_digest",
+        "effect_output_size",
+        "measured_environment_output_digest",
+        "measured_environment_output_size",
+        "termination_output_digest",
+        "termination_output_size",
         "verifier_id",
         "verifier_key_id",
         "evidence_tier",
@@ -1043,6 +1112,9 @@
         "completed_at"
       ],
       "properties": {
+        "artifact_resolution_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
         "lease_id": {
           "$ref": "#/$defs/sha256_id"
         },
@@ -1072,6 +1144,38 @@
         },
         "effect_oracle_id": {
           "$ref": "#/$defs/sha256_id"
+        },
+        "execution_output_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "execution_output_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "effect_output_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "effect_output_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "measured_environment_output_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "measured_environment_output_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "termination_output_digest": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "termination_output_size": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
         },
         "verifier_id": {
           "$ref": "#/$defs/canonical_identity"
@@ -1177,7 +1281,8 @@
             "scan_failed",
             "scan_timed_out",
             "verification_artifacts_resolved",
-            "verification_lease_issued"
+            "verification_lease_issued",
+            "verifier_receipt_admitted"
           ]
         },
         "mission_id": {
@@ -1385,6 +1490,46 @@
               }
             }
           ]
+        }
+      }
+    },
+    "event_payload_verifier_receipt_admitted": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adjudication_profile",
+        "decision_trust_snapshot",
+        "decision_trust_snapshot_id",
+        "effect_output_artifact",
+        "execution_output_artifact",
+        "measured_environment_output_artifact",
+        "receipt",
+        "termination_output_artifact"
+      ],
+      "properties": {
+        "adjudication_profile": {
+          "const": "modeled_fixture_receipt_admission_v1"
+        },
+        "decision_trust_snapshot": {
+          "$ref": "#/$defs/verifier_trust_snapshot"
+        },
+        "decision_trust_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "effect_output_artifact": {
+          "$ref": "#/$defs/modeled_effect_output_artifact_binding"
+        },
+        "execution_output_artifact": {
+          "$ref": "#/$defs/modeled_execution_output_artifact_binding"
+        },
+        "measured_environment_output_artifact": {
+          "$ref": "#/$defs/modeled_measured_environment_output_artifact_binding"
+        },
+        "receipt": {
+          "$ref": "#/$defs/signed_verifier_receipt_envelope"
+        },
+        "termination_output_artifact": {
+          "$ref": "#/$defs/modeled_termination_output_artifact_binding"
         }
       }
     },
@@ -1699,6 +1844,19 @@
             },
             "payload": {
               "$ref": "#/$defs/event_payload_verification_lease_issued"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "verifier_receipt_admitted"
+            },
+            "unit": {
+              "const": "ETZIO"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_verifier_receipt_admitted"
             }
           }
         }

@@ -32,12 +32,26 @@ MAX_SNAPSHOT_BYTES_HARD_CEILING = 64 * 1024 * 1024
 MAX_SNAPSHOT_FILES_HARD_CEILING = 256
 DEFAULT_MAX_SNAPSHOT_BYTES = MAX_SNAPSHOT_BYTES_HARD_CEILING
 DEFAULT_MAX_SNAPSHOT_FILES = MAX_SNAPSHOT_FILES_HARD_CEILING
-VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1: Final = MappingProxyType(
+VERIFICATION_INPUT_ARTIFACT_TYPE_BY_ROLE_V1: Final = MappingProxyType(
     {
         "effect_oracle": "modeled_effect_oracle_spec",
         "environment": "modeled_environment_spec",
         "evidence": "modeled_supporting_evidence_input",
         "poc": "modeled_poc_input",
+    }
+)
+VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1: Final = MappingProxyType(
+    {
+        "effect_output": "modeled_effect_output",
+        "execution_output": "modeled_execution_output",
+        "measured_environment_output": "modeled_measured_environment_output",
+        "termination_output": "modeled_termination_output",
+    }
+)
+VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1: Final = MappingProxyType(
+    {
+        **VERIFICATION_INPUT_ARTIFACT_TYPE_BY_ROLE_V1,
+        **VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1,
     }
 )
 VERIFICATION_ARTIFACT_TYPES_V1: Final = frozenset(VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1.values())
@@ -96,9 +110,7 @@ def _rename_noreplace(
     """Atomically publish one name without overwriting an existing artifact."""
 
     if _EXCLUSIVE_RENAME is None:
-        raise EvidenceError(
-            "atomic no-clobber evidence publication is unsupported on this platform"
-        )
+        raise EvidenceError("atomic no-clobber evidence publication is unsupported on this platform")
     function, flag = _EXCLUSIVE_RENAME
     ctypes.set_errno(0)
     result = function(
@@ -117,9 +129,9 @@ def _rename_noreplace(
             os.strerror(error_number),
             target_name,
         )
-    raise EvidenceError(
-        "atomic no-clobber evidence publication failed"
-    ) from OSError(error_number, os.strerror(error_number))
+    raise EvidenceError("atomic no-clobber evidence publication failed") from OSError(
+        error_number, os.strerror(error_number)
+    )
 
 
 def evidence_digest(data: bytes) -> str:
@@ -135,7 +147,7 @@ def _validate_verification_artifact_type(value: object) -> str:
 
 
 def typed_evidence_digest(data: bytes, *, artifact_type: str) -> str:
-    """Return a type-domain-separated digest for one modeled verification input."""
+    """Return a type-domain-separated digest for one modeled verification artifact."""
 
     if type(data) is not bytes:
         raise EvidenceError("typed evidence must be immutable bytes")
@@ -646,9 +658,7 @@ class SnapshotFileV1:
 
     def __post_init__(self) -> None:
         _validate_relative_path(self.relative_path)
-        if type(self.artifact_digest) is not str or not _DIGEST_RE.fullmatch(
-            self.artifact_digest
-        ):
+        if type(self.artifact_digest) is not str or not _DIGEST_RE.fullmatch(self.artifact_digest):
             raise EvidenceError("invalid snapshot artifact digest")
         if type(self.size) is not int or self.size < 0:
             raise EvidenceError("snapshot file size must be nonnegative")
@@ -726,10 +736,7 @@ class TargetSnapshotV1:
         if envelope.object_kind != "target_snapshot" or envelope.attestations:
             raise EvidenceError("expected an unattested target_snapshot envelope")
         body = thaw_json(envelope.body)
-        if (
-            type(body) is not dict
-            or set(body) != SEMANTIC_BODY_FIELDS_BY_KIND_V1["target_snapshot"]
-        ):
+        if type(body) is not dict or set(body) != SEMANTIC_BODY_FIELDS_BY_KIND_V1["target_snapshot"]:
             raise EvidenceError("target snapshot envelope has missing or unknown fields")
         raw_files = body["files"]
         if type(raw_files) is not list:
@@ -817,10 +824,7 @@ def validate_etzio_fixture_snapshot(
         if manifest_entry is None:
             raise EvidenceError("snapshot path is not present in the Etzio fixture manifest")
         expected_size, expected_digest = manifest_entry
-        if (
-            snapshot_file.size != expected_size
-            or snapshot_file.artifact_digest != expected_digest
-        ):
+        if snapshot_file.size != expected_size or snapshot_file.artifact_digest != expected_digest:
             raise EvidenceError("snapshot metadata does not match the Etzio fixture manifest")
         data = evidence_store.get(
             snapshot_file.artifact_digest,

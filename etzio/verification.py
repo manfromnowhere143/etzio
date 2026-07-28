@@ -8,13 +8,12 @@ CAS bytes, but that establishes byte identity and assigned input role only. It d
 claim process, container, VM, KVM, or hardware isolation. The only evidence tier admitted
 by this foundation boundary is ``modeled_fixture``.
 
-Lease consumption must be committed atomically by the lifecycle kernel alongside any
-future accepted receipt event. :func:`validate_verifier_receipt` observes the
-caller-supplied set of already-consumed lease IDs but deliberately does not mutate external
-state or accept a receipt into mission history. Its positive result is an explicitly
-non-authoritative modeled proposal for a future kernel command. The receipt does not yet
-sign the resolution ID; the proposal's resolution ID identifies evaluation context, not an
-authenticated receipt claim.
+The receipt signs the exact artifact-resolution identity and four separately typed output
+identities and byte counts. :func:`validate_verifier_receipt` still produces only a
+standalone non-authoritative proposal; it observes a caller-supplied consumed-lease set and
+does not mutate mission history. The lifecycle kernel separately loads the canonical
+resolution, derives output role/type/size bindings, and can atomically admit the receipt
+with single-use lease consumption.
 The lease binds its issuance-trust snapshot identity, while receipt proposals separately
 identify the supplied proposal-time revocation view. These are deterministic retrospective
 identities; this module does not establish snapshot continuity, freshness, or trusted time.
@@ -38,6 +37,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey,
 from etzio.crypto_v1 import is_valid_ed25519_public_key
 from etzio.evidence import (
     VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1,
+    VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1,
     EvidenceError,
     FileEvidenceStore,
     TargetSnapshotV1,
@@ -66,6 +66,7 @@ VERDICTS: Final = frozenset({"confirmed", "not_reproduced", "inconclusive", "inv
 # Foundation ceilings bound all attacker-controlled collections and signed wire objects.
 MAX_VERIFIER_RECEIPT_ENVELOPE_BYTES: Final = 256 * 1024
 MAX_EVIDENCE_ARTIFACTS: Final = 256
+MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1: Final = 64 * 1024 * 1024
 MAX_TRUSTED_VERIFIER_KEYS: Final = 64
 MAX_VERIFIER_ROLES: Final = 16
 MAX_VERIFIER_REVOCATIONS: Final = 10_000
@@ -81,6 +82,28 @@ _LEASE_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1["verification_lease"
 _RECEIPT_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1["verifier_receipt"]
 _SIGNED_FIELDS: Final = frozenset({"envelope_bytes", "key_id", "signature_b64"})
 _ATTESTATION_FIELDS: Final = frozenset({"algorithm", "key_id", "signature_b64"})
+_OUTPUT_FIELDS_BY_ROLE_V1: Final = (
+    (
+        "execution_output",
+        "execution_output_digest",
+        "execution_output_size",
+    ),
+    (
+        "effect_output",
+        "effect_output_digest",
+        "effect_output_size",
+    ),
+    (
+        "measured_environment_output",
+        "measured_environment_output_digest",
+        "measured_environment_output_size",
+    ),
+    (
+        "termination_output",
+        "termination_output_digest",
+        "termination_output_size",
+    ),
+)
 VERIFIER_TRUST_SNAPSHOT_FIELDS_V1: Final = frozenset(
     {
         "keys",
@@ -89,9 +112,7 @@ VERIFIER_TRUST_SNAPSHOT_FIELDS_V1: Final = frozenset(
         "revoked_receipt_ids",
     }
 )
-VERIFIER_TRUST_KEY_FIELDS_V1: Final = frozenset(
-    {"key_id", "public_key_b64", "roles", "verifier_id"}
-)
+VERIFIER_TRUST_KEY_FIELDS_V1: Final = frozenset({"key_id", "public_key_b64", "roles", "verifier_id"})
 
 
 class VerificationError(ValueError):
@@ -288,6 +309,7 @@ class VerifierReceiptV1:
     """A verifier's exact claim about one modeled-fixture lease."""
 
     receipt_id: str
+    artifact_resolution_id: str
     lease_id: str
     mission_id: str
     authority_id: str
@@ -298,6 +320,14 @@ class VerifierReceiptV1:
     evidence_artifact_digests: tuple[str, ...]
     environment_digest: str
     effect_oracle_id: str
+    execution_output_digest: str
+    execution_output_size: int
+    effect_output_digest: str
+    effect_output_size: int
+    measured_environment_output_digest: str
+    measured_environment_output_size: int
+    termination_output_digest: str
+    termination_output_size: int
     verifier_id: str
     verifier_key_id: str
     evidence_tier: str
@@ -318,6 +348,7 @@ class VerifierReceiptV1:
     def issue(
         cls,
         *,
+        artifact_resolution_id: str,
         lease_id: str,
         mission_id: str,
         authority_id: str,
@@ -328,6 +359,14 @@ class VerifierReceiptV1:
         evidence_artifact_digests: tuple[str, ...],
         environment_digest: str,
         effect_oracle_id: str,
+        execution_output_digest: str,
+        execution_output_size: int,
+        effect_output_digest: str,
+        effect_output_size: int,
+        measured_environment_output_digest: str,
+        measured_environment_output_size: int,
+        termination_output_digest: str,
+        termination_output_size: int,
         verifier_id: str,
         verifier_key_id: str,
         evidence_tier: str,
@@ -337,6 +376,7 @@ class VerifierReceiptV1:
         completed_at: int,
     ) -> VerifierReceiptV1:
         values = {
+            "artifact_resolution_id": artifact_resolution_id,
             "lease_id": lease_id,
             "mission_id": mission_id,
             "authority_id": authority_id,
@@ -347,6 +387,14 @@ class VerifierReceiptV1:
             "evidence_artifact_digests": evidence_artifact_digests,
             "environment_digest": environment_digest,
             "effect_oracle_id": effect_oracle_id,
+            "execution_output_digest": execution_output_digest,
+            "execution_output_size": execution_output_size,
+            "effect_output_digest": effect_output_digest,
+            "effect_output_size": effect_output_size,
+            "measured_environment_output_digest": measured_environment_output_digest,
+            "measured_environment_output_size": measured_environment_output_size,
+            "termination_output_digest": termination_output_digest,
+            "termination_output_size": termination_output_size,
             "verifier_id": verifier_id,
             "verifier_key_id": verifier_key_id,
             "evidence_tier": evidence_tier,
@@ -367,6 +415,15 @@ class VerifierReceiptV1:
         cls,
         lease: VerificationLeaseV1,
         *,
+        artifact_resolution_id: str,
+        execution_output_digest: str,
+        execution_output_size: int,
+        effect_output_digest: str,
+        effect_output_size: int,
+        measured_environment_output_digest: str,
+        measured_environment_output_size: int,
+        termination_output_digest: str,
+        termination_output_size: int,
         evidence_tier: str,
         verdict: str,
         effect_observed: bool,
@@ -378,6 +435,7 @@ class VerifierReceiptV1:
         if not isinstance(lease, VerificationLeaseV1):
             raise VerificationError("invalid_lease", "lease must be a VerificationLeaseV1")
         return cls.issue(
+            artifact_resolution_id=artifact_resolution_id,
             lease_id=lease.lease_id,
             mission_id=lease.mission_id,
             authority_id=lease.authority_id,
@@ -388,6 +446,14 @@ class VerifierReceiptV1:
             evidence_artifact_digests=lease.evidence_artifact_digests,
             environment_digest=lease.environment_digest,
             effect_oracle_id=lease.effect_oracle_id,
+            execution_output_digest=execution_output_digest,
+            execution_output_size=execution_output_size,
+            effect_output_digest=effect_output_digest,
+            effect_output_size=effect_output_size,
+            measured_environment_output_digest=measured_environment_output_digest,
+            measured_environment_output_size=measured_environment_output_size,
+            termination_output_digest=termination_output_digest,
+            termination_output_size=termination_output_size,
             verifier_id=lease.verifier_id,
             verifier_key_id=lease.verifier_key_id,
             evidence_tier=evidence_tier,
@@ -422,6 +488,7 @@ class VerifierReceiptV1:
 
     def _body_values(self) -> dict[str, object]:
         return {
+            "artifact_resolution_id": self.artifact_resolution_id,
             "lease_id": self.lease_id,
             "mission_id": self.mission_id,
             "authority_id": self.authority_id,
@@ -432,6 +499,14 @@ class VerifierReceiptV1:
             "evidence_artifact_digests": self.evidence_artifact_digests,
             "environment_digest": self.environment_digest,
             "effect_oracle_id": self.effect_oracle_id,
+            "execution_output_digest": self.execution_output_digest,
+            "execution_output_size": self.execution_output_size,
+            "effect_output_digest": self.effect_output_digest,
+            "effect_output_size": self.effect_output_size,
+            "measured_environment_output_digest": self.measured_environment_output_digest,
+            "measured_environment_output_size": self.measured_environment_output_size,
+            "termination_output_digest": self.termination_output_digest,
+            "termination_output_size": self.termination_output_size,
             "verifier_id": self.verifier_id,
             "verifier_key_id": self.verifier_key_id,
             "evidence_tier": self.evidence_tier,
@@ -794,14 +869,140 @@ class VerifierTrustStore:
 
 
 @dataclass(frozen=True, slots=True)
+class AuthenticatedVerifierReceiptV1:
+    """A pure authenticated receipt result with no CAS or lifecycle authority.
+
+    Only an instance returned by :func:`authenticate_verifier_receipt` carries evidence
+    that signature and trust checks ran. Direct construction is coherence-checked but
+    cannot itself establish cryptographic authentication.
+    """
+
+    signed_receipt: SignedVerifierReceiptV1
+    receipt: VerifierReceiptV1
+    lease: VerificationLeaseV1
+    artifact_resolution: VerificationArtifactResolutionV1
+    decision_trust_snapshot_id: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.signed_receipt, SignedVerifierReceiptV1):
+            raise VerificationError(
+                "invalid_authenticated_receipt",
+                "signed_receipt must be a SignedVerifierReceiptV1",
+            )
+        if not isinstance(self.receipt, VerifierReceiptV1):
+            raise VerificationError(
+                "invalid_authenticated_receipt",
+                "receipt must be a VerifierReceiptV1",
+            )
+        if not isinstance(self.lease, VerificationLeaseV1):
+            raise VerificationError(
+                "invalid_authenticated_receipt",
+                "lease must be a VerificationLeaseV1",
+            )
+        if not isinstance(
+            self.artifact_resolution,
+            VerificationArtifactResolutionV1,
+        ):
+            raise VerificationError(
+                "invalid_authenticated_receipt",
+                "artifact_resolution must be a VerificationArtifactResolutionV1",
+            )
+        _validate_digest(
+            self.decision_trust_snapshot_id,
+            "decision_trust_snapshot_id",
+        )
+        if (
+            self.signed_receipt.key_id != self.receipt.verifier_key_id
+            or self.signed_receipt.envelope_bytes
+            != self.receipt.to_envelope().to_bytes()
+        ):
+            raise VerificationError(
+                "invalid_authenticated_receipt",
+                "signed_receipt and receipt do not describe the same attested value",
+            )
+        binding_reason = _artifact_resolution_binding_reason(
+            self.artifact_resolution,
+            lease=self.lease,
+            receipt=self.receipt,
+            decision_time=MAX_EPOCH_SECOND,
+        )
+        if binding_reason is not None:
+            raise VerificationError(
+                "invalid_authenticated_receipt",
+                "receipt, lease, and artifact resolution are internally incoherent",
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class VerificationOutputArtifactsV1:
+    """Code-owned typed bindings reconstructed from signed output digests and sizes."""
+
+    execution_output_artifact: VerificationArtifactBindingV1
+    effect_output_artifact: VerificationArtifactBindingV1
+    measured_environment_output_artifact: VerificationArtifactBindingV1
+    termination_output_artifact: VerificationArtifactBindingV1
+
+    def __post_init__(self) -> None:
+        expected = (
+            (
+                self.execution_output_artifact,
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["execution_output"],
+            ),
+            (
+                self.effect_output_artifact,
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["effect_output"],
+            ),
+            (
+                self.measured_environment_output_artifact,
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["measured_environment_output"],
+            ),
+            (
+                self.termination_output_artifact,
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1["termination_output"],
+            ),
+        )
+        if any(
+            not isinstance(binding, VerificationArtifactBindingV1) or binding.artifact_type != artifact_type
+            for binding, artifact_type in expected
+        ):
+            raise VerificationError(
+                "invalid_verification_output_binding",
+                "verification output binding has the wrong code-owned type",
+            )
+        digests = tuple(binding.artifact_digest for binding, _ in expected)
+        if len(set(digests)) != len(digests):
+            raise VerificationError(
+                "output_artifact_role_collision",
+                "verification output roles must use distinct content identities",
+            )
+        if self.total_bytes > MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1:
+            raise VerificationError(
+                "verification_output_byte_ceiling_exceeded",
+                "verification outputs exceed the fixed aggregate byte ceiling",
+            )
+
+    @property
+    def total_bytes(self) -> int:
+        return sum(
+            binding.size
+            for binding in (
+                self.execution_output_artifact,
+                self.effect_output_artifact,
+                self.measured_environment_output_artifact,
+                self.termination_output_artifact,
+            )
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class VerificationProposal:
     """A non-authoritative modeled receipt-validation proposal.
 
     An eligible proposal distinguishes the lease's issuance-trust identity from the
     proposal-time revocation view and records the supplied resolution context. It does not
     prove that the lease, grant, or resolution was retained. The lifecycle kernel must load
-    those values from canonical history and retain the decision snapshot body with any
-    future atomic receipt admission.
+    those values from canonical history and independently repeat authentication, CAS, and
+    byte-budget checks before atomic receipt admission.
     """
 
     eligible: bool
@@ -812,6 +1013,7 @@ class VerificationProposal:
     issuance_trust_snapshot_id: str | None = None
     decision_trust_snapshot_id: str | None = None
     artifact_resolution_id: str | None = None
+    output_artifacts: VerificationOutputArtifactsV1 | None = None
 
     def __post_init__(self) -> None:
         if type(self.eligible) is not bool:
@@ -825,17 +1027,15 @@ class VerificationProposal:
                 or self.verdict not in VERDICTS
                 or self.reason_code != "proposal_valid"
                 or self.issuance_trust_snapshot_id is None
-                or _FULL_DIGEST.fullmatch(
-                    self.issuance_trust_snapshot_id
-                )
-                is None
+                or _FULL_DIGEST.fullmatch(self.issuance_trust_snapshot_id) is None
                 or self.decision_trust_snapshot_id is None
-                or _FULL_DIGEST.fullmatch(
-                    self.decision_trust_snapshot_id
-                )
-                is None
+                or _FULL_DIGEST.fullmatch(self.decision_trust_snapshot_id) is None
                 or self.artifact_resolution_id is None
                 or _FULL_DIGEST.fullmatch(self.artifact_resolution_id) is None
+                or not isinstance(
+                    self.output_artifacts,
+                    VerificationOutputArtifactsV1,
+                )
             ):
                 raise VerificationError(
                     "invalid_proposal",
@@ -850,6 +1050,7 @@ class VerificationProposal:
                 self.issuance_trust_snapshot_id,
                 self.decision_trust_snapshot_id,
                 self.artifact_resolution_id,
+                self.output_artifacts,
             )
         ):
             raise VerificationError(
@@ -866,101 +1067,115 @@ def verifier_key_id(public_key_bytes: bytes) -> str:
     return "ed25519:sha256:" + hashlib.sha256(public_key_bytes).hexdigest()
 
 
-def validate_verifier_receipt(
+def authenticate_verifier_receipt(
     raw_signed_receipt: SignedVerifierReceiptV1 | Mapping[str, object] | bytes | str,
     trust_store: VerifierTrustStore,
     *,
     lease: VerificationLeaseV1,
-    decision_time: int,
-    expected_verdict: str,
-    consumed_lease_ids: Set[str],
     artifact_resolution: VerificationArtifactResolutionV1,
-    target_snapshot: TargetSnapshotV1,
-    evidence_store: FileEvidenceStore,
-) -> VerificationProposal:
-    """Authenticate and validate one exact modeled-fixture verifier receipt.
+    decision_time: int,
+    expected_verdict: str | None = None,
+) -> AuthenticatedVerifierReceiptV1:
+    """Purely authenticate one receipt and its exact lease/resolution bindings.
 
-    Proposal validation authenticates the configured verifier's signature, validates the
-    receipt/lease/resolution bindings, and re-reads every resolved CAS artifact under its
-    code-owned type. It does not prove the scientific claim, establish that the supplied
-    resolution was kernel-retained, or mint a finding. The caller must atomically persist
-    lease consumption with any future accepted receipt event; a pre-read set alone is not a
-    concurrency primitive. A positive proposal is not receipt acceptance, and its
-    ``artifact_resolution_id`` is supplied evaluation context rather than a field signed by
-    the current receipt contract.
+    This function performs no CAS reads and changes no lifecycle state. A successful
+    result authenticates a modeled statement; it is not receipt admission or a finding.
     """
 
     if not isinstance(trust_store, VerifierTrustStore):
-        return _refuse("invalid_trust_store")
+        raise VerificationError("invalid_trust_store", "invalid verifier trust store")
     if not isinstance(lease, VerificationLeaseV1):
-        return _refuse("invalid_lease")
-    if type(decision_time) is not int or decision_time < 0 or decision_time > MAX_EPOCH_SECOND:
-        return _refuse("invalid_decision_time")
-    if type(expected_verdict) is not str or expected_verdict not in VERDICTS:
-        return _refuse("invalid_expected_verdict")
+        raise VerificationError("invalid_lease", "invalid verification lease")
     if not isinstance(artifact_resolution, VerificationArtifactResolutionV1):
-        return _refuse("invalid_artifact_resolution")
-    if not isinstance(target_snapshot, TargetSnapshotV1):
-        return _refuse("invalid_target_snapshot")
-    if not isinstance(evidence_store, FileEvidenceStore):
-        return _refuse("invalid_evidence_store")
-    try:
-        consumed = _validated_digest_set(
-            consumed_lease_ids,
-            "invalid_consumed_lease_ids",
-            MAX_CONSUMED_LEASE_IDS,
+        raise VerificationError(
+            "invalid_artifact_resolution",
+            "invalid verification artifact resolution",
         )
+    if type(decision_time) is not int or decision_time < 0 or decision_time > MAX_EPOCH_SECOND:
+        raise VerificationError(
+            "invalid_decision_time",
+            "decision_time must be a nonnegative int64 epoch second",
+        )
+    if expected_verdict is not None and (type(expected_verdict) is not str or expected_verdict not in VERDICTS):
+        raise VerificationError(
+            "invalid_expected_verdict",
+            "expected_verdict must be None or a supported verdict",
+        )
+    try:
         signed = _parse_signed_receipt(raw_signed_receipt)
-    except VerificationError as exc:
-        return _refuse(exc.reason_code)
+    except VerificationError:
+        raise
 
     if lease.candidate_producer_id == lease.verifier_id:
-        return _refuse("self_verification")
+        raise VerificationError(
+            "self_verification",
+            "candidate producer cannot verify its own candidate",
+        )
     if lease.lease_id in trust_store.revoked_lease_ids:
-        return _refuse("lease_revoked")
-    if lease.lease_id in consumed:
-        return _refuse("lease_already_consumed")
+        raise VerificationError("lease_revoked", "verification lease is revoked")
     if decision_time < lease.issued_at:
-        return _refuse("lease_not_yet_valid")
+        raise VerificationError(
+            "lease_not_yet_valid",
+            "verification lease is not yet valid",
+        )
     if decision_time >= lease.expires_at:
-        return _refuse("lease_expired")
+        raise VerificationError("lease_expired", "verification lease is expired")
 
     if signed.key_id in trust_store.revoked_key_ids:
-        return _refuse("key_revoked")
+        raise VerificationError("key_revoked", "verifier key is revoked")
     trusted_key = trust_store.keys.get(signed.key_id)
     if trusted_key is None:
-        return _refuse("unknown_key")
+        raise VerificationError("unknown_key", "verifier key is not trusted")
     if VERIFIER_ROLE not in trusted_key.roles:
-        return _refuse("key_missing_verifier_role")
+        raise VerificationError(
+            "key_missing_verifier_role",
+            "verifier key lacks the required role",
+        )
 
     try:
         signature = _decode_canonical_signature(signed.signature_b64)
-    except VerificationError:
-        return _refuse("malformed_signature")
+    except VerificationError as exc:
+        raise VerificationError(
+            "malformed_signature",
+            "verifier signature is malformed",
+        ) from exc
     try:
         Ed25519PublicKey.from_public_bytes(trusted_key.public_key_bytes).verify(
             signature,
             _SIGNATURE_DOMAIN + signed.envelope_bytes,
         )
-    except (InvalidSignature, ValueError):
-        return _refuse("invalid_signature")
+    except (InvalidSignature, ValueError) as exc:
+        raise VerificationError(
+            "invalid_signature",
+            "verifier signature is invalid",
+        ) from exc
 
     try:
         envelope = EnvelopeV1.from_bytes(signed.envelope_bytes)
         if envelope.to_bytes() != signed.envelope_bytes:
-            return _refuse("noncanonical_envelope")
+            raise VerificationError(
+                "noncanonical_envelope",
+                "receipt envelope bytes are noncanonical",
+            )
         receipt = VerifierReceiptV1.from_envelope(envelope)
     except ProtocolError as exc:
-        return _refuse(_protocol_reason(exc))
-    except VerificationError as exc:
-        return _refuse(exc.reason_code)
+        raise VerificationError(
+            _protocol_reason(exc),
+            "receipt envelope violates protocol v1",
+        ) from exc
 
     if receipt.receipt_id in trust_store.revoked_receipt_ids:
-        return _refuse("receipt_revoked")
+        raise VerificationError("receipt_revoked", "verifier receipt is revoked")
     if receipt.verifier_key_id != signed.key_id:
-        return _refuse("signer_key_mismatch")
+        raise VerificationError(
+            "signer_key_mismatch",
+            "receipt verifier key differs from its attestation",
+        )
     if receipt.verifier_id != trusted_key.verifier_id:
-        return _refuse("verifier_identity_mismatch")
+        raise VerificationError(
+            "verifier_identity_mismatch",
+            "receipt verifier identity differs from the trusted key",
+        )
 
     comparisons = (
         ("lease_id", "lease_mismatch"),
@@ -978,67 +1193,88 @@ def validate_verifier_receipt(
     )
     for field, reason in comparisons:
         if getattr(receipt, field) != getattr(lease, field):
-            return _refuse(reason)
+            raise VerificationError(
+                reason,
+                f"receipt {field} differs from the verification lease",
+            )
 
     if receipt.completed_at < lease.issued_at:
-        return _refuse("receipt_before_lease")
+        raise VerificationError(
+            "receipt_before_lease",
+            "receipt completion precedes lease issuance",
+        )
     if receipt.completed_at >= lease.expires_at:
-        return _refuse("receipt_after_expiry")
+        raise VerificationError(
+            "receipt_after_expiry",
+            "receipt completion is outside the lease window",
+        )
     if receipt.completed_at > decision_time:
-        return _refuse("receipt_from_future")
+        raise VerificationError(
+            "receipt_from_future",
+            "receipt completion is later than decision time",
+        )
     if receipt.evidence_tier != MODELED_FIXTURE_TIER:
-        return _refuse("unsupported_evidence_tier")
-    if receipt.verdict != expected_verdict:
-        return _refuse("verdict_mismatch")
+        raise VerificationError(
+            "unsupported_evidence_tier",
+            "only modeled_fixture evidence is admitted",
+        )
+    if expected_verdict is not None and receipt.verdict != expected_verdict:
+        raise VerificationError(
+            "verdict_mismatch",
+            "signed receipt verdict differs from the expected verdict",
+        )
     verdict_reason = _verdict_consistency_reason(
         receipt.verdict,
         effect_observed=receipt.effect_observed,
         oracle_satisfied=receipt.oracle_satisfied,
     )
     if verdict_reason is not None:
-        return _refuse(verdict_reason)
+        raise VerificationError(
+            verdict_reason,
+            "receipt verdict and observations are inconsistent",
+        )
 
-    resolution_reason = _artifact_resolution_reason(
+    resolution_reason = _artifact_resolution_binding_reason(
         artifact_resolution,
-        target_snapshot=target_snapshot,
-        evidence_store=evidence_store,
         lease=lease,
         receipt=receipt,
         decision_time=decision_time,
     )
     if resolution_reason is not None:
-        return _refuse(resolution_reason)
+        raise VerificationError(
+            resolution_reason,
+            "receipt does not bind the exact verification artifact resolution",
+        )
 
-    return VerificationProposal(
-        eligible=True,
-        lease_id=lease.lease_id,
-        receipt_id=receipt.receipt_id,
-        verdict=receipt.verdict,
-        reason_code="proposal_valid",
-        issuance_trust_snapshot_id=lease.issuance_trust_snapshot_id,
+    return AuthenticatedVerifierReceiptV1(
+        signed_receipt=signed,
+        receipt=receipt,
+        lease=lease,
+        artifact_resolution=artifact_resolution,
         decision_trust_snapshot_id=trust_store.snapshot_id,
-        artifact_resolution_id=artifact_resolution.resolution_id,
     )
 
 
-def _artifact_resolution_reason(
+def _artifact_resolution_binding_reason(
     resolution: VerificationArtifactResolutionV1,
     *,
-    target_snapshot: TargetSnapshotV1,
-    evidence_store: FileEvidenceStore,
     lease: VerificationLeaseV1,
     receipt: VerifierReceiptV1,
     decision_time: int,
 ) -> str | None:
-    """Revalidate one supplied resolution without treating it as retained authority."""
+    """Validate receipt/lease/resolution semantics without reading mutable CAS."""
 
     identity_comparisons = (
+        (
+            receipt.artifact_resolution_id,
+            resolution.resolution_id,
+            "artifact_resolution_mismatch",
+        ),
         (resolution.verification_lease_id, lease.lease_id, "resolution_lease_mismatch"),
         (resolution.mission_id, lease.mission_id, "resolution_mission_mismatch"),
         (resolution.authority_id, lease.authority_id, "resolution_authority_mismatch"),
         (resolution.target_snapshot_id, lease.target_snapshot_id, "resolution_target_mismatch"),
         (resolution.candidate_id, lease.candidate_id, "resolution_candidate_mismatch"),
-        (target_snapshot.object_id, lease.target_snapshot_id, "target_snapshot_mismatch"),
     )
     for actual, expected, reason in identity_comparisons:
         if actual != expected:
@@ -1052,32 +1288,9 @@ def _artifact_resolution_reason(
     if resolution.resolved_at > decision_time:
         return "resolution_from_future"
 
-    target_metadata = tuple(
-        (
-            value.artifact_digest,
-            value.artifact_type,
-            value.relative_path,
-            value.size,
-        )
-        for value in resolution.target_artifacts
-    )
-    expected_target_metadata = tuple(
-        (
-            value.artifact_digest,
-            TARGET_ARTIFACT_TYPE_V1,
-            value.relative_path,
-            value.size,
-        )
-        for value in target_snapshot.files
-    )
-    if target_metadata != expected_target_metadata:
-        return "resolution_target_artifacts_mismatch"
-
     if len(resolution.evidence_artifacts) != len(lease.evidence_artifact_digests):
         return "resolution_evidence_artifacts_mismatch"
-    binding_values: list[
-        tuple[str, VerificationArtifactBindingV1, str, str]
-    ] = [
+    binding_values: list[tuple[str, VerificationArtifactBindingV1, str, str]] = [
         (
             "poc",
             resolution.poc_artifact,
@@ -1124,13 +1337,65 @@ def _artifact_resolution_reason(
             return f"resolution_{role}_type_mismatch"
         if binding.size <= 0:
             return f"resolution_{role}_empty"
+    output_digests = {
+        receipt.execution_output_digest,
+        receipt.effect_output_digest,
+        receipt.measured_environment_output_digest,
+        receipt.termination_output_digest,
+    }
+    resolved_digests = {
+        *(value.artifact_digest for value in resolution.target_artifacts),
+        *(binding.artifact_digest for _, binding, _, _ in bindings),
+    }
+    if output_digests.intersection(resolved_digests):
+        return "output_resolution_artifact_collision"
+    return None
+
+
+def _artifact_resolution_cas_reason(
+    resolution: VerificationArtifactResolutionV1,
+    *,
+    target_snapshot: TargetSnapshotV1,
+    evidence_store: FileEvidenceStore,
+) -> str | None:
+    """Re-read the target and every predeclared typed input from current CAS."""
+
+    if target_snapshot.object_id != resolution.target_snapshot_id:
+        return "target_snapshot_mismatch"
+    target_metadata = tuple(
+        (
+            value.artifact_digest,
+            value.artifact_type,
+            value.relative_path,
+            value.size,
+        )
+        for value in resolution.target_artifacts
+    )
+    expected_target_metadata = tuple(
+        (
+            value.artifact_digest,
+            TARGET_ARTIFACT_TYPE_V1,
+            value.relative_path,
+            value.size,
+        )
+        for value in target_snapshot.files
+    )
+    if target_metadata != expected_target_metadata:
+        return "resolution_target_artifacts_mismatch"
+
+    bindings = (
+        ("poc", resolution.poc_artifact),
+        *tuple((f"evidence_{index}", binding) for index, binding in enumerate(resolution.evidence_artifacts)),
+        ("environment", resolution.environment_artifact),
+        ("effect_oracle", resolution.effect_oracle_artifact),
+    )
 
     try:
         validate_etzio_fixture_snapshot(target_snapshot, evidence_store)
     except EvidenceError:
         return "resolved_target_unavailable"
 
-    for role, binding, _, _ in bindings:
+    for role, binding in bindings:
         try:
             data = evidence_store.get_typed(
                 binding.artifact_digest,
@@ -1142,6 +1407,188 @@ def _artifact_resolution_reason(
         if len(data) != binding.size:
             return f"resolved_{role}_artifact_size_mismatch"
     return None
+
+
+def _resolve_verifier_output_artifacts(
+    authenticated_receipt: AuthenticatedVerifierReceiptV1,
+    *,
+    evidence_store: FileEvidenceStore,
+    maximum_output_bytes: int,
+) -> VerificationOutputArtifactsV1:
+    receipt = authenticated_receipt.receipt
+    output_specs = tuple(
+        (
+            role,
+            getattr(receipt, digest_field),
+            getattr(receipt, size_field),
+        )
+        for role, digest_field, size_field in _OUTPUT_FIELDS_BY_ROLE_V1
+    )
+    signed_output_bytes = sum(size for _, _, size in output_specs)
+    if signed_output_bytes > min(
+        maximum_output_bytes,
+        MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1,
+    ):
+        raise VerificationError(
+            "verification_output_byte_ceiling_exceeded",
+            "signed verification outputs exceed the available byte allowance",
+        )
+    resolved: dict[str, VerificationArtifactBindingV1] = {}
+    for role, digest, signed_size in output_specs:
+        artifact_type = VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[role]
+        try:
+            data = evidence_store.get_typed(
+                digest,
+                expected_type=artifact_type,
+                maximum=signed_size,
+            )
+        except EvidenceError as exc:
+            if str(exc) in {
+                "evidence artifact exceeds configured limit",
+                "typed evidence must be nonempty",
+            }:
+                raise VerificationError(
+                    f"resolved_{role}_artifact_size_mismatch",
+                    f"{role} bytes differ from the signed size",
+                ) from exc
+            raise VerificationError(
+                f"resolved_{role}_artifact_unavailable",
+                f"{role} cannot be resolved under its code-owned type",
+            ) from exc
+        if len(data) != signed_size:
+            raise VerificationError(
+                f"resolved_{role}_artifact_size_mismatch",
+                f"{role} bytes differ from the signed size",
+            )
+        binding = VerificationArtifactBindingV1(
+            artifact_digest=digest,
+            artifact_type=artifact_type,
+            size=signed_size,
+        )
+        resolved[role] = binding
+    return VerificationOutputArtifactsV1(
+        execution_output_artifact=resolved["execution_output"],
+        effect_output_artifact=resolved["effect_output"],
+        measured_environment_output_artifact=resolved["measured_environment_output"],
+        termination_output_artifact=resolved["termination_output"],
+    )
+
+
+def revalidate_verifier_receipt_artifacts(
+    authenticated_receipt: AuthenticatedVerifierReceiptV1,
+    *,
+    target_snapshot: TargetSnapshotV1,
+    evidence_store: FileEvidenceStore,
+    maximum_output_bytes: int = MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1,
+) -> VerificationOutputArtifactsV1:
+    """Revalidate current input CAS and derive exact output role/type/size bindings."""
+
+    if not isinstance(
+        authenticated_receipt,
+        AuthenticatedVerifierReceiptV1,
+    ):
+        raise VerificationError(
+            "invalid_authenticated_receipt",
+            "artifact validation requires an authenticated receipt",
+        )
+    if not isinstance(target_snapshot, TargetSnapshotV1):
+        raise VerificationError(
+            "invalid_target_snapshot",
+            "target_snapshot must be a TargetSnapshotV1",
+        )
+    if not isinstance(evidence_store, FileEvidenceStore):
+        raise VerificationError(
+            "invalid_evidence_store",
+            "evidence_store must be a FileEvidenceStore",
+        )
+    if type(maximum_output_bytes) is not int or maximum_output_bytes < 0 or maximum_output_bytes > MAX_EPOCH_SECOND:
+        raise VerificationError(
+            "invalid_output_byte_ceiling",
+            "maximum_output_bytes must be a nonnegative int64",
+        )
+    if sum(
+        getattr(authenticated_receipt.receipt, size_field)
+        for _, _, size_field in _OUTPUT_FIELDS_BY_ROLE_V1
+    ) > min(
+        maximum_output_bytes,
+        MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1,
+    ):
+        raise VerificationError(
+            "verification_output_byte_ceiling_exceeded",
+            "signed verification outputs exceed the available byte allowance",
+        )
+    resolution_reason = _artifact_resolution_cas_reason(
+        authenticated_receipt.artifact_resolution,
+        target_snapshot=target_snapshot,
+        evidence_store=evidence_store,
+    )
+    if resolution_reason is not None:
+        raise VerificationError(
+            resolution_reason,
+            "current CAS differs from the authenticated artifact resolution",
+        )
+    return _resolve_verifier_output_artifacts(
+        authenticated_receipt,
+        evidence_store=evidence_store,
+        maximum_output_bytes=maximum_output_bytes,
+    )
+
+
+def validate_verifier_receipt(
+    raw_signed_receipt: SignedVerifierReceiptV1 | Mapping[str, object] | bytes | str,
+    trust_store: VerifierTrustStore,
+    *,
+    lease: VerificationLeaseV1,
+    decision_time: int,
+    expected_verdict: str | None,
+    consumed_lease_ids: Set[str],
+    artifact_resolution: VerificationArtifactResolutionV1,
+    target_snapshot: TargetSnapshotV1,
+    evidence_store: FileEvidenceStore,
+    maximum_output_bytes: int = MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1,
+) -> VerificationProposal:
+    """Return a proposal after pure authentication and current-CAS revalidation."""
+
+    try:
+        consumed = _validated_digest_set(
+            consumed_lease_ids,
+            "invalid_consumed_lease_ids",
+            MAX_CONSUMED_LEASE_IDS,
+        )
+        authenticated = authenticate_verifier_receipt(
+            raw_signed_receipt,
+            trust_store,
+            lease=lease,
+            artifact_resolution=artifact_resolution,
+            decision_time=decision_time,
+            expected_verdict=expected_verdict,
+        )
+        if lease.lease_id in consumed:
+            raise VerificationError(
+                "lease_already_consumed",
+                "verification lease is already consumed",
+            )
+        output_artifacts = revalidate_verifier_receipt_artifacts(
+            authenticated,
+            target_snapshot=target_snapshot,
+            evidence_store=evidence_store,
+            maximum_output_bytes=maximum_output_bytes,
+        )
+    except VerificationError as exc:
+        return _refuse(exc.reason_code)
+
+    receipt = authenticated.receipt
+    return VerificationProposal(
+        eligible=True,
+        lease_id=lease.lease_id,
+        receipt_id=receipt.receipt_id,
+        verdict=receipt.verdict,
+        reason_code="proposal_valid",
+        issuance_trust_snapshot_id=lease.issuance_trust_snapshot_id,
+        decision_trust_snapshot_id=authenticated.decision_trust_snapshot_id,
+        artifact_resolution_id=artifact_resolution.resolution_id,
+        output_artifacts=output_artifacts,
+    )
 
 
 def _validate_lease_values(values: Mapping[str, object]) -> None:
@@ -1183,6 +1630,7 @@ def _validate_receipt_values(values: Mapping[str, object]) -> None:
     if set(values) != _RECEIPT_BODY_FIELDS:
         raise VerificationError("malformed_receipt", "receipt has missing or unknown fields")
     for field in (
+        "artifact_resolution_id",
         "lease_id",
         "mission_id",
         "authority_id",
@@ -1191,12 +1639,61 @@ def _validate_receipt_values(values: Mapping[str, object]) -> None:
         "poc_artifact_digest",
         "environment_digest",
         "effect_oracle_id",
+        "execution_output_digest",
+        "effect_output_digest",
+        "measured_environment_output_digest",
+        "termination_output_digest",
     ):
         _validate_digest(values[field], field)
     _validate_identity(values["candidate_producer_id"], "candidate_producer_id")
     _validate_identity(values["verifier_id"], "verifier_id")
     _validate_key_id(values["verifier_key_id"], "verifier_key_id")
     _validate_evidence_tuple(values["evidence_artifact_digests"])
+    output_digests = (
+        values["execution_output_digest"],
+        values["effect_output_digest"],
+        values["measured_environment_output_digest"],
+        values["termination_output_digest"],
+    )
+    if len(set(output_digests)) != len(output_digests):
+        raise VerificationError(
+            "output_artifact_role_collision",
+            "verification output roles must use distinct content identities",
+        )
+    input_digests = (
+        values["poc_artifact_digest"],
+        *values["evidence_artifact_digests"],
+        values["environment_digest"],
+        values["effect_oracle_id"],
+    )
+    if set(output_digests).intersection(input_digests):
+        raise VerificationError(
+            "output_input_artifact_collision",
+            "verification outputs must be distinct from predeclared inputs",
+        )
+    output_sizes = tuple(
+        values[size_field]
+        for _, _, size_field in _OUTPUT_FIELDS_BY_ROLE_V1
+    )
+    for (_, _, size_field), size in zip(
+        _OUTPUT_FIELDS_BY_ROLE_V1,
+        output_sizes,
+        strict=True,
+    ):
+        if (
+            type(size) is not int
+            or size <= 0
+            or size > MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1
+        ):
+            raise VerificationError(
+                f"invalid_{size_field}",
+                f"{size_field} must be an integer from 1 through 64 MiB",
+            )
+    if sum(output_sizes) > MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1:
+        raise VerificationError(
+            "verification_output_byte_ceiling_exceeded",
+            "signed verification output sizes exceed the fixed aggregate byte ceiling",
+        )
     if type(values["evidence_tier"]) is not str:
         raise VerificationError("invalid_evidence_tier", "evidence_tier must be a string")
     if values["evidence_tier"] != MODELED_FIXTURE_TIER:

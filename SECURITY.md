@@ -29,29 +29,51 @@ Those controls prove only the bounded fixture slice:
   admitted `modeled_fixture_verification` grant, together with the verifier trust and
   revocation snapshot used for assignment; the lease content-binds that issuance snapshot
   identity;
+- the lease has a signed expiry bound, but canonical expiry, cancellation, supersession,
+  reassignment, and terminal-recovery events are not implemented;
 - ETZIO can resolve every target file and predeclared PoC, supporting-evidence,
   environment, and oracle-specification input under an exact code-owned CAS type, retain
   one canonical resolution for the lease, and remain in nonterminal
   `awaiting_verification`; this establishes byte identity and assigned role at resolution
   time, not provenance, truth, execution, effect, or current retention;
-- signed modeled-fixture receipts remain contract primitives, not a kernel-integrated
-  acceptance path: atomic receipt acceptance and lease consumption, canonical
-  adjudication, verifier-produced execution evidence, and independent execution remain
-  open. Modeled receipt proposals distinguish the issuance snapshot from a later
-  proposal-time revocation view, but do not establish freshness of either; and
+- a signed modeled-fixture receipt now binds that exact resolution plus distinct execution,
+  effect, measured-environment, and termination output digest/size pairs. Before first
+  admission, the supported kernel command revalidates the target, every resolved input,
+  and each nonempty output under its code-owned CAS type and the grant's one signed byte
+  ceiling;
+- one `verifier_receipt_admitted` event retains the exact signed receipt, decision-time
+  trust and revocation snapshot, and derived output bindings. The same append atomically
+  records single-use lease consumption. Exact recovery of that committed historical
+  decision is CAS-free, while current byte availability remains a separate check;
+- receipt admission authenticates and preserves a modeled verifier statement, including
+  negative, inconclusive, and invalid outcomes. Opaque typed output bytes do not prove
+  their semantics, provenance, common-run coherence, execution, effect, measured
+  environment, termination, verifier independence, or finding validity;
+- pure replay verifies the signed digest/size descriptors and event bindings but cannot
+  prove that mutable CAS reads occurred. Generic event append therefore rejects receipt
+  admissions; the dedicated append path repeats current-CAS validation from locked retained
+  history while holding the SQLite writer transaction. Untrusted code must not receive
+  that privileged store surface. CAS and SQLite still do not share one transaction, and a
+  coherent offline rewrite remains undetectable until ETZIO has an authenticated external
+  event-head anchor. Trust-view freshness and decision time are likewise not externally
+  proved. SQLite `BUSY` or `LOCKED` outcomes are retryable `StoreBusyError` conditions, not
+  corruption: receipt admission makes exactly one command-level retry and reconciles
+  retained history, then propagates persistent contention for an operator-controlled
+  retry; and
 - the separate `etzio.cli` foundation model executes only its deterministic in-process
   toy target. Its modeled verdicts are not vulnerability evidence.
 
 Do not run generated payloads, unknown repositories, historical benchmark build systems,
 or third-party exploit material with the current engine.
 
-## Allowed research
+## Research categories and current authority
 
-- repository-owned fixtures;
-- locally owned test systems;
-- pinned historical benchmarks whose terms permit local analysis;
-- later, an exact target and revision covered by a kernel-admitted bounty scope or written
-  permission.
+The current executable research surface is repository-owned fixtures only. Public research
+and pinned historical benchmarks whose terms permit local analysis may be inspected
+read-only; their build systems and payloads must not be executed with the current engine.
+Locally owned test systems are a future gated category, not part of the supported target
+surface. Any such system—and, later, any external target—requires an exact admitted target
+contract, the applicable integrity and isolation gates, and separately scoped grants.
 
 ## Separate authorities
 

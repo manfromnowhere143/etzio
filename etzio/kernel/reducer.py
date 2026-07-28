@@ -7,7 +7,12 @@ from dataclasses import dataclass
 from enum import Enum
 
 from ..protocol import EnvelopeV1, ProtocolError, canonical_dumps, thaw_json
-from .events_v1 import GENESIS_DIGEST, EventIntegrityError, EventV1
+from .events_v1 import (
+    GENESIS_DIGEST,
+    RECEIPT_ADMISSION_PROFILE_V1,
+    EventIntegrityError,
+    EventV1,
+)
 
 
 class ReductionError(ProtocolError):
@@ -43,6 +48,8 @@ class MissionProjection:
     parse_failures: tuple[EventV1, ...]
     verification_lease_events: tuple[EventV1, ...]
     verification_artifact_resolution_events: tuple[EventV1, ...]
+    verification_receipt_admission_events: tuple[EventV1, ...]
+    consumed_verification_lease_ids: frozenset[str]
     refusal: EventV1 | None
     failure_event: EventV1 | None
     scan_summary: EventV1 | None
@@ -102,6 +109,7 @@ def _transition(phase: str, kind: str) -> str:
         if kind in {
             "verification_lease_issued",
             "verification_artifacts_resolved",
+            "verifier_receipt_admitted",
         }:
             return "awaiting_verification"
     raise ReductionError(f"illegal event transition: {phase} -> {kind}")
@@ -127,8 +135,8 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
 
     ``authority_admitted → mission_opened → analysis_lease_issued → outputs* →
     scan_completed → mission_closed``. A verification-intended stream instead continues
-    through one or more ``verification_lease_issued`` events and remains nonterminal
-    pending a later receipt-admission tranche.
+    through lease issuance, artifact resolution, and optional receipt-admission self-loops,
+    then remains nonterminal pending explicit terminal-recovery semantics.
     """
 
     retained = tuple(events)
@@ -150,9 +158,13 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
     candidate_events_by_id: dict[str, EventV1] = {}
     verification_lease_events: list[EventV1] = []
     verification_artifact_resolution_events: list[EventV1] = []
+    verification_receipt_admission_events: list[EventV1] = []
     verification_lease_ids: set[str] = set()
     verification_leases_by_id: dict[str, object] = {}
+    verification_resolutions_by_lease_id: dict[str, object] = {}
     resolved_verification_lease_ids: set[str] = set()
+    consumed_verification_lease_ids: set[str] = set()
+    admitted_verifier_receipt_ids: set[str] = set()
     leased_candidate_ids: set[str] = set()
     admitted_grant: object | None = None
     admitted_admission: object | None = None
@@ -577,7 +589,174 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                     "artifact resolution exceeds the admitted byte ceiling"
                 )
             resolved_verification_lease_ids.add(resolution.verification_lease_id)
+            verification_resolutions_by_lease_id[
+                resolution.verification_lease_id
+            ] = resolution
             verification_artifact_resolution_events.append(event)
+        elif event.kind == "verifier_receipt_admitted":
+            from ..evidence import (
+                VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1,
+            )
+            from ..verification import (
+                VerificationError,
+                VerificationLeaseV1,
+                VerificationOutputArtifactsV1,
+                VerifierReceiptV1,
+                VerifierTrustStore,
+                authenticate_verifier_receipt,
+            )
+            from ..verification_artifacts import (
+                VerificationArtifactBindingV1,
+                VerificationArtifactError,
+                VerificationArtifactResolutionV1,
+            )
+
+            payload = thaw_json(event.payload)
+            if payload["adjudication_profile"] != RECEIPT_ADMISSION_PROFILE_V1:
+                raise ReductionError(
+                    "verifier receipt admission uses an unsupported profile"
+                )
+            try:
+                decision_trust = VerifierTrustStore.from_snapshot_body(
+                    payload["decision_trust_snapshot"],
+                    expected_snapshot_id=payload[
+                        "decision_trust_snapshot_id"
+                    ],
+                )
+                signed_receipt_bytes = canonical_dumps(payload["receipt"])
+                from ..verification import SignedVerifierReceiptV1
+
+                signed_receipt = SignedVerifierReceiptV1.from_bytes(
+                    signed_receipt_bytes
+                )
+                if signed_receipt.to_bytes() != signed_receipt_bytes:
+                    raise ReductionError(
+                        "retained signed verifier receipt is noncanonical"
+                    )
+                receipt = VerifierReceiptV1.from_envelope(
+                    EnvelopeV1.from_bytes(signed_receipt.envelope_bytes)
+                )
+            except (VerificationError, ProtocolError) as exc:
+                raise ReductionError(
+                    f"invalid retained verifier receipt decision evidence: {exc}"
+                ) from exc
+            lease_value = verification_leases_by_id.get(receipt.lease_id)
+            if not isinstance(lease_value, VerificationLeaseV1):
+                raise ReductionError(
+                    "verifier receipt references no prior verification lease"
+                )
+            resolution_value = verification_resolutions_by_lease_id.get(
+                receipt.lease_id
+            )
+            if not isinstance(
+                resolution_value,
+                VerificationArtifactResolutionV1,
+            ):
+                raise ReductionError(
+                    "verifier receipt references a lease without a prior artifact resolution"
+                )
+            if receipt.lease_id in consumed_verification_lease_ids:
+                raise ReductionError("verification lease is already consumed")
+            if receipt.receipt_id in admitted_verifier_receipt_ids:
+                raise ReductionError("verifier receipt is already admitted")
+            try:
+                authenticated = authenticate_verifier_receipt(
+                    signed_receipt,
+                    decision_trust,
+                    lease=lease_value,
+                    artifact_resolution=resolution_value,
+                    decision_time=event.decision_time,
+                )
+                output_artifacts = VerificationOutputArtifactsV1(
+                    execution_output_artifact=(
+                        VerificationArtifactBindingV1.from_dict(
+                            payload["execution_output_artifact"]
+                        )
+                    ),
+                    effect_output_artifact=VerificationArtifactBindingV1.from_dict(
+                        payload["effect_output_artifact"]
+                    ),
+                    measured_environment_output_artifact=(
+                        VerificationArtifactBindingV1.from_dict(
+                            payload[
+                                "measured_environment_output_artifact"
+                            ]
+                        )
+                    ),
+                    termination_output_artifact=(
+                        VerificationArtifactBindingV1.from_dict(
+                            payload["termination_output_artifact"]
+                        )
+                    ),
+                )
+            except (VerificationError, VerificationArtifactError) as exc:
+                raise ReductionError(
+                    f"verifier receipt admission failed authentication: {exc}"
+                ) from exc
+            if (
+                authenticated.decision_trust_snapshot_id
+                != payload["decision_trust_snapshot_id"]
+            ):
+                raise ReductionError(
+                    "receipt authentication used a different decision trust snapshot"
+                )
+            expected_output_bindings = (
+                (
+                    output_artifacts.execution_output_artifact,
+                    authenticated.receipt.execution_output_digest,
+                    authenticated.receipt.execution_output_size,
+                    VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[
+                        "execution_output"
+                    ],
+                ),
+                (
+                    output_artifacts.effect_output_artifact,
+                    authenticated.receipt.effect_output_digest,
+                    authenticated.receipt.effect_output_size,
+                    VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[
+                        "effect_output"
+                    ],
+                ),
+                (
+                    output_artifacts.measured_environment_output_artifact,
+                    authenticated.receipt.measured_environment_output_digest,
+                    authenticated.receipt.measured_environment_output_size,
+                    VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[
+                        "measured_environment_output"
+                    ],
+                ),
+                (
+                    output_artifacts.termination_output_artifact,
+                    authenticated.receipt.termination_output_digest,
+                    authenticated.receipt.termination_output_size,
+                    VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[
+                        "termination_output"
+                    ],
+                ),
+            )
+            if any(
+                binding.artifact_digest != digest
+                or binding.size != size
+                or binding.artifact_type != artifact_type
+                for binding, digest, size, artifact_type in expected_output_bindings
+            ):
+                raise ReductionError(
+                    "receipt output bindings differ from the signed receipt"
+                )
+            if admitted_grant is None:
+                raise ReductionError(
+                    "verifier receipt admission has no admitted authority grant"
+                )
+            if (
+                resolution_value.total_bytes + output_artifacts.total_bytes
+                > admitted_grant.max_bytes
+            ):
+                raise ReductionError(
+                    "receipt artifacts exceed the admitted byte ceiling"
+                )
+            consumed_verification_lease_ids.add(receipt.lease_id)
+            admitted_verifier_receipt_ids.add(receipt.receipt_id)
+            verification_receipt_admission_events.append(event)
         elif event.kind == "mission_closed":
             if (
                 admitted_admission is not None
@@ -587,7 +766,7 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
             ):
                 raise ReductionError(
                     "verification-intended mission with candidates cannot close "
-                    "before receipt adjudication"
+                    "before explicit verification terminal-recovery semantics"
                 )
             if event.payload["candidate_count"] != len(candidates):
                 raise ReductionError(
@@ -636,6 +815,12 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
         verification_lease_events=tuple(verification_lease_events),
         verification_artifact_resolution_events=tuple(
             verification_artifact_resolution_events
+        ),
+        verification_receipt_admission_events=tuple(
+            verification_receipt_admission_events
+        ),
+        consumed_verification_lease_ids=frozenset(
+            consumed_verification_lease_ids
         ),
         refusal=refusal,
         failure_event=failure,
