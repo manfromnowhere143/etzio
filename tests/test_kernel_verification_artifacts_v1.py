@@ -34,6 +34,10 @@ from etzio.kernel.store import SQLiteEventStore, StaleHeadError
 from etzio.kernel.verification_lease import (
     issue_modeled_fixture_verification_lease,
 )
+from etzio.kernel.verification_recovery import (
+    cancel_modeled_fixture_verification_lease,
+    reassign_modeled_fixture_verification_lease,
+)
 from etzio.protocol import EnvelopeV1, canonical_dumps, content_id, thaw_json
 from etzio.verification import (
     VERIFIER_ROLE,
@@ -67,6 +71,8 @@ class _Harness:
     lease_head: str
     pre_resolution_events: tuple[EventV1, ...]
     bindings: dict[str, object]
+    verifier_signer: VerifierSigner
+    verifier_trust: VerifierTrustStore
 
 
 def _typed_bindings(
@@ -209,6 +215,8 @@ def _setup(
         lease_head=issued.event.event_digest,
         pre_resolution_events=issued.projection.events,
         bindings=bindings,
+        verifier_signer=verifier_signer,
+        verifier_trust=verifier_trust,
     )
 
 
@@ -798,3 +806,84 @@ def test_retry_fails_closed_when_cas_bytes_disappear(
 
     assert caught.value.reason_code == "poc_artifact_unavailable"
     assert historical.verification_artifact_resolution_events == (result.event,)
+
+
+def test_cancelled_lease_rejects_even_an_exact_historical_resolution_retry(
+    tmp_path: Path,
+) -> None:
+    harness = _setup(tmp_path)
+    with SQLiteEventStore(harness.database) as store:
+        resolved = _resolve(harness, event_store=store)
+        cancelled = cancel_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission_id,
+            expected_head=resolved.event.event_digest,
+            verification_lease_id=harness.lease.lease_id,
+            reason_code="operator_cancelled",
+            decision_time=NOW + 3,
+        )
+        with pytest.raises(VerificationArtifactResolutionError) as caught:
+            _resolve(
+                harness,
+                event_store=store,
+                expected_head=cancelled.event.event_digest,
+            )
+
+    assert caught.value.reason_code == "verification_lease_inactive"
+
+
+def test_successor_requires_and_retains_its_own_fresh_resolution(
+    tmp_path: Path,
+) -> None:
+    harness = _setup(tmp_path)
+    successor_signer = VerifierSigner.generate()
+    successor_trust = VerifierTrustStore.from_keys(
+        (
+            TrustedVerifierKey(
+                verifier_id="CATO-2",
+                public_key_bytes=successor_signer.public_key_bytes,
+                roles=frozenset({VERIFIER_ROLE}),
+            ),
+        )
+    )
+    with SQLiteEventStore(harness.database) as store:
+        predecessor_resolution = _resolve(harness, event_store=store)
+        reassigned = reassign_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission_id,
+            expected_head=predecessor_resolution.event.event_digest,
+            predecessor_verification_lease_id=harness.lease.lease_id,
+            verifier_key_id=successor_signer.key_id,
+            verifier_trust_store=successor_trust,
+            decision_time=NOW + 3,
+            requested_wallclock_seconds=30,
+        )
+        with pytest.raises(VerificationArtifactResolutionError) as old:
+            resolve_modeled_fixture_verification_artifacts(
+                event_store=store,
+                evidence_store=harness.evidence_store,
+                mission_id=harness.mission_id,
+                expected_head=reassigned.event.event_digest,
+                verification_lease_id=harness.lease.lease_id,
+                decision_time=NOW + 4,
+            )
+        successor_resolution = (
+            resolve_modeled_fixture_verification_artifacts(
+                event_store=store,
+                evidence_store=harness.evidence_store,
+                mission_id=harness.mission_id,
+                expected_head=reassigned.event.event_digest,
+                verification_lease_id=reassigned.lease.lease_id,
+                decision_time=NOW + 4,
+            )
+        )
+        projection = reduce_events(store.load(harness.mission_id))
+
+    assert old.value.reason_code == "verification_lease_inactive"
+    assert successor_resolution.resolution.verification_lease_id == (
+        reassigned.lease.lease_id
+    )
+    assert successor_resolution.resolution.resolution_id != (
+        predecessor_resolution.resolution.resolution_id
+    )
+    assert len(projection.verification_artifact_resolution_events) == 2

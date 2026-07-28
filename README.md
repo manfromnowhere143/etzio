@@ -23,8 +23,10 @@ scientific authority remain in the kernel.
 > modeled-fixture verification lease for a retained candidate, resolve every target and
 > predeclared verification-input byte under an exact CAS type, and atomically admit one
 > authenticated modeled receipt while consuming its lease. The receipt signs the retained
-> resolution and four exact typed output digest/size pairs. The mission remains in
-> `awaiting_verification`. Etzio does not construct or execute exploits, establish that
+> resolution and four exact typed output digest/size pairs. Explicit expiry, modeled
+> cancellation, atomic reassignment, and receipt-coverage closure now recover
+> verification-intent missions without rewriting history. Etzio does not construct or
+> execute exploits, establish that
 > those opaque outputs came from an execution, adjudicate a finding, access a live target,
 > or learn. No production-readiness or superiority claim is made.
 
@@ -67,8 +69,11 @@ An explicit fixture-only kernel path may instead admit both `static_analysis` an
 verification lease, resolve its predeclared inputs under code-owned artifact types, retain
 one canonical ETZIO resolution event, and admit one signed modeled receipt. A single
 `verifier_receipt_admitted` event retains the decision trust snapshot and four code-derived
-typed output bindings while consuming the lease. This is authenticated statement
-retention—not PoC, oracle, or verifier execution and not finding adjudication.
+typed output bindings while consuming the lease. A canonical lease lineage can also retain
+explicit expiry, pre-deadline modeled cancellation, or atomic reassignment to a different
+verifier, then close with exact complete or incomplete receipt coverage. This is
+authenticated statement and lifecycle-decision retention—not PoC, oracle, or verifier
+execution and not finding adjudication.
 
 The command has no arbitrary target-path option. It emits candidates only; neither fixture
 path can mint a finding, execute a PoC, use the network, access credentials, spend,
@@ -79,7 +84,7 @@ The protocol-v1 foundation includes:
 - canonical JSON with duplicate-key rejection, Unicode 17.0.0 NFC, signed 64-bit integers,
   fixed resource ceilings, and full domain-separated SHA-256 identities;
 - an installed Draft 2020-12 semantic wire schema with exact branches for all nine typed
-  object kinds and all fifteen event payload variants;
+  object kinds and all eighteen event payload variants;
 - Ed25519 authority and modeled-receipt attestations, including prime-subgroup public-key
   validation before a key can enter a trust snapshot;
 - exact fixture manifests and a private content-addressed evidence store;
@@ -95,6 +100,8 @@ The protocol-v1 foundation includes:
 - one atomic receipt-admission event that retains the complete decision trust view,
   preserves every allowed verdict, and derives single-use lease consumption through
   replay;
+- explicit lease expiry, modeled cancellation, atomic nonbranching reassignment, and
+  terminal receipt-coverage events with exhaustive candidate partitions;
 - compare-and-append SQLite storage with replay-time lifecycle validation; and
 - known-bad tests for signature, scope, identity, lifecycle, budget, corruption, replay,
   and filesystem-boundary failures.
@@ -104,7 +111,7 @@ The protocol-v1 foundation includes:
 | Plane | Unit | Responsibility | Repository status |
 |---|---|---|---|
 | Control | **ETZIO** | protocol, lifecycle, event ledger, replay | implemented for the fixture scan |
-| Governance | **AQUILA** | authority, scope, budgets, leases | fixture analysis and modeled-verification lease issuance implemented |
+| Governance | **AQUILA** | authority, scope, budgets, leases | fixture analysis plus modeled-verification issuance, cancellation, and reassignment implemented |
 | Recon | **SCIPIO** | target and attack-surface mapping | modeled |
 | Strategy | **FABIUS** | ranked falsifiable hypotheses | modeled |
 | Investigation | **VELITES** | leased probes and candidates | narrow byte-bound Python AST slice |
@@ -153,16 +160,15 @@ mkdir -m 700 .etzio-state
 ## Open gates and next mission
 
 The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments,
-typed input resolutions, and atomic modeled-receipt admission are retained; completing the
-foundation-integrity boundary still requires:
+typed input resolutions, atomic modeled-receipt admission, and explicit lease recovery are
+retained; completing the foundation-integrity boundary still requires:
 
-1. close lease expiry, cancellation, supersession, reassignment, and terminal recovery;
-2. establish a trusted clock, revocation freshness, and external event-head anchoring;
-3. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
+1. establish a trusted clock, revocation freshness, and external event-head anchoring;
+2. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
    pathname race;
-4. replace opaque modeled outputs with structured, independently produced execution
+3. replace opaque modeled outputs with structured, independently produced execution
    evidence; and
-5. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
+4. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
 
 Only then should Etzio run the benchmark-first EVM pack. Live bounty work remains a later,
 target-specific authorization stage.

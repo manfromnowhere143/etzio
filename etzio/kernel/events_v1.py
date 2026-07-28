@@ -31,6 +31,24 @@ from ..protocol import (
 PROTOCOL_VERSION: Final = 1
 EVENT_VERSION: Final = 1
 RECEIPT_ADMISSION_PROFILE_V1: Final = "modeled_fixture_receipt_admission_v1"
+VERIFICATION_LEASE_CANCELLATION_REASON_V1: Final = "operator_cancelled"
+ACTIVE_LEASE_REASSIGNMENT_REASON_V1: Final = "active_lease_superseded"
+EXPIRED_LEASE_REASSIGNMENT_REASON_V1: Final = "expired_lease_recovery"
+CANCELLED_LEASE_REASSIGNMENT_REASON_V1: Final = "cancelled_lease_recovery"
+VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1: Final = frozenset(
+    {
+        ACTIVE_LEASE_REASSIGNMENT_REASON_V1,
+        CANCELLED_LEASE_REASSIGNMENT_REASON_V1,
+        EXPIRED_LEASE_REASSIGNMENT_REASON_V1,
+    }
+)
+MISSION_CLOSED_STATUSES_V1: Final = frozenset(
+    {
+        "completed",
+        "receipt_coverage_complete",
+        "receipt_coverage_incomplete",
+    }
+)
 
 # SHA-256("etzio.event.v1.genesis").  This fixed, domain-specific sentinel represents the
 # predecessor of sequence zero; it is not an externally anchored checkpoint.
@@ -46,6 +64,9 @@ EVENT_UNIT_BY_KIND_V1: Final = MappingProxyType(
         "mission_opened": "ETZIO",
         "analysis_lease_issued": "AQUILA",
         "verification_lease_issued": "AQUILA",
+        "verification_lease_cancelled": "AQUILA",
+        "verification_lease_expired": "ETZIO",
+        "verification_lease_reassigned": "AQUILA",
         "verification_artifacts_resolved": "ETZIO",
         "verifier_receipt_admitted": "ETZIO",
         "candidate_recorded": "VELITES",
@@ -69,6 +90,19 @@ EVENT_PAYLOAD_FIELDS_BY_KIND_V1: Final = MappingProxyType(
         "verification_lease_issued": frozenset(
             {
                 "lease",
+                "verifier_trust_snapshot",
+                "verifier_trust_snapshot_id",
+            }
+        ),
+        "verification_lease_cancelled": frozenset(
+            {"reason_code", "verification_lease_id"}
+        ),
+        "verification_lease_expired": frozenset({"verification_lease_id"}),
+        "verification_lease_reassigned": frozenset(
+            {
+                "lease",
+                "predecessor_verification_lease_id",
+                "reason_code",
                 "verifier_trust_snapshot",
                 "verifier_trust_snapshot_id",
             }
@@ -121,6 +155,9 @@ EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1: Final = MappingProxyType(
         ),
         "analysis_lease_issued": MappingProxyType({"lease": "analysis_lease"}),
         "verification_lease_issued": MappingProxyType(
+            {"lease": "verification_lease"}
+        ),
+        "verification_lease_reassigned": MappingProxyType(
             {"lease": "verification_lease"}
         ),
         "verification_artifacts_resolved": MappingProxyType(
@@ -234,6 +271,103 @@ def _require_relative_path(value: object) -> str:
     ):
         raise EventIntegrityError("relative_path must be normalized and relative")
     return text
+
+
+def _validate_verification_lease_evidence(
+    *,
+    event_kind: str,
+    payload: dict[str, Any],
+    mission_id: str,
+    authority_id: str,
+    target_id: str,
+    decision_time: int,
+    prev_digest: str,
+) -> None:
+    """Validate the shared issuance boundary for initial and reassigned leases."""
+
+    from ..verification import (
+        VERIFIER_ROLE,
+        VerificationError,
+        VerificationLeaseV1,
+        VerifierTrustStore,
+        derive_verification_lease_nonce,
+    )
+
+    lease_envelope = _require_nested_envelope(
+        payload, "lease", "verification_lease"
+    )
+    snapshot_id = _require_digest(
+        "verifier_trust_snapshot_id",
+        payload["verifier_trust_snapshot_id"],
+    )
+    try:
+        lease = VerificationLeaseV1.from_envelope(lease_envelope)
+        verifier_trust = VerifierTrustStore.from_snapshot_body(
+            payload["verifier_trust_snapshot"],
+            expected_snapshot_id=snapshot_id,
+        )
+    except VerificationError as exc:
+        raise EventIntegrityError(
+            f"{event_kind} contains invalid verification evidence: {exc}"
+        ) from exc
+    if (
+        lease.mission_id != mission_id
+        or lease.authority_id != authority_id
+        or lease.target_snapshot_id != target_id
+    ):
+        raise EventIntegrityError(
+            "verification lease does not match the event identities"
+        )
+    if lease.issued_at != decision_time:
+        raise EventIntegrityError(
+            "verification lease issued_at must equal the event decision_time"
+        )
+    if lease.candidate_producer_id == lease.verifier_id:
+        raise EventIntegrityError(
+            "verification lease cannot assign the candidate producer"
+        )
+    trusted_key = verifier_trust.keys.get(lease.verifier_key_id)
+    if trusted_key is None:
+        raise EventIntegrityError(
+            "verification lease references an unknown verifier key"
+        )
+    if lease.verifier_key_id in verifier_trust.revoked_key_ids:
+        raise EventIntegrityError(
+            "verification lease references a revoked verifier key"
+        )
+    if VERIFIER_ROLE not in trusted_key.roles:
+        raise EventIntegrityError(
+            "verification lease key lacks the modeled verifier role"
+        )
+    if trusted_key.verifier_id != lease.verifier_id:
+        raise EventIntegrityError(
+            "verification lease verifier identity differs from its trusted key"
+        )
+    if lease.issuance_trust_snapshot_id != snapshot_id:
+        raise EventIntegrityError(
+            "verification lease does not bind its retained trust snapshot"
+        )
+    expected_nonce = derive_verification_lease_nonce(
+        prior_event_digest=prev_digest,
+        mission_id=lease.mission_id,
+        authority_id=lease.authority_id,
+        target_snapshot_id=lease.target_snapshot_id,
+        candidate_id=lease.candidate_id,
+        candidate_producer_id=lease.candidate_producer_id,
+        poc_artifact_digest=lease.poc_artifact_digest,
+        evidence_artifact_digests=lease.evidence_artifact_digests,
+        environment_digest=lease.environment_digest,
+        effect_oracle_id=lease.effect_oracle_id,
+        verifier_id=lease.verifier_id,
+        verifier_key_id=lease.verifier_key_id,
+        issued_at=lease.issued_at,
+        expires_at=lease.expires_at,
+        issuance_trust_snapshot_id=snapshot_id,
+    )
+    if lease.lease_nonce != expected_nonce:
+        raise EventIntegrityError(
+            "verification lease nonce is not kernel-derived"
+        )
 
 
 def _validate_payload(
@@ -386,91 +520,62 @@ def _validate_payload(
             )
         return
 
-    if kind == "verification_lease_issued":
-        from ..verification import (
-            VERIFIER_ROLE,
-            VerificationError,
-            VerificationLeaseV1,
-            VerifierTrustStore,
-            derive_verification_lease_nonce,
+    if kind == "verification_lease_expired":
+        _require_digest(
+            "verification_lease_id",
+            payload["verification_lease_id"],
         )
+        return
 
-        lease_envelope = _require_nested_envelope(
-            payload, "lease", "verification_lease"
+    if kind == "verification_lease_cancelled":
+        _require_digest(
+            "verification_lease_id",
+            payload["verification_lease_id"],
         )
-        snapshot_id = _require_digest(
-            "verifier_trust_snapshot_id",
-            payload["verifier_trust_snapshot_id"],
+        reason_code = _require_nonempty_text(
+            "reason_code",
+            payload["reason_code"],
         )
-        try:
-            lease = VerificationLeaseV1.from_envelope(lease_envelope)
-            verifier_trust = VerifierTrustStore.from_snapshot_body(
-                payload["verifier_trust_snapshot"],
-                expected_snapshot_id=snapshot_id,
-            )
-        except VerificationError as exc:
+        if reason_code != VERIFICATION_LEASE_CANCELLATION_REASON_V1:
             raise EventIntegrityError(
-                "verification_lease_issued contains invalid verification evidence: "
-                f"{exc}"
-            ) from exc
-        if (
-            lease.mission_id != mission_id
-            or lease.authority_id != authority_id
-            or lease.target_snapshot_id != target_id
-        ):
-            raise EventIntegrityError(
-                "verification lease does not match the event identities"
+                "verification lease cancellation reason must be operator_cancelled"
             )
-        if lease.issued_at != decision_time:
-            raise EventIntegrityError(
-                "verification lease issued_at must equal the event decision_time"
-            )
-        if lease.candidate_producer_id == lease.verifier_id:
-            raise EventIntegrityError(
-                "verification lease cannot assign the candidate producer"
-            )
-        trusted_key = verifier_trust.keys.get(lease.verifier_key_id)
-        if trusted_key is None:
-            raise EventIntegrityError(
-                "verification lease references an unknown verifier key"
-            )
-        if lease.verifier_key_id in verifier_trust.revoked_key_ids:
-            raise EventIntegrityError(
-                "verification lease references a revoked verifier key"
-            )
-        if VERIFIER_ROLE not in trusted_key.roles:
-            raise EventIntegrityError(
-                "verification lease key lacks the modeled verifier role"
-            )
-        if trusted_key.verifier_id != lease.verifier_id:
-            raise EventIntegrityError(
-                "verification lease verifier identity differs from its trusted key"
-            )
-        if lease.issuance_trust_snapshot_id != snapshot_id:
-            raise EventIntegrityError(
-                "verification lease does not bind its retained trust snapshot"
-            )
-        expected_nonce = derive_verification_lease_nonce(
-            prior_event_digest=prev_digest,
-            mission_id=lease.mission_id,
-            authority_id=lease.authority_id,
-            target_snapshot_id=lease.target_snapshot_id,
-            candidate_id=lease.candidate_id,
-            candidate_producer_id=lease.candidate_producer_id,
-            poc_artifact_digest=lease.poc_artifact_digest,
-            evidence_artifact_digests=lease.evidence_artifact_digests,
-            environment_digest=lease.environment_digest,
-            effect_oracle_id=lease.effect_oracle_id,
-            verifier_id=lease.verifier_id,
-            verifier_key_id=lease.verifier_key_id,
-            issued_at=lease.issued_at,
-            expires_at=lease.expires_at,
-            issuance_trust_snapshot_id=snapshot_id,
+        return
+
+    if kind == "verification_lease_reassigned":
+        _require_digest(
+            "predecessor_verification_lease_id",
+            payload["predecessor_verification_lease_id"],
         )
-        if lease.lease_nonce != expected_nonce:
+        reason_code = _require_nonempty_text(
+            "reason_code",
+            payload["reason_code"],
+        )
+        if reason_code not in VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1:
             raise EventIntegrityError(
-                "verification lease nonce is not kernel-derived"
+                "verification lease reassignment reason is unsupported"
             )
+        _validate_verification_lease_evidence(
+            event_kind=kind,
+            payload=payload,
+            mission_id=mission_id,
+            authority_id=authority_id,
+            target_id=target_id,
+            decision_time=decision_time,
+            prev_digest=prev_digest,
+        )
+        return
+
+    if kind == "verification_lease_issued":
+        _validate_verification_lease_evidence(
+            event_kind=kind,
+            payload=payload,
+            mission_id=mission_id,
+            authority_id=authority_id,
+            target_id=target_id,
+            decision_time=decision_time,
+            prev_digest=prev_digest,
+        )
         return
 
     if kind == "verification_artifacts_resolved":
@@ -659,8 +764,9 @@ def _validate_payload(
         _require_nonnegative_int(
             "parse_failure_count", payload["parse_failure_count"]
         )
-        if payload["status"] != "completed":
-            raise EventIntegrityError("mission_closed status must be completed")
+        status = _require_nonempty_text("status", payload["status"])
+        if status not in MISSION_CLOSED_STATUSES_V1:
+            raise EventIntegrityError("mission_closed status is unsupported")
         return
 
     # The remaining supported kinds are terminal interruption events.

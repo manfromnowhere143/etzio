@@ -24,7 +24,10 @@ from etzio.kernel.events_v1 import (  # noqa: E402
     EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1,
     EVENT_PAYLOAD_FIELDS_BY_KIND_V1,
     EVENT_UNIT_BY_KIND_V1,
+    MISSION_CLOSED_STATUSES_V1,
     RECEIPT_ADMISSION_PROFILE_V1,
+    VERIFICATION_LEASE_CANCELLATION_REASON_V1,
+    VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1,
 )
 from etzio.protocol import (  # noqa: E402
     ENVELOPE_FIELDS_V1,
@@ -65,6 +68,9 @@ REQUIRED_PATHS = (
     "docs/decisions/0002-canonical-governed-fixture-boundary.md",
     "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md",
     "docs/decisions/0004-kernel-issued-verification-leases.md",
+    "docs/decisions/0005-typed-verification-artifact-resolution.md",
+    "docs/decisions/0006-atomic-modeled-receipt-admission.md",
+    "docs/decisions/0007-explicit-verification-lease-recovery.md",
     "docs/decisions/README.md",
     "schemas/finding.schema.json",
     "etzio/schemas/__init__.py",
@@ -85,10 +91,48 @@ LEGACY_SCHEMA_PATHS = frozenset(
     }
 )
 EXPECTED_SEMANTIC_OBJECT_KIND_COUNT_V1 = 9
-EXPECTED_EVENT_KIND_COUNT_V1 = 15
+EXPECTED_EVENT_KIND_COUNT_V1 = 18
 EXPECTED_RESOLUTION_PROFILE_V1 = "modeled_fixture_typed_cas_v1"
 EXPECTED_RECEIPT_ADJUDICATION_PROFILE_V1 = (
     "modeled_fixture_receipt_admission_v1"
+)
+EXPECTED_VERIFICATION_RECOVERY_EVENT_UNITS_V1 = {
+    "verification_lease_cancelled": "AQUILA",
+    "verification_lease_expired": "ETZIO",
+    "verification_lease_reassigned": "AQUILA",
+}
+EXPECTED_VERIFICATION_RECOVERY_PAYLOAD_FIELDS_V1 = {
+    "verification_lease_cancelled": frozenset(
+        {"reason_code", "verification_lease_id"}
+    ),
+    "verification_lease_expired": frozenset({"verification_lease_id"}),
+    "verification_lease_reassigned": frozenset(
+        {
+            "lease",
+            "predecessor_verification_lease_id",
+            "reason_code",
+            "verifier_trust_snapshot",
+            "verifier_trust_snapshot_id",
+        }
+    ),
+}
+EXPECTED_VERIFICATION_RECOVERY_NESTED_ENVELOPES_V1 = {
+    "verification_lease_reassigned": {"lease": "verification_lease"}
+}
+EXPECTED_VERIFICATION_LEASE_CANCELLATION_REASON_V1 = "operator_cancelled"
+EXPECTED_VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1 = frozenset(
+    {
+        "active_lease_superseded",
+        "cancelled_lease_recovery",
+        "expired_lease_recovery",
+    }
+)
+EXPECTED_MISSION_CLOSED_STATUSES_V1 = frozenset(
+    {
+        "completed",
+        "receipt_coverage_complete",
+        "receipt_coverage_incomplete",
+    }
 )
 EXPECTED_VERIFICATION_ARTIFACT_TYPES_V1 = frozenset(
     {
@@ -714,6 +758,119 @@ def _receipt_admission_schema_contract_issues(
     return issues
 
 
+def _verification_recovery_schema_contract_issues(
+    definitions: object,
+) -> list[str]:
+    """Freeze the closed recovery reasons, references, and terminal statuses."""
+
+    if type(definitions) is not dict:
+        return ["protocol-v1 verification recovery definitions are missing"]
+    issues: list[str] = []
+    cancelled = definitions.get(
+        "event_payload_verification_lease_cancelled"
+    )
+    expired = definitions.get("event_payload_verification_lease_expired")
+    reassigned = definitions.get(
+        "event_payload_verification_lease_reassigned"
+    )
+    mission_closed = definitions.get("event_payload_mission_closed")
+    cancelled_properties = (
+        cancelled.get("properties") if type(cancelled) is dict else None
+    )
+    expired_properties = (
+        expired.get("properties") if type(expired) is dict else None
+    )
+    reassigned_properties = (
+        reassigned.get("properties") if type(reassigned) is dict else None
+    )
+    mission_closed_properties = (
+        mission_closed.get("properties")
+        if type(mission_closed) is dict
+        else None
+    )
+    if type(cancelled_properties) is not dict:
+        issues.append(
+            "protocol-v1 verification lease cancellation properties drifted"
+        )
+    else:
+        if cancelled_properties.get("reason_code") != {
+            "const": EXPECTED_VERIFICATION_LEASE_CANCELLATION_REASON_V1
+        }:
+            issues.append(
+                "protocol-v1 verification lease cancellation reason drifted"
+            )
+        if cancelled_properties.get("verification_lease_id") != {
+            "$ref": "#/$defs/sha256_id"
+        }:
+            issues.append(
+                "protocol-v1 verification lease cancellation ID reference drifted"
+            )
+    if (
+        type(expired_properties) is not dict
+        or expired_properties.get("verification_lease_id")
+        != {"$ref": "#/$defs/sha256_id"}
+    ):
+        issues.append(
+            "protocol-v1 verification lease expiry ID reference drifted"
+        )
+    if type(reassigned_properties) is not dict:
+        issues.append(
+            "protocol-v1 verification lease reassignment properties drifted"
+        )
+    else:
+        reason_contract = reassigned_properties.get("reason_code")
+        raw_reasons = (
+            reason_contract.get("enum")
+            if type(reason_contract) is dict
+            else None
+        )
+        if (
+            type(raw_reasons) is not list
+            or len(raw_reasons)
+            != len(EXPECTED_VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1)
+            or frozenset(raw_reasons)
+            != EXPECTED_VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1
+        ):
+            issues.append(
+                "protocol-v1 verification lease reassignment reasons drifted"
+            )
+        if reassigned_properties.get(
+            "predecessor_verification_lease_id"
+        ) != {"$ref": "#/$defs/sha256_id"}:
+            issues.append(
+                "protocol-v1 verification lease predecessor reference drifted"
+            )
+        if reassigned_properties.get("verifier_trust_snapshot") != {
+            "$ref": "#/$defs/verifier_trust_snapshot"
+        }:
+            issues.append(
+                "protocol-v1 verification lease reassignment trust reference drifted"
+            )
+        if reassigned_properties.get("verifier_trust_snapshot_id") != {
+            "$ref": "#/$defs/sha256_id"
+        }:
+            issues.append(
+                "protocol-v1 verification lease reassignment trust ID reference drifted"
+            )
+    status_contract = (
+        mission_closed_properties.get("status")
+        if type(mission_closed_properties) is dict
+        else None
+    )
+    raw_statuses = (
+        status_contract.get("enum")
+        if type(status_contract) is dict
+        else None
+    )
+    if (
+        type(raw_statuses) is not list
+        or len(raw_statuses) != len(EXPECTED_MISSION_CLOSED_STATUSES_V1)
+        or frozenset(raw_statuses) != EXPECTED_MISSION_CLOSED_STATUSES_V1
+    ):
+        issues.append("protocol-v1 mission closure statuses drifted")
+    return issues
+
+
 def protocol_schema_contract_issues(schema: object) -> list[str]:
     """Check load-bearing schema/runtime structure for exact parity."""
 
@@ -732,6 +889,43 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
         issues.append("protocol-v1 runtime semantic object-kind count drifted")
     if len(EVENT_UNIT_BY_KIND_V1) != EXPECTED_EVENT_KIND_COUNT_V1:
         issues.append("protocol-v1 runtime event-kind count drifted")
+    if {
+        kind: EVENT_UNIT_BY_KIND_V1.get(kind)
+        for kind in EXPECTED_VERIFICATION_RECOVERY_EVENT_UNITS_V1
+    } != EXPECTED_VERIFICATION_RECOVERY_EVENT_UNITS_V1:
+        issues.append(
+            "protocol-v1 runtime verification recovery event units drifted"
+        )
+    if {
+        kind: EVENT_PAYLOAD_FIELDS_BY_KIND_V1.get(kind)
+        for kind in EXPECTED_VERIFICATION_RECOVERY_PAYLOAD_FIELDS_V1
+    } != EXPECTED_VERIFICATION_RECOVERY_PAYLOAD_FIELDS_V1:
+        issues.append(
+            "protocol-v1 runtime verification recovery payload fields drifted"
+        )
+    if {
+        kind: EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1.get(kind)
+        for kind in EXPECTED_VERIFICATION_RECOVERY_NESTED_ENVELOPES_V1
+    } != EXPECTED_VERIFICATION_RECOVERY_NESTED_ENVELOPES_V1:
+        issues.append(
+            "protocol-v1 runtime verification recovery nested envelopes drifted"
+        )
+    if (
+        VERIFICATION_LEASE_CANCELLATION_REASON_V1
+        != EXPECTED_VERIFICATION_LEASE_CANCELLATION_REASON_V1
+    ):
+        issues.append(
+            "protocol-v1 runtime verification cancellation reason drifted"
+        )
+    if (
+        VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1
+        != EXPECTED_VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1
+    ):
+        issues.append(
+            "protocol-v1 runtime verification reassignment reasons drifted"
+        )
+    if MISSION_CLOSED_STATUSES_V1 != EXPECTED_MISSION_CLOSED_STATUSES_V1:
+        issues.append("protocol-v1 runtime mission closure statuses drifted")
     if RESOLUTION_PROFILE_V1 != EXPECTED_RESOLUTION_PROFILE_V1:
         issues.append("protocol-v1 runtime resolution profile drifted")
     if RESOLUTION_BODY_FIELDS_V1 != EXPECTED_RESOLUTION_BODY_FIELDS_V1:
@@ -836,6 +1030,7 @@ def protocol_schema_contract_issues(schema: object) -> list[str]:
         return issues
     issues.extend(_verification_artifact_schema_contract_issues(definitions))
     issues.extend(_receipt_admission_schema_contract_issues(definitions))
+    issues.extend(_verification_recovery_schema_contract_issues(definitions))
 
     frame = definitions.get("envelope_frame")
     issues.extend(

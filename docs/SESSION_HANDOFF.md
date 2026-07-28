@@ -33,7 +33,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0003](decisions/0003-semantic-wire-schema-and-typed-kind-closure.md), and
 [ADR-0004](decisions/0004-kernel-issued-verification-leases.md), and
 [ADR-0005](decisions/0005-typed-verification-artifact-resolution.md), and
-[ADR-0006](decisions/0006-atomic-modeled-receipt-admission.md).
+[ADR-0006](decisions/0006-atomic-modeled-receipt-admission.md), and
+[ADR-0007](decisions/0007-explicit-verification-lease-recovery.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -43,10 +44,10 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/atomic-receipt-adjudication-v1`
-- Stacked on: `agent/typed-cas-receipt-evidence-v1`
-- Branch base: `1e0c8ad271f19acfd862cc3dba3bd9502bed638b`
-- Branch-base tree: `4782fec37a6384298ef188f92dd6e4e4801b4816`
+- Current foundation-integrity branch: `agent/verification-lease-recovery-v1`
+- Stacked on: `agent/atomic-receipt-adjudication-v1`
+- Branch base: `f70e4c2786babfd97deddfdc240cbc3fc5fde85e`
+- Branch-base tree: `bac7fa6559326dd87bce8fa685f22f1fd829471d`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -103,7 +104,7 @@ exact authority
 
 - common protocol-v1 envelopes and strict canonical JSON;
 - installed semantic wire schemas and typed dispatch for every supported object kind;
-- exact closed-field schema/runtime parity for all nine semantic bodies and all fifteen
+- exact closed-field schema/runtime parity for all nine semantic bodies and all eighteen
   event kind, unit, and payload forms;
 - Unicode 17.0.0 NFC, signed 64-bit integers, and fixed resource ceilings;
 - full domain-separated SHA-256 object and event identities;
@@ -138,12 +139,23 @@ exact authority
   same-receipt reconciliation when an identical commit becomes visible, retryable
   `StoreBusyError` on persistent `BUSY` or `LOCKED`, conflicting-receipt refusal, and
   distinct-lease stale-head semantics;
+- explicit ETZIO lease expiry and pre-deadline AQUILA modeled cancellation;
+- canonical nonbranching per-candidate lease lineages with atomic reassignment to a
+  different verifier, immutable work bindings, retained successor-issuance trust evidence,
+  and original authority deadlines and lease-count ceilings;
+- active-only resolution and receipt admission with expired, cancelled, superseded, and
+  consumed predecessors unable to resurrect;
+- exact terminal `receipt_coverage_complete` or `receipt_coverage_incomplete` status from
+  exhaustive active, covered, never-assigned, latest-expired, and latest-cancelled
+  candidate partitions;
+- reader-only replay compatibility for the exact zero-candidate pre-recovery
+  verification-intent `completed` closure, without rewriting retained bytes;
 - nonterminal `awaiting_verification` lifecycle state for verification-intent missions;
 - fail-closed refusal, cancellation, failure, timeout, budget, completion, and closure;
 - recoverable deterministic fixture scans without duplicate outputs; and
 - a supported fixture-only CLI that emits candidates and never findings.
 
-### Implemented for modeled receipt admission
+### Implemented for modeled verification admission and recovery
 
 - canonical one-attestation signed verifier receipts;
 - exact receipt/lease/resolution/output-digest/output-size/time/verdict bindings and
@@ -160,6 +172,11 @@ opaque typed bytes grouped by one signature. This does not establish that an exe
 occurred, that one run produced the outputs, that their contents are true, or that the
 verifier was independent or isolated. It does not mint a finding.
 
+Recovery retains modeled lifecycle decisions only. Caller-supplied event time is not
+trusted-clock evidence, and AQUILA plus `operator_cancelled` does not cryptographically
+authenticate an external control principal. Receipt-coverage closure is not a verdict or
+finding claim.
+
 ### Retained behavior models
 
 The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eight-case
@@ -171,7 +188,7 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 On the current candidate bytes, `make verify` passed under both CPython 3.11.15 and
 CPython 3.14.2:
 
-- 463 tests passed;
+- 497 tests passed;
 - Ruff was clean;
 - the installed semantic protocol schema, three explicitly modeled legacy schemas, and
   repository policy passed;
@@ -181,8 +198,11 @@ CPython 3.14.2:
 - the governed clean fixture closed with zero candidates; and
 - both modeled regression demonstrations retained their historical outputs.
 
-The hash-locked environments passed `pip check`, and GitHub Actions reproduced repository
-policy plus both declared runtime suites on the pushed branch head. This evidence remains
+The hash-locked environments passed `pip check`. GitHub Actions reproduced repository
+policy plus both declared runtime suites on the exact parent head
+`f70e4c2786babfd97deddfdc240cbc3fc5fde85e`. At the time this candidate packet was
+authored, remote evidence for the recovery tranche was pending; resolve its current state
+from the branch head and GitHub rather than this dated statement. This evidence remains
 fixture-scoped.
 
 ## Closed adversarial findings in this tranche
@@ -241,6 +261,16 @@ Known-bads now cover:
 - receipt reuse, lease double consumption, exact committed retry after CAS loss and head
   advancement, identical and conflicting submission races, and distinct-lease stale-head
   races;
+- expiry before the retained boundary, cancellation disguised as expiry, unknown or
+  inactive disposition, duplicate/conflicting disposition, and post-resolution recovery;
+- plain second issuance, branching or older-predecessor reassignment, same-verifier
+  renewal, immutable-binding substitution, deadline/budget reset, and reason/state
+  mismatch;
+- predecessor resolution or receipt reuse after reassignment, receipt-versus-recovery
+  commit ordering, identical/conflicting concurrent reassignment, and active-lease
+  closure;
+- complete, incomplete, never-assigned, latest-expired, latest-cancelled, and zero-candidate
+  receipt-coverage partitions;
 - bounded SQLite writer contention, identical-commit reconciliation after one retry, and
   retryable `StoreBusyError` exhaustion without a corruption classification;
 - generic and direct-internal append bypass, receipt-event/evidence-store pairing mismatch,
@@ -253,18 +283,16 @@ Known-bads now cover:
 
 ## Open foundation-integrity blockers
 
-1. Issued leases have no canonical expiry, cancellation, supersession, reassignment, or
-   terminal recovery event.
-2. Authority/verifier clock and revocation snapshot freshness are not externally proved.
-3. SQLite event heads are not externally authenticated or anchored.
-4. The filesystem CAS and SQLite event commit do not share one transaction; bytes can
+1. Authority/verifier clock and revocation snapshot freshness are not externally proved.
+2. SQLite event heads are not externally authenticated or anchored.
+3. The filesystem CAS and SQLite event commit do not share one transaction; bytes can
    disappear after the dedicated append validates them.
-5. SQLite retains a documented same-user pathname race.
-6. Modeled output artifacts are opaque signed descriptors, not structured evidence tied to
+4. SQLite retains a documented same-user pathname race.
+5. Modeled output artifacts are opaque signed descriptors, not structured evidence tied to
    an independently measured execution identity.
-7. Separate verifier labels and keys do not prove separate principals, processes, or
+6. Separate verifier labels and keys do not prove separate principals, processes, or
    isolation.
-8. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
+7. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
    are not implemented.
 
 These blockers prevent a finding pipeline and all live-target work.
@@ -273,11 +301,10 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-Next, define canonical lease expiry, cancellation, supersession, reassignment, and terminal
-recovery. Then close trusted time, revocation freshness, and authenticated external head
-anchoring with concurrency and substitution known-bads. Atomic filesystem-CAS/SQLite
-retention and closure of the same-user pathname race also remain mandatory before a finding
-pipeline can be accepted.
+Next, close trusted time, revocation freshness, and authenticated external head anchoring
+with concurrency and substitution known-bads. Atomic filesystem-CAS/SQLite retention and
+closure of the same-user pathname race also remain mandatory before a finding pipeline can
+be accepted.
 
 ### Mission 2 — independent proof plane
 

@@ -53,7 +53,7 @@ Status: **running**.
 
 Implemented in this phase:
 
-- installed semantic per-kind wire schemas for all nine typed objects and all fifteen event
+- installed semantic per-kind wire schemas for all nine typed objects and all eighteen event
   variants;
 - runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and
 - fail-closed rejection of untyped reserved kinds, malformed signed-grant encoding, and
@@ -83,26 +83,40 @@ Implemented in this phase:
   reclassifying bounded-contention exhaustion as corruption; and
 - reducer, schema, repository-policy, signature, revocation, substitution, byte-budget,
   CAS-loss, direct-append, crash, retry, and concurrency known-bads for modeled-receipt
-  admission.
+  admission;
+- explicit ETZIO lease-expiry and AQUILA modeled-cancellation events with closed reasons
+  and no implicit wall-clock replay transition;
+- one nonbranching candidate lease lineage with atomic supersession/reassignment to a
+  different verifier, immutable work bindings, retained successor-issuance trust evidence,
+  and non-resetting authority deadlines and lease-count ceilings;
+- active-only artifact resolution and receipt admission, with predecessor resurrection
+  rejected after expiry, cancellation, reassignment, or consumption; and
+- exact `receipt_coverage_complete` or `receipt_coverage_incomplete` terminal recovery with
+  active, covered, never-assigned, latest-expired, and latest-cancelled candidate
+  partitions.
+
+Current canonical command writers use receipt-coverage status for every verification-intent
+closure. Replay also accepts the exact pre-recovery zero-candidate `completed` shape as a
+reader-only legacy alias; it is vacuous coverage compatibility, not a finding or execution
+claim.
 
 Remaining required:
 
-1. explicit lease expiry, cancellation, supersession, reassignment, and terminal recovery
-   semantics;
-2. trusted time and revocation freshness;
-3. authenticated, externally anchored event heads;
-4. atomic retention shared by filesystem CAS and the SQLite event commit, or an equivalent
+1. trusted time and revocation freshness;
+2. authenticated, externally anchored event heads;
+3. atomic retention shared by filesystem CAS and the SQLite event commit, or an equivalent
    replay-safe protocol;
-5. closure of the documented same-user SQLite pathname race;
-6. structured independently produced execution evidence with a common measured run
+4. closure of the documented same-user SQLite pathname race;
+5. structured independently produced execution evidence with a common measured run
    identity; and
-7. known-bads for every new refusal, substitution, replay, and concurrency condition.
+6. known-bads for every new refusal, substitution, replay, and concurrency condition.
 
 Current retained boundary: an authority-bound modeled verification assignment, every
 predeclared input, and one authenticated modeled receipt can be resolved and retained today.
-Receipt admission and lease consumption are one event. This authenticates a modeled
-statement and preserves its output descriptors and verdict; it does not establish
-execution, independence, truth, or a finding.
+Receipt admission and lease consumption are one event. Explicit expiry, modeled
+cancellation, atomic reassignment, and exact receipt-coverage closure can recover the
+mission without rewriting its history. This authenticates modeled statements and
+lifecycle decisions; it does not establish execution, independence, truth, or a finding.
 
 ## Phase 2 — independent proof plane
 

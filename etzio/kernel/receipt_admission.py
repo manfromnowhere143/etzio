@@ -406,6 +406,11 @@ def validate_retained_receipt_admission_event(
 
     lease = _verification_lease(projection, receipt.lease_id)
     _assert_candidate_retained(projection, lease.candidate_id)
+    if receipt.lease_id not in projection.active_verification_lease_ids:
+        _reject(
+            "verification_lease_inactive",
+            "receipt admission requires the active candidate-lineage lease",
+        )
     resolution = _artifact_resolution(projection, receipt.lease_id)
     try:
         authenticated = authenticate_verifier_receipt(
@@ -497,6 +502,16 @@ def admit_modeled_fixture_verifier_receipt(
     projection = reduce_events(retained)
     lease = _verification_lease(projection, verification_lease_id)
     _assert_candidate_retained(projection, lease.candidate_id)
+    if (
+        verification_lease_id
+        not in projection.active_verification_lease_ids
+        and verification_lease_id
+        not in projection.consumed_verification_lease_ids
+    ):
+        _reject(
+            "verification_lease_inactive",
+            "receipt admission requires the active candidate-lineage lease",
+        )
     resolution = _artifact_resolution(projection, verification_lease_id)
     try:
         authenticated = authenticate_verifier_receipt(

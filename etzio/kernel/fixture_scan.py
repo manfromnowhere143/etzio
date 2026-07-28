@@ -427,7 +427,11 @@ def _run_fixture_scan(
                     "parse_failure_count": projection.scan_summary.payload[
                         "parse_failure_count"
                     ],
-                    "status": "completed",
+                    "status": (
+                        "receipt_coverage_complete"
+                        if "modeled_fixture_verification" in required_actions
+                        else "completed"
+                    ),
                 },
             )
             return reduce_events(retained)
@@ -721,7 +725,11 @@ def _run_fixture_scan(
         payload={
             "candidate_count": candidate_count,
             "parse_failure_count": parse_failure_count,
-            "status": "completed",
+            "status": (
+                "receipt_coverage_complete"
+                if "modeled_fixture_verification" in required_actions
+                else "completed"
+            ),
         },
     )
     return reduce_events(retained)

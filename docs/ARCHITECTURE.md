@@ -18,9 +18,11 @@ issue an authority-bound modeled-fixture verification lease for a retained candi
 ETZIO can then resolve every predeclared input under a code-owned CAS type and retain the
 exact resolution. It can also authenticate one modeled receipt that signs the resolution
 and four typed output digest/size pairs, retain the complete decision evidence, and consume
-the lease in the same event append. This is meaningful foundation progress, but it is
-candidate generation, verification assignment, byte resolution, and modeled-statement
-admission—not a finding pipeline.
+the lease in the same event append. Canonical lease lineages now retain explicit expiry,
+modeled cancellation, atomic reassignment, and exact terminal receipt coverage. This is
+meaningful foundation progress, but it is candidate generation, verification assignment,
+byte resolution, modeled-statement admission, and lifecycle recovery—not a finding
+pipeline.
 
 ## Target system
 
@@ -73,10 +75,13 @@ repository fixture manifest
   → scan_completed
   ├─ ordinary fixture scan → mission_closed
   └─ verification intent → VerificationLeaseV1
-                           → VerificationArtifactResolutionV1
-                           → signed VerifierReceiptV1
-                           → verifier_receipt_admitted
-                           → awaiting_verification
+                           ├─ VerificationArtifactResolutionV1
+                           │  → signed VerifierReceiptV1
+                           │  → verifier_receipt_admitted
+                           ├─ verification_lease_expired
+                           ├─ verification_lease_cancelled
+                           └─ verification_lease_reassigned → successor lease
+                           → mission_closed with exact receipt coverage
 ```
 
 Only `clean_app.py` and `vulnerable_app.py` from the immutable repository manifest are
@@ -88,8 +93,9 @@ can admit one authenticated modeled receipt while consuming its lease. Four sepa
 typed output artifacts must already exist in the fixture evidence store; Etzio binds their
 exact signed digests and sizes but does not produce, parse, or execute them. The path cannot
 create or execute a PoC, run an oracle, establish an observed effect, or adjudicate a
-finding. Network access, credentials, spending, disclosure, publication, and live-target
-interaction are absent.
+finding. Explicit lease recovery changes only canonical modeled lifecycle state. Network
+access, credentials, spending, disclosure, publication, and live-target interaction are
+absent.
 
 ## Protocol v1
 
@@ -118,7 +124,7 @@ Canonical JSON enforcement includes:
 - rejection of noncanonical wire spellings during parsing.
 
 The installed Draft 2020-12 schema is a semantic wire-shape guard for all nine supported
-typed object kinds. It has exact signed and unsigned grant/receipt forms plus fifteen event
+typed object kinds. It has exact signed and unsigned grant/receipt forms plus eighteen event
 kind, unit, and payload branches. One immutable runtime registry closes every top-level
 semantic body field set; repository policy compares the schema's envelope, body,
 attestation, dispatch, event-unit, and event-payload structure against those contracts.
@@ -213,10 +219,12 @@ The reducer cross-validates embedded authority, target, lease, candidate, resolu
 verifier trust, signed receipt, and output-binding objects. It reauthenticates receipt
 signatures from the retained decision trust snapshot, enforces exact signed output
 digest/type/size bindings and one cumulative grant budget, and derives consumed leases
-solely from admitted receipt events. It rejects lifecycle, identity, role, revocation,
-time, duplicate-use, and budget violations before the offending row is inserted. Refusal,
-failure, cancellation, timeout, budget exhaustion, completed scan, awaiting verification,
-and closed mission remain distinct.
+solely from admitted receipt events. It also derives one lease lineage per candidate,
+disjoint active/expired/cancelled/superseded/consumed lease states, and exhaustive
+candidate receipt-coverage partitions. It rejects lifecycle, identity, role, revocation,
+time, duplicate-use, branching, and budget violations before the offending row is
+inserted. Refusal, failure, scan cancellation, timeout, budget exhaustion, completed scan,
+awaiting verification, and closed mission remain distinct.
 
 Limits:
 
@@ -285,6 +293,30 @@ not corruption; once a competing commit is visible, conflicting-receipt or disti
 stale-head semantics apply. An exact retry after commit returns retained history without
 depending on current CAS availability, including after head advancement or byte deletion.
 
+Three recovery events extend the same `awaiting_verification` state. ETZIO explicitly
+records expiry only at or after the retained lease deadline. AQUILA can retain one
+pre-deadline modeled `operator_cancelled` decision or atomically reassign the candidate's
+latest active, expired, or cancelled lease to a different verifier. Reassignment preserves
+every work binding, retains successor-issuance trust evidence and a head-derived nonce,
+stays under the original absolute authority deadline and total lease-count ceiling, and
+requires a successor-specific artifact resolution. An active predecessor becomes
+superseded in the same event that issues its successor; an expired or cancelled predecessor
+keeps its original disposition.
+
+Only a candidate's active latest lease can receive a first resolution or receipt. Receipt,
+expiry, cancellation, and reassignment races therefore serialize at one canonical event
+head, and an earlier signed receipt cannot resurrect a lease after another disposition
+wins. `mission_closed` terminates verification intent only with zero active leases. Replay
+derives `receipt_coverage_complete` when every candidate has an admitted receipt and
+`receipt_coverage_incomplete` when any candidate is never assigned, latest-expired, or
+latest-cancelled. These are coverage states, not verdict or finding states.
+
+Current canonical command writers always use a receipt-coverage status for verification
+intent. The reducer also preserves and accepts the exact zero-candidate,
+no-verification-event `completed` shape as a reader-only compatibility alias for
+pre-recovery protocol-v1 streams. The retained event bytes and label are not rewritten;
+the alias carries only the same vacuous coverage meaning.
+
 This is modeled-statement admission, not scientific finding admission. Typed output bytes
 are opaque. Their shared receipt proves that one trusted key signed the group, not that one
 measured execution produced them or that their contents are true. The pure reducer can
@@ -295,24 +327,21 @@ service boundary until event heads are externally authenticated.
 
 Still open:
 
-1. lease expiry, cancellation, supersession, reassignment, and terminal recovery must enter
-   canonical history;
-2. freshness of clock and trust snapshots must be established;
-3. event heads must be authenticated outside the mutable SQLite store;
-4. the filesystem CAS and SQLite event commit need shared atomic retention or an equivalent
+1. freshness of clock and trust snapshots must be established;
+2. event heads must be authenticated outside the mutable SQLite store;
+3. the filesystem CAS and SQLite event commit need shared atomic retention or an equivalent
    replay-safe protocol;
-5. the documented same-user SQLite pathname race must be closed;
-6. opaque modeled outputs must become structured, independently produced execution
+4. the documented same-user SQLite pathname race must be closed;
+5. opaque modeled outputs must become structured, independently produced execution
    evidence with an exact run identity; and
-7. different labels/keys must be replaced by proved process, principal, and isolation
+6. different labels/keys must be replaced by proved process, principal, and isolation
    separation.
 
-This tranche deliberately permits one lifetime lease per candidate and one resolution per
-lease. It has no canonical expiry, cancellation, supersession, or reassignment event once a
-lease is issued. An admitted receipt consumes that lease, but an `awaiting_verification`
-mission still cannot terminate or recover from an expired or unavailable verifier. The
-next lifecycle tranche must add explicit recovery events rather than silently reopening or
-overwriting a lease.
+The recovery events remain modeled control decisions. Their caller-supplied
+`decision_time` is not trusted clock evidence, and the AQUILA unit plus
+`operator_cancelled` reason do not authenticate an external operator. Reassignment proves
+canonical lineage and a different configured verifier identity, not a different principal,
+process, host, or isolation boundary.
 
 ## Modeled components
 
@@ -382,12 +411,12 @@ scientific or policy authority.
 ## Next acceptance gate
 
 Kernel-issued, authority-bound modeled-fixture verification leases, typed input-resolution
-history, and atomic modeled-receipt admission with single-use consumption are retained. The
-next gate is explicit lease expiry, cancellation, supersession, reassignment, and terminal
-recovery. Foundation integrity is accepted only when retained evidence also shows:
+history, atomic modeled-receipt admission, single-use consumption, and explicit terminal
+lease recovery are retained. The next gate is trusted time, revocation freshness, and
+authenticated external event-head anchoring. Foundation integrity is accepted only when
+retained evidence also shows:
 
-- fail-closed recovery for every lease outcome and concurrent transition;
-- trusted time and revocation freshness;
+- trusted time and revocation freshness for every consequential transition;
 - authenticated, externally anchored event heads;
 - atomic retention across filesystem CAS and the SQLite event commit;
 - closure of the same-user SQLite pathname race; and

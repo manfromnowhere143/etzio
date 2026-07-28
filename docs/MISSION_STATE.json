@@ -4,10 +4,10 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/atomic-receipt-adjudication-v1",
+  "active_branch": "agent/verification-lease-recovery-v1",
   "foundation_base": {
-    "commit": "1e0c8ad271f19acfd862cc3dba3bd9502bed638b",
-    "tree": "4782fec37a6384298ef188f92dd6e4e4801b4816"
+    "commit": "f70e4c2786babfd97deddfdc240cbc3fc5fde85e",
+    "tree": "bac7fa6559326dd87bce8fa685f22f1fd829471d"
   },
   "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
   "author": {
@@ -29,7 +29,7 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "verification_lease_recovery_semantics"
+    "next_gate": "trusted_clock_revocation_freshness_and_external_head_anchoring"
   },
   "authority": {
     "repository_modify": true,
@@ -48,7 +48,7 @@
   "implemented": [
     "canonical protocol-v1 envelope and strict JSON",
     "installed semantic wire schema and typed dispatch for all nine supported object kinds",
-    "exact closed-field schema/runtime parity for all nine semantic bodies and fifteen event variants",
+    "exact closed-field schema/runtime parity for all nine semantic bodies and eighteen event variants",
     "Unicode 17.0.0 NFC and fixed protocol resource ceilings",
     "full domain-separated SHA-256 object and event identities",
     "signed authority grants and self-verifying admissions",
@@ -69,6 +69,11 @@
     "atomic modeled-receipt admission and single-use verification-lease consumption",
     "dedicated transaction-bound receipt append with repeated current-CAS validation",
     "CAS-free committed receipt retry, deterministic crash recovery, one bounded SQLite-contention retry, identical-commit reconciliation, and retryable StoreBusyError exhaustion",
+    "explicit modeled verification-lease expiry and pre-deadline cancellation",
+    "nonbranching per-candidate verification-lease lineages with atomic reassignment to a different verifier",
+    "disjoint active expired cancelled superseded and consumed verification-lease replay states",
+    "active-only resolution and receipt admission with predecessor resurrection refused",
+    "terminal complete or incomplete receipt coverage with exhaustive candidate partitions",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -80,7 +85,6 @@
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "verification lease expiry cancellation supersession reassignment and terminal recovery",
     "trusted clock and revocation freshness",
     "authenticated external event-head anchoring",
     "atomic retention shared by filesystem CAS and SQLite event commit",
@@ -99,8 +103,8 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 463,
+    "validation_status": "local_release_suites_passed",
+    "test_count": 497,
     "validated_runtimes": [
       "CPython 3.11.15",
       "CPython 3.14.2"
@@ -132,6 +136,7 @@
     "docs/decisions/0003-semantic-wire-schema-and-typed-kind-closure.md",
     "docs/decisions/0004-kernel-issued-verification-leases.md",
     "docs/decisions/0005-typed-verification-artifact-resolution.md",
-    "docs/decisions/0006-atomic-modeled-receipt-admission.md"
+    "docs/decisions/0006-atomic-modeled-receipt-admission.md",
+    "docs/decisions/0007-explicit-verification-lease-recovery.md"
   ]
 }

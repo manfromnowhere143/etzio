@@ -38,11 +38,18 @@ from etzio.kernel.reducer import (
     ReductionError,
     reduce_events,
 )
-from etzio.kernel.store import SQLiteEventStore
+from etzio.kernel.store import EventStoreError, SQLiteEventStore, StaleHeadError
 from etzio.kernel.verification_lease import (
     VerificationLeaseIssuance,
     VerificationLeaseIssuanceError,
     issue_modeled_fixture_verification_lease,
+)
+from etzio.kernel.verification_recovery import (
+    VerificationLeaseRecoveryError,
+    cancel_modeled_fixture_verification_lease,
+    close_modeled_fixture_verification_mission,
+    expire_modeled_fixture_verification_lease,
+    reassign_modeled_fixture_verification_lease,
 )
 from etzio.protocol import (
     EnvelopeV1,
@@ -79,6 +86,7 @@ def _setup(
         "modeled_fixture_verification",
         "static_analysis",
     ),
+    max_candidates: int = 100,
     max_wallclock_seconds: int = 60,
     nonce: str = "verification-run",
 ) -> _Harness:
@@ -112,7 +120,7 @@ def _setup(
         not_before=NOW,
         expires_at=NOW + 300,
         max_bytes=len(fixture_bytes),
-        max_candidates=100,
+        max_candidates=max_candidates,
         max_wallclock_seconds=max_wallclock_seconds,
     )
     signed = signer.sign(grant)
@@ -231,6 +239,82 @@ def _issue_args(
     }
 
 
+@dataclass(frozen=True, slots=True)
+class _RecoveryHarness:
+    database: Path
+    mission: _Harness
+    issuance: VerificationLeaseIssuance
+    original_signer: VerifierSigner
+    original_trust: VerifierTrustStore
+
+
+class _AppendBarrierStore:
+    """Force two commands to finish replay/build work before either append."""
+
+    def __init__(self, store: SQLiteEventStore, barrier: Barrier) -> None:
+        self.store = store
+        self.barrier = barrier
+
+    def load(self, mission_id: str):
+        return self.store.load(mission_id)
+
+    def append(self, event: EventV1, *, expected_head: str):
+        self.barrier.wait(timeout=20)
+        return self.store.append(event, expected_head=expected_head)
+
+
+class _CrashAfterAppendStore:
+    """Simulate process loss after SQLite commits an ordinary event."""
+
+    def __init__(self, store: SQLiteEventStore) -> None:
+        self.store = store
+
+    def load(self, mission_id: str):
+        return self.store.load(mission_id)
+
+    def append(self, event: EventV1, *, expected_head: str):
+        self.store.append(event, expected_head=expected_head)
+        raise RuntimeError("simulated process loss after commit")
+
+
+def _setup_recovery(
+    root: Path,
+    *,
+    max_candidates: int = 100,
+    requested_wallclock_seconds: int = 10,
+    nonce: str = "verification-recovery",
+) -> _RecoveryHarness:
+    mission = _setup(
+        root,
+        max_candidates=max_candidates,
+        max_wallclock_seconds=60,
+        nonce=nonce,
+    )
+    database = root / "events.sqlite3"
+    signer, verifier_trust = _verifier(verifier_id="CATO")
+    bindings = _bindings(mission.evidence_store)
+    with SQLiteEventStore(database) as store:
+        prepared = _prepare(store, mission)
+        issuance = issue_modeled_fixture_verification_lease(
+            **_issue_args(
+                store=store,
+                harness=mission,
+                projection=prepared,
+                signer=signer,
+                verifier_trust=verifier_trust,
+                bindings=bindings,
+                requested_wallclock_seconds=requested_wallclock_seconds,
+            )
+        )
+    return _RecoveryHarness(
+        database=database,
+        mission=mission,
+        issuance=issuance,
+        original_signer=signer,
+        original_trust=verifier_trust,
+    )
+
+
 def _admission(event: EventV1) -> AuthorityAdmissionV1:
     payload = thaw_json(event.payload)
     return AuthorityAdmissionV1.from_envelope(
@@ -334,6 +418,73 @@ def _manual_verification_event(
     )
 
 
+def _manual_reassignment_event(
+    projection,
+    *,
+    predecessor: VerificationLeaseV1,
+    signer: VerifierSigner,
+    verifier_trust: VerifierTrustStore,
+    decision_time: int,
+    expires_at: int,
+    reason_code: str = "active_lease_superseded",
+    poc_artifact_digest: str | None = None,
+) -> EventV1:
+    previous = projection.events[-1].event_digest
+    verifier_id = verifier_trust.keys[signer.key_id].verifier_id
+    poc = poc_artifact_digest or predecessor.poc_artifact_digest
+    nonce = derive_verification_lease_nonce(
+        prior_event_digest=previous,
+        mission_id=predecessor.mission_id,
+        authority_id=predecessor.authority_id,
+        target_snapshot_id=predecessor.target_snapshot_id,
+        candidate_id=predecessor.candidate_id,
+        candidate_producer_id=predecessor.candidate_producer_id,
+        poc_artifact_digest=poc,
+        evidence_artifact_digests=predecessor.evidence_artifact_digests,
+        environment_digest=predecessor.environment_digest,
+        effect_oracle_id=predecessor.effect_oracle_id,
+        verifier_id=verifier_id,
+        verifier_key_id=signer.key_id,
+        issued_at=decision_time,
+        expires_at=expires_at,
+        issuance_trust_snapshot_id=verifier_trust.snapshot_id,
+    )
+    lease = VerificationLeaseV1.issue(
+        lease_nonce=nonce,
+        mission_id=predecessor.mission_id,
+        authority_id=predecessor.authority_id,
+        target_snapshot_id=predecessor.target_snapshot_id,
+        candidate_id=predecessor.candidate_id,
+        candidate_producer_id=predecessor.candidate_producer_id,
+        poc_artifact_digest=poc,
+        evidence_artifact_digests=predecessor.evidence_artifact_digests,
+        environment_digest=predecessor.environment_digest,
+        effect_oracle_id=predecessor.effect_oracle_id,
+        verifier_id=verifier_id,
+        verifier_key_id=signer.key_id,
+        issuance_trust_snapshot_id=verifier_trust.snapshot_id,
+        issued_at=decision_time,
+        expires_at=expires_at,
+    )
+    return EventV1.create(
+        mission_id=projection.mission_id,
+        seq=len(projection.events),
+        kind="verification_lease_reassigned",
+        unit="AQUILA",
+        authority_id=projection.authority_id,
+        target_id=projection.target_id,
+        decision_time=decision_time,
+        payload={
+            "lease": lease.to_envelope().to_dict(),
+            "predecessor_verification_lease_id": predecessor.lease_id,
+            "reason_code": reason_code,
+            "verifier_trust_snapshot": verifier_trust.to_snapshot_body(),
+            "verifier_trust_snapshot_id": verifier_trust.snapshot_id,
+        },
+        prev_digest=previous,
+    )
+
+
 def test_kernel_issuance_is_authority_bound_replayable_and_idempotent(
     tmp_path: Path,
 ) -> None:
@@ -392,6 +543,9 @@ def test_zero_candidate_verification_intent_closes_without_a_lease(
     assert projection.phase is ProjectionPhase.CLOSED
     assert projection.candidate_events == ()
     assert projection.verification_lease_events == ()
+    assert thaw_json(projection.terminal_event.payload)["status"] == (
+        "receipt_coverage_complete"
+    )
 
 
 def test_verification_preparation_refuses_a_static_only_grant(
@@ -1106,7 +1260,7 @@ def test_reducer_requires_retained_verification_intent_and_blocks_early_close(
         },
         prev_digest=prepared.events[-1].event_digest,
     )
-    with pytest.raises(ReductionError, match="cannot close"):
+    with pytest.raises(ReductionError, match="receipt coverage"):
         reduce_events((*prepared.events, close))
 
 
@@ -1348,3 +1502,831 @@ def test_event_and_reducer_reject_nonce_unit_snapshot_and_authority_substitution
             reduce_events(
                 (*static_projection.events, unauthorized_event)
             )
+
+
+def test_expiry_is_explicit_boundary_idempotent_and_terminally_incomplete(
+    tmp_path: Path,
+) -> None:
+    harness = _setup_recovery(tmp_path)
+    lease = harness.issuance.lease
+    base = {
+        "mission_id": harness.mission.mission_id,
+        "expected_head": harness.issuance.event.event_digest,
+        "verification_lease_id": lease.lease_id,
+    }
+    with SQLiteEventStore(harness.database) as store:
+        with pytest.raises(VerificationLeaseRecoveryError) as early:
+            expire_modeled_fixture_verification_lease(
+                event_store=store,
+                **base,
+                decision_time=lease.expires_at - 1,
+            )
+        assert early.value.reason_code == "verification_lease_not_expired"
+
+        expired = expire_modeled_fixture_verification_lease(
+            event_store=store,
+            **base,
+            decision_time=lease.expires_at,
+        )
+        replayed = expire_modeled_fixture_verification_lease(
+            event_store=store,
+            **base,
+            decision_time=lease.expires_at,
+        )
+        with pytest.raises(VerificationLeaseRecoveryError) as conflict:
+            expire_modeled_fixture_verification_lease(
+                event_store=store,
+                **base,
+                decision_time=lease.expires_at + 1,
+            )
+        assert conflict.value.reason_code == (
+            "verification_lease_disposition_conflict"
+        )
+        closed = close_modeled_fixture_verification_mission(
+            event_store=store,
+            mission_id=harness.mission.mission_id,
+            expected_head=expired.event.event_digest,
+            decision_time=lease.expires_at + 1,
+        )
+        closed_replay = close_modeled_fixture_verification_mission(
+            event_store=store,
+            mission_id=harness.mission.mission_id,
+            expected_head=expired.event.event_digest,
+            decision_time=lease.expires_at + 1,
+        )
+
+    candidate_id = lease.candidate_id
+    assert expired.event.kind == "verification_lease_expired"
+    assert expired.event.unit == "ETZIO"
+    assert not expired.replayed
+    assert replayed.replayed and replayed.event == expired.event
+    assert expired.projection.active_verification_lease_ids == frozenset()
+    assert expired.projection.expired_verification_lease_ids == frozenset(
+        {lease.lease_id}
+    )
+    assert expired.projection.latest_expired_verification_candidate_ids == (
+        frozenset({candidate_id})
+    )
+    assert closed.status == "receipt_coverage_incomplete"
+    assert closed.projection.phase is ProjectionPhase.CLOSED
+    assert closed_replay.replayed and closed_replay.event == closed.event
+
+
+def test_cancellation_cannot_disguise_expiry_and_is_exactly_replayable(
+    tmp_path: Path,
+) -> None:
+    harness = _setup_recovery(tmp_path)
+    lease = harness.issuance.lease
+    base = {
+        "event_store": None,
+        "mission_id": harness.mission.mission_id,
+        "expected_head": harness.issuance.event.event_digest,
+        "verification_lease_id": lease.lease_id,
+        "reason_code": "operator_cancelled",
+    }
+    with SQLiteEventStore(harness.database) as store:
+        base["event_store"] = store
+        with pytest.raises(VerificationLeaseRecoveryError) as late:
+            cancel_modeled_fixture_verification_lease(
+                **base,
+                decision_time=lease.expires_at,
+            )
+        assert late.value.reason_code == (
+            "verification_lease_expiry_not_recorded"
+        )
+        with pytest.raises(VerificationLeaseRecoveryError) as unsupported:
+            cancel_modeled_fixture_verification_lease(
+                **{**base, "reason_code": "verifier_unavailable"},
+                decision_time=NOW + 2,
+            )
+        assert unsupported.value.reason_code == (
+            "unsupported_cancellation_reason"
+        )
+        cancelled = cancel_modeled_fixture_verification_lease(
+            **base,
+            decision_time=NOW + 2,
+        )
+        replayed = cancel_modeled_fixture_verification_lease(
+            **base,
+            decision_time=NOW + 2,
+        )
+
+    assert cancelled.event.kind == "verification_lease_cancelled"
+    assert cancelled.event.unit == "AQUILA"
+    assert replayed.replayed and replayed.event == cancelled.event
+    assert cancelled.projection.cancelled_verification_lease_ids == (
+        frozenset({lease.lease_id})
+    )
+    assert (
+        cancelled.projection.latest_cancelled_verification_candidate_ids
+        == frozenset({lease.candidate_id})
+    )
+
+
+def test_active_reassignment_is_atomic_nonrenewing_and_nonbranching(
+    tmp_path: Path,
+) -> None:
+    harness = _setup_recovery(tmp_path, requested_wallclock_seconds=20)
+    predecessor = harness.issuance.lease
+    successor_signer, successor_trust = _verifier(verifier_id="CATO-2")
+    with SQLiteEventStore(harness.database) as store:
+        with pytest.raises(VerificationLeaseRecoveryError) as renewal:
+            reassign_modeled_fixture_verification_lease(
+                event_store=store,
+                mission_id=harness.mission.mission_id,
+                expected_head=harness.issuance.event.event_digest,
+                predecessor_verification_lease_id=predecessor.lease_id,
+                verifier_key_id=harness.original_signer.key_id,
+                verifier_trust_store=harness.original_trust,
+                decision_time=NOW + 2,
+                requested_wallclock_seconds=10,
+            )
+        assert renewal.value.reason_code == "verifier_not_reassigned"
+
+        reassigned = reassign_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission.mission_id,
+            expected_head=harness.issuance.event.event_digest,
+            predecessor_verification_lease_id=predecessor.lease_id,
+            verifier_key_id=successor_signer.key_id,
+            verifier_trust_store=successor_trust,
+            decision_time=NOW + 2,
+            requested_wallclock_seconds=10,
+        )
+        exact = reassign_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission.mission_id,
+            expected_head=harness.issuance.event.event_digest,
+            predecessor_verification_lease_id=predecessor.lease_id,
+            verifier_key_id=successor_signer.key_id,
+            verifier_trust_store=successor_trust,
+            decision_time=NOW + 2,
+            requested_wallclock_seconds=10,
+        )
+        other_signer, other_trust = _verifier(verifier_id="CATO-3")
+        with pytest.raises(VerificationLeaseRecoveryError) as branch:
+            reassign_modeled_fixture_verification_lease(
+                event_store=store,
+                mission_id=harness.mission.mission_id,
+                expected_head=harness.issuance.event.event_digest,
+                predecessor_verification_lease_id=predecessor.lease_id,
+                verifier_key_id=other_signer.key_id,
+                verifier_trust_store=other_trust,
+                decision_time=NOW + 2,
+                requested_wallclock_seconds=10,
+            )
+        assert branch.value.reason_code == (
+            "verification_lease_reassignment_conflict"
+        )
+        with pytest.raises(VerificationLeaseRecoveryError) as active_close:
+            close_modeled_fixture_verification_mission(
+                event_store=store,
+                mission_id=harness.mission.mission_id,
+                expected_head=reassigned.event.event_digest,
+                decision_time=NOW + 3,
+            )
+        assert active_close.value.reason_code == "verification_leases_active"
+
+    successor = reassigned.lease
+    payload = thaw_json(reassigned.event.payload)
+    assert payload["reason_code"] == "active_lease_superseded"
+    assert exact.replayed and exact.event == reassigned.event
+    assert predecessor.lease_id in (
+        reassigned.projection.superseded_verification_lease_ids
+    )
+    assert successor.lease_id in (
+        reassigned.projection.active_verification_lease_ids
+    )
+    assert dict(
+        reassigned.projection.latest_verification_lease_by_candidate
+    )[predecessor.candidate_id] == successor.lease_id
+    assert dict(reassigned.projection.verification_lease_successors) == {
+        predecessor.lease_id: successor.lease_id
+    }
+    assert successor.verifier_id == "CATO-2"
+    assert successor.lease_id != predecessor.lease_id
+    assert successor.poc_artifact_digest == predecessor.poc_artifact_digest
+    assert successor.evidence_artifact_digests == (
+        predecessor.evidence_artifact_digests
+    )
+    assert successor.environment_digest == predecessor.environment_digest
+    assert successor.effect_oracle_id == predecessor.effect_oracle_id
+
+
+@pytest.mark.parametrize(
+    ("disposition", "expected_reason"),
+    (
+        ("expired", "expired_lease_recovery"),
+        ("cancelled", "cancelled_lease_recovery"),
+    ),
+)
+def test_ended_lineage_tip_can_be_reassigned_without_rewriting_disposition(
+    tmp_path: Path,
+    disposition: str,
+    expected_reason: str,
+) -> None:
+    root = tmp_path / disposition
+    root.mkdir(mode=0o700)
+    root.chmod(0o700)
+    harness = _setup_recovery(
+        root,
+        requested_wallclock_seconds=10,
+        nonce=f"recovery-{disposition}",
+    )
+    predecessor = harness.issuance.lease
+    successor_signer, successor_trust = _verifier(verifier_id="CATO-2")
+    with SQLiteEventStore(harness.database) as store:
+        if disposition == "expired":
+            ended = expire_modeled_fixture_verification_lease(
+                event_store=store,
+                mission_id=harness.mission.mission_id,
+                expected_head=harness.issuance.event.event_digest,
+                verification_lease_id=predecessor.lease_id,
+                decision_time=predecessor.expires_at,
+            )
+        else:
+            ended = cancel_modeled_fixture_verification_lease(
+                event_store=store,
+                mission_id=harness.mission.mission_id,
+                expected_head=harness.issuance.event.event_digest,
+                verification_lease_id=predecessor.lease_id,
+                reason_code="operator_cancelled",
+                decision_time=NOW + 2,
+            )
+        reassigned = reassign_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission.mission_id,
+            expected_head=ended.event.event_digest,
+            predecessor_verification_lease_id=predecessor.lease_id,
+            verifier_key_id=successor_signer.key_id,
+            verifier_trust_store=successor_trust,
+            decision_time=ended.event.decision_time + 1,
+            requested_wallclock_seconds=10,
+        )
+
+    payload = thaw_json(reassigned.event.payload)
+    assert payload["reason_code"] == expected_reason
+    ended_ids = (
+        reassigned.projection.expired_verification_lease_ids
+        if disposition == "expired"
+        else reassigned.projection.cancelled_verification_lease_ids
+    )
+    assert predecessor.lease_id in ended_ids
+    assert predecessor.lease_id not in (
+        reassigned.projection.superseded_verification_lease_ids
+    )
+    assert reassigned.lease.lease_id in (
+        reassigned.projection.active_verification_lease_ids
+    )
+
+
+def test_verification_closure_exposes_never_assigned_candidates(
+    tmp_path: Path,
+) -> None:
+    harness = _setup(tmp_path, nonce="never-assigned")
+    with SQLiteEventStore(tmp_path / "events.sqlite3") as store:
+        prepared = _prepare(store, harness)
+        closed = close_modeled_fixture_verification_mission(
+            event_store=store,
+            mission_id=harness.mission_id,
+            expected_head=prepared.events[-1].event_digest,
+            decision_time=NOW + 1,
+        )
+
+    candidate_ids = frozenset(
+        _candidate_id(prepared, index)
+        for index in range(len(prepared.candidate_events))
+    )
+    assert closed.status == "receipt_coverage_incomplete"
+    assert closed.projection.never_assigned_verification_candidate_ids == (
+        candidate_ids
+    )
+    assert closed.projection.receipt_covered_candidate_ids == frozenset()
+    assert thaw_json(closed.event.payload)["candidate_count"] == len(
+        candidate_ids
+    )
+
+
+def test_reassignment_reason_must_match_predecessor_disposition(
+    tmp_path: Path,
+) -> None:
+    harness = _setup_recovery(tmp_path, requested_wallclock_seconds=20)
+    signer, trust = _verifier(verifier_id="CATO-2")
+    with SQLiteEventStore(harness.database) as store:
+        reassigned = reassign_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission.mission_id,
+            expected_head=harness.issuance.event.event_digest,
+            predecessor_verification_lease_id=(
+                harness.issuance.lease.lease_id
+            ),
+            verifier_key_id=signer.key_id,
+            verifier_trust_store=trust,
+            decision_time=NOW + 2,
+            requested_wallclock_seconds=10,
+        )
+    payload = thaw_json(reassigned.event.payload)
+    payload["reason_code"] = "expired_lease_recovery"
+    wrong = EventV1.create(
+        mission_id=reassigned.event.mission_id,
+        seq=reassigned.event.seq,
+        kind=reassigned.event.kind,
+        unit=reassigned.event.unit,
+        authority_id=reassigned.event.authority_id,
+        target_id=reassigned.event.target_id,
+        decision_time=reassigned.event.decision_time,
+        payload=payload,
+        prev_digest=reassigned.event.prev_digest,
+    )
+    with pytest.raises(ReductionError, match="reason"):
+        reduce_events((*harness.issuance.projection.events, wrong))
+
+
+def test_identical_concurrent_reassignment_converges_to_one_successor(
+    tmp_path: Path,
+) -> None:
+    harness = _setup_recovery(tmp_path, requested_wallclock_seconds=20)
+    signer, trust = _verifier(verifier_id="CATO-2")
+    barrier = Barrier(2)
+
+    def worker():
+        with SQLiteEventStore(harness.database) as store:
+            return reassign_modeled_fixture_verification_lease(
+                event_store=_AppendBarrierStore(store, barrier),
+                mission_id=harness.mission.mission_id,
+                expected_head=harness.issuance.event.event_digest,
+                predecessor_verification_lease_id=(
+                    harness.issuance.lease.lease_id
+                ),
+                verifier_key_id=signer.key_id,
+                verifier_trust_store=trust,
+                decision_time=NOW + 2,
+                requested_wallclock_seconds=10,
+            )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = tuple(pool.map(lambda _: worker(), range(2)))
+
+    assert {outcome.event.event_digest for outcome in outcomes} == {
+        outcomes[0].event.event_digest
+    }
+    assert sorted(outcome.replayed for outcome in outcomes) == [False, True]
+    with SQLiteEventStore(harness.database) as store:
+        projection = reduce_events(store.load(harness.mission.mission_id))
+    assert len(projection.verification_lease_reassignment_events) == 1
+    assert len(projection.verification_lease_events) == 2
+
+
+def test_conflicting_concurrent_reassignment_has_exactly_one_winner(
+    tmp_path: Path,
+) -> None:
+    harness = _setup_recovery(tmp_path, requested_wallclock_seconds=20)
+    alternatives = (
+        _verifier(verifier_id="CATO-2"),
+        _verifier(verifier_id="CATO-3"),
+    )
+    barrier = Barrier(2)
+
+    def worker(index: int):
+        signer, trust = alternatives[index]
+        try:
+            with SQLiteEventStore(harness.database) as store:
+                return reassign_modeled_fixture_verification_lease(
+                    event_store=_AppendBarrierStore(store, barrier),
+                    mission_id=harness.mission.mission_id,
+                    expected_head=harness.issuance.event.event_digest,
+                    predecessor_verification_lease_id=(
+                        harness.issuance.lease.lease_id
+                    ),
+                    verifier_key_id=signer.key_id,
+                    verifier_trust_store=trust,
+                    decision_time=NOW + 2,
+                    requested_wallclock_seconds=10,
+                )
+        except (StaleHeadError, VerificationLeaseRecoveryError) as exc:
+            return exc
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = tuple(pool.map(worker, range(2)))
+
+    successes = [
+        outcome
+        for outcome in outcomes
+        if not isinstance(
+            outcome,
+            (StaleHeadError, VerificationLeaseRecoveryError),
+        )
+    ]
+    failures = [
+        outcome
+        for outcome in outcomes
+        if isinstance(
+            outcome,
+            (StaleHeadError, VerificationLeaseRecoveryError),
+        )
+    ]
+    assert len(successes) == 1
+    assert len(failures) == 1
+    if isinstance(failures[0], VerificationLeaseRecoveryError):
+        assert failures[0].reason_code == (
+            "verification_lease_reassignment_conflict"
+        )
+    with SQLiteEventStore(harness.database) as store:
+        projection = reduce_events(store.load(harness.mission.mission_id))
+    assert len(projection.verification_lease_reassignment_events) == 1
+    assert len(projection.active_verification_lease_ids) == 1
+
+
+def test_reassignment_preserves_original_deadline_and_total_lease_budget(
+    tmp_path: Path,
+) -> None:
+    deadline_root = tmp_path / "deadline"
+    deadline_root.mkdir(mode=0o700)
+    deadline_harness = _setup_recovery(
+        deadline_root,
+        requested_wallclock_seconds=60,
+        nonce="reassignment-deadline",
+    )
+    successor_signer, successor_trust = _verifier(verifier_id="CATO-2")
+    with SQLiteEventStore(deadline_harness.database) as store:
+        reassigned = reassign_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=deadline_harness.mission.mission_id,
+            expected_head=deadline_harness.issuance.event.event_digest,
+            predecessor_verification_lease_id=(
+                deadline_harness.issuance.lease.lease_id
+            ),
+            verifier_key_id=successor_signer.key_id,
+            verifier_trust_store=successor_trust,
+            decision_time=NOW + 2,
+            requested_wallclock_seconds=60,
+        )
+
+    assert deadline_harness.issuance.lease.expires_at == NOW + 60
+    assert reassigned.lease.expires_at == NOW + 60
+    assert reassigned.lease.expires_at < NOW + 62
+
+    budget_root = tmp_path / "budget"
+    budget_root.mkdir(mode=0o700)
+    mission = _setup(
+        budget_root,
+        max_candidates=7,
+        nonce="reassignment-total-budget",
+    )
+    with SQLiteEventStore(budget_root / "events.sqlite3") as store:
+        projection = _prepare(store, mission)
+        assert len(projection.candidate_events) == 7
+        issuances: list[VerificationLeaseIssuance] = []
+        for index in range(len(projection.candidate_events)):
+            signer, trust = _verifier(verifier_id=f"CATO-{index + 1}")
+            issuance = issue_modeled_fixture_verification_lease(
+                **_issue_args(
+                    store=store,
+                    harness=mission,
+                    projection=projection,
+                    signer=signer,
+                    verifier_trust=trust,
+                    bindings=_bindings(
+                        mission.evidence_store,
+                        suffix=f"-{index}".encode(),
+                    ),
+                    candidate_index=index,
+                )
+            )
+            issuances.append(issuance)
+            projection = issuance.projection
+
+        recovery_signer, recovery_trust = _verifier(
+            verifier_id="CATO-RECOVERY"
+        )
+        with pytest.raises(VerificationLeaseRecoveryError) as exhausted:
+            reassign_modeled_fixture_verification_lease(
+                event_store=store,
+                mission_id=mission.mission_id,
+                expected_head=projection.events[-1].event_digest,
+                predecessor_verification_lease_id=(
+                    issuances[0].lease.lease_id
+                ),
+                verifier_key_id=recovery_signer.key_id,
+                verifier_trust_store=recovery_trust,
+                decision_time=NOW + 2,
+                requested_wallclock_seconds=10,
+            )
+        assert exhausted.value.reason_code == (
+            "verification_lease_budget_exhausted"
+        )
+
+        forged = _manual_reassignment_event(
+            projection,
+            predecessor=issuances[0].lease,
+            signer=recovery_signer,
+            verifier_trust=recovery_trust,
+            decision_time=NOW + 2,
+            expires_at=NOW + 12,
+        )
+        retained = store.load(mission.mission_id)
+        with pytest.raises(
+            EventStoreError,
+            match="verification lease count exceeds",
+        ):
+            store.append(
+                forged,
+                expected_head=projection.events[-1].event_digest,
+            )
+        assert store.load(mission.mission_id) == retained
+
+
+def test_store_rejects_direct_reassignment_bypasses_without_advancing_head(
+    tmp_path: Path,
+) -> None:
+    harness = _setup_recovery(
+        tmp_path,
+        requested_wallclock_seconds=20,
+        nonce="direct-reassignment-bypass",
+    )
+    predecessor = harness.issuance.lease
+    successor_signer, successor_trust = _verifier(verifier_id="CATO-2")
+
+    with SQLiteEventStore(harness.database) as store:
+        projection = reduce_events(store.load(harness.mission.mission_id))
+
+        changed_binding = _manual_reassignment_event(
+            projection,
+            predecessor=predecessor,
+            signer=successor_signer,
+            verifier_trust=successor_trust,
+            decision_time=NOW + 2,
+            expires_at=NOW + 12,
+            poc_artifact_digest=harness.mission.evidence_store.put(
+                b"substituted PoC"
+            ).digest,
+        )
+        retained = store.load(harness.mission.mission_id)
+        with pytest.raises(
+            EventStoreError,
+            match="changed immutable work bindings",
+        ):
+            store.append(
+                changed_binding,
+                expected_head=retained[-1].event_digest,
+            )
+        assert store.load(harness.mission.mission_id) == retained
+
+        same_verifier_signer, same_verifier_trust = _verifier(
+            verifier_id=predecessor.verifier_id
+        )
+        same_verifier = _manual_reassignment_event(
+            projection,
+            predecessor=predecessor,
+            signer=same_verifier_signer,
+            verifier_trust=same_verifier_trust,
+            decision_time=NOW + 2,
+            expires_at=NOW + 12,
+        )
+        with pytest.raises(
+            EventStoreError,
+            match="requires a different verifier",
+        ):
+            store.append(
+                same_verifier,
+                expected_head=retained[-1].event_digest,
+            )
+        assert store.load(harness.mission.mission_id) == retained
+
+        extended_deadline = _manual_reassignment_event(
+            projection,
+            predecessor=predecessor,
+            signer=successor_signer,
+            verifier_trust=successor_trust,
+            decision_time=NOW + 2,
+            expires_at=NOW + 61,
+        )
+        with pytest.raises(
+            EventStoreError,
+            match="exceeds the admitted authority window",
+        ):
+            store.append(
+                extended_deadline,
+                expected_head=retained[-1].event_digest,
+            )
+        assert store.load(harness.mission.mission_id) == retained
+
+        unknown_expiry = EventV1.create(
+            mission_id=projection.mission_id,
+            seq=len(projection.events),
+            kind="verification_lease_expired",
+            unit="ETZIO",
+            authority_id=projection.authority_id,
+            target_id=projection.target_id,
+            decision_time=NOW + 2,
+            payload={"verification_lease_id": "sha256:" + "f" * 64},
+            prev_digest=retained[-1].event_digest,
+        )
+        with pytest.raises(
+            EventStoreError,
+            match="expiry references no prior lease",
+        ):
+            store.append(
+                unknown_expiry,
+                expected_head=retained[-1].event_digest,
+            )
+        assert store.load(harness.mission.mission_id) == retained
+
+        reassigned = reassign_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission.mission_id,
+            expected_head=retained[-1].event_digest,
+            predecessor_verification_lease_id=predecessor.lease_id,
+            verifier_key_id=successor_signer.key_id,
+            verifier_trust_store=successor_trust,
+            decision_time=NOW + 2,
+            requested_wallclock_seconds=10,
+        )
+        other_signer, other_trust = _verifier(verifier_id="CATO-3")
+        stale_predecessor = _manual_reassignment_event(
+            reassigned.projection,
+            predecessor=predecessor,
+            signer=other_signer,
+            verifier_trust=other_trust,
+            decision_time=NOW + 3,
+            expires_at=NOW + 13,
+        )
+        retained = store.load(harness.mission.mission_id)
+        with pytest.raises(
+            EventStoreError,
+            match="requires the candidate's latest lease",
+        ):
+            store.append(
+                stale_predecessor,
+                expected_head=retained[-1].event_digest,
+            )
+        assert store.load(harness.mission.mission_id) == retained
+
+
+def test_close_and_reassign_same_head_race_has_one_canonical_winner(
+    tmp_path: Path,
+) -> None:
+    harness = _setup_recovery(
+        tmp_path,
+        requested_wallclock_seconds=20,
+        nonce="close-reassign-race",
+    )
+    predecessor = harness.issuance.lease
+    successor_signer, successor_trust = _verifier(verifier_id="CATO-2")
+    with SQLiteEventStore(harness.database) as store:
+        cancelled = cancel_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission.mission_id,
+            expected_head=harness.issuance.event.event_digest,
+            verification_lease_id=predecessor.lease_id,
+            reason_code="operator_cancelled",
+            decision_time=NOW + 2,
+        )
+
+    barrier = Barrier(2)
+
+    def close_worker():
+        try:
+            with SQLiteEventStore(harness.database) as store:
+                return close_modeled_fixture_verification_mission(
+                    event_store=_AppendBarrierStore(store, barrier),
+                    mission_id=harness.mission.mission_id,
+                    expected_head=cancelled.event.event_digest,
+                    decision_time=NOW + 3,
+                )
+        except (StaleHeadError, VerificationLeaseRecoveryError) as exc:
+            return exc
+
+    def reassign_worker():
+        try:
+            with SQLiteEventStore(harness.database) as store:
+                return reassign_modeled_fixture_verification_lease(
+                    event_store=_AppendBarrierStore(store, barrier),
+                    mission_id=harness.mission.mission_id,
+                    expected_head=cancelled.event.event_digest,
+                    predecessor_verification_lease_id=predecessor.lease_id,
+                    verifier_key_id=successor_signer.key_id,
+                    verifier_trust_store=successor_trust,
+                    decision_time=NOW + 3,
+                    requested_wallclock_seconds=10,
+                )
+        except (StaleHeadError, VerificationLeaseRecoveryError) as exc:
+            return exc
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        close_future = pool.submit(close_worker)
+        reassign_future = pool.submit(reassign_worker)
+        outcomes = (
+            close_future.result(timeout=20),
+            reassign_future.result(timeout=20),
+        )
+
+    successes = tuple(
+        outcome
+        for outcome in outcomes
+        if not isinstance(
+            outcome,
+            (StaleHeadError, VerificationLeaseRecoveryError),
+        )
+    )
+    failures = tuple(
+        outcome
+        for outcome in outcomes
+        if isinstance(
+            outcome,
+            (StaleHeadError, VerificationLeaseRecoveryError),
+        )
+    )
+    assert len(successes) == 1
+    assert len(failures) == 1
+    with SQLiteEventStore(harness.database) as store:
+        projection = reduce_events(store.load(harness.mission.mission_id))
+    assert len(projection.events) == len(cancelled.projection.events) + 1
+    if projection.phase is ProjectionPhase.CLOSED:
+        assert projection.active_verification_lease_ids == frozenset()
+        assert projection.verification_lease_reassignment_events == ()
+    else:
+        assert projection.phase is ProjectionPhase.AWAITING_VERIFICATION
+        assert len(projection.active_verification_lease_ids) == 1
+        assert len(projection.verification_lease_reassignment_events) == 1
+
+
+@pytest.mark.parametrize(
+    "operation",
+    ("expiry", "cancellation", "reassignment", "closure"),
+)
+def test_recovery_commands_reconcile_commit_then_process_loss(
+    tmp_path: Path,
+    operation: str,
+) -> None:
+    root = tmp_path / operation
+    root.mkdir(mode=0o700)
+    if operation == "closure":
+        mission = _setup(root, nonce="crash-closure")
+        database = root / "events.sqlite3"
+        with SQLiteEventStore(database) as store:
+            prepared = _prepare(store, mission)
+        kwargs = {
+            "mission_id": mission.mission_id,
+            "expected_head": prepared.events[-1].event_digest,
+            "decision_time": NOW + 1,
+        }
+        command = close_modeled_fixture_verification_mission
+    else:
+        harness = _setup_recovery(
+            root,
+            requested_wallclock_seconds=10,
+            nonce=f"crash-{operation}",
+        )
+        mission = harness.mission
+        database = harness.database
+        common = {
+            "mission_id": mission.mission_id,
+            "expected_head": harness.issuance.event.event_digest,
+            "decision_time": (
+                harness.issuance.lease.expires_at
+                if operation == "expiry"
+                else NOW + 2
+            ),
+        }
+        if operation == "expiry":
+            command = expire_modeled_fixture_verification_lease
+            kwargs = {
+                **common,
+                "verification_lease_id": harness.issuance.lease.lease_id,
+            }
+        elif operation == "cancellation":
+            command = cancel_modeled_fixture_verification_lease
+            kwargs = {
+                **common,
+                "verification_lease_id": harness.issuance.lease.lease_id,
+                "reason_code": "operator_cancelled",
+            }
+        else:
+            command = reassign_modeled_fixture_verification_lease
+            signer, trust = _verifier(verifier_id="CATO-2")
+            kwargs = {
+                **common,
+                "predecessor_verification_lease_id": (
+                    harness.issuance.lease.lease_id
+                ),
+                "verifier_key_id": signer.key_id,
+                "verifier_trust_store": trust,
+                "requested_wallclock_seconds": 10,
+            }
+
+    with SQLiteEventStore(database) as store:
+        with pytest.raises(
+            RuntimeError,
+            match="simulated process loss after commit",
+        ):
+            command(
+                event_store=_CrashAfterAppendStore(store),
+                **kwargs,
+            )
+    with SQLiteEventStore(database) as store:
+        recovered = command(event_store=store, **kwargs)
+        projection = reduce_events(store.load(mission.mission_id))
+
+    assert recovered.replayed
+    assert projection.events[-1] == recovered.event

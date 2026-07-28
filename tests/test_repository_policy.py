@@ -172,6 +172,93 @@ def test_protocol_policy_freezes_exact_v1_object_and_event_counts(
     assert any("event-kind count" in issue for issue in issues)
 
 
+def test_protocol_policy_freezes_runtime_verification_recovery_contracts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    event_units = dict(repository_policy.EVENT_UNIT_BY_KIND_V1)
+    event_units["verification_lease_expired"] = "AQUILA"
+    monkeypatch.setattr(
+        repository_policy,
+        "EVENT_UNIT_BY_KIND_V1",
+        event_units,
+    )
+    payload_fields = dict(
+        repository_policy.EVENT_PAYLOAD_FIELDS_BY_KIND_V1
+    )
+    payload_fields["verification_lease_cancelled"] = frozenset(
+        {"verification_lease_id"}
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "EVENT_PAYLOAD_FIELDS_BY_KIND_V1",
+        payload_fields,
+    )
+    nested = dict(
+        repository_policy.EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1
+    )
+    nested["verification_lease_reassigned"] = {
+        "lease": "analysis_lease"
+    }
+    monkeypatch.setattr(
+        repository_policy,
+        "EVENT_NESTED_ENVELOPE_KIND_BY_FIELD_V1",
+        nested,
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "VERIFICATION_LEASE_CANCELLATION_REASON_V1",
+        "verifier_unavailable",
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1",
+        frozenset({"active_lease_superseded"}),
+    )
+    monkeypatch.setattr(
+        repository_policy,
+        "MISSION_CLOSED_STATUSES_V1",
+        frozenset({"completed"}),
+    )
+
+    issues = protocol_schema_contract_issues(protocol_v1_schema())
+
+    assert any("recovery event units" in issue for issue in issues)
+    assert any("recovery payload fields" in issue for issue in issues)
+    assert any("recovery nested envelopes" in issue for issue in issues)
+    assert any("runtime verification cancellation reason" in issue for issue in issues)
+    assert any("runtime verification reassignment reasons" in issue for issue in issues)
+    assert any("runtime mission closure statuses" in issue for issue in issues)
+
+
+def test_protocol_policy_rejects_recovery_reason_reference_and_status_drift():
+    schema = deepcopy(protocol_v1_schema())
+    definitions = schema["$defs"]
+    definitions["event_payload_verification_lease_cancelled"][
+        "properties"
+    ]["reason_code"] = {"const": "verifier_unavailable"}
+    reassigned = definitions[
+        "event_payload_verification_lease_reassigned"
+    ]["properties"]
+    reassigned["reason_code"]["enum"] = ["active_lease_superseded"]
+    reassigned["predecessor_verification_lease_id"] = {
+        "$ref": "#/$defs/canonical_nonblank_string"
+    }
+    reassigned["verifier_trust_snapshot"] = {
+        "$ref": "#/$defs/sha256_id"
+    }
+    definitions["event_payload_mission_closed"]["properties"]["status"][
+        "enum"
+    ] = ["completed"]
+
+    issues = protocol_schema_contract_issues(schema)
+
+    assert any("cancellation reason" in issue for issue in issues)
+    assert any("reassignment reasons" in issue for issue in issues)
+    assert any("predecessor reference" in issue for issue in issues)
+    assert any("reassignment trust reference" in issue for issue in issues)
+    assert any("mission closure statuses" in issue for issue in issues)
+
+
 def test_protocol_schema_contract_rejects_resolution_contract_drift():
     schema = deepcopy(protocol_v1_schema())
     definitions = schema["$defs"]

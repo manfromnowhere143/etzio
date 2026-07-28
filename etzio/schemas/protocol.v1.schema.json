@@ -1281,7 +1281,10 @@
             "scan_failed",
             "scan_timed_out",
             "verification_artifacts_resolved",
+            "verification_lease_cancelled",
+            "verification_lease_expired",
             "verification_lease_issued",
+            "verification_lease_reassigned",
             "verifier_receipt_admitted"
           ]
         },
@@ -1454,6 +1457,83 @@
                 }
               }
             }
+          ]
+        },
+        "verifier_trust_snapshot": {
+          "$ref": "#/$defs/verifier_trust_snapshot"
+        },
+        "verifier_trust_snapshot_id": {
+          "$ref": "#/$defs/sha256_id"
+        }
+      }
+    },
+    "event_payload_verification_lease_cancelled": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason_code",
+        "verification_lease_id"
+      ],
+      "properties": {
+        "reason_code": {
+          "const": "operator_cancelled"
+        },
+        "verification_lease_id": {
+          "$ref": "#/$defs/sha256_id"
+        }
+      }
+    },
+    "event_payload_verification_lease_expired": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verification_lease_id"
+      ],
+      "properties": {
+        "verification_lease_id": {
+          "$ref": "#/$defs/sha256_id"
+        }
+      }
+    },
+    "event_payload_verification_lease_reassigned": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lease",
+        "predecessor_verification_lease_id",
+        "reason_code",
+        "verifier_trust_snapshot",
+        "verifier_trust_snapshot_id"
+      ],
+      "properties": {
+        "lease": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/envelope_frame"
+            },
+            {
+              "properties": {
+                "object_kind": {
+                  "const": "verification_lease"
+                },
+                "body": {
+                  "$ref": "#/$defs/verification_lease_body"
+                },
+                "attestations": {
+                  "$ref": "#/$defs/no_attestations"
+                }
+              }
+            }
+          ]
+        },
+        "predecessor_verification_lease_id": {
+          "$ref": "#/$defs/sha256_id"
+        },
+        "reason_code": {
+          "enum": [
+            "active_lease_superseded",
+            "cancelled_lease_recovery",
+            "expired_lease_recovery"
           ]
         },
         "verifier_trust_snapshot": {
@@ -1647,7 +1727,11 @@
           "$ref": "#/$defs/epoch_second"
         },
         "status": {
-          "const": "completed"
+          "enum": [
+            "completed",
+            "receipt_coverage_complete",
+            "receipt_coverage_incomplete"
+          ]
         }
       }
     },
@@ -1837,6 +1921,32 @@
         {
           "properties": {
             "kind": {
+              "const": "verification_lease_cancelled"
+            },
+            "unit": {
+              "const": "AQUILA"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_verification_lease_cancelled"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "verification_lease_expired"
+            },
+            "unit": {
+              "const": "ETZIO"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_verification_lease_expired"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
               "const": "verification_lease_issued"
             },
             "unit": {
@@ -1844,6 +1954,19 @@
             },
             "payload": {
               "$ref": "#/$defs/event_payload_verification_lease_issued"
+            }
+          }
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "verification_lease_reassigned"
+            },
+            "unit": {
+              "const": "AQUILA"
+            },
+            "payload": {
+              "$ref": "#/$defs/event_payload_verification_lease_reassigned"
             }
           }
         },

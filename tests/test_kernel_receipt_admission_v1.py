@@ -48,7 +48,15 @@ from etzio.kernel.store import (
     StoreBusyError,
 )
 from etzio.kernel.verification_lease import (
+    VerificationLeaseIssuance,
     issue_modeled_fixture_verification_lease,
+)
+from etzio.kernel.verification_recovery import (
+    VerificationLeaseRecoveryError,
+    cancel_modeled_fixture_verification_lease,
+    close_modeled_fixture_verification_mission,
+    expire_modeled_fixture_verification_lease,
+    reassign_modeled_fixture_verification_lease,
 )
 from etzio.protocol import canonical_dumps, content_id, thaw_json
 from etzio.verification import (
@@ -363,6 +371,82 @@ def _second_resolution(
         decision_time=NOW + 6,
     )
     return issuance.lease, resolution
+
+
+def _issue_candidate(
+    harness: _Harness,
+    *,
+    event_store: SQLiteEventStore,
+    expected_head: str,
+    candidate_index: int,
+    decision_time: int,
+    requested_wallclock_seconds: int = 60,
+) -> VerificationLeaseIssuance:
+    projection = reduce_events(event_store.load(harness.mission_id))
+    candidate_id = thaw_json(
+        projection.candidate_events[candidate_index].payload
+    )["candidate"]["object_id"]
+    inputs, _ = _put_inputs(
+        harness.evidence_store,
+        suffix=f"-candidate-{candidate_index}".encode("ascii"),
+    )
+    return issue_modeled_fixture_verification_lease(
+        event_store=event_store,
+        mission_id=harness.mission_id,
+        expected_head=expected_head,
+        candidate_id=candidate_id,
+        **inputs,
+        verifier_key_id=harness.signer.key_id,
+        verifier_trust_store=harness.decision_trust,
+        decision_time=decision_time,
+        requested_wallclock_seconds=requested_wallclock_seconds,
+    )
+
+
+def _issue_resolve_and_admit_candidate(
+    harness: _Harness,
+    *,
+    event_store: SQLiteEventStore,
+    expected_head: str,
+    candidate_index: int,
+    issuance_time: int,
+) -> VerificationReceiptAdmission:
+    issuance = _issue_candidate(
+        harness,
+        event_store=event_store,
+        expected_head=expected_head,
+        candidate_index=candidate_index,
+        decision_time=issuance_time,
+    )
+    resolution = resolve_modeled_fixture_verification_artifacts(
+        event_store=event_store,
+        evidence_store=harness.evidence_store,
+        mission_id=harness.mission_id,
+        expected_head=issuance.event.event_digest,
+        verification_lease_id=issuance.lease.lease_id,
+        decision_time=issuance_time + 1,
+    )
+    outputs, _ = _put_outputs(
+        harness.evidence_store,
+        suffix=f"-candidate-{candidate_index}".encode("ascii"),
+    )
+    signed_receipt = _signed_receipt(
+        signer=harness.signer,
+        lease=issuance.lease,
+        resolution_id=resolution.resolution.resolution_id,
+        outputs=outputs,
+        completed_at=issuance_time + 2,
+    )
+    return admit_modeled_fixture_verifier_receipt(
+        event_store=event_store,
+        evidence_store=harness.evidence_store,
+        mission_id=harness.mission_id,
+        expected_head=resolution.event.event_digest,
+        verification_lease_id=issuance.lease.lease_id,
+        signed_receipt=signed_receipt,
+        decision_trust_store=harness.decision_trust,
+        decision_time=issuance_time + 3,
+    )
 
 
 def test_admission_is_one_atomic_self_loop_without_a_finding(
@@ -1176,3 +1260,448 @@ def test_stale_head_before_first_admission_is_not_auto_rebased(
         with pytest.raises(StaleHeadError):
             _admit(harness, event_store=store, expected_head=stale)
     assert reads == 0
+
+
+@pytest.mark.parametrize("disposition", ("expired", "cancelled"))
+def test_recovery_winner_blocks_late_receipt_without_resurrecting_lease(
+    tmp_path: Path,
+    disposition: str,
+) -> None:
+    harness = _setup(tmp_path)
+    with SQLiteEventStore(harness.database) as store:
+        if disposition == "expired":
+            ended = expire_modeled_fixture_verification_lease(
+                event_store=store,
+                mission_id=harness.mission_id,
+                expected_head=harness.resolution.event.event_digest,
+                verification_lease_id=harness.lease.lease_id,
+                decision_time=harness.lease.expires_at,
+            )
+        else:
+            ended = cancel_modeled_fixture_verification_lease(
+                event_store=store,
+                mission_id=harness.mission_id,
+                expected_head=harness.resolution.event.event_digest,
+                verification_lease_id=harness.lease.lease_id,
+                reason_code="operator_cancelled",
+                decision_time=NOW + 3,
+            )
+        with pytest.raises(VerificationReceiptAdmissionError) as rejected:
+            _admit(
+                harness,
+                event_store=store,
+                expected_head=ended.event.event_digest,
+                decision_time=ended.event.decision_time + 1,
+            )
+        projection = reduce_events(store.load(harness.mission_id))
+
+    assert rejected.value.reason_code == "verification_lease_inactive"
+    assert projection.verification_receipt_admission_events == ()
+    assert harness.lease.lease_id not in (
+        projection.consumed_verification_lease_ids
+    )
+
+
+def test_receipt_winner_blocks_all_recovery_and_closes_exact_coverage(
+    tmp_path: Path,
+) -> None:
+    harness = _setup(tmp_path)
+    alternate_signer = VerifierSigner.generate()
+    alternate_trust = VerifierTrustStore.from_keys(
+        (
+            TrustedVerifierKey(
+                verifier_id="CATO-2",
+                public_key_bytes=alternate_signer.public_key_bytes,
+                roles=frozenset({VERIFIER_ROLE}),
+            ),
+        )
+    )
+    with SQLiteEventStore(harness.database) as store:
+        admitted = _admit(harness, event_store=store)
+        shared = {
+            "event_store": store,
+            "mission_id": harness.mission_id,
+            "expected_head": admitted.event.event_digest,
+        }
+        with pytest.raises(VerificationLeaseRecoveryError) as expiry:
+            expire_modeled_fixture_verification_lease(
+                **shared,
+                verification_lease_id=harness.lease.lease_id,
+                decision_time=harness.lease.expires_at,
+            )
+        assert expiry.value.reason_code == "verification_lease_inactive"
+        with pytest.raises(VerificationLeaseRecoveryError) as cancellation:
+            cancel_modeled_fixture_verification_lease(
+                **shared,
+                verification_lease_id=harness.lease.lease_id,
+                reason_code="operator_cancelled",
+                decision_time=NOW + 5,
+            )
+        assert cancellation.value.reason_code == "verification_lease_inactive"
+        with pytest.raises(VerificationLeaseRecoveryError) as reassignment:
+            reassign_modeled_fixture_verification_lease(
+                **shared,
+                predecessor_verification_lease_id=harness.lease.lease_id,
+                verifier_key_id=alternate_signer.key_id,
+                verifier_trust_store=alternate_trust,
+                decision_time=NOW + 5,
+                requested_wallclock_seconds=10,
+            )
+        assert reassignment.value.reason_code == "verification_lease_consumed"
+        closed = close_modeled_fixture_verification_mission(
+            **shared,
+            decision_time=NOW + 5,
+        )
+
+    assert closed.status == "receipt_coverage_incomplete"
+    assert closed.projection.receipt_covered_candidate_ids == frozenset(
+        {harness.lease.candidate_id}
+    )
+    assert closed.projection.never_assigned_verification_candidate_ids
+    assert closed.projection.phase is ProjectionPhase.CLOSED
+
+
+@pytest.mark.parametrize(
+    "recovery_kind",
+    ("expired", "cancelled", "reassigned"),
+)
+def test_receipt_and_recovery_same_head_race_has_one_canonical_winner(
+    tmp_path: Path,
+    recovery_kind: str,
+) -> None:
+    harness = _setup(tmp_path)
+    barrier = Barrier(2)
+    alternate_signer = VerifierSigner.generate()
+    alternate_trust = VerifierTrustStore.from_keys(
+        (
+            TrustedVerifierKey(
+                verifier_id="CATO-2",
+                public_key_bytes=alternate_signer.public_key_bytes,
+                roles=frozenset({VERIFIER_ROLE}),
+            ),
+        )
+    )
+
+    class _AppendBarrierStore:
+        def __init__(self, delegate: SQLiteEventStore) -> None:
+            self.delegate = delegate
+            self.synchronized = False
+
+        def load(self, mission_id: str):
+            return self.delegate.load(mission_id)
+
+        def _synchronize_once(self) -> None:
+            if not self.synchronized:
+                self.synchronized = True
+                barrier.wait(timeout=20)
+
+        def append(self, event: EventV1, *, expected_head: str):
+            self._synchronize_once()
+            return self.delegate.append(event, expected_head=expected_head)
+
+        def append_receipt_admission(
+            self,
+            event: EventV1,
+            *,
+            expected_head: str,
+            evidence_store: FileEvidenceStore,
+        ):
+            self._synchronize_once()
+            return self.delegate.append_receipt_admission(
+                event,
+                expected_head=expected_head,
+                evidence_store=evidence_store,
+            )
+
+    def receipt_worker():
+        try:
+            with SQLiteEventStore(harness.database) as delegate:
+                return _admit(
+                    harness,
+                    event_store=_AppendBarrierStore(delegate),
+                )
+        except (
+            StaleHeadError,
+            VerificationReceiptAdmissionError,
+        ) as exc:
+            return exc
+
+    def recovery_worker():
+        try:
+            with SQLiteEventStore(harness.database) as delegate:
+                store = _AppendBarrierStore(delegate)
+                common = {
+                    "event_store": store,
+                    "mission_id": harness.mission_id,
+                    "expected_head": harness.resolution.event.event_digest,
+                }
+                if recovery_kind == "expired":
+                    return expire_modeled_fixture_verification_lease(
+                        **common,
+                        verification_lease_id=harness.lease.lease_id,
+                        decision_time=harness.lease.expires_at,
+                    )
+                if recovery_kind == "cancelled":
+                    return cancel_modeled_fixture_verification_lease(
+                        **common,
+                        verification_lease_id=harness.lease.lease_id,
+                        reason_code="operator_cancelled",
+                        decision_time=NOW + 3,
+                    )
+                return reassign_modeled_fixture_verification_lease(
+                    **common,
+                    predecessor_verification_lease_id=(
+                        harness.lease.lease_id
+                    ),
+                    verifier_key_id=alternate_signer.key_id,
+                    verifier_trust_store=alternate_trust,
+                    decision_time=NOW + 3,
+                    requested_wallclock_seconds=10,
+                )
+        except (
+            StaleHeadError,
+            VerificationLeaseRecoveryError,
+        ) as exc:
+            return exc
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        receipt_future = executor.submit(receipt_worker)
+        recovery_future = executor.submit(recovery_worker)
+        outcomes = (
+            receipt_future.result(timeout=30),
+            recovery_future.result(timeout=30),
+        )
+
+    failure_types = (
+        StaleHeadError,
+        VerificationLeaseRecoveryError,
+        VerificationReceiptAdmissionError,
+    )
+    failures = tuple(
+        value for value in outcomes if isinstance(value, failure_types)
+    )
+    successes = tuple(
+        value for value in outcomes if not isinstance(value, failure_types)
+    )
+    assert len(successes) == 1
+    assert len(failures) == 1
+    assert isinstance(failures[0], StaleHeadError)
+
+    with SQLiteEventStore(harness.database) as store:
+        projection = reduce_events(store.load(harness.mission_id))
+
+    assert len(projection.events) == len(harness.resolution.projection.events) + 1
+    assert successes[0].event == projection.events[-1]
+    lease_id = harness.lease.lease_id
+    predecessor_dispositions = (
+        lease_id in projection.active_verification_lease_ids,
+        lease_id in projection.expired_verification_lease_ids,
+        lease_id in projection.cancelled_verification_lease_ids,
+        lease_id in projection.superseded_verification_lease_ids,
+        lease_id in projection.consumed_verification_lease_ids,
+    )
+    assert sum(predecessor_dispositions) == 1
+    receipt_won = bool(projection.verification_receipt_admission_events)
+    if receipt_won:
+        assert projection.consumed_verification_lease_ids == frozenset(
+            {lease_id}
+        )
+        assert projection.active_verification_lease_ids == frozenset()
+        assert projection.expired_verification_lease_ids == frozenset()
+        assert projection.cancelled_verification_lease_ids == frozenset()
+        assert projection.superseded_verification_lease_ids == frozenset()
+        assert projection.verification_lease_expiry_events == ()
+        assert projection.verification_lease_cancellation_events == ()
+        assert projection.verification_lease_reassignment_events == ()
+        return
+
+    assert projection.verification_receipt_admission_events == ()
+    assert projection.consumed_verification_lease_ids == frozenset()
+    if recovery_kind == "expired":
+        assert projection.expired_verification_lease_ids == frozenset(
+            {lease_id}
+        )
+        assert projection.active_verification_lease_ids == frozenset()
+        assert len(projection.verification_lease_expiry_events) == 1
+        assert projection.verification_lease_cancellation_events == ()
+        assert projection.verification_lease_reassignment_events == ()
+    elif recovery_kind == "cancelled":
+        assert projection.cancelled_verification_lease_ids == frozenset(
+            {lease_id}
+        )
+        assert projection.active_verification_lease_ids == frozenset()
+        assert projection.verification_lease_expiry_events == ()
+        assert len(projection.verification_lease_cancellation_events) == 1
+        assert projection.verification_lease_reassignment_events == ()
+    else:
+        assert projection.superseded_verification_lease_ids == frozenset(
+            {lease_id}
+        )
+        assert len(projection.active_verification_lease_ids) == 1
+        successor_id = next(iter(projection.active_verification_lease_ids))
+        assert successor_id != lease_id
+        assert dict(projection.latest_verification_lease_by_candidate)[
+            harness.lease.candidate_id
+        ] == successor_id
+        assert projection.verification_lease_expiry_events == ()
+        assert projection.verification_lease_cancellation_events == ()
+        assert len(projection.verification_lease_reassignment_events) == 1
+
+
+def test_nonzero_complete_receipt_coverage_requires_every_candidate(
+    tmp_path: Path,
+) -> None:
+    harness = _setup(tmp_path)
+    with SQLiteEventStore(harness.database) as store:
+        first_admission = _admit(harness, event_store=store)
+        candidate_count = len(first_admission.projection.candidate_events)
+        assert candidate_count > 1
+
+        head = first_admission.event.event_digest
+        next_issuance_time = NOW + 5
+        for candidate_index in range(1, candidate_count):
+            admission = _issue_resolve_and_admit_candidate(
+                harness,
+                event_store=store,
+                expected_head=head,
+                candidate_index=candidate_index,
+                issuance_time=next_issuance_time,
+            )
+            head = admission.event.event_digest
+            next_issuance_time += 4
+
+        closed = close_modeled_fixture_verification_mission(
+            event_store=store,
+            mission_id=harness.mission_id,
+            expected_head=head,
+            decision_time=next_issuance_time,
+        )
+
+    candidate_ids = frozenset(
+        thaw_json(event.payload)["candidate"]["object_id"]
+        for event in closed.projection.candidate_events
+    )
+    assert candidate_ids
+    assert closed.status == "receipt_coverage_complete"
+    assert thaw_json(closed.event.payload)["status"] == (
+        "receipt_coverage_complete"
+    )
+    assert closed.projection.receipt_covered_candidate_ids == candidate_ids
+    assert closed.projection.active_verification_candidate_ids == frozenset()
+    assert (
+        closed.projection.never_assigned_verification_candidate_ids
+        == frozenset()
+    )
+    assert (
+        closed.projection.latest_expired_verification_candidate_ids
+        == frozenset()
+    )
+    assert (
+        closed.projection.latest_cancelled_verification_candidate_ids
+        == frozenset()
+    )
+    assert closed.projection.active_verification_lease_ids == frozenset()
+    assert len(closed.projection.verification_lease_events) == len(
+        candidate_ids
+    )
+    assert len(
+        closed.projection.verification_artifact_resolution_events
+    ) == len(candidate_ids)
+    assert len(
+        closed.projection.verification_receipt_admission_events
+    ) == len(candidate_ids)
+
+
+def test_incomplete_closure_retains_exact_mixed_candidate_partition(
+    tmp_path: Path,
+) -> None:
+    harness = _setup(tmp_path)
+    with SQLiteEventStore(harness.database) as store:
+        covered = _admit(harness, event_store=store)
+        candidate_events = covered.projection.candidate_events
+        assert len(candidate_events) >= 4
+
+        expired_issuance = _issue_candidate(
+            harness,
+            event_store=store,
+            expected_head=covered.event.event_digest,
+            candidate_index=1,
+            decision_time=NOW + 5,
+            requested_wallclock_seconds=10,
+        )
+        expired = expire_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission_id,
+            expected_head=expired_issuance.event.event_digest,
+            verification_lease_id=expired_issuance.lease.lease_id,
+            decision_time=expired_issuance.lease.expires_at,
+        )
+        cancelled_issuance = _issue_candidate(
+            harness,
+            event_store=store,
+            expected_head=expired.event.event_digest,
+            candidate_index=2,
+            decision_time=expired.event.decision_time + 1,
+            requested_wallclock_seconds=10,
+        )
+        cancelled = cancel_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission_id,
+            expected_head=cancelled_issuance.event.event_digest,
+            verification_lease_id=cancelled_issuance.lease.lease_id,
+            reason_code="operator_cancelled",
+            decision_time=cancelled_issuance.event.decision_time + 1,
+        )
+        closed = close_modeled_fixture_verification_mission(
+            event_store=store,
+            mission_id=harness.mission_id,
+            expected_head=cancelled.event.event_digest,
+            decision_time=cancelled.event.decision_time + 1,
+        )
+
+    candidate_ids = tuple(
+        thaw_json(event.payload)["candidate"]["object_id"]
+        for event in candidate_events
+    )
+    active = closed.projection.active_verification_candidate_ids
+    receipt_covered = closed.projection.receipt_covered_candidate_ids
+    never_assigned = (
+        closed.projection.never_assigned_verification_candidate_ids
+    )
+    latest_expired = (
+        closed.projection.latest_expired_verification_candidate_ids
+    )
+    latest_cancelled = (
+        closed.projection.latest_cancelled_verification_candidate_ids
+    )
+    partitions = (
+        active,
+        receipt_covered,
+        never_assigned,
+        latest_expired,
+        latest_cancelled,
+    )
+
+    assert closed.status == "receipt_coverage_incomplete"
+    assert thaw_json(closed.event.payload)["status"] == (
+        "receipt_coverage_incomplete"
+    )
+    assert active == frozenset()
+    assert receipt_covered == frozenset({candidate_ids[0]})
+    assert latest_expired == frozenset({candidate_ids[1]})
+    assert latest_cancelled == frozenset({candidate_ids[2]})
+    assert never_assigned == frozenset(candidate_ids[3:])
+    assert set().union(*partitions) == set(candidate_ids)
+    assert sum(len(partition) for partition in partitions) == len(
+        candidate_ids
+    )
+    assert closed.projection.active_verification_lease_ids == frozenset()
+    assert closed.projection.consumed_verification_lease_ids == frozenset(
+        {harness.lease.lease_id}
+    )
+    assert closed.projection.expired_verification_lease_ids == frozenset(
+        {expired_issuance.lease.lease_id}
+    )
+    assert closed.projection.cancelled_verification_lease_ids == frozenset(
+        {cancelled_issuance.lease.lease_id}
+    )

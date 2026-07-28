@@ -20,6 +20,9 @@ from etzio.kernel.events_v1 import (
     EVENT_PAYLOAD_FIELDS_BY_KIND_V1,
     EVENT_UNIT_BY_KIND_V1,
     GENESIS_DIGEST,
+    MISSION_CLOSED_STATUSES_V1,
+    VERIFICATION_LEASE_CANCELLATION_REASON_V1,
+    VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1,
     EventV1,
 )
 from etzio.mission_v1 import AnalysisLeaseV1, StaticCandidateV1
@@ -176,6 +179,52 @@ def _golden_graph() -> GoldenGraph:
         issued_at=NOW,
         expires_at=NOW + 60,
     )
+    reassigned_verifier_signer = VerifierSigner.generate()
+    reassigned_verifier_trust_store = VerifierTrustStore.from_keys(
+        (
+            TrustedVerifierKey(
+                verifier_id="CATO_SECONDARY",
+                public_key_bytes=reassigned_verifier_signer.public_key_bytes,
+                roles=frozenset({VERIFIER_ROLE}),
+            ),
+        )
+    )
+    reassigned_nonce = derive_verification_lease_nonce(
+        prior_event_digest=GENESIS_DIGEST,
+        mission_id=mission_id,
+        authority_id=grant.grant_id,
+        target_snapshot_id=snapshot.object_id,
+        candidate_id=candidate.candidate_id,
+        candidate_producer_id="VELITES",
+        poc_artifact_digest=_digest("3"),
+        evidence_artifact_digests=(_digest("4"), _digest("5")),
+        environment_digest=_digest("6"),
+        effect_oracle_id=_digest("7"),
+        verifier_id="CATO_SECONDARY",
+        verifier_key_id=reassigned_verifier_signer.key_id,
+        issued_at=NOW,
+        expires_at=NOW + 60,
+        issuance_trust_snapshot_id=reassigned_verifier_trust_store.snapshot_id,
+    )
+    reassigned_verification_lease = VerificationLeaseV1.issue(
+        lease_nonce=reassigned_nonce,
+        mission_id=mission_id,
+        authority_id=grant.grant_id,
+        target_snapshot_id=snapshot.object_id,
+        candidate_id=candidate.candidate_id,
+        candidate_producer_id="VELITES",
+        poc_artifact_digest=_digest("3"),
+        evidence_artifact_digests=(_digest("4"), _digest("5")),
+        environment_digest=_digest("6"),
+        effect_oracle_id=_digest("7"),
+        verifier_id="CATO_SECONDARY",
+        verifier_key_id=reassigned_verifier_signer.key_id,
+        issuance_trust_snapshot_id=(
+            reassigned_verifier_trust_store.snapshot_id
+        ),
+        issued_at=NOW,
+        expires_at=NOW + 60,
+    )
     resolution = EnvelopeV1.create(
         "verification_artifact_resolution",
         {
@@ -265,6 +314,24 @@ def _golden_graph() -> GoldenGraph:
             "lease": verification_lease.to_envelope().to_dict(),
             "verifier_trust_snapshot": verifier_trust_store.to_snapshot_body(),
             "verifier_trust_snapshot_id": verifier_trust_store.snapshot_id,
+        },
+        "verification_lease_cancelled": {
+            "reason_code": VERIFICATION_LEASE_CANCELLATION_REASON_V1,
+            "verification_lease_id": verification_lease.lease_id,
+        },
+        "verification_lease_expired": {
+            "verification_lease_id": verification_lease.lease_id,
+        },
+        "verification_lease_reassigned": {
+            "lease": reassigned_verification_lease.to_envelope().to_dict(),
+            "predecessor_verification_lease_id": verification_lease.lease_id,
+            "reason_code": "active_lease_superseded",
+            "verifier_trust_snapshot": (
+                reassigned_verifier_trust_store.to_snapshot_body()
+            ),
+            "verifier_trust_snapshot_id": (
+                reassigned_verifier_trust_store.snapshot_id
+            ),
         },
         "verification_artifacts_resolved": {
             "resolution": resolution.to_dict(),
@@ -407,7 +474,7 @@ def test_schema_branch_metadata_has_exact_runtime_parity() -> None:
     schema = protocol_v1_schema()
     assert frozenset(SEMANTIC_BODY_FIELDS_BY_KIND_V1) == SUPPORTED_OBJECT_KINDS
     assert len(SUPPORTED_OBJECT_KINDS) == 9
-    assert len(EVENT_UNIT_BY_KIND_V1) == 15
+    assert len(EVENT_UNIT_BY_KIND_V1) == 18
     case_refs = {
         branch["$ref"]
         for branch in schema["oneOf"]
@@ -439,6 +506,200 @@ def test_schema_branch_metadata_has_exact_runtime_parity() -> None:
         assert body_schema["additionalProperties"] is False
         assert frozenset(body_schema["required"]) == expected_fields
         assert frozenset(body_schema["properties"]) == expected_fields
+
+
+def test_verification_lease_recovery_event_surfaces_are_exact_and_fail_closed(
+    golden: GoldenGraph,
+    validator: Draft202012Validator,
+) -> None:
+    expected_units = {
+        "verification_lease_cancelled": "AQUILA",
+        "verification_lease_expired": "ETZIO",
+        "verification_lease_reassigned": "AQUILA",
+    }
+
+    def assert_rejected(label: str, body: dict[str, object]) -> None:
+        envelope = EnvelopeV1.create("event", body)
+        _assert_schema_rejects(validator, envelope.to_dict(), label)
+        with pytest.raises(SemanticProtocolError):
+            parse_semantic_envelope(envelope)
+
+    for kind, expected_unit in expected_units.items():
+        event = golden.events[kind]
+        assert event.unit == expected_unit
+        canonical_body = thaw_json(event.to_envelope().body)
+        assert type(canonical_body) is dict
+        canonical_payload = canonical_body["payload"]
+        assert type(canonical_payload) is dict
+        assert set(canonical_payload) == EVENT_PAYLOAD_FIELDS_BY_KIND_V1[kind]
+
+        wrong_unit = thaw_json(event.to_envelope().body)
+        assert type(wrong_unit) is dict
+        wrong_unit["unit"] = (
+            "ETZIO" if expected_unit == "AQUILA" else "AQUILA"
+        )
+        assert_rejected(f"{kind} wrong unit", wrong_unit)
+
+        for field in tuple(canonical_payload):
+            missing_field = thaw_json(event.to_envelope().body)
+            assert type(missing_field) is dict
+            missing_field["payload"].pop(field)
+            assert_rejected(f"{kind} missing {field}", missing_field)
+
+        unknown_field = thaw_json(event.to_envelope().body)
+        assert type(unknown_field) is dict
+        unknown_field["payload"]["unexpected"] = True
+        assert_rejected(f"{kind} unknown payload field", unknown_field)
+
+    cancelled = golden.events["verification_lease_cancelled"]
+    cancelled_payload = thaw_json(cancelled.payload)
+    assert type(cancelled_payload) is dict
+    assert (
+        cancelled_payload["reason_code"]
+        == VERIFICATION_LEASE_CANCELLATION_REASON_V1
+        == "operator_cancelled"
+    )
+    for label, invalid_reason in (
+        ("unsupported cancellation reason", "caller_selected"),
+        ("non-string cancellation reason", []),
+    ):
+        invalid_cancellation = thaw_json(cancelled.to_envelope().body)
+        assert type(invalid_cancellation) is dict
+        invalid_cancellation["payload"]["reason_code"] = invalid_reason
+        assert_rejected(label, invalid_cancellation)
+
+    reassigned = golden.events["verification_lease_reassigned"]
+    reassigned_payload = thaw_json(reassigned.payload)
+    assert type(reassigned_payload) is dict
+    assert VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1 == frozenset(
+        {
+            "active_lease_superseded",
+            "cancelled_lease_recovery",
+            "expired_lease_recovery",
+        }
+    )
+    for reason_code in VERIFICATION_LEASE_REASSIGNMENT_REASONS_V1:
+        accepted_reason = thaw_json(reassigned.to_envelope().body)
+        assert type(accepted_reason) is dict
+        accepted_reason["payload"]["reason_code"] = reason_code
+        accepted = EnvelopeV1.create("event", accepted_reason)
+        validator.validate(accepted.to_dict())
+        assert parse_semantic_envelope(accepted) is not None
+
+    for label, invalid_reason in (
+        ("unsupported reassignment reason", "caller_selected"),
+        ("non-string reassignment reason", []),
+    ):
+        invalid_reassignment = thaw_json(reassigned.to_envelope().body)
+        assert type(invalid_reassignment) is dict
+        invalid_reassignment["payload"]["reason_code"] = invalid_reason
+        assert_rejected(label, invalid_reassignment)
+
+
+def test_verification_lease_reassignment_retains_nested_trust_and_nonce_evidence(
+    golden: GoldenGraph,
+    validator: Draft202012Validator,
+) -> None:
+    reassigned = golden.events["verification_lease_reassigned"]
+
+    def event_from_body(body: dict[str, object]) -> EnvelopeV1:
+        return EnvelopeV1.create("event", body)
+
+    def assert_schema_and_runtime_reject(
+        label: str,
+        body: dict[str, object],
+    ) -> None:
+        envelope = event_from_body(body)
+        _assert_schema_rejects(validator, envelope.to_dict(), label)
+        with pytest.raises(SemanticProtocolError):
+            parse_semantic_envelope(envelope)
+
+    wrong_kind = thaw_json(reassigned.to_envelope().body)
+    assert type(wrong_kind) is dict
+    wrong_kind["payload"]["lease"] = golden.envelopes[
+        "analysis_lease"
+    ].to_dict()
+    assert_schema_and_runtime_reject(
+        "reassigned lease wrong nested kind",
+        wrong_kind,
+    )
+
+    attested = thaw_json(reassigned.to_envelope().body)
+    assert type(attested) is dict
+    nested_lease = attested["payload"]["lease"]
+    attestation = golden.envelopes["authority_grant_signed"].attestations[0]
+    attested["payload"]["lease"] = EnvelopeV1.create(
+        "verification_lease",
+        nested_lease["body"],
+        attestations=[attestation],
+    ).to_dict()
+    assert_schema_and_runtime_reject(
+        "reassigned lease must be unattested",
+        attested,
+    )
+
+    wrong_nonce = thaw_json(reassigned.to_envelope().body)
+    assert type(wrong_nonce) is dict
+    nested_lease = wrong_nonce["payload"]["lease"]
+    lease_body = nested_lease["body"]
+    lease_body["lease_nonce"] = (
+        "0" * 32 if lease_body["lease_nonce"] != "0" * 32 else "1" * 32
+    )
+    wrong_nonce["payload"]["lease"] = EnvelopeV1.create(
+        "verification_lease",
+        lease_body,
+    ).to_dict()
+    wrong_nonce_envelope = event_from_body(wrong_nonce)
+    validator.validate(wrong_nonce_envelope.to_dict())
+    with pytest.raises(SemanticProtocolError, match="kernel-derived"):
+        parse_semantic_envelope(wrong_nonce_envelope)
+
+    wrong_trust_snapshot = thaw_json(reassigned.to_envelope().body)
+    assert type(wrong_trust_snapshot) is dict
+    wrong_trust_snapshot["payload"]["verifier_trust_snapshot_id"] = _digest(
+        "0"
+    )
+    wrong_trust_envelope = event_from_body(wrong_trust_snapshot)
+    validator.validate(wrong_trust_envelope.to_dict())
+    with pytest.raises(SemanticProtocolError, match="trust snapshot"):
+        parse_semantic_envelope(wrong_trust_envelope)
+
+
+def test_mission_closed_receipt_coverage_statuses_are_exact(
+    golden: GoldenGraph,
+    validator: Draft202012Validator,
+) -> None:
+    assert MISSION_CLOSED_STATUSES_V1 == frozenset(
+        {
+            "completed",
+            "receipt_coverage_complete",
+            "receipt_coverage_incomplete",
+        }
+    )
+    closed = golden.events["mission_closed"]
+    for status in MISSION_CLOSED_STATUSES_V1:
+        body = thaw_json(closed.to_envelope().body)
+        assert type(body) is dict
+        body["payload"]["status"] = status
+        envelope = EnvelopeV1.create("event", body)
+        validator.validate(envelope.to_dict())
+        assert parse_semantic_envelope(envelope) is not None
+
+    for label, invalid_status in (
+        ("unsupported mission closure status", "caller_selected"),
+        ("non-string mission closure status", []),
+    ):
+        invalid_body = thaw_json(closed.to_envelope().body)
+        assert type(invalid_body) is dict
+        invalid_body["payload"]["status"] = invalid_status
+        invalid = EnvelopeV1.create("event", invalid_body)
+        _assert_schema_rejects(
+            validator,
+            invalid.to_dict(),
+            label,
+        )
+        with pytest.raises(SemanticProtocolError):
+            parse_semantic_envelope(invalid)
 
 
 def test_resolution_schema_closes_profile_artifact_types_and_nested_fields(

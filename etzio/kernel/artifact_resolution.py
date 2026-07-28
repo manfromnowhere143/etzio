@@ -442,6 +442,15 @@ def resolve_modeled_fixture_verification_artifacts(
     _assert_candidate_retained(projection, lease.candidate_id)
     grant = _grant(projection)
 
+    if (
+        verification_lease_id
+        not in projection.active_verification_lease_ids
+    ):
+        _reject(
+            "verification_lease_inactive",
+            "artifact resolution requires the active candidate-lineage lease",
+        )
+
     existing = _existing_resolution(projection, verification_lease_id)
     if existing is not None:
         return _replay_existing(

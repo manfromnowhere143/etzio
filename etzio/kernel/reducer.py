@@ -8,8 +8,12 @@ from enum import Enum
 
 from ..protocol import EnvelopeV1, ProtocolError, canonical_dumps, thaw_json
 from .events_v1 import (
+    ACTIVE_LEASE_REASSIGNMENT_REASON_V1,
+    CANCELLED_LEASE_REASSIGNMENT_REASON_V1,
+    EXPIRED_LEASE_REASSIGNMENT_REASON_V1,
     GENESIS_DIGEST,
     RECEIPT_ADMISSION_PROFILE_V1,
+    VERIFICATION_LEASE_CANCELLATION_REASON_V1,
     EventIntegrityError,
     EventV1,
 )
@@ -47,9 +51,23 @@ class MissionProjection:
     candidate_events: tuple[EventV1, ...]
     parse_failures: tuple[EventV1, ...]
     verification_lease_events: tuple[EventV1, ...]
+    verification_lease_expiry_events: tuple[EventV1, ...]
+    verification_lease_cancellation_events: tuple[EventV1, ...]
+    verification_lease_reassignment_events: tuple[EventV1, ...]
     verification_artifact_resolution_events: tuple[EventV1, ...]
     verification_receipt_admission_events: tuple[EventV1, ...]
+    active_verification_lease_ids: frozenset[str]
+    expired_verification_lease_ids: frozenset[str]
+    cancelled_verification_lease_ids: frozenset[str]
+    superseded_verification_lease_ids: frozenset[str]
     consumed_verification_lease_ids: frozenset[str]
+    active_verification_candidate_ids: frozenset[str]
+    receipt_covered_candidate_ids: frozenset[str]
+    never_assigned_verification_candidate_ids: frozenset[str]
+    latest_expired_verification_candidate_ids: frozenset[str]
+    latest_cancelled_verification_candidate_ids: frozenset[str]
+    latest_verification_lease_by_candidate: tuple[tuple[str, str], ...]
+    verification_lease_successors: tuple[tuple[str, str], ...]
     refusal: EventV1 | None
     failure_event: EventV1 | None
     scan_summary: EventV1 | None
@@ -108,10 +126,15 @@ def _transition(phase: str, kind: str) -> str:
     elif phase == "awaiting_verification":
         if kind in {
             "verification_lease_issued",
+            "verification_lease_expired",
+            "verification_lease_cancelled",
+            "verification_lease_reassigned",
             "verification_artifacts_resolved",
             "verifier_receipt_admitted",
         }:
             return "awaiting_verification"
+        if kind == "mission_closed":
+            return "closed"
     raise ReductionError(f"illegal event transition: {phase} -> {kind}")
 
 
@@ -127,6 +150,62 @@ def _nested_envelope(event: EventV1, field: str) -> EnvelopeV1:
         ) from exc
 
 
+def _verification_candidate_partitions(
+    *,
+    candidate_ids: set[str],
+    latest_lease_by_candidate: dict[str, str],
+    active_lease_ids: set[str],
+    consumed_lease_ids: set[str],
+    expired_lease_ids: set[str],
+    cancelled_lease_ids: set[str],
+) -> tuple[set[str], set[str], set[str], set[str], set[str]]:
+    """Derive one exhaustive, mutually exclusive verification state per candidate."""
+
+    if not set(latest_lease_by_candidate).issubset(candidate_ids):
+        raise ReductionError(
+            "verification lease lineage references an unknown candidate"
+        )
+    never_assigned = candidate_ids - set(latest_lease_by_candidate)
+    active: set[str] = set()
+    receipt_covered: set[str] = set()
+    latest_expired: set[str] = set()
+    latest_cancelled: set[str] = set()
+    for candidate_id, lease_id in latest_lease_by_candidate.items():
+        states = (
+            lease_id in active_lease_ids,
+            lease_id in consumed_lease_ids,
+            lease_id in expired_lease_ids,
+            lease_id in cancelled_lease_ids,
+        )
+        if sum(states) != 1:
+            raise ReductionError(
+                "candidate latest verification lease lacks one terminal or active state"
+            )
+        if states[0]:
+            active.add(candidate_id)
+        elif states[1]:
+            receipt_covered.add(candidate_id)
+        elif states[2]:
+            latest_expired.add(candidate_id)
+        else:
+            latest_cancelled.add(candidate_id)
+
+    partitions = (
+        active,
+        receipt_covered,
+        never_assigned,
+        latest_expired,
+        latest_cancelled,
+    )
+    if set().union(*partitions) != candidate_ids or sum(
+        len(partition) for partition in partitions
+    ) != len(candidate_ids):
+        raise ReductionError(
+            "verification candidate states are not an exhaustive partition"
+        )
+    return partitions
+
+
 def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
     """Rebuild one mission projection, rejecting gaps, forks, and illegal transitions.
 
@@ -135,8 +214,8 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
 
     ``authority_admitted → mission_opened → analysis_lease_issued → outputs* →
     scan_completed → mission_closed``. A verification-intended stream instead continues
-    through lease issuance, artifact resolution, and optional receipt-admission self-loops,
-    then remains nonterminal pending explicit terminal-recovery semantics.
+    through lease issuance, explicit recovery, artifact resolution, and optional
+    receipt-admission self-loops before terminal receipt-coverage closure.
     """
 
     retained = tuple(events)
@@ -157,15 +236,23 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
     candidate_ids: set[str] = set()
     candidate_events_by_id: dict[str, EventV1] = {}
     verification_lease_events: list[EventV1] = []
+    verification_lease_expiry_events: list[EventV1] = []
+    verification_lease_cancellation_events: list[EventV1] = []
+    verification_lease_reassignment_events: list[EventV1] = []
     verification_artifact_resolution_events: list[EventV1] = []
     verification_receipt_admission_events: list[EventV1] = []
     verification_lease_ids: set[str] = set()
     verification_leases_by_id: dict[str, object] = {}
+    latest_verification_lease_by_candidate: dict[str, str] = {}
+    verification_lease_successors: dict[str, str] = {}
     verification_resolutions_by_lease_id: dict[str, object] = {}
     resolved_verification_lease_ids: set[str] = set()
+    active_verification_lease_ids: set[str] = set()
+    expired_verification_lease_ids: set[str] = set()
+    cancelled_verification_lease_ids: set[str] = set()
+    superseded_verification_lease_ids: set[str] = set()
     consumed_verification_lease_ids: set[str] = set()
     admitted_verifier_receipt_ids: set[str] = set()
-    leased_candidate_ids: set[str] = set()
     admitted_grant: object | None = None
     admitted_admission: object | None = None
     target_snapshot: object | None = None
@@ -484,9 +571,9 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                 raise ReductionError(
                     "duplicate verification lease identity in mission stream"
                 )
-            if lease.candidate_id in leased_candidate_ids:
+            if lease.candidate_id in latest_verification_lease_by_candidate:
                 raise ReductionError(
-                    "candidate already has a verification lease"
+                    "plain issuance requires a never-assigned verification candidate"
                 )
             if (
                 len(verification_lease_events) + 1
@@ -497,8 +584,296 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                 )
             verification_lease_ids.add(lease.lease_id)
             verification_leases_by_id[lease.lease_id] = lease
-            leased_candidate_ids.add(lease.candidate_id)
+            active_verification_lease_ids.add(lease.lease_id)
+            latest_verification_lease_by_candidate[
+                lease.candidate_id
+            ] = lease.lease_id
             verification_lease_events.append(event)
+        elif event.kind == "verification_lease_expired":
+            from ..verification import VerificationLeaseV1
+
+            lease_id = event.payload["verification_lease_id"]
+            lease_value = verification_leases_by_id.get(lease_id)
+            if not isinstance(lease_value, VerificationLeaseV1):
+                raise ReductionError(
+                    "verification lease expiry references no prior lease"
+                )
+            lease = lease_value
+            if (
+                latest_verification_lease_by_candidate.get(
+                    lease.candidate_id
+                )
+                != lease.lease_id
+            ):
+                raise ReductionError(
+                    "verification lease expiry must reference the candidate's latest lease"
+                )
+            if lease.lease_id not in active_verification_lease_ids:
+                raise ReductionError(
+                    "verification lease expiry requires one active lease"
+                )
+            if event.decision_time < lease.expires_at:
+                raise ReductionError(
+                    "verification lease cannot expire before its retained deadline"
+                )
+            active_verification_lease_ids.remove(lease.lease_id)
+            expired_verification_lease_ids.add(lease.lease_id)
+            verification_lease_expiry_events.append(event)
+        elif event.kind == "verification_lease_cancelled":
+            from ..verification import VerificationLeaseV1
+
+            lease_id = event.payload["verification_lease_id"]
+            lease_value = verification_leases_by_id.get(lease_id)
+            if not isinstance(lease_value, VerificationLeaseV1):
+                raise ReductionError(
+                    "verification lease cancellation references no prior lease"
+                )
+            lease = lease_value
+            if (
+                event.payload["reason_code"]
+                != VERIFICATION_LEASE_CANCELLATION_REASON_V1
+            ):
+                raise ReductionError(
+                    "verification lease cancellation reason is unsupported"
+                )
+            if (
+                latest_verification_lease_by_candidate.get(
+                    lease.candidate_id
+                )
+                != lease.lease_id
+            ):
+                raise ReductionError(
+                    "verification lease cancellation must reference the candidate's latest lease"
+                )
+            if lease.lease_id not in active_verification_lease_ids:
+                raise ReductionError(
+                    "verification lease cancellation requires one active lease"
+                )
+            if not (
+                lease.issued_at
+                <= event.decision_time
+                < lease.expires_at
+            ):
+                raise ReductionError(
+                    "verification lease cancellation is outside the active lease window"
+                )
+            active_verification_lease_ids.remove(lease.lease_id)
+            cancelled_verification_lease_ids.add(lease.lease_id)
+            verification_lease_cancellation_events.append(event)
+        elif event.kind == "verification_lease_reassigned":
+            from ..verification import (
+                VERIFIER_ROLE,
+                VerificationLeaseV1,
+                VerifierTrustStore,
+                derive_verification_lease_nonce,
+            )
+
+            predecessor_id = event.payload[
+                "predecessor_verification_lease_id"
+            ]
+            predecessor_value = verification_leases_by_id.get(
+                predecessor_id
+            )
+            if not isinstance(predecessor_value, VerificationLeaseV1):
+                raise ReductionError(
+                    "verification lease reassignment references no predecessor"
+                )
+            predecessor = predecessor_value
+            if (
+                latest_verification_lease_by_candidate.get(
+                    predecessor.candidate_id
+                )
+                != predecessor.lease_id
+            ):
+                raise ReductionError(
+                    "verification lease reassignment requires the candidate's latest lease"
+                )
+            if predecessor.lease_id in verification_lease_successors:
+                raise ReductionError(
+                    "verification lease predecessor already has a successor"
+                )
+
+            lease = VerificationLeaseV1.from_envelope(
+                _nested_envelope(event, "lease")
+            )
+            verifier_trust = VerifierTrustStore.from_snapshot_body(
+                thaw_json(event.payload)["verifier_trust_snapshot"],
+                expected_snapshot_id=event.payload[
+                    "verifier_trust_snapshot_id"
+                ],
+            )
+            if admitted_grant is None or admitted_admission is None:
+                raise ReductionError(
+                    "verification lease reassignment has no admitted authority evidence"
+                )
+            if (
+                "modeled_fixture_verification"
+                not in admitted_admission.required_actions
+                or "modeled_fixture_verification"
+                not in admitted_grant.permitted_actions
+            ):
+                raise ReductionError(
+                    "verification lease reassignment lacks admitted "
+                    "modeled_fixture_verification authority"
+                )
+            candidate_event = candidate_events_by_id.get(
+                predecessor.candidate_id
+            )
+            if candidate_event is None:
+                raise ReductionError(
+                    "verification lease predecessor references no retained candidate"
+                )
+            predecessor_bindings = (
+                predecessor.mission_id,
+                predecessor.authority_id,
+                predecessor.target_snapshot_id,
+                predecessor.candidate_id,
+                predecessor.candidate_producer_id,
+                predecessor.poc_artifact_digest,
+                predecessor.evidence_artifact_digests,
+                predecessor.environment_digest,
+                predecessor.effect_oracle_id,
+            )
+            successor_bindings = (
+                lease.mission_id,
+                lease.authority_id,
+                lease.target_snapshot_id,
+                lease.candidate_id,
+                lease.candidate_producer_id,
+                lease.poc_artifact_digest,
+                lease.evidence_artifact_digests,
+                lease.environment_digest,
+                lease.effect_oracle_id,
+            )
+            if successor_bindings != predecessor_bindings:
+                raise ReductionError(
+                    "verification lease reassignment changed immutable work bindings"
+                )
+            if (
+                lease.mission_id != mission_id
+                or lease.authority_id != authority_id
+                or lease.target_snapshot_id != target_id
+                or lease.candidate_producer_id != candidate_event.unit
+            ):
+                raise ReductionError(
+                    "reassigned verification lease differs from retained mission bindings"
+                )
+            if lease.issued_at != event.decision_time:
+                raise ReductionError(
+                    "reassigned verification lease issued_at differs from its event"
+                )
+            grant_deadline = min(
+                admitted_grant.expires_at,
+                admitted_admission.decision_time
+                + admitted_grant.max_wallclock_seconds,
+            )
+            if not (
+                admitted_admission.decision_time
+                <= lease.issued_at
+                < lease.expires_at
+                <= grant_deadline
+            ):
+                raise ReductionError(
+                    "reassigned verification lease exceeds the admitted authority window"
+                )
+            if lease.candidate_producer_id == lease.verifier_id:
+                raise ReductionError(
+                    "reassigned verification lease assigns the candidate producer"
+                )
+            if lease.verifier_id == predecessor.verifier_id:
+                raise ReductionError(
+                    "verification lease reassignment requires a different verifier"
+                )
+            trusted_key = verifier_trust.keys.get(lease.verifier_key_id)
+            if (
+                trusted_key is None
+                or lease.verifier_key_id in verifier_trust.revoked_key_ids
+                or lease.lease_id in verifier_trust.revoked_lease_ids
+                or VERIFIER_ROLE not in trusted_key.roles
+                or trusted_key.verifier_id != lease.verifier_id
+                or lease.issuance_trust_snapshot_id
+                != event.payload["verifier_trust_snapshot_id"]
+            ):
+                raise ReductionError(
+                    "reassigned verification lease lacks an eligible retained verifier"
+                )
+            expected_nonce = derive_verification_lease_nonce(
+                prior_event_digest=event.prev_digest,
+                mission_id=lease.mission_id,
+                authority_id=lease.authority_id,
+                target_snapshot_id=lease.target_snapshot_id,
+                candidate_id=lease.candidate_id,
+                candidate_producer_id=lease.candidate_producer_id,
+                poc_artifact_digest=lease.poc_artifact_digest,
+                evidence_artifact_digests=lease.evidence_artifact_digests,
+                environment_digest=lease.environment_digest,
+                effect_oracle_id=lease.effect_oracle_id,
+                verifier_id=lease.verifier_id,
+                verifier_key_id=lease.verifier_key_id,
+                issued_at=lease.issued_at,
+                expires_at=lease.expires_at,
+                issuance_trust_snapshot_id=(
+                    lease.issuance_trust_snapshot_id
+                ),
+            )
+            if lease.lease_nonce != expected_nonce:
+                raise ReductionError(
+                    "reassigned verification lease nonce is not kernel-derived"
+                )
+            if lease.lease_id in verification_lease_ids:
+                raise ReductionError(
+                    "duplicate verification lease identity in mission stream"
+                )
+            if (
+                len(verification_lease_events) + 1
+                > admitted_grant.max_candidates
+            ):
+                raise ReductionError(
+                    "verification lease count exceeds the admitted candidate ceiling"
+                )
+
+            reason_code = event.payload["reason_code"]
+            if predecessor.lease_id in active_verification_lease_ids:
+                if event.decision_time >= predecessor.expires_at:
+                    raise ReductionError(
+                        "expired active lease requires canonical expiry before reassignment"
+                    )
+                if reason_code != ACTIVE_LEASE_REASSIGNMENT_REASON_V1:
+                    raise ReductionError(
+                        "active verification lease reassignment reason is unsupported"
+                    )
+                active_verification_lease_ids.remove(
+                    predecessor.lease_id
+                )
+                superseded_verification_lease_ids.add(
+                    predecessor.lease_id
+                )
+            elif predecessor.lease_id in expired_verification_lease_ids:
+                if reason_code != EXPIRED_LEASE_REASSIGNMENT_REASON_V1:
+                    raise ReductionError(
+                        "expired verification lease reassignment reason is unsupported"
+                    )
+            elif predecessor.lease_id in cancelled_verification_lease_ids:
+                if reason_code != CANCELLED_LEASE_REASSIGNMENT_REASON_V1:
+                    raise ReductionError(
+                        "cancelled verification lease reassignment reason is unsupported"
+                    )
+            else:
+                raise ReductionError(
+                    "verification lease predecessor cannot be reassigned from its disposition"
+                )
+
+            verification_lease_ids.add(lease.lease_id)
+            verification_leases_by_id[lease.lease_id] = lease
+            active_verification_lease_ids.add(lease.lease_id)
+            latest_verification_lease_by_candidate[
+                lease.candidate_id
+            ] = lease.lease_id
+            verification_lease_successors[
+                predecessor.lease_id
+            ] = lease.lease_id
+            verification_lease_events.append(event)
+            verification_lease_reassignment_events.append(event)
         elif event.kind == "verification_artifacts_resolved":
             from ..verification import VerificationLeaseV1
             from ..verification_artifacts import (
@@ -518,6 +893,16 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                     "artifact resolution references no prior verification lease"
                 )
             lease = lease_value
+            if (
+                lease.lease_id not in active_verification_lease_ids
+                or latest_verification_lease_by_candidate.get(
+                    lease.candidate_id
+                )
+                != lease.lease_id
+            ):
+                raise ReductionError(
+                    "artifact resolution requires the candidate's active latest lease"
+                )
             if resolution.verification_lease_id in resolved_verification_lease_ids:
                 raise ReductionError(
                     "verification lease already has an artifact resolution"
@@ -645,6 +1030,18 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                 raise ReductionError(
                     "verifier receipt references no prior verification lease"
                 )
+            if receipt.lease_id in consumed_verification_lease_ids:
+                raise ReductionError("verification lease is already consumed")
+            if (
+                lease_value.lease_id not in active_verification_lease_ids
+                or latest_verification_lease_by_candidate.get(
+                    lease_value.candidate_id
+                )
+                != lease_value.lease_id
+            ):
+                raise ReductionError(
+                    "verifier receipt requires the candidate's active latest lease"
+                )
             resolution_value = verification_resolutions_by_lease_id.get(
                 receipt.lease_id
             )
@@ -655,8 +1052,6 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                 raise ReductionError(
                     "verifier receipt references a lease without a prior artifact resolution"
                 )
-            if receipt.lease_id in consumed_verification_lease_ids:
-                raise ReductionError("verification lease is already consumed")
             if receipt.receipt_id in admitted_verifier_receipt_ids:
                 raise ReductionError("verifier receipt is already admitted")
             try:
@@ -754,19 +1149,63 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
                 raise ReductionError(
                     "receipt artifacts exceed the admitted byte ceiling"
                 )
+            active_verification_lease_ids.remove(receipt.lease_id)
             consumed_verification_lease_ids.add(receipt.lease_id)
             admitted_verifier_receipt_ids.add(receipt.receipt_id)
             verification_receipt_admission_events.append(event)
         elif event.kind == "mission_closed":
-            if (
+            verification_intent = (
                 admitted_admission is not None
                 and "modeled_fixture_verification"
                 in admitted_admission.required_actions
-                and candidates
-            ):
+            )
+            if verification_intent:
+                (
+                    active_candidate_ids,
+                    receipt_covered_candidate_ids,
+                    _,
+                    _,
+                    _,
+                ) = _verification_candidate_partitions(
+                    candidate_ids=candidate_ids,
+                    latest_lease_by_candidate=(
+                        latest_verification_lease_by_candidate
+                    ),
+                    active_lease_ids=active_verification_lease_ids,
+                    consumed_lease_ids=consumed_verification_lease_ids,
+                    expired_lease_ids=expired_verification_lease_ids,
+                    cancelled_lease_ids=cancelled_verification_lease_ids,
+                )
+                if active_verification_lease_ids or active_candidate_ids:
+                    raise ReductionError(
+                        "verification mission cannot close with an active lease"
+                    )
+                expected_status = (
+                    "receipt_coverage_complete"
+                    if receipt_covered_candidate_ids == candidate_ids
+                    else "receipt_coverage_incomplete"
+                )
+                legacy_zero_candidate_completion = (
+                    event.payload["status"] == "completed"
+                    and not candidate_ids
+                    and not verification_lease_events
+                    and not verification_lease_expiry_events
+                    and not verification_lease_cancellation_events
+                    and not verification_lease_reassignment_events
+                    and not verification_artifact_resolution_events
+                    and not verification_receipt_admission_events
+                )
+                if (
+                    event.payload["status"] != expected_status
+                    and not legacy_zero_candidate_completion
+                ):
+                    raise ReductionError(
+                        "verification mission cannot close with a status that "
+                        "differs from retained receipt coverage"
+                    )
+            elif event.payload["status"] != "completed":
                 raise ReductionError(
-                    "verification-intended mission with candidates cannot close "
-                    "before explicit verification terminal-recovery semantics"
+                    "non-verification mission must close with completed status"
                 )
             if event.payload["candidate_count"] != len(candidates):
                 raise ReductionError(
@@ -804,6 +1243,33 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
         "timed_out": ProjectionPhase.TIMED_OUT,
         "budget_exhausted": ProjectionPhase.BUDGET_EXHAUSTED,
     }
+    lease_dispositions = (
+        active_verification_lease_ids,
+        expired_verification_lease_ids,
+        cancelled_verification_lease_ids,
+        superseded_verification_lease_ids,
+        consumed_verification_lease_ids,
+    )
+    if set().union(*lease_dispositions) != verification_lease_ids or sum(
+        len(disposition) for disposition in lease_dispositions
+    ) != len(verification_lease_ids):
+        raise ReductionError(
+            "verification leases do not have exactly one canonical disposition"
+        )
+    (
+        active_verification_candidate_ids,
+        receipt_covered_candidate_ids,
+        never_assigned_verification_candidate_ids,
+        latest_expired_verification_candidate_ids,
+        latest_cancelled_verification_candidate_ids,
+    ) = _verification_candidate_partitions(
+        candidate_ids=candidate_ids,
+        latest_lease_by_candidate=latest_verification_lease_by_candidate,
+        active_lease_ids=active_verification_lease_ids,
+        consumed_lease_ids=consumed_verification_lease_ids,
+        expired_lease_ids=expired_verification_lease_ids,
+        cancelled_lease_ids=cancelled_verification_lease_ids,
+    )
     return MissionProjection(
         mission_id=mission_id,
         authority_id=authority_id,
@@ -813,14 +1279,56 @@ def reduce_events(events: Iterable[EventV1]) -> MissionProjection:
         candidate_events=tuple(candidates),
         parse_failures=tuple(failures),
         verification_lease_events=tuple(verification_lease_events),
+        verification_lease_expiry_events=tuple(
+            verification_lease_expiry_events
+        ),
+        verification_lease_cancellation_events=tuple(
+            verification_lease_cancellation_events
+        ),
+        verification_lease_reassignment_events=tuple(
+            verification_lease_reassignment_events
+        ),
         verification_artifact_resolution_events=tuple(
             verification_artifact_resolution_events
         ),
         verification_receipt_admission_events=tuple(
             verification_receipt_admission_events
         ),
+        active_verification_lease_ids=frozenset(
+            active_verification_lease_ids
+        ),
+        expired_verification_lease_ids=frozenset(
+            expired_verification_lease_ids
+        ),
+        cancelled_verification_lease_ids=frozenset(
+            cancelled_verification_lease_ids
+        ),
+        superseded_verification_lease_ids=frozenset(
+            superseded_verification_lease_ids
+        ),
         consumed_verification_lease_ids=frozenset(
             consumed_verification_lease_ids
+        ),
+        active_verification_candidate_ids=frozenset(
+            active_verification_candidate_ids
+        ),
+        receipt_covered_candidate_ids=frozenset(
+            receipt_covered_candidate_ids
+        ),
+        never_assigned_verification_candidate_ids=frozenset(
+            never_assigned_verification_candidate_ids
+        ),
+        latest_expired_verification_candidate_ids=frozenset(
+            latest_expired_verification_candidate_ids
+        ),
+        latest_cancelled_verification_candidate_ids=frozenset(
+            latest_cancelled_verification_candidate_ids
+        ),
+        latest_verification_lease_by_candidate=tuple(
+            sorted(latest_verification_lease_by_candidate.items())
+        ),
+        verification_lease_successors=tuple(
+            sorted(verification_lease_successors.items())
         ),
         refusal=refusal,
         failure_event=failure,

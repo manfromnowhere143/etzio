@@ -66,19 +66,19 @@ kernel-issued authority-bound modeled-fixture verification leases, typed CAS res
 every modeled verification input, atomic modeled-receipt admission, single-use lease
 consumption, and known-bad controls. The receipt signs the retained resolution and four
 typed output digest/size pairs, but those opaque outputs do not establish execution or a
-finding.
+finding. Canonical per-candidate lease lineages now retain explicit expiry, modeled
+cancellation, atomic reassignment to a different verifier, single-use receipt consumption,
+and complete or incomplete receipt-coverage closure.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. define explicit lease expiry, cancellation, supersession, reassignment, and terminal
-   recovery;
-2. establish a trusted clock boundary, revocation freshness, and externally anchor event
+1. establish a trusted clock boundary, revocation freshness, and externally anchor event
    heads;
-3. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
+2. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
    pathname race;
-4. replace opaque modeled outputs with structured independently produced execution
+3. replace opaque modeled outputs with structured independently produced execution
    evidence; and
-5. prove every new refusal and concurrency invariant with a known-bad.
+4. prove every new refusal and concurrency invariant with a known-bad.
 
 Then build MARCELLUS and independent CATO execution on an explicitly accepted Linux/KVM
 profile before the benchmark-first EVM domain pack.
