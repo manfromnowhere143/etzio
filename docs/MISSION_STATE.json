@@ -111,7 +111,7 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_dual_runtime_candidate_passed_github_pending",
+    "validation_status": "local_and_github_release_suites_passed",
     "test_count": 659,
     "validated_runtimes": [
       "CPython 3.11.15",
@@ -122,8 +122,8 @@
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
-    "github_validated_commit": "306e42889394f5d225171dcd88ce7ae7878678bf",
-    "github_actions_run_id": 30338666115,
+    "github_validated_commit": "ad90fb2b3629b2aa006c63894de3cd7880602a12",
+    "github_actions_run_id": 30386314385,
     "claim_boundary": "no real-world precision, finding validity, isolation, live authorization, learning, or superiority claim"
   },
   "external_blockers": [

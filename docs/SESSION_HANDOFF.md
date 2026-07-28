@@ -248,13 +248,12 @@ CPython 3.14.2:
 - the governed clean fixture closed with zero candidates; and
 - both modeled regression demonstrations retained their historical outputs.
 
-The hash-locked environments passed `pip check`. At this local-evidence checkpoint, the
-integrity-contract candidate was uncommitted and had not been reproduced by GitHub
-Actions. The prior GitHub Actions run
-[`30338666115`](https://github.com/manfromnowhere143/etzio/actions/runs/30338666115)
-reproduced repository policy plus both declared runtime suites on the exact recovery
-implementation commit `306e42889394f5d225171dcd88ce7ae7878678bf`; GitGuardian also
-passed. That earlier run does not validate the current uncommitted bytes. Resolve the
+The hash-locked environments passed `pip check`. GitHub Actions run
+[`30386314385`](https://github.com/manfromnowhere143/etzio/actions/runs/30386314385)
+reproduced repository policy plus both declared runtime suites, package build,
+outside-checkout wheel smoke, and clean-tree proof on the exact integrity-contract
+implementation commit `ad90fb2b3629b2aa006c63894de3cd7880602a12`; GitGuardian also
+passed. This evidence-only handoff update follows that implementation commit. Resolve the
 current branch head and checks from GitHub rather than treating this dated statement as
 live state. All evidence remains fixture-scoped.
 
