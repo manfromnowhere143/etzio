@@ -181,8 +181,9 @@ CPython 3.14.2:
 - the governed clean fixture closed with zero candidates; and
 - both modeled regression demonstrations retained their historical outputs.
 
-The hash-locked environments passed `pip check`. This evidence remains fixture-scoped and
-must be reproduced by GitHub Actions for the pushed commit.
+The hash-locked environments passed `pip check`, and GitHub Actions reproduced repository
+policy plus both declared runtime suites on the pushed branch head. This evidence remains
+fixture-scoped.
 
 ## Closed adversarial findings in this tranche
 
