@@ -198,12 +198,13 @@ CPython 3.14.2:
 - the governed clean fixture closed with zero candidates; and
 - both modeled regression demonstrations retained their historical outputs.
 
-The hash-locked environments passed `pip check`. GitHub Actions reproduced repository
-policy plus both declared runtime suites on the exact parent head
-`f70e4c2786babfd97deddfdc240cbc3fc5fde85e`. At the time this candidate packet was
-authored, remote evidence for the recovery tranche was pending; resolve its current state
-from the branch head and GitHub rather than this dated statement. This evidence remains
-fixture-scoped.
+The hash-locked environments passed `pip check`. GitHub Actions run
+[`30338666115`](https://github.com/manfromnowhere143/etzio/actions/runs/30338666115)
+reproduced repository policy plus both declared runtime suites on the exact recovery
+implementation commit `306e42889394f5d225171dcd88ce7ae7878678bf`; GitGuardian also
+passed. The subsequent documentation-only evidence commit does not change runtime bytes.
+Resolve the current branch head and checks from GitHub rather than treating this dated
+statement as live state. This evidence remains fixture-scoped.
 
 ## Closed adversarial findings in this tranche
 
