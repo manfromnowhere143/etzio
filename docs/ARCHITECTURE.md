@@ -123,10 +123,11 @@ Canonical JSON enforcement includes:
 - fixed wire, string, key, nesting, container, node, and attestation ceilings; and
 - rejection of noncanonical wire spellings during parsing.
 
-The installed Draft 2020-12 schema is a semantic wire-shape guard for all nine supported
-typed object kinds. It has exact signed and unsigned grant/receipt forms plus eighteen event
-kind, unit, and payload branches. One immutable runtime registry closes every top-level
-semantic body field set; repository policy compares the schema's envelope, body,
+The installed Draft 2020-12 schema is a semantic wire-shape guard for all eleven supported
+typed object kinds. It has exact signed and unsigned grant/receipt forms, required signed
+integrity-decision and head-checkpoint forms, plus eighteen event kind, unit, and payload
+branches. One immutable runtime registry closes every top-level semantic body field set;
+repository policy compares the schema's envelope, body, nested integrity evidence,
 attestation, dispatch, event-unit, and event-payload structure against those contracts.
 Parity fixtures validate every runtime-produced form plus known-bad mutations.
 
@@ -135,8 +136,61 @@ enforce canonical UTF-8 and Unicode, derived identities, lexical ordering, field
 uniqueness, aggregate and cross-field limits, Ed25519 validity, nested bindings, authority,
 and event transitions. The schema uses an explicit edge-whitespace class instead of
 dialect-dependent `\s`/`\S`, freezing the Python protocol's nonblank-string semantics
-across Python and ECMA-262-style regex validators. The name `head_checkpoint` is reserved
-but rejected until an authenticated typed contract exists.
+across Python and ECMA-262-style regex validators.
+
+## Integrity-evidence contract
+
+`IntegrityDecisionV1` is a required-attestation pre-transition contract. It binds the
+service instance, environment, mission, authority, target, exact previous head, complete
+proposed-event digest, event kind, transition-intent identity, 256-bit request nonce,
+decision and time policies, conservative time interval, typed time evidence with distinct
+`source_id` labels, and complete versioned revocation views. The previous head includes both the
+mission event predecessor and the exact immediately preceding instance-global checkpoint,
+including its signed attestation, signer principal, and historical trust snapshot, so a
+newer decision cannot be validated against an older checkpoint baseline or a substituted
+co-signature over the same semantic body. The proposed event's scalar
+`decision_time` is the conservative upper bound. Whole-interval checks reject uncertainty
+that crosses an authorization or deadline boundary. A successor decision's lower bound
+cannot precede the upper bound of its retained checkpoint predecessor.
+
+`HeadCheckpointV1` is a required-attestation post-transition contract. It binds an
+instance-global predecessor and sequence, mission-local predecessor and event sequence,
+exact signed-attestation/principal/trust provenance for both predecessors, the exact event,
+signed integrity-decision attestation, decision principal and historical trust snapshot,
+checkpoint time, anchor policy, and typed anchor receipt references with distinct
+`source_id` labels.
+External receipts bind a pre-receipt `anchor_statement_id`; the final checkpoint then
+commits to those receipt identities without creating a hash cycle or permitting later
+trusted co-signing to rewrite decision or historical checkpoint provenance. Identical
+global and mission predecessor identities cannot carry mixed provenance, and one mission
+lineage cannot change authority or target.
+
+Decision and checkpoint signatures use distinct domains and exact roles. Consequential
+validation reauthenticates every wrapper with its exact historical trust store and requires
+different principals even after key rotation. Authenticated-result public construction is
+refused; consequential composition rejects subclasses and malformed nested objects,
+snapshots the exact constructed trust store and caller policy, and rebuilds a fresh
+immutable authenticated result from newly verified signed bytes. Validators use only that
+snapshot, preventing a stateful caller object from changing semantics after
+reauthentication. Decision predecessor sequences also reserve one signed-int64 successor,
+so an accepted decision cannot name an event or checkpoint position that cannot be
+represented. Composition reapplies the caller's exact policy identities, namespace
+requirements, and uncertainty ceilings.
+Revocation floors bind service, environment, decision policy, and exact namespaces; their
+local predecessor decision must be the one bound by the immediately previous
+instance-global checkpoint, and a floor behind that retained decision is rollback. The
+external instance catalog floor carries exact
+signed-attestation, principal, and trust provenance for both the global and mission head.
+A witness ahead of local history is rollback, not a stale-head retry; an exact current
+floor is an idempotent reconciliation state. Locally available projections cannot place a
+mission checkpoint ahead of the global head or place different checkpoints at the same
+global sequence. Older mission-head ancestry and co-residency depend on a qualified
+external catalog adapter and retained consistency evidence; directly constructing the
+floor value does not prove them.
+
+This is a provider-neutral contract proof. No real trusted-time, revocation, transparency,
+monitoring, or anchor service is connected; typed floor construction alone is not external
+authentication. The legacy SQLite `SignedCheckpoint` remains opaque and untrusted.
 
 ## Authority
 
@@ -230,8 +284,10 @@ Limits:
 
 - Python’s SQLite API cannot connect through Etzio’s already validated file descriptor, so
   a hostile process under the same OS user retains a pathname-race opportunity;
-- a coherent offline database rewrite is not detectable without an external anchor;
-- checkpoint storage is opaque and not yet authenticated by an authority component; and
+- a coherent offline database rewrite is not detectable without a connected external
+  latest-head catalog;
+- legacy checkpoint storage is opaque, while typed checkpoints are not yet persisted or
+  required by lifecycle commands; and
 - event time is only as trustworthy as the invoking service’s supplied clock.
 
 Production deployment therefore requires an isolated service identity, protected mount,
@@ -411,10 +467,11 @@ scientific or policy authority.
 ## Next acceptance gate
 
 Kernel-issued, authority-bound modeled-fixture verification leases, typed input-resolution
-history, atomic modeled-receipt admission, single-use consumption, and explicit terminal
-lease recovery are retained. The next gate is trusted time, revocation freshness, and
-authenticated external event-head anchoring. Foundation integrity is accepted only when
-retained evidence also shows:
+history, atomic modeled-receipt admission, single-use consumption, explicit terminal lease
+recovery, and the typed integrity-decision/head-checkpoint contract are retained. The next
+gate is adapter qualification and crash-safe enforcement of trusted time, revocation
+freshness, and authenticated external event-head anchoring. Foundation integrity is
+accepted only when retained evidence also shows:
 
 - trusted time and revocation freshness for every consequential transition;
 - authenticated, externally anchored event heads;

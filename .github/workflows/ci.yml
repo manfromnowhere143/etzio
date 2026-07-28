@@ -130,6 +130,128 @@ jobs:
               'import etzio; assert etzio.__version__ == "0.0.1"'
             "${smoke_root}/venv/bin/python" -c \
               'from jsonschema import Draft202012Validator; from etzio.schemas import protocol_v1_schema; schema = protocol_v1_schema(); Draft202012Validator.check_schema(schema); assert schema["x-etzio-schema-role"] == "semantic_wire_shape_guard"'
+            "${smoke_root}/venv/bin/python" - <<'PY'
+          import hashlib
+
+          from etzio.integrity_v1 import (
+              HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+              HEAD_CHECKPOINT_ROLE,
+              INTEGRITY_DECISION_ROLE,
+              REVOCATION_METADATA_EVIDENCE_KIND,
+              TRUSTED_TIME_EVIDENCE_KIND,
+              EvidenceReferenceV1,
+              HeadCheckpointV1,
+              IntegrityDecisionV1,
+              IntegritySigner,
+              RevocationViewV1,
+              head_checkpoint_genesis_id,
+              mission_checkpoint_genesis_id,
+              signed_integrity_decision_attestation_id,
+          )
+          from etzio.kernel.events_v1 import GENESIS_DIGEST
+          from etzio.protocol import parse_semantic_bytes
+
+          digest = lambda value: "sha256:" + hashlib.sha256(value.encode()).hexdigest()
+          time_evidence = (
+              EvidenceReferenceV1(TRUSTED_TIME_EVIDENCE_KIND, "time.smoke-a", digest("time-a")),
+              EvidenceReferenceV1(TRUSTED_TIME_EVIDENCE_KIND, "time.smoke-b", digest("time-b")),
+          )
+          decision = IntegrityDecisionV1.issue(
+              service_instance_id="Etzio.wheel-smoke",
+              environment_id="fixture.wheel-smoke",
+              mission_id=digest("mission"),
+              authority_id=digest("authority"),
+              target_id=digest("target"),
+              prior_global_checkpoint_sequence=-1,
+              prior_global_checkpoint_id=head_checkpoint_genesis_id(
+                  service_instance_id="Etzio.wheel-smoke",
+                  environment_id="fixture.wheel-smoke",
+              ),
+              prior_global_checkpoint_attestation_id=None,
+              prior_global_checkpoint_principal_id=None,
+              prior_global_checkpoint_trust_snapshot_id=None,
+              prior_event_seq=-1,
+              prior_event_digest=GENESIS_DIGEST,
+              event_kind="scan_failed",
+              proposed_event_digest=digest("event"),
+              transition_intent_id=digest("intent"),
+              request_nonce="a" * 64,
+              time_lower_bound=2_000_000_000,
+              time_upper_bound=2_000_000_001,
+              time_policy_id=digest("time-policy"),
+              time_evidence=time_evidence,
+              revocation_views=(
+                  RevocationViewV1(
+                      "authority",
+                      1,
+                      1,
+                      digest("revocation-snapshot"),
+                      EvidenceReferenceV1(
+                          REVOCATION_METADATA_EVIDENCE_KIND,
+                          "revocation.smoke",
+                          digest("revocation-evidence"),
+                      ),
+                      1_999_999_999,
+                      2_000_000_010,
+                  ),
+              ),
+              decision_policy_id=digest("decision-policy"),
+          )
+          decision_signer = IntegritySigner.generate(INTEGRITY_DECISION_ROLE)
+          signed_decision = decision_signer.sign_decision(decision)
+          assert parse_semantic_bytes(signed_decision.to_bytes()) == signed_decision
+          checkpoint = HeadCheckpointV1.issue(
+              service_instance_id=decision.service_instance_id,
+              environment_id=decision.environment_id,
+              instance_sequence=0,
+              previous_checkpoint_id=head_checkpoint_genesis_id(
+                  service_instance_id=decision.service_instance_id,
+                  environment_id=decision.environment_id,
+              ),
+              previous_checkpoint_attestation_id=None,
+              previous_checkpoint_principal_id=None,
+              previous_checkpoint_trust_snapshot_id=None,
+              previous_mission_checkpoint_id=mission_checkpoint_genesis_id(
+                  service_instance_id=decision.service_instance_id,
+                  environment_id=decision.environment_id,
+                  mission_id=decision.mission_id,
+              ),
+              previous_mission_checkpoint_attestation_id=None,
+              previous_mission_checkpoint_principal_id=None,
+              previous_mission_checkpoint_trust_snapshot_id=None,
+              mission_id=decision.mission_id,
+              authority_id=decision.authority_id,
+              target_id=decision.target_id,
+              event_seq=0,
+              event_digest=decision.proposed_event_digest,
+              integrity_decision_id=decision.decision_id,
+              integrity_decision_attestation_id=(
+                  signed_integrity_decision_attestation_id(signed_decision)
+              ),
+              integrity_decision_principal_id="wheel-smoke.decision-principal",
+              integrity_decision_trust_snapshot_id=digest("integrity-trust"),
+              time_lower_bound=2_000_000_001,
+              time_upper_bound=2_000_000_002,
+              time_policy_id=decision.time_policy_id,
+              time_evidence=time_evidence,
+              anchor_policy_id=digest("anchor-policy"),
+              anchor_evidence=(
+                  EvidenceReferenceV1(
+                      HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+                      "anchor.smoke-a",
+                      digest("anchor-a"),
+                  ),
+                  EvidenceReferenceV1(
+                      HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+                      "anchor.smoke-b",
+                      digest("anchor-b"),
+                  ),
+              ),
+          )
+          checkpoint_signer = IntegritySigner.generate(HEAD_CHECKPOINT_ROLE)
+          signed_checkpoint = checkpoint_signer.sign_checkpoint(checkpoint)
+          assert parse_semantic_bytes(signed_checkpoint.to_bytes()) == signed_checkpoint
+          PY
             "${smoke_root}/venv/bin/etzio" --fixture clean
           )
 

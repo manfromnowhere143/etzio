@@ -16,6 +16,21 @@ from etzio.authority import (
     TrustStore,
 )
 from etzio.evidence import EvidenceError, SnapshotFileV1, TargetSnapshotV1
+from etzio.integrity_v1 import (
+    HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+    HEAD_CHECKPOINT_ROLE,
+    INTEGRITY_DECISION_ROLE,
+    REVOCATION_METADATA_EVIDENCE_KIND,
+    TRUSTED_TIME_EVIDENCE_KIND,
+    EvidenceReferenceV1,
+    HeadCheckpointV1,
+    IntegrityDecisionV1,
+    IntegritySigner,
+    RevocationViewV1,
+    head_checkpoint_genesis_id,
+    mission_checkpoint_genesis_id,
+    signed_integrity_decision_attestation_id,
+)
 from etzio.kernel.events_v1 import (
     EVENT_PAYLOAD_FIELDS_BY_KIND_V1,
     EVENT_UNIT_BY_KIND_V1,
@@ -27,6 +42,7 @@ from etzio.kernel.events_v1 import (
 )
 from etzio.mission_v1 import AnalysisLeaseV1, StaticCandidateV1
 from etzio.protocol import (
+    REQUIRED_ATTESTED_OBJECT_KINDS_V1,
     RESERVED_OBJECT_KINDS,
     SEMANTIC_BODY_FIELDS_BY_KIND_V1,
     SUPPORTED_OBJECT_KINDS,
@@ -219,9 +235,7 @@ def _golden_graph() -> GoldenGraph:
         effect_oracle_id=_digest("7"),
         verifier_id="CATO_SECONDARY",
         verifier_key_id=reassigned_verifier_signer.key_id,
-        issuance_trust_snapshot_id=(
-            reassigned_verifier_trust_store.snapshot_id
-        ),
+        issuance_trust_snapshot_id=(reassigned_verifier_trust_store.snapshot_id),
         issued_at=NOW,
         expires_at=NOW + 60,
     )
@@ -326,23 +340,15 @@ def _golden_graph() -> GoldenGraph:
             "lease": reassigned_verification_lease.to_envelope().to_dict(),
             "predecessor_verification_lease_id": verification_lease.lease_id,
             "reason_code": "active_lease_superseded",
-            "verifier_trust_snapshot": (
-                reassigned_verifier_trust_store.to_snapshot_body()
-            ),
-            "verifier_trust_snapshot_id": (
-                reassigned_verifier_trust_store.snapshot_id
-            ),
+            "verifier_trust_snapshot": (reassigned_verifier_trust_store.to_snapshot_body()),
+            "verifier_trust_snapshot_id": (reassigned_verifier_trust_store.snapshot_id),
         },
         "verification_artifacts_resolved": {
             "resolution": resolution.to_dict(),
         },
         "verifier_receipt_admitted": {
-            "adjudication_profile": (
-                "modeled_fixture_receipt_admission_v1"
-            ),
-            "decision_trust_snapshot": (
-                verifier_trust_store.to_snapshot_body()
-            ),
+            "adjudication_profile": ("modeled_fixture_receipt_admission_v1"),
+            "decision_trust_snapshot": (verifier_trust_store.to_snapshot_body()),
             "decision_trust_snapshot_id": verifier_trust_store.snapshot_id,
             "effect_output_artifact": {
                 "artifact_digest": receipt.effect_output_digest,
@@ -355,9 +361,7 @@ def _golden_graph() -> GoldenGraph:
                 "size": 64,
             },
             "measured_environment_output_artifact": {
-                "artifact_digest": (
-                    receipt.measured_environment_output_digest
-                ),
+                "artifact_digest": (receipt.measured_environment_output_digest),
                 "artifact_type": "modeled_measured_environment_output",
                 "size": 48,
             },
@@ -404,14 +408,129 @@ def _golden_graph() -> GoldenGraph:
             unit=EVENT_UNIT_BY_KIND_V1[kind],
             authority_id=grant.grant_id,
             target_id=snapshot.object_id,
-            decision_time=(
-                NOW + 11 if kind == "verifier_receipt_admitted" else NOW
-            ),
+            decision_time=(NOW + 11 if kind == "verifier_receipt_admitted" else NOW),
             payload=payload,
             prev_digest=GENESIS_DIGEST,
         )
         for kind, payload in payloads.items()
     }
+    integrity_event = events["analysis_lease_issued"]
+    decision_signer = IntegritySigner.generate(INTEGRITY_DECISION_ROLE)
+    checkpoint_signer = IntegritySigner.generate(HEAD_CHECKPOINT_ROLE)
+    time_evidence = (
+        EvidenceReferenceV1(
+            TRUSTED_TIME_EVIDENCE_KIND,
+            "time.schema-a",
+            _digest("1"),
+        ),
+        EvidenceReferenceV1(
+            TRUSTED_TIME_EVIDENCE_KIND,
+            "time.schema-b",
+            _digest("2"),
+        ),
+    )
+    integrity_decision = IntegrityDecisionV1.issue(
+        service_instance_id="Etzio.schema-instance",
+        environment_id="fixture.schema",
+        mission_id=mission_id,
+        authority_id=grant.grant_id,
+        target_id=snapshot.object_id,
+        prior_global_checkpoint_sequence=-1,
+        prior_global_checkpoint_id=head_checkpoint_genesis_id(
+            service_instance_id="Etzio.schema-instance",
+            environment_id="fixture.schema",
+        ),
+        prior_global_checkpoint_attestation_id=None,
+        prior_global_checkpoint_principal_id=None,
+        prior_global_checkpoint_trust_snapshot_id=None,
+        prior_event_seq=-1,
+        prior_event_digest=GENESIS_DIGEST,
+        event_kind=integrity_event.kind,
+        proposed_event_digest=integrity_event.event_digest,
+        transition_intent_id=_digest("3"),
+        request_nonce="4" * 64,
+        time_lower_bound=NOW,
+        time_upper_bound=NOW,
+        time_policy_id=_digest("5"),
+        time_evidence=time_evidence,
+        revocation_views=(
+            RevocationViewV1(
+                namespace="authority",
+                root_version=1,
+                version=1,
+                snapshot_id=trust_store.snapshot_id,
+                evidence=EvidenceReferenceV1(
+                    REVOCATION_METADATA_EVIDENCE_KIND,
+                    "revocation.authority",
+                    _digest("6"),
+                ),
+                valid_from=NOW - 1,
+                valid_until=NOW + 60,
+            ),
+            RevocationViewV1(
+                namespace="verifier",
+                root_version=1,
+                version=1,
+                snapshot_id=verifier_trust_store.snapshot_id,
+                evidence=EvidenceReferenceV1(
+                    REVOCATION_METADATA_EVIDENCE_KIND,
+                    "revocation.verifier",
+                    _digest("7"),
+                ),
+                valid_from=NOW - 1,
+                valid_until=NOW + 60,
+            ),
+        ),
+        decision_policy_id=_digest("8"),
+    )
+    signed_integrity_decision = decision_signer.sign_decision(integrity_decision)
+    head_checkpoint = HeadCheckpointV1.issue(
+        service_instance_id=integrity_decision.service_instance_id,
+        environment_id=integrity_decision.environment_id,
+        instance_sequence=0,
+        previous_checkpoint_id=head_checkpoint_genesis_id(
+            service_instance_id=integrity_decision.service_instance_id,
+            environment_id=integrity_decision.environment_id,
+        ),
+        previous_checkpoint_attestation_id=None,
+        previous_checkpoint_principal_id=None,
+        previous_checkpoint_trust_snapshot_id=None,
+        previous_mission_checkpoint_id=mission_checkpoint_genesis_id(
+            service_instance_id=integrity_decision.service_instance_id,
+            environment_id=integrity_decision.environment_id,
+            mission_id=mission_id,
+        ),
+        previous_mission_checkpoint_attestation_id=None,
+        previous_mission_checkpoint_principal_id=None,
+        previous_mission_checkpoint_trust_snapshot_id=None,
+        mission_id=mission_id,
+        authority_id=grant.grant_id,
+        target_id=snapshot.object_id,
+        event_seq=0,
+        event_digest=integrity_event.event_digest,
+        integrity_decision_id=integrity_decision.decision_id,
+        integrity_decision_attestation_id=(signed_integrity_decision_attestation_id(signed_integrity_decision)),
+        integrity_decision_principal_id="schema.integrity-principal",
+        integrity_decision_trust_snapshot_id=_digest("c"),
+        time_lower_bound=NOW,
+        time_upper_bound=NOW,
+        time_policy_id=integrity_decision.time_policy_id,
+        time_evidence=time_evidence,
+        anchor_policy_id=_digest("9"),
+        anchor_evidence=(
+            EvidenceReferenceV1(
+                HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+                "anchor.schema-a",
+                _digest("a"),
+            ),
+            EvidenceReferenceV1(
+                HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+                "anchor.schema-b",
+                _digest("b"),
+            ),
+        ),
+    )
+    signed_head_checkpoint = checkpoint_signer.sign_checkpoint(head_checkpoint)
     envelopes = {
         "authority_grant_unsigned": grant.to_envelope(),
         "authority_grant_signed": signed_grant.to_envelope(),
@@ -424,6 +543,8 @@ def _golden_graph() -> GoldenGraph:
         "verifier_receipt_unsigned": receipt.to_envelope(),
         "verifier_receipt_signed": signed_receipt.to_envelope(),
         "event": events["analysis_lease_issued"].to_envelope(),
+        "integrity_decision": signed_integrity_decision.to_envelope(),
+        "head_checkpoint": signed_head_checkpoint.to_envelope(),
     }
     return GoldenGraph(envelopes=envelopes, events=events)
 
@@ -473,19 +594,14 @@ def test_all_event_kind_unit_payload_variants_validate_and_round_trip(
 def test_schema_branch_metadata_has_exact_runtime_parity() -> None:
     schema = protocol_v1_schema()
     assert frozenset(SEMANTIC_BODY_FIELDS_BY_KIND_V1) == SUPPORTED_OBJECT_KINDS
-    assert len(SUPPORTED_OBJECT_KINDS) == 9
+    assert len(SUPPORTED_OBJECT_KINDS) == 11
     assert len(EVENT_UNIT_BY_KIND_V1) == 18
-    case_refs = {
-        branch["$ref"]
-        for branch in schema["oneOf"]
-    }
-    assert case_refs == {
-        f"#/$defs/{kind}_case"
-        for kind in SUPPORTED_OBJECT_KINDS
-    }
+    case_refs = {branch["$ref"] for branch in schema["oneOf"]}
+    assert case_refs == {f"#/$defs/{kind}_case" for kind in SUPPORTED_OBJECT_KINDS}
     assert frozenset(schema["properties"]["object_kind"]["enum"]) == SUPPORTED_OBJECT_KINDS
-    assert RESERVED_OBJECT_KINDS == frozenset({"head_checkpoint"})
+    assert RESERVED_OBJECT_KINDS == frozenset()
     assert RESERVED_OBJECT_KINDS.isdisjoint(SUPPORTED_OBJECT_KINDS)
+    assert REQUIRED_ATTESTED_OBJECT_KINDS_V1 == frozenset({"head_checkpoint", "integrity_decision"})
 
     variants = schema["$defs"]["event_variants"]["oneOf"]
     schema_units: dict[str, str] = {}
@@ -495,9 +611,7 @@ def test_schema_branch_metadata_has_exact_runtime_parity() -> None:
         kind = properties["kind"]["const"]
         schema_units[kind] = properties["unit"]["const"]
         payload_name = properties["payload"]["$ref"].removeprefix("#/$defs/")
-        schema_payload_fields[kind] = frozenset(
-            schema["$defs"][payload_name]["required"]
-        )
+        schema_payload_fields[kind] = frozenset(schema["$defs"][payload_name]["required"])
     assert schema_units == dict(EVENT_UNIT_BY_KIND_V1)
     assert schema_payload_fields == dict(EVENT_PAYLOAD_FIELDS_BY_KIND_V1)
     for kind, expected_fields in SEMANTIC_BODY_FIELDS_BY_KIND_V1.items():
@@ -535,9 +649,7 @@ def test_verification_lease_recovery_event_surfaces_are_exact_and_fail_closed(
 
         wrong_unit = thaw_json(event.to_envelope().body)
         assert type(wrong_unit) is dict
-        wrong_unit["unit"] = (
-            "ETZIO" if expected_unit == "AQUILA" else "AQUILA"
-        )
+        wrong_unit["unit"] = "ETZIO" if expected_unit == "AQUILA" else "AQUILA"
         assert_rejected(f"{kind} wrong unit", wrong_unit)
 
         for field in tuple(canonical_payload):
@@ -554,11 +666,7 @@ def test_verification_lease_recovery_event_surfaces_are_exact_and_fail_closed(
     cancelled = golden.events["verification_lease_cancelled"]
     cancelled_payload = thaw_json(cancelled.payload)
     assert type(cancelled_payload) is dict
-    assert (
-        cancelled_payload["reason_code"]
-        == VERIFICATION_LEASE_CANCELLATION_REASON_V1
-        == "operator_cancelled"
-    )
+    assert cancelled_payload["reason_code"] == VERIFICATION_LEASE_CANCELLATION_REASON_V1 == "operator_cancelled"
     for label, invalid_reason in (
         ("unsupported cancellation reason", "caller_selected"),
         ("non-string cancellation reason", []),
@@ -616,9 +724,7 @@ def test_verification_lease_reassignment_retains_nested_trust_and_nonce_evidence
 
     wrong_kind = thaw_json(reassigned.to_envelope().body)
     assert type(wrong_kind) is dict
-    wrong_kind["payload"]["lease"] = golden.envelopes[
-        "analysis_lease"
-    ].to_dict()
+    wrong_kind["payload"]["lease"] = golden.envelopes["analysis_lease"].to_dict()
     assert_schema_and_runtime_reject(
         "reassigned lease wrong nested kind",
         wrong_kind,
@@ -642,9 +748,7 @@ def test_verification_lease_reassignment_retains_nested_trust_and_nonce_evidence
     assert type(wrong_nonce) is dict
     nested_lease = wrong_nonce["payload"]["lease"]
     lease_body = nested_lease["body"]
-    lease_body["lease_nonce"] = (
-        "0" * 32 if lease_body["lease_nonce"] != "0" * 32 else "1" * 32
-    )
+    lease_body["lease_nonce"] = "0" * 32 if lease_body["lease_nonce"] != "0" * 32 else "1" * 32
     wrong_nonce["payload"]["lease"] = EnvelopeV1.create(
         "verification_lease",
         lease_body,
@@ -656,9 +760,7 @@ def test_verification_lease_reassignment_retains_nested_trust_and_nonce_evidence
 
     wrong_trust_snapshot = thaw_json(reassigned.to_envelope().body)
     assert type(wrong_trust_snapshot) is dict
-    wrong_trust_snapshot["payload"]["verifier_trust_snapshot_id"] = _digest(
-        "0"
-    )
+    wrong_trust_snapshot["payload"]["verifier_trust_snapshot_id"] = _digest("0")
     wrong_trust_envelope = event_from_body(wrong_trust_snapshot)
     validator.validate(wrong_trust_envelope.to_dict())
     with pytest.raises(SemanticProtocolError, match="trust snapshot"):
@@ -736,16 +838,12 @@ def test_resolution_schema_closes_profile_artifact_types_and_nested_fields(
 
     unknown_evidence_type = thaw_json(resolution.body)
     assert type(unknown_evidence_type) is dict
-    unknown_evidence_type["evidence_artifacts"][0]["artifact_type"] = (
-        "unregistered_artifact"
-    )
+    unknown_evidence_type["evidence_artifacts"][0]["artifact_type"] = "unregistered_artifact"
     mutations.append(("unknown evidence type", unknown_evidence_type))
 
     wrong_target_type = thaw_json(resolution.body)
     assert type(wrong_target_type) is dict
-    wrong_target_type["target_artifacts"][0]["artifact_type"] = (
-        "modeled_supporting_evidence_input"
-    )
+    wrong_target_type["target_artifacts"][0]["artifact_type"] = "modeled_supporting_evidence_input"
     mutations.append(("wrong target type", wrong_target_type))
 
     missing_nested_field = thaw_json(resolution.body)
@@ -816,9 +914,7 @@ def test_receipt_admission_schema_requires_signed_closed_typed_evidence(
     mutations.append(("unattested receipt", unattested))
 
     multi_attested = thaw_json(admitted.to_envelope().body)
-    receipt_attestations = multi_attested["payload"]["receipt"][
-        "attestations"
-    ]
+    receipt_attestations = multi_attested["payload"]["receipt"]["attestations"]
     receipt_attestations.append(dict(receipt_attestations[0]))
     mutations.append(("multi-attested receipt", multi_attested))
 
@@ -832,9 +928,7 @@ def test_receipt_admission_schema_requires_signed_closed_typed_evidence(
     mutations.append(("wrong nested receipt kind", wrong_kind))
 
     wrong_output_type = thaw_json(admitted.to_envelope().body)
-    wrong_output_type["payload"]["effect_output_artifact"][
-        "artifact_type"
-    ] = "modeled_execution_output"
+    wrong_output_type["payload"]["effect_output_artifact"]["artifact_type"] = "modeled_execution_output"
     mutations.append(("wrong output artifact type", wrong_output_type))
 
     receipt_size_fields = (
@@ -856,9 +950,7 @@ def test_receipt_admission_schema_requires_signed_closed_typed_evidence(
         ):
             invalid_size = thaw_json(admitted.to_envelope().body)
             invalid_size["payload"]["receipt"]["body"][field] = invalid_value
-            mutations.append(
-                (f"{value_label} signed {field}", invalid_size)
-            )
+            mutations.append((f"{value_label} signed {field}", invalid_size))
 
     legacy_digest_only_wire = thaw_json(admitted.to_envelope().body)
     nested_receipt = legacy_digest_only_wire["payload"]["receipt"]
@@ -870,9 +962,7 @@ def test_receipt_admission_schema_requires_signed_closed_typed_evidence(
         legacy_body,
         attestations=nested_receipt["attestations"],
     ).to_dict()
-    mutations.append(
-        ("legacy digest-only receipt wire", legacy_digest_only_wire)
-    )
+    mutations.append(("legacy digest-only receipt wire", legacy_digest_only_wire))
 
     for label, mutated_body in mutations:
         mutated = EnvelopeV1.create("event", mutated_body)
@@ -941,9 +1031,7 @@ def test_attestation_cardinality_and_shape_are_fail_closed(
     golden: GoldenGraph,
     validator: Draft202012Validator,
 ) -> None:
-    valid_attestation = thaw_json(
-        golden.envelopes["authority_grant_signed"].attestations[0]
-    )
+    valid_attestation = thaw_json(golden.envelopes["authority_grant_signed"].attestations[0])
     assert type(valid_attestation) is dict
 
     for label in (
@@ -1133,8 +1221,228 @@ def test_schema_rejects_former_framing_only_bypasses(
     trailing_lf["object_id"] += "\n"
     _assert_schema_rejects(validator, trailing_lf, "digest with trailing LF")
 
-    with pytest.raises(ProtocolError, match="unsupported"):
-        EnvelopeV1.create("head_checkpoint", {"anything": 1})
+    arbitrary_checkpoint = EnvelopeV1.create(
+        "head_checkpoint",
+        {"anything": 1},
+    )
+    _assert_schema_rejects(
+        validator,
+        arbitrary_checkpoint.to_dict(),
+        "arbitrary head checkpoint body",
+    )
+    with pytest.raises(SemanticProtocolError):
+        parse_semantic_envelope(arbitrary_checkpoint)
+
+
+@pytest.mark.parametrize(
+    ("label", "envelope_label", "path", "wrong_kind"),
+    [
+        (
+            "decision time evidence kind",
+            "integrity_decision",
+            ("time_evidence", 0),
+            HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+        ),
+        (
+            "decision revocation evidence kind",
+            "integrity_decision",
+            ("revocation_views", 0, "evidence"),
+            TRUSTED_TIME_EVIDENCE_KIND,
+        ),
+        (
+            "checkpoint time evidence kind",
+            "head_checkpoint",
+            ("time_evidence", 0),
+            HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+        ),
+        (
+            "checkpoint anchor evidence kind",
+            "head_checkpoint",
+            ("anchor_evidence", 0),
+            TRUSTED_TIME_EVIDENCE_KIND,
+        ),
+    ],
+)
+def test_integrity_evidence_kinds_are_schema_typed_by_context(
+    golden: GoldenGraph,
+    validator: Draft202012Validator,
+    label: str,
+    envelope_label: str,
+    path: tuple[object, ...],
+    wrong_kind: str,
+) -> None:
+    original = golden.envelopes[envelope_label]
+    body = thaw_json(original.body)
+    assert type(body) is dict
+    cursor: object = body
+    for component in path:
+        cursor = cursor[component]  # type: ignore[index]
+    assert type(cursor) is dict
+    cursor["evidence_kind"] = wrong_kind
+    mutated = EnvelopeV1.create(
+        original.object_kind,
+        body,
+        attestations=original.to_dict()["attestations"],
+    )
+    _assert_schema_rejects(validator, mutated.to_dict(), label)
+    with pytest.raises(SemanticProtocolError):
+        parse_semantic_envelope(mutated)
+
+
+@pytest.mark.parametrize(
+    "sequence_field",
+    [
+        "prior_event_seq",
+        "prior_global_checkpoint_sequence",
+    ],
+)
+def test_integrity_decision_sequences_reserve_one_int64_successor(
+    golden: GoldenGraph,
+    validator: Draft202012Validator,
+    sequence_field: str,
+) -> None:
+    original = golden.envelopes["integrity_decision"]
+    body = thaw_json(original.body)
+    assert type(body) is dict
+    body[sequence_field] = (2**63) - 1
+    mutated = EnvelopeV1.create(
+        original.object_kind,
+        body,
+        attestations=original.to_dict()["attestations"],
+    )
+    _assert_schema_rejects(
+        validator,
+        mutated.to_dict(),
+        f"integrity decision terminal {sequence_field}",
+    )
+    with pytest.raises(SemanticProtocolError):
+        parse_semantic_envelope(mutated)
+
+
+_PREDECESSOR_PROVENANCE_SCHEMA_CASES = (
+    (
+        "decision global predecessor",
+        "integrity_decision",
+        "prior_global_checkpoint_sequence",
+        0,
+        "prior_global_checkpoint_id",
+        (
+            "prior_global_checkpoint_attestation_id",
+            "prior_global_checkpoint_principal_id",
+            "prior_global_checkpoint_trust_snapshot_id",
+        ),
+    ),
+    (
+        "checkpoint global predecessor",
+        "head_checkpoint",
+        "instance_sequence",
+        1,
+        "previous_checkpoint_id",
+        (
+            "previous_checkpoint_attestation_id",
+            "previous_checkpoint_principal_id",
+            "previous_checkpoint_trust_snapshot_id",
+        ),
+    ),
+    (
+        "checkpoint mission predecessor",
+        "head_checkpoint",
+        "event_seq",
+        1,
+        "previous_mission_checkpoint_id",
+        (
+            "previous_mission_checkpoint_attestation_id",
+            "previous_mission_checkpoint_principal_id",
+            "previous_mission_checkpoint_trust_snapshot_id",
+        ),
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    (
+        "label",
+        "envelope_label",
+        "sequence_field",
+        "non_genesis_sequence",
+        "predecessor_id_field",
+        "provenance_fields",
+        "target_field",
+    ),
+    [
+        (
+            label,
+            envelope_label,
+            sequence_field,
+            non_genesis_sequence,
+            predecessor_id_field,
+            provenance_fields,
+            target_field,
+        )
+        for (
+            label,
+            envelope_label,
+            sequence_field,
+            non_genesis_sequence,
+            predecessor_id_field,
+            provenance_fields,
+        ) in _PREDECESSOR_PROVENANCE_SCHEMA_CASES
+        for target_field in provenance_fields
+    ],
+)
+def test_predecessor_provenance_is_null_exactly_at_genesis(
+    golden: GoldenGraph,
+    validator: Draft202012Validator,
+    label: str,
+    envelope_label: str,
+    sequence_field: str,
+    non_genesis_sequence: int,
+    predecessor_id_field: str,
+    provenance_fields: tuple[str, str, str],
+    target_field: str,
+) -> None:
+    original = golden.envelopes[envelope_label]
+    attestations = original.to_dict()["attestations"]
+    provenance_values: dict[str, object] = {
+        provenance_fields[0]: _digest("d"),
+        provenance_fields[1]: "schema.predecessor-principal",
+        provenance_fields[2]: _digest("e"),
+    }
+
+    genesis_with_provenance = thaw_json(original.body)
+    assert type(genesis_with_provenance) is dict
+    genesis_with_provenance[target_field] = provenance_values[target_field]
+    genesis_envelope = EnvelopeV1.create(
+        original.object_kind,
+        genesis_with_provenance,
+        attestations=attestations,
+    )
+    _assert_schema_rejects(
+        validator,
+        genesis_envelope.to_dict(),
+        f"{label} genesis with {target_field}",
+    )
+    with pytest.raises(SemanticProtocolError):
+        parse_semantic_envelope(genesis_envelope)
+
+    non_genesis_without_provenance = thaw_json(original.body)
+    assert type(non_genesis_without_provenance) is dict
+    non_genesis_without_provenance[sequence_field] = non_genesis_sequence
+    non_genesis_without_provenance[predecessor_id_field] = _digest("f")
+    non_genesis_without_provenance.update(provenance_values)
+    non_genesis_without_provenance[target_field] = None
+    non_genesis_envelope = EnvelopeV1.create(
+        original.object_kind,
+        non_genesis_without_provenance,
+        attestations=attestations,
+    )
+    _assert_schema_rejects(
+        validator,
+        non_genesis_envelope.to_dict(),
+        f"{label} non-genesis without {target_field}",
+    )
+    with pytest.raises(SemanticProtocolError):
+        parse_semantic_envelope(non_genesis_envelope)
 
 
 def test_schema_valid_runtime_invalid_cases_are_explicitly_retained(
@@ -1146,30 +1454,22 @@ def test_schema_valid_runtime_invalid_cases_are_explicitly_retained(
     grant_body = thaw_json(golden.envelopes["authority_grant_unsigned"].body)
     assert type(grant_body) is dict
     grant_body["assets"].reverse()
-    runtime_only.append(
-        ("lexical asset order", EnvelopeV1.create("authority_grant", grant_body))
-    )
+    runtime_only.append(("lexical asset order", EnvelopeV1.create("authority_grant", grant_body)))
 
     snapshot_body = thaw_json(golden.envelopes["target_snapshot"].body)
     assert type(snapshot_body) is dict
     snapshot_body["files"].reverse()
-    runtime_only.append(
-        ("lexical snapshot order", EnvelopeV1.create("target_snapshot", snapshot_body))
-    )
+    runtime_only.append(("lexical snapshot order", EnvelopeV1.create("target_snapshot", snapshot_body)))
 
     analysis_body = thaw_json(golden.envelopes["analysis_lease"].body)
     assert type(analysis_body) is dict
     analysis_body["expires_at"] = analysis_body["issued_at"]
-    runtime_only.append(
-        ("analysis time relation", EnvelopeV1.create("analysis_lease", analysis_body))
-    )
+    runtime_only.append(("analysis time relation", EnvelopeV1.create("analysis_lease", analysis_body)))
 
     candidate_body = thaw_json(golden.envelopes["candidate"].body)
     assert type(candidate_body) is dict
     candidate_body["claim_id"] = _digest("f")
-    runtime_only.append(
-        ("derived claim identity", EnvelopeV1.create("candidate", candidate_body))
-    )
+    runtime_only.append(("derived claim identity", EnvelopeV1.create("candidate", candidate_body)))
 
     verification_body = thaw_json(golden.envelopes["verification_lease"].body)
     assert type(verification_body) is dict
@@ -1181,9 +1481,7 @@ def test_schema_valid_runtime_invalid_cases_are_explicitly_retained(
         )
     )
 
-    resolution_body = thaw_json(
-        golden.envelopes["verification_artifact_resolution"].body
-    )
+    resolution_body = thaw_json(golden.envelopes["verification_artifact_resolution"].body)
     assert type(resolution_body) is dict
     resolution_body["target_artifacts"].reverse()
     runtime_only.append(
@@ -1199,9 +1497,7 @@ def test_schema_valid_runtime_invalid_cases_are_explicitly_retained(
     event_body = thaw_json(golden.events["analysis_lease_issued"].to_envelope().body)
     assert type(event_body) is dict
     event_body["mission_id"] = _digest("e")
-    runtime_only.append(
-        ("nested event identity binding", EnvelopeV1.create("event", event_body))
-    )
+    runtime_only.append(("nested event identity binding", EnvelopeV1.create("event", event_body)))
 
     for label, envelope in runtime_only:
         validator.validate(envelope.to_dict())
@@ -1221,9 +1517,23 @@ def test_schema_cannot_replace_canonical_wire_or_content_identity_checks(
         parse_semantic_bytes(canonical_dumps(tampered_id))
 
     mathematical_integer = golden.envelopes["analysis_lease"].to_dict()
-    mathematical_integer["body"]["issued_at"] = float(
-        mathematical_integer["body"]["issued_at"]
-    )
+    mathematical_integer["body"]["issued_at"] = float(mathematical_integer["body"]["issued_at"])
     validator.validate(mathematical_integer)
     with pytest.raises(ProtocolError, match="unsupported JSON value"):
         canonical_dumps(mathematical_integer)
+
+
+def test_semantic_dispatch_rejects_uninitialized_and_subclass_envelopes(
+    golden: GoldenGraph,
+) -> None:
+    class EnvelopeSubclass(EnvelopeV1):
+        pass
+
+    uninitialized = object.__new__(EnvelopeV1)
+    subclass = EnvelopeSubclass.from_bytes(golden.envelopes["target_snapshot"].to_bytes())
+    assert type(subclass) is EnvelopeSubclass
+
+    for envelope in (uninitialized, subclass):
+        with pytest.raises(SemanticProtocolError) as caught:
+            parse_semantic_envelope(envelope)
+        assert caught.value.code == "invalid_semantic_object"

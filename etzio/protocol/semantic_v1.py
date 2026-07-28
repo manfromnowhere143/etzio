@@ -17,11 +17,22 @@ def parse_semantic_envelope(envelope: EnvelopeV1) -> object:
     once for their grant body and once for their attestation wire.
     """
 
-    if not isinstance(envelope, EnvelopeV1):
-        raise SemanticProtocolError("semantic parsing requires an EnvelopeV1")
+    if type(envelope) is not EnvelopeV1:
+        raise SemanticProtocolError(
+            "semantic parsing requires an exact EnvelopeV1",
+            code="invalid_semantic_object",
+        )
+    try:
+        envelope = EnvelopeV1.from_bytes(envelope.to_bytes())
+        object_kind = envelope.object_kind
+    except (AttributeError, ProtocolError, TypeError, ValueError) as exc:
+        raise SemanticProtocolError(
+            "semantic parsing requires a valid canonical EnvelopeV1",
+            code="invalid_semantic_object",
+        ) from exc
 
     try:
-        if envelope.object_kind == "authority_grant":
+        if object_kind == "authority_grant":
             from etzio.authority import AuthorityGrantV1, SignedAuthorityGrantV1
 
             unattested = EnvelopeV1.create("authority_grant", envelope.body)
@@ -30,55 +41,65 @@ def parse_semantic_envelope(envelope: EnvelopeV1) -> object:
                 return grant
             return SignedAuthorityGrantV1.from_bytes(envelope.to_bytes())
 
-        if envelope.object_kind == "authority_admission":
+        if object_kind == "authority_admission":
             from etzio.authority import AuthorityAdmissionV1
 
             return AuthorityAdmissionV1.from_envelope(envelope)
 
-        if envelope.object_kind == "target_snapshot":
+        if object_kind == "target_snapshot":
             from etzio.evidence import TargetSnapshotV1
 
             return TargetSnapshotV1.from_envelope(envelope)
 
-        if envelope.object_kind == "analysis_lease":
+        if object_kind == "analysis_lease":
             from etzio.mission_v1 import AnalysisLeaseV1
 
             return AnalysisLeaseV1.from_envelope(envelope)
 
-        if envelope.object_kind == "verification_lease":
+        if object_kind == "verification_lease":
             from etzio.verification import VerificationLeaseV1
 
             return VerificationLeaseV1.from_envelope(envelope)
 
-        if envelope.object_kind == "verification_artifact_resolution":
+        if object_kind == "verification_artifact_resolution":
             from etzio.verification_artifacts import VerificationArtifactResolutionV1
 
             return VerificationArtifactResolutionV1.from_envelope(envelope)
 
-        if envelope.object_kind == "candidate":
+        if object_kind == "candidate":
             from etzio.mission_v1 import StaticCandidateV1
 
             return StaticCandidateV1.from_envelope(envelope)
 
-        if envelope.object_kind == "verifier_receipt":
+        if object_kind == "verifier_receipt":
             from etzio.verification import SignedVerifierReceiptV1, VerifierReceiptV1
 
             if not envelope.attestations:
                 return VerifierReceiptV1.from_envelope(envelope)
             return SignedVerifierReceiptV1.from_bytes(envelope.to_bytes())
 
-        if envelope.object_kind == "event":
+        if object_kind == "event":
             from etzio.kernel.events_v1 import EventV1
 
             return EventV1.from_canonical_bytes(envelope.to_bytes())
-    except (ProtocolError, ValueError, TypeError) as exc:
+
+        if object_kind == "integrity_decision":
+            from etzio.integrity_v1 import SignedIntegrityDecisionV1
+
+            return SignedIntegrityDecisionV1.from_bytes(envelope.to_bytes())
+
+        if object_kind == "head_checkpoint":
+            from etzio.integrity_v1 import SignedHeadCheckpointV1
+
+            return SignedHeadCheckpointV1.from_bytes(envelope.to_bytes())
+    except (AttributeError, ProtocolError, ValueError, TypeError) as exc:
         raise SemanticProtocolError(
-            f"invalid {envelope.object_kind} semantic object: {exc}",
+            f"invalid {object_kind} semantic object: {exc}",
             code="invalid_semantic_object",
         ) from exc
 
     raise SemanticProtocolError(
-        f"protocol-v1 object kind {envelope.object_kind!r} has no semantic parser",
+        f"protocol-v1 object kind {object_kind!r} has no semantic parser",
         code="unsupported_semantic_object",
     )
 

@@ -29,8 +29,11 @@ Those controls prove only the bounded fixture slice:
   admitted `modeled_fixture_verification` grant, together with the verifier trust and
   revocation snapshot used for assignment; the lease content-binds that issuance snapshot
   identity;
-- the lease has a signed expiry bound, but canonical expiry, cancellation, supersession,
-  reassignment, and terminal-recovery events are not implemented;
+- canonical modeled lifecycle decisions now retain lease expiry, pre-deadline AQUILA
+  cancellation, nonbranching supersession through atomic reassignment to a different
+  verifier, and complete or incomplete receipt-coverage closure. Caller-supplied event
+  time remains untrusted-clock input, and the modeled cancellation label does not
+  authenticate an external control principal;
 - ETZIO can resolve every target file and predeclared PoC, supporting-evidence,
   environment, and oracle-specification input under an exact code-owned CAS type, retain
   one canonical resolution for the lease, and remain in nonterminal

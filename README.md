@@ -26,9 +26,9 @@ scientific authority remain in the kernel.
 > resolution and four exact typed output digest/size pairs. Explicit expiry, modeled
 > cancellation, atomic reassignment, and receipt-coverage closure now recover
 > verification-intent missions without rewriting history. Etzio does not construct or
-> execute exploits, establish that
-> those opaque outputs came from an execution, adjudicate a finding, access a live target,
-> or learn. No production-readiness or superiority claim is made.
+> execute exploits, establish that those opaque outputs came from an execution, adjudicate
+> a finding, access a live target, or learn. No production-readiness or superiority claim
+> is made.
 
 ## Why Etzio
 
@@ -83,10 +83,17 @@ The protocol-v1 foundation includes:
 
 - canonical JSON with duplicate-key rejection, Unicode 17.0.0 NFC, signed 64-bit integers,
   fixed resource ceilings, and full domain-separated SHA-256 identities;
-- an installed Draft 2020-12 semantic wire schema with exact branches for all nine typed
+- an installed Draft 2020-12 semantic wire schema with exact branches for all eleven typed
   object kinds and all eighteen event payload variants;
 - Ed25519 authority and modeled-receipt attestations, including prime-subgroup public-key
   validation before a key can enter a trust snapshot;
+- required-attestation contracts for pre-transition integrity decisions and
+  post-transition head checkpoints, with proposed-event binding, conservative time
+  intervals and ordering, context-typed provider evidence, exact current and predecessor
+  signed-attestation provenance, scope-bound nonstale revocation/head floors, and distinct
+  principals;
+- exact-type composition boundaries that copy trust and policy inputs and rebuild fresh
+  authenticated snapshots from verified wire before continuity logic runs;
 - exact fixture manifests and a private content-addressed evidence store;
 - immutable target, authority, lease, candidate, receipt, and event objects;
 - kernel-issued verification-lease events binding retained authority, target, candidate,
@@ -107,6 +114,79 @@ The protocol-v1 foundation includes:
   and filesystem-boundary failures.
 
 ## System map
+
+This diagram distinguishes retained implementation from behavior models. A solid arrow is
+a currently retained repository-fixture flow; a dashed arrow crosses a blocked or
+unconnected gate.
+
+```mermaid
+flowchart LR
+    AQ["AQUILA<br/>authority · budgets · leases"]
+    K["ETZIO kernel<br/>protocol · lifecycle · replay"]
+    CAS[("Typed CAS<br/>exact fixture bytes")]
+    DB[("SQLite event ledger<br/>append + replay")]
+    V["VELITES<br/>byte-bound AST observations"]
+    C["Stable candidates<br/>not findings"]
+    L["Modeled verification lease<br/>resolution · recovery"]
+    M["MARCELLUS<br/>isolated proof construction"]
+    T["CATO<br/>independent reproduction"]
+    R["Modeled receipt admission<br/>opaque signed outputs"]
+    A["CAMILLUS<br/>finding adjudication"]
+    F["FABRICIUS<br/>disclosure draft"]
+    N["MINERVA<br/>offline promotion"]
+
+    AQ --> K
+    K <--> CAS
+    K <--> DB
+    K --> V --> C --> L
+    L -->|"modeled statement only"| R
+    L -. "proof construction + isolation absent" .-> M
+    M -. "separate verifier absent" .-> T
+    T -. "structured receipt evidence absent" .-> R
+    R -. "no finding authority yet" .-> A
+    A -. "external-write grant required" .-> F
+    A -. "frozen evaluation gate required" .-> N
+
+    classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
+    classDef modeled fill:#fff3bf,stroke:#e67700,color:#3b2f00;
+    class AQ,K,CAS,DB,V,C,L,R implemented;
+    class M,T,A,F,N modeled;
+```
+
+The new integrity tranche is deliberately a contract proof, not runtime enforcement:
+
+```mermaid
+flowchart TB
+    PG["Exact previous instance checkpoint<br/>semantic ID + signed attestation + principal + trust snapshot"]
+    PE["Exact previous mission event head<br/>event sequence + digest"]
+    PM["Exact previous mission checkpoint<br/>semantic ID + signed attestation + principal + trust snapshot"]
+    TR["Typed time + revocation references<br/>distinct source labels · bounded · policy-bound"]
+    D["Signed IntegrityDecisionV1<br/>complete proposed event + nonce + conservative interval"]
+    E["Canonical proposed EventV1"]
+    H["Signed HeadCheckpointV1<br/>global + mission continuity + decision provenance"]
+    AR["Typed anchor receipt references<br/>pre-receipt statement avoids a hash cycle"]
+    XF["External revocation/head floors<br/>shape checked; adapter authentication still required"]
+    CMD["Lifecycle command enforcement<br/>not connected in this tranche"]
+
+    PG --> D
+    PG --> H
+    PE --> D
+    PM --> H
+    TR --> D
+    D --> E --> H
+    D --> H
+    AR --> H
+    XF --> D
+    XF --> H
+    H -. "next vertical slice" .-> CMD
+
+    classDef retained fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
+    classDef boundary fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
+    classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#3b0a0a;
+    class PG,PE,PM,TR,D,E,H,AR retained;
+    class XF boundary;
+    class CMD blocked;
+```
 
 | Plane | Unit | Responsibility | Repository status |
 |---|---|---|---|
@@ -160,10 +240,12 @@ mkdir -m 700 .etzio-state
 ## Open gates and next mission
 
 The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments,
-typed input resolutions, atomic modeled-receipt admission, and explicit lease recovery are
-retained; completing the foundation-integrity boundary still requires:
+typed input resolutions, atomic modeled-receipt admission, explicit lease recovery, and
+the typed integrity-evidence contract are retained. Completing the foundation-integrity
+boundary still requires:
 
-1. establish a trusted clock, revocation freshness, and external event-head anchoring;
+1. qualify external trusted-time, revocation, and head-anchor adapters, then require their
+   evidence and crash-safe anchor finality at each consequential command;
 2. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
    pathname race;
 3. replace opaque modeled outputs with structured, independently produced execution

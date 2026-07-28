@@ -27,7 +27,7 @@ MAX_TOTAL_NODES = 100_000
 MAX_NESTING_DEPTH = 64
 MIN_INTEGER = -(2**63)
 MAX_INTEGER = (2**63) - 1
-RESERVED_OBJECT_KINDS = frozenset({"head_checkpoint"})
+RESERVED_OBJECT_KINDS = frozenset()
 SEMANTIC_OBJECT_KINDS = frozenset(
     {
         "analysis_lease",
@@ -35,6 +35,8 @@ SEMANTIC_OBJECT_KINDS = frozenset(
         "authority_grant",
         "candidate",
         "event",
+        "head_checkpoint",
+        "integrity_decision",
         "target_snapshot",
         "verification_artifact_resolution",
         "verification_lease",
@@ -43,6 +45,9 @@ SEMANTIC_OBJECT_KINDS = frozenset(
 )
 SUPPORTED_OBJECT_KINDS = SEMANTIC_OBJECT_KINDS
 OPTIONALLY_ATTESTED_OBJECT_KINDS_V1: Final = frozenset({"authority_grant", "verifier_receipt"})
+REQUIRED_ATTESTED_OBJECT_KINDS_V1: Final = frozenset(
+    {"head_checkpoint", "integrity_decision"}
+)
 ENVELOPE_FIELDS_V1: Final = frozenset(
     {
         "attestations",
@@ -128,6 +133,63 @@ SEMANTIC_BODY_FIELDS_BY_KIND_V1: Final = MappingProxyType(
                 "seq",
                 "target_id",
                 "unit",
+            }
+        ),
+        "head_checkpoint": frozenset(
+            {
+                "anchor_evidence",
+                "anchor_policy_id",
+                "anchor_statement_id",
+                "authority_id",
+                "environment_id",
+                "event_digest",
+                "event_seq",
+                "instance_sequence",
+                "integrity_decision_attestation_id",
+                "integrity_decision_id",
+                "integrity_decision_principal_id",
+                "integrity_decision_trust_snapshot_id",
+                "mission_id",
+                "previous_checkpoint_attestation_id",
+                "previous_checkpoint_id",
+                "previous_checkpoint_principal_id",
+                "previous_checkpoint_trust_snapshot_id",
+                "previous_mission_checkpoint_attestation_id",
+                "previous_mission_checkpoint_id",
+                "previous_mission_checkpoint_principal_id",
+                "previous_mission_checkpoint_trust_snapshot_id",
+                "service_instance_id",
+                "target_id",
+                "time_evidence",
+                "time_lower_bound",
+                "time_policy_id",
+                "time_upper_bound",
+            }
+        ),
+        "integrity_decision": frozenset(
+            {
+                "authority_id",
+                "decision_policy_id",
+                "environment_id",
+                "event_kind",
+                "mission_id",
+                "prior_event_digest",
+                "prior_event_seq",
+                "prior_global_checkpoint_attestation_id",
+                "prior_global_checkpoint_id",
+                "prior_global_checkpoint_principal_id",
+                "prior_global_checkpoint_sequence",
+                "prior_global_checkpoint_trust_snapshot_id",
+                "proposed_event_digest",
+                "request_nonce",
+                "revocation_views",
+                "service_instance_id",
+                "target_id",
+                "time_evidence",
+                "time_lower_bound",
+                "time_policy_id",
+                "time_upper_bound",
+                "transition_intent_id",
             }
         ),
         "target_snapshot": frozenset({"files", "source"}),

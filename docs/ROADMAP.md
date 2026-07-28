@@ -53,11 +53,11 @@ Status: **running**.
 
 Implemented in this phase:
 
-- installed semantic per-kind wire schemas for all nine typed objects and all eighteen event
+- installed semantic per-kind wire schemas for all eleven typed objects and all eighteen event
   variants;
 - runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and
-- fail-closed rejection of untyped reserved kinds, malformed signed-grant encoding, and
-  `"."` relative paths;
+- fail-closed rejection of arbitrary semantic bodies, missing required attestations,
+  malformed signed-grant encoding, and `"."` relative paths;
 - kernel-issued verification leases under the exact admitted
   `modeled_fixture_verification` grant;
 - retained verifier trust and revocation evidence with exact candidate, producer, target,
@@ -93,7 +93,16 @@ Implemented in this phase:
   rejected after expiry, cancellation, reassignment, or consumption; and
 - exact `receipt_coverage_complete` or `receipt_coverage_incomplete` terminal recovery with
   active, covered, never-assigned, latest-expired, and latest-cancelled candidate
-  partitions.
+  partitions;
+- required-attestation `integrity_decision` and `head_checkpoint` contracts with exact
+  proposed-event binding, conservative time intervals, typed provider evidence,
+  versioned revocation views, exact signed-decision and checkpoint-predecessor provenance,
+  distinct decision/checkpoint principals, pre-receipt anchor statements, conservative
+  cross-transition temporal ordering, and global plus mission continuity; and
+- adapter-facing external revocation and instance-catalog floors with rollback,
+  scope/provenance replay, equivocation, branch, gap, evidence-confusion,
+  event/checkpoint-lineage splice, stale-floor, mixed-projection, and historical
+  attestation-substitution known-bads.
 
 Current canonical command writers use receipt-coverage status for every verification-intent
 closure. Replay also accepts the exact pre-recovery zero-candidate `completed` shape as a
@@ -102,8 +111,10 @@ claim.
 
 Remaining required:
 
-1. trusted time and revocation freshness;
-2. authenticated, externally anchored event heads;
+1. qualify concrete trusted-time and revocation adapters, retain their validation
+   evidence, and enforce freshness at consequential commands;
+2. qualify independent anchor/monitor adapters, persist typed checkpoints, and make
+   verified external latest-head finality part of command completion and recovery;
 3. atomic retention shared by filesystem CAS and the SQLite event commit, or an equivalent
    replay-safe protocol;
 4. closure of the documented same-user SQLite pathname race;

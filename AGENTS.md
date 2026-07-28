@@ -70,10 +70,19 @@ finding. Canonical per-candidate lease lineages now retain explicit expiry, mode
 cancellation, atomic reassignment to a different verifier, single-use receipt consumption,
 and complete or incomplete receipt-coverage closure.
 
+The next-gate protocol contract now has typed, required-attestation integrity decisions and
+head checkpoints with proposed-event binding, conservative time intervals, typed provider
+evidence, exact current and predecessor signed-attestation provenance, scope-bound
+nonstale external rollback-floor inputs, conservative cross-transition time ordering, and
+global plus mission continuity. Consequential composition rejects subclasses, copies the
+constructed trust store and caller policy, and rebuilds fresh authenticated snapshots from
+verified wire before applying continuity logic. These objects are contract proof only: no
+external provider is connected and lifecycle commands do not yet require or persist them.
+
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. establish a trusted clock boundary, revocation freshness, and externally anchor event
-   heads;
+1. qualify trusted-time, revocation, and anchor adapters, then enforce the typed contract
+   with crash-safe external head finality at consequential command boundaries;
 2. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
    pathname race;
 3. replace opaque modeled outputs with structured independently produced execution

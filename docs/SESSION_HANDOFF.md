@@ -34,7 +34,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0004](decisions/0004-kernel-issued-verification-leases.md), and
 [ADR-0005](decisions/0005-typed-verification-artifact-resolution.md), and
 [ADR-0006](decisions/0006-atomic-modeled-receipt-admission.md), and
-[ADR-0007](decisions/0007-explicit-verification-lease-recovery.md).
+[ADR-0007](decisions/0007-explicit-verification-lease-recovery.md), and
+[ADR-0008](decisions/0008-typed-integrity-evidence-contract.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -44,10 +45,10 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/verification-lease-recovery-v1`
-- Stacked on: `agent/atomic-receipt-adjudication-v1`
-- Branch base: `f70e4c2786babfd97deddfdc240cbc3fc5fde85e`
-- Branch-base tree: `bac7fa6559326dd87bce8fa685f22f1fd829471d`
+- Current foundation-integrity branch: `agent/integrity-evidence-contract-v1`
+- Stacked on: `agent/verification-lease-recovery-v1`
+- Branch base: `3a3c3b5d361108f78fe6ef0073869d3e18f49774`
+- Branch-base tree: `68e85ba4dfb0d458cb40a40ccc7ceb63405c028a`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -104,7 +105,7 @@ exact authority
 
 - common protocol-v1 envelopes and strict canonical JSON;
 - installed semantic wire schemas and typed dispatch for every supported object kind;
-- exact closed-field schema/runtime parity for all nine semantic bodies and all eighteen
+- exact closed-field schema/runtime parity for all eleven semantic bodies and all eighteen
   event kind, unit, and payload forms;
 - Unicode 17.0.0 NFC, signed 64-bit integers, and fixed resource ceilings;
 - full domain-separated SHA-256 object and event identities;
@@ -155,6 +156,55 @@ exact authority
 - recoverable deterministic fixture scans without duplicate outputs; and
 - a supported fixture-only CLI that emits candidates and never findings.
 
+### Implemented integrity-evidence contract
+
+- one required-attestation `IntegrityDecisionV1` binding exact service, environment,
+  mission, authority, target, exact prior instance-global checkpoint semantic and signed
+  attestation/principal/trust provenance, mission event head, complete proposed event,
+  transition intent, 256-bit nonce, decision/time policy, conservative time interval,
+  typed time evidence, and versioned revocation views;
+- one required-attestation `HeadCheckpointV1` binding instance-global and mission-local
+  predecessors plus their exact attestation/principal/trust provenance, exact event plus
+  signed-decision attestation/principal/trust provenance, conservative checkpoint time,
+  pre-receipt anchor statement, anchor policy, and typed anchor-receipt references with
+  distinct `source_id` labels, without treating those labels as proof of independent
+  operators;
+- distinct signature domains, exact noninterchangeable roles, and decision/checkpoint
+  separation by principal as well as key;
+- typed external revocation floors bound to service, environment, and decision policy;
+  instance-catalog floors retain exact signed-checkpoint/principal/trust provenance for
+  both heads, with namespace removal, cross-scope replay, rollback, same-version mutation,
+  equivocation, whole-history deletion, branch, and gap refusal;
+- exact linkage from revocation continuity to the immediately previous instance-global
+  checkpoint decision, signed linkage from every decision to that exact checkpoint, and
+  signed linkage from successor checkpoints to both exact predecessor attestations;
+  identical global/mission predecessor identities cannot carry mixed provenance, and
+  mission-local successors cannot rebind authority or target;
+- mission projections cannot exceed the global sequence or conflict with another
+  checkpoint at the same global position; older mission ancestry/co-residency remains an
+  explicit external-catalog adapter obligation, not a property of direct floor
+  construction;
+- conservative temporal ordering from predecessor checkpoint through successor decision
+  and resulting checkpoint, plus refusal of external revocation floors behind retained
+  local history;
+- cryptographic reauthentication of every consequential validator input against its exact
+  historical trust store, refused public construction of authenticated-result wrappers,
+  authentication-boundary seals, exact-type refusal, fresh verified signed snapshots,
+  copied constructed trust stores and caller policies, and reapplication of policy
+  identities, namespace requirements, and uncertainty ceilings at composition boundaries;
+- predecessor sequences that reserve one representable signed-int64 successor, preventing
+  a decision from proposing an impossible event or checkpoint position;
+- authentication-before-semantic-interpretation on consequential signed-wire paths;
+- installed schema, semantic dispatch, repository-policy parity, and known-bads for both
+  new protocol kinds; and
+- an explicit dependency decision: official TUF direction, conditional RFC 3161 adapter
+  qualification, and no accepted canonical Python SCITT verifier yet.
+
+This is a provider-neutral contract proof. It does not connect a real time, revocation,
+anchor, transparency, or monitoring service; persist typed checkpoints; or make lifecycle
+commands require them. Directly constructed floor objects validate shape only and do not
+prove external authentication.
+
 ### Implemented for modeled verification admission and recovery
 
 - canonical one-attestation signed verifier receipts;
@@ -188,7 +238,7 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 On the current candidate bytes, `make verify` passed under both CPython 3.11.15 and
 CPython 3.14.2:
 
-- 497 tests passed;
+- 659 tests passed;
 - Ruff was clean;
 - the installed semantic protocol schema, three explicitly modeled legacy schemas, and
   repository policy passed;
@@ -198,13 +248,15 @@ CPython 3.14.2:
 - the governed clean fixture closed with zero candidates; and
 - both modeled regression demonstrations retained their historical outputs.
 
-The hash-locked environments passed `pip check`. GitHub Actions run
+The hash-locked environments passed `pip check`. At this local-evidence checkpoint, the
+integrity-contract candidate was uncommitted and had not been reproduced by GitHub
+Actions. The prior GitHub Actions run
 [`30338666115`](https://github.com/manfromnowhere143/etzio/actions/runs/30338666115)
 reproduced repository policy plus both declared runtime suites on the exact recovery
 implementation commit `306e42889394f5d225171dcd88ce7ae7878678bf`; GitGuardian also
-passed. The subsequent documentation-only evidence commit does not change runtime bytes.
-Resolve the current branch head and checks from GitHub rather than treating this dated
-statement as live state. This evidence remains fixture-scoped.
+passed. That earlier run does not validate the current uncommitted bytes. Resolve the
+current branch head and checks from GitHub rather than treating this dated statement as
+live state. All evidence remains fixture-scoped.
 
 ## Closed adversarial findings in this tranche
 
@@ -218,7 +270,29 @@ Known-bads now cover:
   policy weakening against the repository schema gate;
 - Python/ECMA-262 edge-whitespace divergence and portable U+001C–U+001F, U+0085, and U+FEFF
   behavior;
-- the untyped `head_checkpoint` name and literal `"."` relative paths;
+- arbitrary, unattested, multiply attested, forged, wrong-role, or signature-domain-
+  substituted integrity decisions and head checkpoints;
+- nonce, policy, proposed-event, prior-head, mission, authority, target, instance,
+  environment, time, and transition substitution;
+- time intervals that regress, exceed policy, reverse, or straddle not-before, expiry, or
+  deadline boundaries;
+- unsorted, duplicate-source, duplicate-evidence, wrong-kind, or undersized time,
+  revocation, anchor, and external-floor evidence quorums;
+- revocation namespace removal, root/version rollback, same-version mutation, external
+  equivocation, cross-service/environment/policy floor replay, unbounded floor sets, and
+  local state below an external floor;
+- rotated-key same-principal reuse, decision/checkpoint event substitution, checkpoint
+  time preceding decision time, alternate trusted decision/checkpoint attestation
+  substitution, direct authenticated-wrapper forgery, event/checkpoint predecessor splice,
+  older-global-baseline substitution, historical checkpoint re-signing, mixed
+  global/mission provenance, mission authority/target rebinding, successor-time regression,
+  stateful wrapper-subclass substitution after authentication, stale external revocation
+  floors, post-authentication policy weakening, bounded hostile iterables and pre-encode
+  oversized text, terminal predecessor sequence exhaustion, global/mission branch or gap,
+  exact-current reconciliation, whole-history rollback, and receipt/checkpoint hash cycles;
+- weakened integrity nonce, nested evidence, revocation, body-reference, attestation, and
+  dispatch schema contracts;
+- the literal `"."` relative path;
 - malformed signed-grant Base64 before authority admission;
 - semantically invalid signed-grant wire production/parsing without changing
   authentication-first admission refusal precedence;
@@ -284,8 +358,10 @@ Known-bads now cover:
 
 ## Open foundation-integrity blockers
 
-1. Authority/verifier clock and revocation snapshot freshness are not externally proved.
-2. SQLite event heads are not externally authenticated or anchored.
+1. Authority/verifier clock and revocation snapshot freshness have an exact contract but
+   are not externally proved or required by lifecycle commands.
+2. Event heads have an exact checkpoint/floor contract but are not persisted, externally
+   authenticated, anchored, monitored, or required for command success.
 3. The filesystem CAS and SQLite event commit do not share one transaction; bytes can
    disappear after the dedicated append validates them.
 4. SQLite retains a documented same-user pathname race.
@@ -302,10 +378,12 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-Next, close trusted time, revocation freshness, and authenticated external head anchoring
-with concurrency and substitution known-bads. Atomic filesystem-CAS/SQLite retention and
-closure of the same-user pathname race also remain mandatory before a finding pipeline can
-be accepted.
+Next, qualify concrete trusted-time, revocation, anchor, and monitor adapters, then enforce
+the typed contract through one receipt-admission vertical. Local commit must become
+pending, external registration and latest-head verification must be idempotently
+recoverable, and command success plus later append must wait for anchor finality. Atomic
+filesystem-CAS/SQLite retention and closure of the same-user pathname race also remain
+mandatory before a finding pipeline can be accepted.
 
 ### Mission 2 — independent proof plane
 

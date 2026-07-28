@@ -12,6 +12,7 @@ from etzio.protocol import (
     MAX_INTEGER,
     MAX_NESTING_DEPTH,
     MIN_INTEGER,
+    SEMANTIC_BODY_FIELDS_BY_KIND_V1,
     SUPPORTED_OBJECT_KINDS,
     UNICODE_VERSION,
     EnvelopeV1,
@@ -221,11 +222,31 @@ def test_schema_and_runtime_object_kind_allowlists_have_exact_parity():
     schema_kinds = frozenset(schema["properties"]["object_kind"]["enum"])
 
     assert schema_kinds == SUPPORTED_OBJECT_KINDS
+    assert {
+        "prior_global_checkpoint_attestation_id",
+        "prior_global_checkpoint_id",
+        "prior_global_checkpoint_principal_id",
+        "prior_global_checkpoint_sequence",
+        "prior_global_checkpoint_trust_snapshot_id",
+    }.issubset(SEMANTIC_BODY_FIELDS_BY_KIND_V1["integrity_decision"])
+    assert {
+        "previous_checkpoint_attestation_id",
+        "previous_checkpoint_principal_id",
+        "previous_checkpoint_trust_snapshot_id",
+        "previous_mission_checkpoint_attestation_id",
+        "previous_mission_checkpoint_principal_id",
+        "previous_mission_checkpoint_trust_snapshot_id",
+    }.issubset(SEMANTIC_BODY_FIELDS_BY_KIND_V1["head_checkpoint"])
     assert EnvelopeV1.create("verification_lease", {"purpose": "modeled_fixture_verification"})
     with pytest.raises(ProtocolError, match="unsupported"):
         EnvelopeV1.create("verification_leases", {"purpose": "modeled_fixture_verification"})
-    with pytest.raises(ProtocolError, match="unsupported"):
-        EnvelopeV1.create("head_checkpoint", {"event_digest": "sha256:" + ("0" * 64)})
+    assert (
+        EnvelopeV1.create(
+            "head_checkpoint",
+            {"event_digest": "sha256:" + ("0" * 64)},
+        ).object_kind
+        == "head_checkpoint"
+    )
 
 
 def test_non_json_values_and_non_utf8_wire_are_rejected():
