@@ -126,7 +126,7 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_release_suites_passed_github_pending",
+    "validation_status": "local_and_github_release_suites_passed",
     "test_count": 730,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -137,8 +137,8 @@
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
-    "github_validated_commit": null,
-    "github_actions_run_id": null,
+    "github_validated_commit": "612953648eff751a49054e8a700005216ddf7fb6",
+    "github_actions_run_id": 30450447700,
     "claim_boundary": "closes Etzio-created exposure to the disclosed SQLite WAL-reset defect for the declared runtime matrix and closes the ordinary filesystem-staging and SQLite event-retention split at the four implemented byte-claiming boundaries; no same-user or offline-rewrite safety, general storage safety, execution truth, real-world precision, finding validity, isolation, live authorization, learning, or superiority claim"
   },
   "inherited_foundation_evidence": {

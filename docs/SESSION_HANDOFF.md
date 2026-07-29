@@ -272,8 +272,9 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 
 ## Reproduced local evidence
 
-On the current vault candidate bytes, the complete release command passed under both
-declared runtimes:
+On transactional-vault implementation commit
+`612953648eff751a49054e8a700005216ddf7fb6`, the complete release command passed under
+both declared runtimes:
 
 - 730 tests passed;
 - CPython 3.11.15 loaded SQLite 3.53.1 and used `DELETE`/`EXTRA`;
@@ -289,17 +290,22 @@ declared runtimes:
 - the governed clean fixture closed with zero candidates; and
 - both modeled regression demonstrations retained their historical outputs.
 
-Both hash-locked environments passed `pip check`. This is current local evidence only;
-GitHub validation remains pending.
+Both hash-locked environments passed `pip check`. GitHub Actions run
+[`30450447700`](https://github.com/manfromnowhere143/etzio/actions/runs/30450447700)
+reproduced repository policy plus both declared runtime suites, package build,
+outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on that
+exact implementation commit; GitGuardian also passed. Draft
+[#10](https://github.com/manfromnowhere143/etzio/pull/10) is stacked on the SQLite
+journal-safety branch. This evidence-only handoff update follows the validated
+implementation commit.
 
 Inherited foundation evidence is separate. GitHub Actions run
 [`30438318919`](https://github.com/manfromnowhere143/etzio/actions/runs/30438318919)
 reproduced repository policy plus both declared runtime suites, package build,
 outside-checkout wheel smoke, and clean-tree proof on the exact SQLite journal-safety
 implementation commit `4dfbcc319a63a14a3a223b80b1740fbd05fc676e`; GitGuardian also
-passed. That run predates the transactional vault and validates no vault claim. The
-current branch has no vault commit, upstream, pull request, or GitHub run yet. All evidence
-remains fixture-scoped.
+passed. That run predates the transactional vault and validates no vault claim. All
+evidence remains fixture-scoped.
 
 ## Closed adversarial findings in this tranche
 
