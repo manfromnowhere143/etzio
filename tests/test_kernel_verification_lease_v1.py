@@ -764,8 +764,65 @@ def test_issuance_is_rejected_before_scan_completion_and_after_closure(
         def load(self, mission_id: str):
             return self.store.load(mission_id)
 
+        def load_event_artifact(
+            self,
+            event_digest: str,
+            role: str,
+            ordinal: int = 0,
+        ):
+            return self.store.load_event_artifact(event_digest, role, ordinal)
+
+        def load_event_artifacts(self, selectors, *, maximum_total: int):
+            return self.store.load_event_artifacts(
+                selectors,
+                maximum_total=maximum_total,
+            )
+
+        def resolve_evidence_artifact(
+            self,
+            role: str,
+            digest: str,
+            maximum: int,
+            evidence_store: FileEvidenceStore,
+        ):
+            return self.store.resolve_evidence_artifact(
+                role,
+                digest,
+                maximum,
+                evidence_store,
+            )
+
+        def resolve_evidence_artifacts(
+            self,
+            requests,
+            evidence_store: FileEvidenceStore,
+            *,
+            maximum_total: int,
+        ):
+            return self.store.resolve_evidence_artifacts(
+                requests,
+                evidence_store,
+                maximum_total=maximum_total,
+            )
+
         def append(self, event: EventV1, *, expected_head: str):
             result = self.store.append(event, expected_head=expected_head)
+            if event.kind == "mission_opened":
+                raise RuntimeError("stop before scan")
+            return result
+
+        def append_evidence_event(
+            self,
+            event: EventV1,
+            *,
+            expected_head: str,
+            evidence_store: FileEvidenceStore,
+        ):
+            result = self.store.append_evidence_event(
+                event,
+                expected_head=expected_head,
+                evidence_store=evidence_store,
+            )
             if event.kind == "mission_opened":
                 raise RuntimeError("stop before scan")
             return result
@@ -1421,11 +1478,69 @@ def test_event_and_reducer_reject_nonce_unit_snapshot_and_authority_substitution
             def load(self, mission_id: str):
                 return static_store.load(mission_id)
 
+            def load_event_artifact(
+                self,
+                event_digest: str,
+                role: str,
+                ordinal: int = 0,
+            ):
+                return static_store.load_event_artifact(
+                    event_digest,
+                    role,
+                    ordinal,
+                )
+
+            def load_event_artifacts(self, selectors, *, maximum_total: int):
+                return static_store.load_event_artifacts(
+                    selectors,
+                    maximum_total=maximum_total,
+                )
+
+            def resolve_evidence_artifact(
+                self,
+                role: str,
+                digest: str,
+                maximum: int,
+                evidence_store: FileEvidenceStore,
+            ):
+                return static_store.resolve_evidence_artifact(
+                    role,
+                    digest,
+                    maximum,
+                    evidence_store,
+                )
+
+            def resolve_evidence_artifacts(
+                self,
+                requests,
+                evidence_store: FileEvidenceStore,
+                *,
+                maximum_total: int,
+            ):
+                return static_store.resolve_evidence_artifacts(
+                    requests,
+                    evidence_store,
+                    maximum_total=maximum_total,
+                )
+
             def append(self, event: EventV1, *, expected_head: str):
                 result = static_store.append(event, expected_head=expected_head)
                 if event.kind == "scan_completed":
                     raise RuntimeError("stop after scan")
                 return result
+
+            def append_evidence_event(
+                self,
+                event: EventV1,
+                *,
+                expected_head: str,
+                evidence_store: FileEvidenceStore,
+            ):
+                return static_store.append_evidence_event(
+                    event,
+                    expected_head=expected_head,
+                    evidence_store=evidence_store,
+                )
 
         with pytest.raises(RuntimeError, match="stop after scan"):
             run_fixture_scan(

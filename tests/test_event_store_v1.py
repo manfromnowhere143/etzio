@@ -22,7 +22,9 @@ from etzio.authority import (
     TrustedAuthorityKey,
     TrustStore,
 )
+from etzio.evidence import FileEvidenceStore, evidence_digest
 from etzio.kernel.events_v1 import GENESIS_DIGEST, EventIntegrityError, EventV1
+from etzio.kernel.evidence_vault import NON_RECEIPT_EVIDENCE_EVENT_KINDS_V1
 from etzio.kernel.reducer import ProjectionPhase, ReductionError, reduce_events
 from etzio.kernel.store import (
     ClosedStreamError,
@@ -31,6 +33,9 @@ from etzio.kernel.store import (
     SignedCheckpoint,
     SQLiteEventStore,
     StaleHeadError,
+    StoreBusyError,
+    StoreCapacityError,
+    StoreOperationalError,
 )
 from etzio.mission_v1 import StaticCandidateV1
 from etzio.protocol import EnvelopeV1, content_id, strict_loads
@@ -38,7 +43,11 @@ from etzio.schemas import protocol_v1_schema
 
 MISSION_ID = content_id("mission", {"fixture": "event-store"})
 OTHER_MISSION_ID = content_id("mission", {"fixture": "other-event-store"})
-SOURCE_DIGEST = content_id("artifact", {"fixture": "source"})
+AUTHORITY_EVIDENCE_BYTES = b"event-store-v1 authority evidence"
+APP_SOURCE_BYTES = b"A" * 128
+BROKEN_SOURCE_BYTES = b"B" * 64
+SOURCE_DIGEST = evidence_digest(APP_SOURCE_BYTES)
+BROKEN_SOURCE_DIGEST = evidence_digest(BROKEN_SOURCE_BYTES)
 
 TARGET_SNAPSHOT = EnvelopeV1.create(
     "target_snapshot",
@@ -50,7 +59,7 @@ TARGET_SNAPSHOT = EnvelopeV1.create(
                 "size": 128,
             },
             {
-                "artifact_digest": SOURCE_DIGEST,
+                "artifact_digest": BROKEN_SOURCE_DIGEST,
                 "relative_path": "fixture/broken.py",
                 "size": 64,
             },
@@ -61,7 +70,7 @@ TARGET_SNAPSHOT = EnvelopeV1.create(
 TARGET_ID = TARGET_SNAPSHOT.object_id
 AUTHORITY_GRANT_VALUE = AuthorityGrantV1.issue(
     assets=("fixture://app.py",),
-    evidence_digest=content_id("artifact", {"fixture": "authority"}),
+    evidence_digest=evidence_digest(AUTHORITY_EVIDENCE_BYTES),
     expires_at=1_800_000_000,
     issued_at=1_700_000_000,
     issuer="operator:daniel",
@@ -86,6 +95,54 @@ AUTHORITY_TRUST = TrustStore.from_keys(
         ),
     )
 )
+
+
+@pytest.mark.parametrize(
+    ("sqlite_code", "expected_error"),
+    (
+        (sqlite3.SQLITE_BUSY, StoreBusyError),
+        (sqlite3.SQLITE_LOCKED, StoreBusyError),
+        (sqlite3.SQLITE_FULL, StoreCapacityError),
+        (sqlite3.SQLITE_NOMEM, StoreCapacityError),
+        (sqlite3.SQLITE_TOOBIG, StoreCapacityError),
+        (sqlite3.SQLITE_CORRUPT, EventStoreCorruptionError),
+        (sqlite3.SQLITE_FORMAT, EventStoreCorruptionError),
+        (sqlite3.SQLITE_NOTADB, EventStoreCorruptionError),
+        (sqlite3.SQLITE_ABORT, StoreOperationalError),
+        (sqlite3.SQLITE_AUTH, StoreOperationalError),
+        (sqlite3.SQLITE_CANTOPEN, StoreOperationalError),
+        (sqlite3.SQLITE_INTERRUPT, StoreOperationalError),
+        (sqlite3.SQLITE_IOERR, StoreOperationalError),
+        (sqlite3.SQLITE_MISUSE, StoreOperationalError),
+        (sqlite3.SQLITE_PERM, StoreOperationalError),
+        (sqlite3.SQLITE_PROTOCOL, StoreOperationalError),
+        (sqlite3.SQLITE_READONLY, StoreOperationalError),
+    ),
+)
+def test_sqlite_primary_result_codes_preserve_failure_semantics(
+    sqlite_code: int,
+    expected_error: type[EventStoreError],
+) -> None:
+    failure = sqlite3.OperationalError("classified failure")
+    failure.sqlite_errorcode = sqlite_code | (7 << 8)
+
+    classified = event_store_module._sqlite_store_failure(
+        "classification test",
+        failure,
+    )
+
+    assert type(classified) is expected_error
+
+
+def test_sqlite_failure_without_a_result_code_is_operational() -> None:
+    classified = event_store_module._sqlite_store_failure(
+        "classification test",
+        sqlite3.OperationalError("unclassified failure"),
+    )
+
+    assert type(classified) is StoreOperationalError
+
+
 AUTHORITY_ADMISSION = AuthorityAdmissionV1.issue(
     grant=AUTHORITY_GRANT_VALUE,
     signed_grant=SIGNED_AUTHORITY_GRANT,
@@ -231,7 +288,7 @@ def valid_payload(
                 "reason_code": "syntax_error",
                 "relative_path": "fixture/broken.py",
             },
-            "source_artifact_digest": SOURCE_DIGEST,
+            "source_artifact_digest": BROKEN_SOURCE_DIGEST,
         }
     if kind == "scan_completed":
         return {
@@ -275,7 +332,7 @@ def output_payload_for_lease(
                 "reason_code": "syntax_error",
                 "relative_path": "fixture/broken.py",
             },
-            "source_artifact_digest": SOURCE_DIGEST,
+            "source_artifact_digest": BROKEN_SOURCE_DIGEST,
         }
     raise AssertionError(f"not an analyzer output kind: {kind}")
 
@@ -361,10 +418,50 @@ def successful_chain() -> tuple[EventV1, ...]:
     )
 
 
+def fixture_evidence_store(path: Path) -> FileEvidenceStore:
+    evidence_store = FileEvidenceStore(
+        path.parent / f".{path.name}.evidence",
+    )
+    for artifact in (
+        AUTHORITY_EVIDENCE_BYTES,
+        APP_SOURCE_BYTES,
+        BROKEN_SOURCE_BYTES,
+    ):
+        evidence_store.put(artifact)
+    return evidence_store
+
+
+def append_event(
+    store: SQLiteEventStore,
+    event: EventV1,
+    *,
+    expected_head: str,
+    evidence_store: FileEvidenceStore | None = None,
+) -> EventV1:
+    if event.kind in NON_RECEIPT_EVIDENCE_EVENT_KINDS_V1:
+        staging = (
+            evidence_store
+            if evidence_store is not None
+            else fixture_evidence_store(store.path)
+        )
+        return store.append_evidence_event(
+            event,
+            expected_head=expected_head,
+            evidence_store=staging,
+        )
+    return store.append(event, expected_head=expected_head)
+
+
 def append_all(store: SQLiteEventStore, events: tuple[EventV1, ...]) -> None:
+    evidence_store = fixture_evidence_store(store.path)
     head = GENESIS_DIGEST
     for event in events:
-        store.append(event, expected_head=head)
+        append_event(
+            store,
+            event,
+            expected_head=head,
+            evidence_store=evidence_store,
+        )
         head = event.event_digest
 
 
@@ -914,9 +1011,9 @@ def test_compare_and_append_rejects_stale_head(tmp_path: Path) -> None:
     path = store_path(tmp_path)
     first, second = make_chain(["authority_admitted", "mission_opened"])
     with SQLiteEventStore(path) as store:
-        store.append(first, expected_head=GENESIS_DIGEST)
+        append_event(store, first, expected_head=GENESIS_DIGEST)
         with pytest.raises(StaleHeadError, match="stale"):
-            store.append(second, expected_head=GENESIS_DIGEST)
+            append_event(store, second, expected_head=GENESIS_DIGEST)
         assert store.load(MISSION_ID) == (first,)
 
 
@@ -927,13 +1024,19 @@ def test_concurrent_compare_and_append_commits_exactly_one_genesis_event(
     event = make_event("authority_admitted", 0, GENESIS_DIGEST)
     with SQLiteEventStore(path):
         pass
+    evidence_store = fixture_evidence_store(path)
     barrier = threading.Barrier(2)
 
     def attempt() -> str:
         with SQLiteEventStore(path) as store:
             barrier.wait(timeout=5)
             try:
-                store.append(event, expected_head=GENESIS_DIGEST)
+                append_event(
+                    store,
+                    event,
+                    expected_head=GENESIS_DIGEST,
+                    evidence_store=evidence_store,
+                )
             except StaleHeadError:
                 return "stale"
             return "committed"
@@ -951,7 +1054,7 @@ def test_store_rejects_illegal_seq_zero_without_persistence(tmp_path: Path) -> N
     illegal = make_event("mission_opened", 0, GENESIS_DIGEST)
     with SQLiteEventStore(path) as store:
         with pytest.raises(EventStoreError, match="illegal mission lifecycle"):
-            store.append(illegal, expected_head=GENESIS_DIGEST)
+            append_event(store, illegal, expected_head=GENESIS_DIGEST)
         assert store.load(MISSION_ID) == ()
         assert store.head(MISSION_ID) == GENESIS_DIGEST
 
@@ -967,7 +1070,7 @@ def test_store_rejects_illegal_transition_without_persistence(
         admitted.event_digest,
     )
     with SQLiteEventStore(path) as store:
-        store.append(admitted, expected_head=GENESIS_DIGEST)
+        append_event(store, admitted, expected_head=GENESIS_DIGEST)
         with pytest.raises(EventStoreError, match="illegal mission lifecycle"):
             store.append(illegal, expected_head=admitted.event_digest)
         assert store.load(MISSION_ID) == (admitted,)
@@ -978,13 +1081,13 @@ def test_store_rejects_sequence_gap_and_forked_predecessor(tmp_path: Path) -> No
     with SQLiteEventStore(path) as store:
         gap = make_event("mission_opened", 1, GENESIS_DIGEST)
         with pytest.raises(EventStoreError, match="sequence gap"):
-            store.append(gap, expected_head=GENESIS_DIGEST)
+            append_event(store, gap, expected_head=GENESIS_DIGEST)
 
         first = make_event("authority_admitted", 0, GENESIS_DIGEST)
-        store.append(first, expected_head=GENESIS_DIGEST)
+        append_event(store, first, expected_head=GENESIS_DIGEST)
         fork = make_event("mission_opened", 1, GENESIS_DIGEST)
         with pytest.raises(StaleHeadError, match="predecessor"):
-            store.append(fork, expected_head=first.event_digest)
+            append_event(store, fork, expected_head=first.event_digest)
 
 
 def test_database_trigger_rejects_gap_without_public_write_bypass(
@@ -993,7 +1096,7 @@ def test_database_trigger_rejects_gap_without_public_write_bypass(
     path = store_path(tmp_path)
     with SQLiteEventStore(path):
         pass
-    gap = make_event("mission_opened", 2, GENESIS_DIGEST)
+    gap = make_event("scan_failed", 2, GENESIS_DIGEST)
     connection = sqlite3.connect(path)
     try:
         with pytest.raises(sqlite3.DatabaseError, match="gap or fork"):
@@ -1006,7 +1109,7 @@ def test_database_rejects_event_update_and_delete(tmp_path: Path) -> None:
     path = store_path(tmp_path)
     first = make_event("authority_admitted", 0, GENESIS_DIGEST)
     with SQLiteEventStore(path) as store:
-        store.append(first, expected_head=GENESIS_DIGEST)
+        append_event(store, first, expected_head=GENESIS_DIGEST)
 
     connection = sqlite3.connect(path)
     try:
@@ -1033,10 +1136,15 @@ def test_loading_detects_payload_tamper_after_offline_compromise(
     path = store_path(tmp_path)
     first = make_event("authority_admitted", 0, GENESIS_DIGEST)
     with SQLiteEventStore(path) as store:
-        store.append(first, expected_head=GENESIS_DIGEST)
+        append_event(store, first, expected_head=GENESIS_DIGEST)
 
     connection = sqlite3.connect(path)
     try:
+        trigger_row = connection.execute(
+            "SELECT sql FROM sqlite_schema WHERE type = 'trigger' AND name = ?",
+            ("events_reject_update",),
+        ).fetchone()
+        assert trigger_row is not None and type(trigger_row[0]) is str
         connection.execute("DROP TRIGGER events_reject_update")
         corrupt = bytearray(first.to_canonical_bytes())
         object_id_start = corrupt.index(b'"object_id":"sha256:') + len(
@@ -1047,6 +1155,7 @@ def test_loading_detects_payload_tamper_after_offline_compromise(
             "UPDATE events SET canonical = ? WHERE mission_id = ? AND seq = 0",
             (sqlite3.Binary(bytes(corrupt)), MISSION_ID),
         )
+        connection.execute(trigger_row[0])
         connection.commit()
     finally:
         connection.close()
@@ -1069,8 +1178,14 @@ def test_load_detects_offline_injected_post_close_transition(tmp_path: Path) -> 
     )
     connection = sqlite3.connect(path)
     try:
+        trigger_row = connection.execute(
+            "SELECT sql FROM sqlite_schema WHERE type = 'trigger' AND name = ?",
+            ("events_validate_insert",),
+        ).fetchone()
+        assert trigger_row is not None and type(trigger_row[0]) is str
         connection.execute("DROP TRIGGER events_validate_insert")
         raw_insert(connection, injected)
+        connection.execute(trigger_row[0])
         connection.commit()
     finally:
         connection.close()
@@ -1111,7 +1226,7 @@ def test_refusal_is_a_distinct_one_event_terminal_mission(tmp_path: Path) -> Non
         store.append(refusal, expected_head=GENESIS_DIGEST)
         illegal = make_event("mission_opened", 1, refusal.event_digest)
         with pytest.raises(ClosedStreamError, match="mission_admission_refused"):
-            store.append(illegal, expected_head=refusal.event_digest)
+            append_event(store, illegal, expected_head=refusal.event_digest)
 
 
 @pytest.mark.parametrize(
@@ -1253,12 +1368,12 @@ def test_mission_heads_are_independent_and_cannot_cross_link(tmp_path: Path) -> 
         mission_id=content_id("mission", {"fixture": "cross-linked"}),
     )
     with SQLiteEventStore(path) as store:
-        store.append(event_a, expected_head=GENESIS_DIGEST)
-        store.append(event_b, expected_head=GENESIS_DIGEST)
+        append_event(store, event_a, expected_head=GENESIS_DIGEST)
+        append_event(store, event_b, expected_head=GENESIS_DIGEST)
         assert store.head(MISSION_ID) == event_a.event_digest
         assert store.head(OTHER_MISSION_ID) == event_b.event_digest
         with pytest.raises(StaleHeadError, match="predecessor"):
-            store.append(cross_linked, expected_head=GENESIS_DIGEST)
+            append_event(store, cross_linked, expected_head=GENESIS_DIGEST)
 
 
 def test_signed_checkpoint_is_retained_as_unverified_data(tmp_path: Path) -> None:
@@ -1275,7 +1390,7 @@ def test_signed_checkpoint_is_retained_as_unverified_data(tmp_path: Path) -> Non
     with SQLiteEventStore(path) as store:
         with pytest.raises(EventStoreError, match="retained"):
             store.store_checkpoint(checkpoint)
-        store.append(event, expected_head=GENESIS_DIGEST)
+        append_event(store, event, expected_head=GENESIS_DIGEST)
         assert store.store_checkpoint(checkpoint) is checkpoint
         assert store.load_checkpoints(MISSION_ID) == (checkpoint,)
 

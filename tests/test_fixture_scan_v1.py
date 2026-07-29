@@ -24,7 +24,7 @@ from etzio.kernel.fixture_scan import (
     run_fixture_scan,
 )
 from etzio.kernel.reducer import ProjectionPhase
-from etzio.kernel.store import SQLiteEventStore
+from etzio.kernel.store import SQLiteEventStore, StoreCapacityError
 from etzio.mission_v1 import StaticCandidateV1
 from etzio.protocol import EnvelopeV1, canonical_dumps, content_id, thaw_json
 
@@ -161,6 +161,28 @@ def test_clean_fixture_closes_with_zero_candidates(tmp_path: Path) -> None:
     assert projection.phase is ProjectionPhase.CLOSED
     assert projection.candidate_events == ()
     assert thaw_json(projection.scan_summary.payload)["candidate_count"] == 0
+
+
+def test_fixture_preflight_propagates_vault_capacity_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    setup = _setup(tmp_path)
+
+    def capacity_failure(self, requests, evidence_store, *, maximum_total):
+        raise StoreCapacityError("simulated fixture vault capacity failure")
+
+    monkeypatch.setattr(
+        SQLiteEventStore,
+        "resolve_evidence_artifacts",
+        capacity_failure,
+    )
+    with SQLiteEventStore(tmp_path / "events.sqlite3") as store:
+        with pytest.raises(
+            StoreCapacityError,
+            match="simulated fixture vault capacity failure",
+        ):
+            _run(store, setup)
 
 
 def test_expired_authority_is_refused_before_mission_open(tmp_path: Path) -> None:
@@ -302,12 +324,70 @@ class _CrashAfterAppend:
     def load(self, mission_id: str):
         return self.store.load(mission_id)
 
-    def append(self, event, *, expected_head: str):
-        result = self.store.append(event, expected_head=expected_head)
+    def load_event_artifact(
+        self,
+        event_digest: str,
+        role: str,
+        ordinal: int = 0,
+    ):
+        return self.store.load_event_artifact(event_digest, role, ordinal)
+
+    def load_event_artifacts(self, selectors, *, maximum_total: int):
+        return self.store.load_event_artifacts(
+            selectors,
+            maximum_total=maximum_total,
+        )
+
+    def resolve_evidence_artifact(
+        self,
+        role: str,
+        digest: str,
+        maximum: int,
+        evidence_store: FileEvidenceStore,
+    ):
+        return self.store.resolve_evidence_artifact(
+            role,
+            digest,
+            maximum,
+            evidence_store,
+        )
+
+    def resolve_evidence_artifacts(
+        self,
+        requests,
+        evidence_store: FileEvidenceStore,
+        *,
+        maximum_total: int,
+    ):
+        return self.store.resolve_evidence_artifacts(
+            requests,
+            evidence_store,
+            maximum_total=maximum_total,
+        )
+
+    def _after_committed_append(self, event, result):
         if event.kind == self.kind and not self.crashed:
             self.crashed = True
             raise RuntimeError("simulated process loss after durable append")
         return result
+
+    def append(self, event, *, expected_head: str):
+        result = self.store.append(event, expected_head=expected_head)
+        return self._after_committed_append(event, result)
+
+    def append_evidence_event(
+        self,
+        event,
+        *,
+        expected_head: str,
+        evidence_store: FileEvidenceStore,
+    ):
+        result = self.store.append_evidence_event(
+            event,
+            expected_head=expected_head,
+            evidence_store=evidence_store,
+        )
+        return self._after_committed_append(event, result)
 
 
 @pytest.mark.parametrize("crash_kind", ("candidate_recorded", "scan_completed"))
@@ -341,6 +421,16 @@ def test_delayed_resume_after_mission_open_times_out_before_lease_issuance(
         crashing = _CrashAfterAppend(store, "mission_opened")
         with pytest.raises(RuntimeError, match="simulated"):
             _run(crashing, setup)
+
+        retained = store.load(setup[4])
+        admitted_grant = AuthorityGrantV1.from_envelope(
+            EnvelopeV1.from_bytes(
+                canonical_dumps(thaw_json(retained[0].payload)["grant"])
+            )
+        )
+        setup[0]._path_for(admitted_grant.evidence_digest).unlink()
+        for snapshot_file in setup[1].files:
+            setup[0]._path_for(snapshot_file.artifact_digest).unlink()
 
         resumed = _run(store, setup, decision_time=NOW + 60)
 

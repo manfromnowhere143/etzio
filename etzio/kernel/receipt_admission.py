@@ -12,11 +12,17 @@ from dataclasses import dataclass
 from typing import NoReturn, Protocol
 
 from ..authority import AuthorityGrantV1
-from ..evidence import FileEvidenceStore, TargetSnapshotV1
+from ..evidence import (
+    VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1,
+    EvidenceError,
+    FileEvidenceStore,
+    TargetSnapshotV1,
+)
 from ..mission_v1 import StaticCandidateV1
 from ..protocol import EnvelopeV1, ProtocolError, canonical_dumps, thaw_json
 from ..verification import (
     MAX_EPOCH_SECOND,
+    MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1,
     AuthenticatedVerifierReceiptV1,
     SignedVerifierReceiptV1,
     VerificationError,
@@ -27,16 +33,44 @@ from ..verification import (
     authenticate_verifier_receipt,
     revalidate_verifier_receipt_artifacts,
 )
-from ..verification_artifacts import VerificationArtifactResolutionV1
+from ..verification_artifacts import (
+    VerificationArtifactBindingV1,
+    VerificationArtifactError,
+    VerificationArtifactResolutionV1,
+)
 from .events_v1 import RECEIPT_ADMISSION_PROFILE_V1, EventV1
+from .evidence_vault import (
+    VERIFICATION_EFFECT_OUTPUT_ROLE_V1,
+    VERIFICATION_EXECUTION_OUTPUT_ROLE_V1,
+    VERIFICATION_MEASURED_ENVIRONMENT_OUTPUT_ROLE_V1,
+    VERIFICATION_TERMINATION_OUTPUT_ROLE_V1,
+    VaultArtifactResolutionRequestV1,
+)
 from .reducer import MissionProjection, ProjectionPhase, reduce_events
-from .store import SQLiteEventStore, StaleHeadError, StoreBusyError
+from .store import (
+    EventStoreCorruptionError,
+    EventStoreError,
+    EvidenceVaultRequestError,
+    SQLiteEventStore,
+    StaleHeadError,
+    StoreBusyError,
+    StoreCapacityError,
+    StoreOperationalError,
+)
 
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 
 
 class _EventStorePort(Protocol):
     def load(self, mission_id: str) -> tuple[EventV1, ...]: ...
+
+    def resolve_evidence_artifacts(
+        self,
+        requests: tuple[VaultArtifactResolutionRequestV1, ...],
+        evidence_store: FileEvidenceStore,
+        *,
+        maximum_total: int,
+    ) -> tuple[bytes, ...]: ...
 
     def append_receipt_admission(
         self,
@@ -96,17 +130,23 @@ def _validate_request(
     VerifierTrustStore,
     int,
 ]:
-    if not callable(getattr(event_store, "load", None)) or not callable(
-        getattr(event_store, "append_receipt_admission", None)
+    if (
+        not callable(getattr(event_store, "load", None))
+        or not callable(
+            getattr(event_store, "append_receipt_admission", None)
+        )
+        or not callable(
+            getattr(event_store, "resolve_evidence_artifacts", None)
+        )
     ):
         _reject(
             "invalid_event_store",
-            "event_store must provide load and receipt-admission append operations",
+            "event_store must provide load, vault resolution, and receipt append operations",
         )
-    if not isinstance(evidence_store, FileEvidenceStore):
+    if type(evidence_store) is not FileEvidenceStore:
         _reject(
             "invalid_evidence_store",
-            "evidence_store must be a FileEvidenceStore",
+            "evidence_store must be an exact FileEvidenceStore",
         )
     mission = _require_digest("mission_id", mission_id)
     head = _require_digest("expected_head", expected_head)
@@ -233,11 +273,6 @@ def _signed_receipt_from_event(event: EventV1) -> SignedVerifierReceiptV1:
 
 
 def _outputs_from_event(event: EventV1) -> VerificationOutputArtifactsV1:
-    from ..verification_artifacts import (
-        VerificationArtifactBindingV1,
-        VerificationArtifactError,
-    )
-
     payload = thaw_json(event.payload)
     try:
         return VerificationOutputArtifactsV1(
@@ -261,6 +296,123 @@ def _outputs_from_event(event: EventV1) -> VerificationOutputArtifactsV1:
             "retained_output_bindings_invalid",
             f"retained output bindings are invalid: {exc}",
         )
+
+
+def _resolve_new_output_artifacts(
+    authenticated_receipt: AuthenticatedVerifierReceiptV1,
+    *,
+    event_store: _EventStorePort,
+    evidence_store: FileEvidenceStore,
+    maximum_output_bytes: int,
+) -> VerificationOutputArtifactsV1:
+    """Resolve only the four outputs first introduced by this admission."""
+
+    receipt = authenticated_receipt.receipt
+    output_specs = (
+        (
+            "execution_output",
+            VERIFICATION_EXECUTION_OUTPUT_ROLE_V1,
+            receipt.execution_output_digest,
+            receipt.execution_output_size,
+        ),
+        (
+            "effect_output",
+            VERIFICATION_EFFECT_OUTPUT_ROLE_V1,
+            receipt.effect_output_digest,
+            receipt.effect_output_size,
+        ),
+        (
+            "measured_environment_output",
+            VERIFICATION_MEASURED_ENVIRONMENT_OUTPUT_ROLE_V1,
+            receipt.measured_environment_output_digest,
+            receipt.measured_environment_output_size,
+        ),
+        (
+            "termination_output",
+            VERIFICATION_TERMINATION_OUTPUT_ROLE_V1,
+            receipt.termination_output_digest,
+            receipt.termination_output_size,
+        ),
+    )
+    signed_output_bytes = sum(size for _, _, _, size in output_specs)
+    if signed_output_bytes > min(
+        maximum_output_bytes,
+        MAX_TYPED_VERIFICATION_OUTPUT_BYTES_V1,
+    ):
+        _reject(
+            "verification_output_byte_ceiling_exceeded",
+            "signed verification outputs exceed the available byte allowance",
+        )
+
+    try:
+        resolved_bytes = event_store.resolve_evidence_artifacts(
+            tuple(
+                VaultArtifactResolutionRequestV1(
+                    role=vault_role,
+                    digest=digest,
+                    maximum=signed_size,
+                )
+                for _, vault_role, digest, signed_size in output_specs
+            ),
+            evidence_store,
+            maximum_total=signed_output_bytes,
+        )
+    except (
+        EventStoreCorruptionError,
+        StoreBusyError,
+        StoreCapacityError,
+        StoreOperationalError,
+    ):
+        raise
+    except EvidenceVaultRequestError as exc:
+        role = output_specs[exc.request_index][0]
+        if exc.reason_code in {"artifact_limit", "batch_limit"}:
+            _reject(
+                f"resolved_{role}_artifact_size_mismatch",
+                f"{role} bytes differ from the signed size",
+            )
+        _reject(
+            f"resolved_{role}_artifact_unavailable",
+            f"{role} cannot be resolved under its code-owned type",
+        )
+    except (EvidenceError, EventStoreError) as exc:
+        _reject(
+            "resolved_output_artifact_unavailable",
+            f"verification outputs cannot be resolved: {exc}",
+        )
+
+    resolved: dict[str, VerificationArtifactBindingV1] = {}
+    for (role, _, digest, signed_size), data in zip(
+        output_specs,
+        resolved_bytes,
+        strict=True,
+    ):
+        artifact_type = VERIFICATION_OUTPUT_ARTIFACT_TYPE_BY_ROLE_V1[role]
+        if len(data) != signed_size:
+            _reject(
+                f"resolved_{role}_artifact_size_mismatch",
+                f"{role} bytes differ from the signed size",
+            )
+        try:
+            resolved[role] = VerificationArtifactBindingV1(
+                artifact_digest=digest,
+                artifact_type=artifact_type,
+                size=signed_size,
+            )
+        except VerificationArtifactError as exc:
+            _reject(exc.reason_code, str(exc))
+
+    try:
+        return VerificationOutputArtifactsV1(
+            execution_output_artifact=resolved["execution_output"],
+            effect_output_artifact=resolved["effect_output"],
+            measured_environment_output_artifact=resolved[
+                "measured_environment_output"
+            ],
+            termination_output_artifact=resolved["termination_output"],
+        )
+    except VerificationError as exc:
+        _reject(exc.reason_code, str(exc))
 
 
 def _existing_admission(
@@ -355,11 +507,12 @@ def validate_retained_receipt_admission_event(
     event: EventV1,
     evidence_store: FileEvidenceStore,
 ) -> tuple[AuthenticatedVerifierReceiptV1, VerificationOutputArtifactsV1]:
-    """Revalidate one exact proposed admission against retained history and current CAS.
+    """Revalidate one exact proposal against history and its supplied evidence view.
 
-    This helper changes no state.  The durable store invokes it only while holding its
-    ``BEGIN IMMEDIATE`` writer transaction, after validating the retained lifecycle,
-    compare-and-append head, and pure proposed transition.
+    This helper changes no state. The canonical store invokes it under ``BEGIN IMMEDIATE``
+    with a vault-first overlay that consults staging only when an identity is genuinely
+    absent, after validating lifecycle, compare-and-append head, and proposed transition.
+    A standalone caller supplies only a non-authoritative filesystem evidence view.
     """
 
     if (
@@ -374,7 +527,7 @@ def validate_retained_receipt_admission_event(
     if not isinstance(event, EventV1) or event.kind != "verifier_receipt_admitted":
         _reject(
             "invalid_receipt_admission_event",
-            "current-CAS validation requires verifier_receipt_admitted",
+            "current evidence validation requires verifier_receipt_admitted",
         )
     if not isinstance(evidence_store, FileEvidenceStore):
         _reject(
@@ -451,7 +604,7 @@ def validate_retained_receipt_admission_event(
     if output_artifacts != _outputs_from_event(event):
         _reject(
             "retained_output_bindings_mismatch",
-            "current CAS-derived output bindings differ from the proposed event",
+            "current evidence-derived output bindings differ from the proposed event",
         )
     if resolution.total_bytes + output_artifacts.total_bytes > grant.max_bytes:
         _reject(
@@ -472,7 +625,7 @@ def admit_modeled_fixture_verifier_receipt(
     decision_trust_store: VerifierTrustStore,
     decision_time: int,
 ) -> VerificationReceiptAdmission:
-    """Authenticate, CAS-check, and atomically admit one single-use receipt."""
+    """Authenticate, vault-check, and atomically admit one single-use receipt."""
 
     (
         event_store,
@@ -554,22 +707,18 @@ def admit_modeled_fixture_verifier_receipt(
         )
 
     grant = _grant(projection)
-    target_snapshot = _target_snapshot(projection)
     remaining = grant.max_bytes - resolution.total_bytes
     if remaining <= 0:
         _reject(
             "verification_output_byte_ceiling_exceeded",
             "the signed byte ceiling leaves no allowance for verifier outputs",
         )
-    try:
-        output_artifacts = revalidate_verifier_receipt_artifacts(
-            authenticated,
-            target_snapshot=target_snapshot,
-            evidence_store=evidence_store,
-            maximum_output_bytes=remaining,
-        )
-    except VerificationError as exc:
-        _reject(exc.reason_code, str(exc))
+    output_artifacts = _resolve_new_output_artifacts(
+        authenticated,
+        event_store=event_store,
+        evidence_store=evidence_store,
+        maximum_output_bytes=remaining,
+    )
     if resolution.total_bytes + output_artifacts.total_bytes > grant.max_bytes:
         _reject(
             "verification_output_byte_ceiling_exceeded",

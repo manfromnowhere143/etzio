@@ -36,7 +36,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0006](decisions/0006-atomic-modeled-receipt-admission.md), and
 [ADR-0007](decisions/0007-explicit-verification-lease-recovery.md), and
 [ADR-0008](decisions/0008-typed-integrity-evidence-contract.md), and
-[ADR-0009](decisions/0009-uniform-sqlite-rollback-journal-safety.md).
+[ADR-0009](decisions/0009-uniform-sqlite-rollback-journal-safety.md), and
+[ADR-0010](decisions/0010-transactional-evidence-vault.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -46,10 +47,10 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/sqlite-wal-reset-safety-v1`
-- Stacked on: `agent/integrity-evidence-contract-v1`
-- Branch base: `5d0de3915a0b44f90668d0a66ecb27bcd4f24d48`
-- Branch-base tree: `6d782f93f12495e16ba4d4158ec5e13ddf703006`
+- Current foundation-integrity branch: `agent/transactional-evidence-vault-v1`
+- Stacked on: `agent/sqlite-wal-reset-safety-v1`
+- Branch base: `d2807dd2ea71704cb9db95bab7401d75df6ea8b6`
+- Branch-base tree: `6527a9c6e55974b7a8165a5adcbf30f715666a7d`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -112,39 +113,67 @@ exact authority
 - full domain-separated SHA-256 object and event identities;
 - Ed25519 signed authority grants and self-verifying admission records;
 - prime-subgroup trust-key validation for configured and embedded snapshots;
-- exact clean/vulnerable fixture manifests and content-addressed evidence;
+- exact clean/vulnerable fixture manifests and a bounded private content-addressed
+  filesystem staging/cache surface;
 - bounded analysis leases and stable candidate/claim identities;
 - byte-bound Python AST analysis with no production filesystem walker;
 - lifecycle-validated append-only SQLite storage and deterministic replay;
 - one uniform rollback-journal `DELETE`/`EXTRA` policy across the declared SQLite matrix,
-  with a pre-open persistent-WAL refusal and explicit offline-migration boundary;
+  with a pre-open persistent-WAL refusal and explicit offline-migration boundary; no WAL
+  conversion tool is implemented;
 - exact WAL-reset-fix classification, SQLite 3.37 minimum and major-version admission, and
   loaded-version/fix diagnostics;
 - retained runtime-reported SQLite version/source identity with isolated versus
   repository-import-context agreement;
+- one SQLite schema with exact `application_id = 0x45545A31` (ASCII `ETZ1`) and
+  `user_version = 1`, exact
+  object, strict-table, foreign-key, index, and trigger validation, and transactional
+  initialization;
+- explicit refusal of malformed, unknown, or nonempty pre-vault event state without
+  changing its application/schema identity; no pre-vault backfill tool is implemented;
+- a canonical append-only SQLite evidence vault retaining deduplicated exact BLOBs and
+  complete code-derived event-role mappings;
+- immutable first-origin event provenance for each unique BLOB plus a covering
+  artifact-identity, size, and event reverse index;
+- one `BEGIN IMMEDIATE` commit of exact evidence BLOBs, mappings, and event for each
+  `authority_admitted`, `mission_opened`, `verification_artifacts_resolved`, and
+  `verifier_receipt_admitted` boundary, with generic append refusing all four kinds;
+- canonical-vault-first artifact reuse, exact committed replay/retry without filesystem
+  staging, and corruption refusal that never falls back to otherwise-valid staging bytes;
+- exact batch reads bounded to 515 selectors or requests and 1 GiB of selected unique
+  identities; identity resolution follows immutable first-origin events, selector loads
+  follow exact event owners, each distinct required mission is reduced once, one shared
+  rehash set reads and hashes each distinct BLOB encountered across the complete histories
+  at most once, and only requested bytes remain in the response cache;
+- fixed 16 MiB authority-evidence, existing target/resolution/output/grant bounds, and a
+  default 1 GiB configurable per-opening logical unique-vault-byte ceiling independent of
+  physical deduplication;
 - kernel-issued verification leases under the exact admitted
   `modeled_fixture_verification` grant;
 - complete verifier trust and revocation evidence retained with each issuance;
 - replay-checked authority, target, candidate, producer, verifier, key,
   `issuance_trust_snapshot_id`, time, and expiry bindings;
-- type-domain-separated CAS identities for each modeled PoC, supporting-evidence,
+- type-domain-separated content identities for each modeled PoC, supporting-evidence,
   environment, and effect-oracle specification input;
 - code-owned role-to-type resolution for every target and verification-input byte under a
   fixed aggregate bound shared with the grant's one signed `max_bytes` ceiling;
 - one canonical `verification_artifacts_resolved` event per lease with replay, retry,
-  crash-recovery, and concurrent-writer controls;
+  injected post-commit caller-failure recovery, and concurrent-writer controls;
 - type-domain-separated identities for modeled execution, effect, measured-environment,
   and termination outputs;
 - a canonical signed receipt binding the retained resolution plus each output's exact
   digest and positive bounded size;
 - authentication-first receipt checks under a retained decision trust/revocation snapshot,
-  followed by fixed-order target, input, and output CAS revalidation;
+  followed by fixed-order vault-first target, input, and output resolution;
 - one `verifier_receipt_admitted` event that atomically retains the complete modeled
   decision and records single-use lease consumption;
-- a dedicated receipt-admission store path that repeats current-CAS validation from locked
-  retained history before insertion, while generic append rejects the reserved event;
-- CAS-free exact committed retry, crash recovery, one bounded SQLite-contention retry,
-  same-receipt reconciliation when an identical commit becomes visible, retryable
+- a dedicated receipt-admission store path that repeats exact manifest and byte validation
+  from locked retained history before insertion, while generic append rejects the
+  protected event;
+- staging-independent exact committed retry, injected post-commit caller-failure recovery,
+  one bounded
+  SQLite-contention retry, same-receipt reconciliation when an identical commit becomes
+  visible, retryable
   `StoreBusyError` on persistent `BUSY` or `LOCKED`, conflicting-receipt refusal, and
   distinct-lease stale-head semantics;
 - explicit ETZIO lease expiry and pre-deadline AQUILA modeled cancellation;
@@ -219,8 +248,9 @@ prove external authentication.
   resource ceilings;
 - distinct issuance- and proposal-time trust snapshot identities in modeled receipt
   proposals; and
-- matching typed-resolution and current-CAS revalidation before a positive standalone
-  modeled proposal or first canonical admission.
+- matching typed-resolution and exact current-staging validation before a positive
+  standalone modeled proposal, plus vault-first exact-byte validation before first
+  canonical admission.
 
 Lease issuance records an authorized modeled assignment, and resolution records exact
 predeclared input bytes and roles. Receipt admission authenticates and atomically retains a
@@ -242,9 +272,10 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 
 ## Reproduced local evidence
 
-On the current candidate bytes, `make verify` passed under both declared runtimes:
+On the current vault candidate bytes, the complete release command passed under both
+declared runtimes:
 
-- 675 tests passed;
+- 730 tests passed;
 - CPython 3.11.15 loaded SQLite 3.53.1 and used `DELETE`/`EXTRA`;
 - CPython 3.14.2 loaded SQLite 3.51.2 and used `DELETE`/`EXTRA`;
 - each verification log retained `sqlite_source_id()` and proved that the isolated and
@@ -258,14 +289,17 @@ On the current candidate bytes, `make verify` passed under both declared runtime
 - the governed clean fixture closed with zero candidates; and
 - both modeled regression demonstrations retained their historical outputs.
 
-The hash-locked environments passed `pip check`. GitHub Actions run
+Both hash-locked environments passed `pip check`. This is current local evidence only;
+GitHub validation remains pending.
+
+Inherited foundation evidence is separate. GitHub Actions run
 [`30438318919`](https://github.com/manfromnowhere143/etzio/actions/runs/30438318919)
 reproduced repository policy plus both declared runtime suites, package build,
 outside-checkout wheel smoke, and clean-tree proof on the exact SQLite journal-safety
 implementation commit `4dfbcc319a63a14a3a223b80b1740fbd05fc676e`; GitGuardian also
-passed. This evidence-only handoff update follows that implementation commit. Resolve the
-current branch head and checks from GitHub rather than treating this dated statement as live
-state. All evidence remains fixture-scoped.
+passed. That run predates the transactional vault and validates no vault claim. The
+current branch has no vault commit, upstream, pull request, or GitHub run yet. All evidence
+remains fixture-scoped.
 
 ## Closed adversarial findings in this tranche
 
@@ -333,16 +367,16 @@ Known-bads now cover:
   publication primitives, and preservation of preexisting names;
 - reuse of one signed byte ceiling as multiple action budgets;
 - forged, partial, reordered, stale, expired, or conflicting per-lease resolution events;
-- exact resolution retry, crash-after-append recovery, concurrent convergence, and
-  post-event CAS disappearance;
+- exact resolution retry, injected post-append caller-failure recovery, concurrent
+  convergence, and post-event staging disappearance;
 - caller-selected unsigned resolution contexts promoted beyond non-authoritative proposal
   status, noncausal resolution/receipt times, and consequential receipt refusals that would
-  otherwise reach CAS reads;
+  otherwise reach evidence reads;
 - missing, empty, corrupt, wrong-type, swapped, colliding, individually oversized,
   aggregate-oversized, or signed-size-mismatched modeled output artifacts;
 - unattested, multiply attested, malformed, forged, revoked, wrong-role, or substituted
   receipt-admission decision evidence;
-- receipt reuse, lease double consumption, exact committed retry after CAS loss and head
+- receipt reuse, lease double consumption, exact committed retry after staging loss and head
   advancement, identical and conflicting submission races, and distinct-lease stale-head
   races;
 - expiry before the retained boundary, cancellation disguised as expiry, unknown or
@@ -357,6 +391,9 @@ Known-bads now cover:
   receipt-coverage partitions;
 - bounded SQLite writer contention, identical-commit reconciliation after one retry, and
   retryable `StoreBusyError` exhaustion without a corruption classification;
+- SQLite `BUSY`/`LOCKED`, `FULL`/`TOOBIG`/`NOMEM`, explicit corruption, and other
+  operational result-code classification, production capacity propagation, and locked
+  receipt revalidation preserving the exact store-failure class;
 - exact SQLite WAL-reset fix/backport boundaries, unsupported pre-3.37 and future-major
   releases, matrix-wide fixed/affected rollback-policy agreement, and preexisting WAL
   header refusal before ordinary startup;
@@ -364,8 +401,22 @@ Known-bads now cover:
   versus repository-context SQLite identity disagreement;
 - generic and direct-internal append bypass, receipt-event/evidence-store pairing mismatch,
   wrong-kind dedicated append, direct undersized-output event injection, and rollback with
-  unchanged history on dedicated CAS validation failure;
-- crash-after-append replay without duplicate candidates;
+  unchanged history on dedicated evidence validation failure;
+- generic or raw-SQL insertion of any protected byte-claiming event without its exact
+  mappings, mutable or late vault-role rows, and a transaction-sabotaging staging-store
+  subclass;
+- failed, quota-exceeding, or stale protected appends leaving any event, mapping, or orphan
+  BLOB; cross-mission BLOB deduplication losing logical role records; and malformed
+  pre-vault schema promotion;
+- lower-ceiling reopen, ETZ1 schema drift, oversized retained authority metadata, and a
+  missing canonical BLOB escaping their exact capacity or corruption classes;
+- 515 ordered duplicate requests, 256 distinct target identities with one event-owner
+  reduction, one rehash for each of 257 complete-history BLOBs, and requested-only response
+  caching;
+- authority, target, typed-input, and typed-output replay or retry after staging deletion,
+  wrong-role canonical reuse, canonical corruption hidden by valid staging, and offline
+  vault corruption surviving reopen;
+- injected post-append caller-failure replay without duplicate candidates;
 - late recovery before lease issuance and completed-scan closure after grant/trust
   changes; and
 - the former arbitrary local-path CLI escape hatch.
@@ -376,9 +427,11 @@ Known-bads now cover:
    are not externally proved or required by lifecycle commands.
 2. Event heads have an exact checkpoint/floor contract but are not persisted, externally
    authenticated, anchored, monitored, or required for command success.
-3. The filesystem CAS and SQLite event commit do not share one transaction; bytes can
-   disappear after the dedicated append validates them.
-4. SQLite retains a documented same-user pathname race.
+3. SQLite retains a documented same-user pathname race, and a coherent offline rewrite
+   remains undetectable without an authenticated external latest-head catalog.
+4. Production storage still needs an accepted SQLite/VFS/filesystem/device profile,
+   physical and journal quotas, backup/restore, process-kill and power-fault qualification,
+   and sensitive-evidence access-control, encryption, and retention policy.
 5. Modeled output artifacts are opaque signed descriptors, not structured evidence tied to
    an independently measured execution identity.
 6. Separate verifier labels and keys do not prove separate principals, processes, or
@@ -396,8 +449,9 @@ Next, qualify concrete trusted-time, revocation, anchor, and monitor adapters, t
 the typed contract through one receipt-admission vertical. Local commit must become
 pending, external registration and latest-head verification must be idempotently
 recoverable, and command success plus later append must wait for anchor finality. Atomic
-filesystem-CAS/SQLite retention and closure of the same-user pathname race also remain
-mandatory before a finding pipeline can be accepted.
+retention of exact BLOBs, mappings, and protected events is now closed for the implemented
+boundaries. Closure of the same-user SQLite pathname and coherent offline-rewrite boundary
+remains mandatory before a finding pipeline can be accepted.
 
 ### Mission 2 — independent proof plane
 

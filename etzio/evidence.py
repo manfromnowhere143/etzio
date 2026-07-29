@@ -28,6 +28,7 @@ _DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 _EVIDENCE_DOMAIN = b"etzio:evidence:v1\x00"
 _TYPED_EVIDENCE_DOMAIN = b"etzio:evidence:typed:v1\x00"
 DEFAULT_MAX_ARTIFACT_BYTES = 16 * 1024 * 1024
+MAX_AUTHORITY_EVIDENCE_BYTES_V1: Final[int] = DEFAULT_MAX_ARTIFACT_BYTES
 MAX_SNAPSHOT_BYTES_HARD_CEILING = 64 * 1024 * 1024
 MAX_SNAPSHOT_FILES_HARD_CEILING = 256
 DEFAULT_MAX_SNAPSHOT_BYTES = MAX_SNAPSHOT_BYTES_HARD_CEILING
@@ -819,6 +820,7 @@ def validate_etzio_fixture_snapshot(
     """Require every target entry to match the immutable repository fixture manifest."""
     if not isinstance(snapshot, TargetSnapshotV1):
         raise EvidenceError("fixture snapshot must be a TargetSnapshotV1")
+    source_bytes: dict[str, bytes] = {}
     for snapshot_file in snapshot.files:
         manifest_entry = _ETZIO_FIXTURE_MANIFEST.get(snapshot_file.relative_path)
         if manifest_entry is None:
@@ -826,10 +828,42 @@ def validate_etzio_fixture_snapshot(
         expected_size, expected_digest = manifest_entry
         if snapshot_file.size != expected_size or snapshot_file.artifact_digest != expected_digest:
             raise EvidenceError("snapshot metadata does not match the Etzio fixture manifest")
-        data = evidence_store.get(
+        source_bytes[snapshot_file.relative_path] = evidence_store.get(
             snapshot_file.artifact_digest,
             maximum=expected_size,
         )
+    validate_etzio_fixture_snapshot_bytes(snapshot, source_bytes)
+
+
+def validate_etzio_fixture_snapshot_bytes(
+    snapshot: TargetSnapshotV1,
+    source_bytes: Mapping[str, bytes],
+) -> None:
+    """Validate an exact path-to-bytes view against the immutable fixture manifest."""
+
+    if not isinstance(snapshot, TargetSnapshotV1):
+        raise EvidenceError("fixture snapshot must be a TargetSnapshotV1")
+    if not isinstance(source_bytes, Mapping):
+        raise EvidenceError("fixture source bytes must be a path-to-bytes mapping")
+    expected_paths = tuple(value.relative_path for value in snapshot.files)
+    try:
+        supplied_paths = tuple(sorted(source_bytes))
+    except TypeError as exc:
+        raise EvidenceError("fixture source-byte paths must be text") from exc
+    if any(type(value) is not str for value in supplied_paths):
+        raise EvidenceError("fixture source-byte paths must be text")
+    if supplied_paths != expected_paths:
+        raise EvidenceError("fixture source-byte paths differ from the target snapshot")
+    for snapshot_file in snapshot.files:
+        manifest_entry = _ETZIO_FIXTURE_MANIFEST.get(snapshot_file.relative_path)
+        if manifest_entry is None:
+            raise EvidenceError("snapshot path is not present in the Etzio fixture manifest")
+        expected_size, expected_digest = manifest_entry
+        if snapshot_file.size != expected_size or snapshot_file.artifact_digest != expected_digest:
+            raise EvidenceError("snapshot metadata does not match the Etzio fixture manifest")
+        data = source_bytes[snapshot_file.relative_path]
+        if type(data) is not bytes:
+            raise EvidenceError("fixture source bytes must be immutable bytes")
         if len(data) != expected_size or evidence_digest(data) != expected_digest:
             raise EvidenceError("snapshot bytes do not match the Etzio fixture manifest")
 

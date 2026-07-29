@@ -37,7 +37,8 @@ Status: **implemented for repository fixtures**.
 - full content-bound identities;
 - signed, expiring, revocable authority admission before mission opening;
 - prime-subgroup Ed25519 trust-key validation;
-- private content-addressed target evidence;
+- bounded private content-addressed staging/cache plus canonical transactional target
+  retention in the SQLite evidence vault;
 - exact manifest-backed clean and vulnerable fixtures;
 - bounded analysis leases;
 - stable, source-minimized static candidates;
@@ -59,6 +60,18 @@ Implemented in this phase:
 - pre-open refusal of persistent WAL state, exact upstream WAL-fix classification,
   explicit SQLite 3.37 minimum/major-version admission, and known-bads proving fixed and
   affected accessors cannot choose different journal policies;
+- exact SQLite `application_id = 0x45545A31` (ASCII `ETZ1`) and `user_version = 1`, strict append-only
+  evidence and event-role tables, full schema-shape validation, and explicit refusal to
+  promote nonempty pre-vault event state without an offline migration;
+- one canonical evidence vault transaction that derives artifact manifests in code and
+  commits exact immutable BLOBs, complete role mappings, and the event together for
+  `authority_admitted`, `mission_opened`, `verification_artifacts_resolved`, and
+  `verifier_receipt_admitted`;
+- staging-independent committed replay and exact retry, canonical-vault-first reuse, and
+  fail-closed corruption handling that never substitutes otherwise-valid staging bytes;
+- fixed authority, target, resolution, output, and aggregate grant bounds plus a default
+  1 GiB configurable per-opening logical unique-vault-byte ceiling, without treating
+  physical deduplication as a mission budget discount;
 - installed semantic per-kind wire schemas for all eleven typed objects and all eighteen event
   variants;
 - runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and
@@ -70,26 +83,26 @@ Implemented in this phase:
   authority, verifier, key, issuance-trust identity, time, and expiry bindings; and
 - a replayable nonterminal `awaiting_verification` state with substitution and conflicting
   reissuance known-bads;
-- type-domain-separated CAS identities for the PoC, supporting-evidence, environment, and
+- type-domain-separated content identities for the PoC, supporting-evidence, environment, and
   effect-oracle specification roles;
 - canonical per-lease resolution of every target and verification-input byte with exact
   role, type, size, order, time, and retained-state bindings; and
-- replay, current-CAS revalidation, aggregate-bound, substitution, crash, retry, and
-  concurrent-writer known-bads for the resolution boundary;
+- vault-first/staging-on-absence resolution, aggregate-bound, substitution, injected
+  caller-failure, retry, and concurrent-writer known-bads for the resolution boundary;
 - signed receipt binding of the exact retained resolution plus four distinct execution,
   effect, measured-environment, and termination output digest/size pairs;
-- fixed-order current-CAS revalidation of every output under a code-owned type and the
-  authority grant's one non-resetting byte ceiling;
+- fixed-order vault-first resolution of every output during canonical admission under a
+  code-owned type and the authority grant's one non-resetting byte ceiling;
 - one canonical receipt-admission event retaining the exact signed receipt, decision trust
   snapshot, adjudication profile, and derived output bindings;
-- atomic single-use lease consumption, CAS-free committed retry, deterministic conflicting
-  receipt refusal after a competing commit is visible, and bounded one-retry reconciliation
-  of identical submissions under SQLite contention;
+- atomic single-use lease consumption, staging-independent committed retry, deterministic
+  conflicting receipt refusal after a competing commit is visible, and bounded one-retry
+  reconciliation of identical submissions under SQLite contention;
 - retryable `StoreBusyError` classification for SQLite `BUSY` or `LOCKED`, without
   reclassifying bounded-contention exhaustion as corruption; and
 - reducer, schema, repository-policy, signature, revocation, substitution, byte-budget,
-  CAS-loss, direct-append, crash, retry, and concurrency known-bads for modeled-receipt
-  admission;
+  staging-loss, direct-append, injected caller-failure, retry, and concurrency known-bads
+  for modeled-receipt admission;
 - explicit ETZIO lease-expiry and AQUILA modeled-cancellation events with closed reasons
   and no implicit wall-clock replay transition;
 - one nonbranching candidate lease lineage with atomic supersession/reassignment to a
@@ -121,19 +134,24 @@ Remaining required:
    evidence, and enforce freshness at consequential commands;
 2. qualify independent anchor/monitor adapters, persist typed checkpoints, and make
    verified external latest-head finality part of command completion and recovery;
-3. atomic retention shared by filesystem CAS and the SQLite event commit, or an equivalent
-   replay-safe protocol;
-4. closure of the documented same-user SQLite pathname race;
+3. closure of the documented same-user SQLite pathname and coherent offline-rewrite
+   boundary;
+4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
+   quotas, backup/restore, process-kill and power-fault recovery, and sensitive-evidence
+   access-control, encryption, and retention policy;
 5. structured independently produced execution evidence with a common measured run
    identity; and
 6. known-bads for every new refusal, substitution, replay, and concurrency condition.
 
 Current retained boundary: an authority-bound modeled verification assignment, every
 predeclared input, and one authenticated modeled receipt can be resolved and retained today.
-Receipt admission and lease consumption are one event. Explicit expiry, modeled
+All four implemented byte-claiming boundaries commit exact BLOBs, code-derived mappings,
+and their event together; committed replay and retry no longer depend on filesystem
+staging. Receipt admission and lease consumption are one event. Explicit expiry, modeled
 cancellation, atomic reassignment, and exact receipt-coverage closure can recover the
-mission without rewriting its history. This authenticates modeled statements and
-lifecycle decisions; it does not establish execution, independence, truth, or a finding.
+mission without rewriting its history. This authenticates and retains modeled statements
+and lifecycle decisions; it does not establish execution, independence, truth, or a
+finding.
 
 ## Phase 2 — independent proof plane
 

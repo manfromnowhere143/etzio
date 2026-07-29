@@ -1,9 +1,10 @@
-"""Kernel resolution of modeled verification artifacts from retained CAS bytes.
+"""Kernel resolution of modeled verification artifacts from retained evidence bytes.
 
 This command derives every reference and expected type from canonical mission history,
-reads and rehashes the referenced bytes, and appends one historical resolution event.  It
-does not accept a receipt, consume a lease, execute an artifact, evaluate an oracle,
-adjudicate a verdict, or mint a finding.
+loads canonical target dependencies vault-first, resolves genuinely first-seen typed
+inputs from exact staging, and appends one historical resolution event with all required
+BLOBs and mappings. It does not accept a receipt, consume a lease, execute an artifact,
+evaluate an oracle, adjudicate a verdict, or mint a finding.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from ..evidence import (
     EvidenceError,
     FileEvidenceStore,
     TargetSnapshotV1,
-    validate_etzio_fixture_snapshot,
+    validate_etzio_fixture_snapshot_bytes,
 )
 from ..mission_v1 import StaticCandidateV1
 from ..protocol import EnvelopeV1, ProtocolError, canonical_dumps, thaw_json
@@ -33,8 +34,26 @@ from ..verification_artifacts import (
     VerificationArtifactResolutionV1,
 )
 from .events_v1 import EventV1
+from .evidence_vault import (
+    TARGET_SOURCE_ROLE_V1,
+    VERIFICATION_EFFECT_ORACLE_SPEC_ROLE_V1,
+    VERIFICATION_ENVIRONMENT_SPEC_ROLE_V1,
+    VERIFICATION_POC_INPUT_ROLE_V1,
+    VERIFICATION_SUPPORTING_EVIDENCE_INPUT_ROLE_V1,
+    VaultArtifactResolutionRequestV1,
+    VaultEventArtifactSelectorV1,
+)
 from .reducer import MissionProjection, ProjectionPhase, reduce_events
-from .store import SQLiteEventStore, StaleHeadError
+from .store import (
+    EventStoreCorruptionError,
+    EventStoreError,
+    EvidenceVaultRequestError,
+    SQLiteEventStore,
+    StaleHeadError,
+    StoreBusyError,
+    StoreCapacityError,
+    StoreOperationalError,
+)
 
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 
@@ -42,7 +61,28 @@ _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 class _EventStorePort(Protocol):
     def load(self, mission_id: str) -> tuple[EventV1, ...]: ...
 
-    def append(self, event: EventV1, *, expected_head: str) -> EventV1: ...
+    def append_evidence_event(
+        self,
+        event: EventV1,
+        *,
+        expected_head: str,
+        evidence_store: FileEvidenceStore,
+    ) -> EventV1: ...
+
+    def load_event_artifacts(
+        self,
+        selectors: tuple[VaultEventArtifactSelectorV1, ...],
+        *,
+        maximum_total: int,
+    ) -> tuple[bytes, ...]: ...
+
+    def resolve_evidence_artifacts(
+        self,
+        requests: tuple[VaultArtifactResolutionRequestV1, ...],
+        evidence_store: FileEvidenceStore,
+        *,
+        maximum_total: int,
+    ) -> tuple[bytes, ...]: ...
 
 
 class VerificationArtifactResolutionError(ProtocolError):
@@ -89,15 +129,20 @@ def _validate_request(
     str,
     int,
 ]:
-    if not callable(getattr(event_store, "load", None)) or not callable(getattr(event_store, "append", None)):
+    if (
+        not callable(getattr(event_store, "load", None))
+        or not callable(getattr(event_store, "append_evidence_event", None))
+        or not callable(getattr(event_store, "load_event_artifacts", None))
+        or not callable(getattr(event_store, "resolve_evidence_artifacts", None))
+    ):
         _reject(
             "invalid_event_store",
-            "event_store must provide load and append operations",
+            "event_store must provide load, vault resolution, and evidence append operations",
         )
-    if not isinstance(evidence_store, FileEvidenceStore):
+    if type(evidence_store) is not FileEvidenceStore:
         _reject(
             "invalid_evidence_store",
-            "evidence_store must be a FileEvidenceStore",
+            "evidence_store must be an exact FileEvidenceStore",
         )
     mission = _require_digest("mission_id", mission_id)
     head = _require_digest("expected_head", expected_head)
@@ -196,49 +241,36 @@ def _existing_resolution(
     return found
 
 
-def _read_generic(
+def _read_typed_batch(
+    event_store: _EventStorePort,
     evidence_store: FileEvidenceStore,
     *,
-    digest: str,
-    expected_size: int,
+    specs: tuple[tuple[str, str, str], ...],
     maximum: int,
-) -> bytes:
-    if expected_size > maximum:
-        _reject(
-            "resolution_byte_ceiling_exceeded",
-            "target artifacts exceed the available resolution byte budget",
-        )
+) -> tuple[bytes, ...]:
     try:
-        data = evidence_store.get(digest, maximum=expected_size)
-    except EvidenceError as exc:
-        _reject(
-            "target_artifact_unavailable",
-            f"target artifact cannot be resolved: {exc}",
+        return event_store.resolve_evidence_artifacts(
+            tuple(
+                VaultArtifactResolutionRequestV1(
+                    role=vault_role,
+                    digest=digest,
+                    maximum=maximum,
+                )
+                for _, vault_role, digest in specs
+            ),
+            evidence_store,
+            maximum_total=maximum,
         )
-    if len(data) != expected_size:
-        _reject(
-            "target_artifact_size_mismatch",
-            "target artifact size differs from the retained snapshot",
-        )
-    return data
-
-
-def _read_typed(
-    evidence_store: FileEvidenceStore,
-    *,
-    digest: str,
-    artifact_type: str,
-    role: str,
-    maximum: int,
-) -> bytes:
-    try:
-        return evidence_store.get_typed(
-            digest,
-            expected_type=artifact_type,
-            maximum=maximum,
-        )
-    except EvidenceError as exc:
-        if str(exc) == "evidence artifact exceeds configured limit":
+    except (
+        EventStoreCorruptionError,
+        StoreBusyError,
+        StoreCapacityError,
+        StoreOperationalError,
+    ):
+        raise
+    except EvidenceVaultRequestError as exc:
+        role = specs[exc.request_index][0]
+        if exc.reason_code in {"artifact_limit", "batch_limit"}:
             _reject(
                 "resolution_byte_ceiling_exceeded",
                 "typed verification inputs exceed the admitted byte ceiling",
@@ -247,10 +279,16 @@ def _read_typed(
             f"{role}_artifact_unavailable",
             f"{role} artifact cannot be resolved under its expected type: {exc}",
         )
+    except (EvidenceError, EventStoreError) as exc:
+        _reject(
+            "verification_artifact_unavailable",
+            f"typed verification inputs cannot be resolved: {exc}",
+        )
 
 
 def _resolve_from_cas(
     *,
+    event_store: _EventStorePort,
     evidence_store: FileEvidenceStore,
     projection: MissionProjection,
     lease: VerificationLeaseV1,
@@ -263,14 +301,6 @@ def _resolve_from_cas(
             "target_mismatch",
             "verification lease target differs from the retained snapshot",
         )
-    try:
-        validate_etzio_fixture_snapshot(snapshot, evidence_store)
-    except EvidenceError as exc:
-        _reject(
-            "target_manifest_mismatch",
-            f"target snapshot no longer matches the immutable fixture manifest: {exc}",
-        )
-
     target_bytes = sum(value.size for value in snapshot.files)
     if target_bytes > grant.max_bytes:
         _reject(
@@ -278,14 +308,49 @@ def _resolve_from_cas(
             "target bytes exhaust the signed resolution byte ceiling",
         )
 
+    mission_opened_event = next(
+        (
+            event
+            for event in projection.events
+            if event.kind == "mission_opened"
+        ),
+        None,
+    )
+    if mission_opened_event is None:
+        _reject(
+            "target_not_retained",
+            "artifact resolution requires a retained target snapshot",
+        )
+    resolved_sources = event_store.load_event_artifacts(
+        tuple(
+            VaultEventArtifactSelectorV1(
+                event_digest=mission_opened_event.event_digest,
+                role=TARGET_SOURCE_ROLE_V1,
+                ordinal=ordinal,
+            )
+            for ordinal, _ in enumerate(snapshot.files)
+        ),
+        maximum_total=target_bytes,
+    )
+    source_bytes = {
+        snapshot_file.relative_path: data
+        for snapshot_file, data in zip(
+            snapshot.files,
+            resolved_sources,
+            strict=True,
+        )
+    }
+    try:
+        validate_etzio_fixture_snapshot_bytes(snapshot, source_bytes)
+    except EvidenceError as exc:
+        _reject(
+            "target_manifest_mismatch",
+            f"canonical target bytes differ from the immutable fixture manifest: {exc}",
+        )
+
     target_bindings: list[TargetArtifactBindingV1] = []
     for snapshot_file in snapshot.files:
-        data = _read_generic(
-            evidence_store,
-            digest=snapshot_file.artifact_digest,
-            expected_size=snapshot_file.size,
-            maximum=snapshot_file.size,
-        )
+        data = source_bytes[snapshot_file.relative_path]
         target_bindings.append(
             TargetArtifactBindingV1(
                 artifact_digest=snapshot_file.artifact_digest,
@@ -299,44 +364,55 @@ def _resolve_from_cas(
         grant.max_bytes - target_bytes,
         MAX_TYPED_VERIFICATION_INPUT_BYTES_V1,
     )
-    remaining = typed_limit
-
-    def resolve_singleton(
-        *,
-        digest: str,
-        role: str,
-    ) -> VerificationArtifactBindingV1:
-        nonlocal remaining
-        artifact_type = VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1[role]
-        data = _read_typed(
-            evidence_store,
-            digest=digest,
-            artifact_type=artifact_type,
-            role=role,
-            maximum=remaining,
+    typed_specs = (
+        (
+            "poc",
+            VERIFICATION_POC_INPUT_ROLE_V1,
+            lease.poc_artifact_digest,
+        ),
+        (
+            "environment",
+            VERIFICATION_ENVIRONMENT_SPEC_ROLE_V1,
+            lease.environment_digest,
+        ),
+        (
+            "effect_oracle",
+            VERIFICATION_EFFECT_ORACLE_SPEC_ROLE_V1,
+            lease.effect_oracle_id,
+        ),
+        *(
+            (
+                "evidence",
+                VERIFICATION_SUPPORTING_EVIDENCE_INPUT_ROLE_V1,
+                digest,
+            )
+            for digest in lease.evidence_artifact_digests
+        ),
+    )
+    typed_bytes = _read_typed_batch(
+        event_store,
+        evidence_store,
+        specs=typed_specs,
+        maximum=typed_limit,
+    )
+    if sum(len(data) for data in typed_bytes) > typed_limit:
+        _reject(
+            "resolution_byte_ceiling_exceeded",
+            "typed verification inputs exceed the admitted byte ceiling",
         )
-        remaining -= len(data)
-        return VerificationArtifactBindingV1(
+    typed_bindings = tuple(
+        VerificationArtifactBindingV1(
             artifact_digest=digest,
-            artifact_type=artifact_type,
+            artifact_type=VERIFICATION_ARTIFACT_TYPE_BY_ROLE_V1[role],
             size=len(data),
         )
-
-    poc = resolve_singleton(
-        digest=lease.poc_artifact_digest,
-        role="poc",
+        for (role, _, digest), data in zip(
+            typed_specs,
+            typed_bytes,
+            strict=True,
+        )
     )
-    environment = resolve_singleton(
-        digest=lease.environment_digest,
-        role="environment",
-    )
-    effect_oracle = resolve_singleton(
-        digest=lease.effect_oracle_id,
-        role="effect_oracle",
-    )
-    evidence: list[VerificationArtifactBindingV1] = []
-    for digest in lease.evidence_artifact_digests:
-        evidence.append(resolve_singleton(digest=digest, role="evidence"))
+    poc, environment, effect_oracle, *evidence = typed_bindings
 
     try:
         resolution = VerificationArtifactResolutionV1.issue(
@@ -375,27 +451,12 @@ def _replay_existing(
     projection: MissionProjection,
     existing_event: EventV1,
     existing_resolution: VerificationArtifactResolutionV1,
-    evidence_store: FileEvidenceStore,
-    lease: VerificationLeaseV1,
-    grant: AuthorityGrantV1,
     decision_time: int,
 ) -> VerificationArtifactResolution:
     if existing_resolution.resolved_at != decision_time:
         _reject(
             "verification_lease_resolution_conflict",
             "verification lease already has a resolution at a different time",
-        )
-    current = _resolve_from_cas(
-        evidence_store=evidence_store,
-        projection=projection,
-        lease=lease,
-        resolved_at=decision_time,
-        grant=grant,
-    )
-    if current.to_envelope().to_bytes() != existing_resolution.to_envelope().to_bytes():
-        _reject(
-            "retained_resolution_mismatch",
-            "retained artifact resolution differs from current typed CAS bytes",
         )
     return VerificationArtifactResolution(
         projection=projection,
@@ -457,9 +518,6 @@ def resolve_modeled_fixture_verification_artifacts(
             projection=projection,
             existing_event=existing[0],
             existing_resolution=existing[1],
-            evidence_store=evidence_store,
-            lease=lease,
-            grant=grant,
             decision_time=decision_time,
         )
 
@@ -493,6 +551,7 @@ def resolve_modeled_fixture_verification_artifacts(
         )
 
     resolution = _resolve_from_cas(
+        event_store=event_store,
         evidence_store=evidence_store,
         projection=projection,
         lease=lease,
@@ -512,7 +571,11 @@ def resolve_modeled_fixture_verification_artifacts(
     )
     reduce_events((*retained, event))
     try:
-        event_store.append(event, expected_head=expected_head)
+        event_store.append_evidence_event(
+            event,
+            expected_head=expected_head,
+            evidence_store=evidence_store,
+        )
     except StaleHeadError:
         raced_projection = reduce_events(event_store.load(mission_id))
         raced_existing = _existing_resolution(
@@ -525,12 +588,6 @@ def resolve_modeled_fixture_verification_artifacts(
             projection=raced_projection,
             existing_event=raced_existing[0],
             existing_resolution=raced_existing[1],
-            evidence_store=evidence_store,
-            lease=_verification_lease(
-                raced_projection,
-                verification_lease_id,
-            ),
-            grant=_grant(raced_projection),
             decision_time=decision_time,
         )
 

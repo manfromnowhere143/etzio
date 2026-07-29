@@ -4,10 +4,10 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/sqlite-wal-reset-safety-v1",
+  "active_branch": "agent/transactional-evidence-vault-v1",
   "foundation_base": {
-    "commit": "5d0de3915a0b44f90668d0a66ecb27bcd4f24d48",
-    "tree": "6d782f93f12495e16ba4d4158ec5e13ddf703006"
+    "commit": "d2807dd2ea71704cb9db95bab7401d75df6ea8b6",
+    "tree": "6527a9c6e55974b7a8165a5adcbf30f715666a7d"
   },
   "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
   "author": {
@@ -53,7 +53,7 @@
     "full domain-separated SHA-256 object and event identities",
     "signed authority grants and self-verifying admissions",
     "prime-subgroup Ed25519 validation for configured and embedded trust snapshots",
-    "content-addressed repository-fixture target snapshots",
+    "bounded private content-addressed filesystem staging and cache for repository-fixture bytes",
     "bounded analysis leases and stable candidate identities",
     "byte-bound Python AST analyzer without a production filesystem walker",
     "lifecycle-validated append-only SQLite event streams and replay",
@@ -61,18 +61,27 @@
     "pre-open refusal of persistent WAL state with explicit offline migration required",
     "exact WAL-reset fix classification plus SQLite minimum and major-version admission",
     "retained runtime-reported SQLite version and source identity with isolated versus repository-context agreement",
+    "exact SQLite application_id 0x45545A31 (ASCII ETZ1) and user_version 1 with transactional initialization and full schema-shape validation",
+    "explicit refusal of malformed unknown or nonempty pre-vault event state pending an offline migration",
+    "canonical append-only SQLite evidence vault retaining deduplicated exact immutable BLOBs and complete code-derived event-role mappings",
+    "immutable first-origin event provenance per unique vault BLOB plus a covering reverse artifact-identity size and event index",
+    "single-transaction BLOB mapping and event retention for authority_admitted mission_opened verification_artifacts_resolved and verifier_receipt_admitted",
+    "generic append refusal for every protected byte-claiming event",
+    "canonical-vault-first reuse plus staging-independent committed replay and retry with corruption never falling back to staging",
+    "bounded batched production reads that follow immutable first origins or exact event owners reduce each distinct required mission once share one rehash per distinct BLOB across complete histories and cache requested responses only",
+    "fixed authority target resolution output and grant bounds plus a default 1 GiB configurable per-opening logical unique-vault-byte ceiling",
     "distinct refusal, failure, cancellation, timeout, budget, completion, and closure states",
     "kernel-issued authority-bound modeled-fixture verification leases",
     "retained verifier trust and revocation snapshots for replayable lease assignment",
-    "type-domain-separated CAS identities for modeled verification input roles",
+    "type-domain-separated content identities for modeled verification input roles",
     "canonical per-lease resolution of target and verification input bytes",
-    "CAS-aware exact retry and deterministic historical replay of verification artifact resolutions",
+    "vault-first exact retry and deterministic historical replay of verification artifact resolutions without staging",
     "signed modeled receipts binding retained resolution and four typed output digest-size pairs",
-    "code-owned typed CAS identities and fixed-order validation for modeled execution effect measured-environment and termination outputs",
+    "code-owned typed content identities and fixed-order vault-first validation for modeled execution effect measured-environment and termination outputs",
     "canonical receipt-admission history retaining decision trust evidence and derived output bindings",
     "atomic modeled-receipt admission and single-use verification-lease consumption",
-    "dedicated transaction-bound receipt append with repeated current-CAS validation",
-    "CAS-free committed receipt retry, deterministic crash recovery, one bounded SQLite-contention retry, identical-commit reconciliation, and retryable StoreBusyError exhaustion",
+    "dedicated transaction-bound receipt append with repeated exact manifest and byte validation",
+    "staging-independent committed receipt retry, deterministic injected post-commit caller-failure recovery, one bounded SQLite-contention retry, identical-commit reconciliation, and retryable StoreBusyError exhaustion",
     "explicit modeled verification-lease expiry and pre-deadline cancellation",
     "nonbranching per-candidate verification-lease lineages with atomic reassignment to a different verifier",
     "disjoint active expired cancelled superseded and consumed verification-lease replay states",
@@ -97,14 +106,16 @@
   "blocking_integrity_work": [
     "qualified trusted-time and revocation adapters plus lifecycle enforcement",
     "persisted authenticated external event-head anchoring monitoring and command finality",
-    "atomic retention shared by filesystem CAS and SQLite event commit",
     "structured independently produced execution effect measured-environment and termination evidence",
-    "closure of the documented SQLite same-user pathname race",
+    "closure of the documented SQLite same-user pathname and coherent offline-rewrite boundary",
+    "qualification of an accepted SQLite VFS filesystem and device profile physical and journal quotas backup and restore process-kill and power-fault recovery plus sensitive-evidence access-control encryption and retention policy",
     "proved verifier principal, process, and isolation separation"
   ],
   "not_implemented": [
     "qualified trusted-time revocation anchor and monitor adapters",
     "persisted typed checkpoints and crash-safe anchor-final command state machine",
+    "offline conversion tooling for persistent-WAL event databases",
+    "offline backfill tooling for nonempty pre-vault event databases",
     "isolated exploit construction",
     "separately isolated independent verification",
     "kernel-minted findings",
@@ -115,8 +126,8 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 675,
+    "validation_status": "local_release_suites_passed_github_pending",
+    "test_count": 730,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -126,9 +137,15 @@
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
+    "github_validated_commit": null,
+    "github_actions_run_id": null,
+    "claim_boundary": "closes Etzio-created exposure to the disclosed SQLite WAL-reset defect for the declared runtime matrix and closes the ordinary filesystem-staging and SQLite event-retention split at the four implemented byte-claiming boundaries; no same-user or offline-rewrite safety, general storage safety, execution truth, real-world precision, finding validity, isolation, live authorization, learning, or superiority claim"
+  },
+  "inherited_foundation_evidence": {
+    "validation_status": "local_and_github_release_suites_passed",
     "github_validated_commit": "4dfbcc319a63a14a3a223b80b1740fbd05fc676e",
     "github_actions_run_id": 30438318919,
-    "claim_boundary": "closes Etzio-created exposure to the disclosed SQLite WAL-reset defect for the declared runtime matrix only; no general storage safety, real-world precision, finding validity, isolation, live authorization, learning, or superiority claim"
+    "claim_boundary": "prior SQLite rollback-journal safety implementation only; predates and does not validate the transactional evidence vault"
   },
   "external_blockers": [
     {
@@ -138,6 +155,10 @@
     {
       "capability": "isolated MARCELLUS and CATO execution",
       "blocker": "separately authorized Linux/KVM host and accepted isolation profile"
+    },
+    {
+      "capability": "qualified durable evidence storage",
+      "blocker": "accepted SQLite VFS filesystem and device profile physical and journal quotas backup and restore process-kill and power-fault qualification plus sensitive-evidence access-control encryption and retention policy"
     },
     {
       "capability": "live bounty mission",
@@ -157,6 +178,7 @@
     "docs/decisions/0006-atomic-modeled-receipt-admission.md",
     "docs/decisions/0007-explicit-verification-lease-recovery.md",
     "docs/decisions/0008-typed-integrity-evidence-contract.md",
-    "docs/decisions/0009-uniform-sqlite-rollback-journal-safety.md"
+    "docs/decisions/0009-uniform-sqlite-rollback-journal-safety.md",
+    "docs/decisions/0010-transactional-evidence-vault.md"
   ]
 }

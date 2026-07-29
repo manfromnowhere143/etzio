@@ -30,7 +30,11 @@ from etzio.kernel.artifact_resolution import (
 from etzio.kernel.events_v1 import EventIntegrityError, EventV1
 from etzio.kernel.fixture_scan import prepare_fixture_scan_for_verification
 from etzio.kernel.reducer import ProjectionPhase, ReductionError, reduce_events
-from etzio.kernel.store import SQLiteEventStore, StaleHeadError
+from etzio.kernel.store import (
+    SQLiteEventStore,
+    StaleHeadError,
+    StoreCapacityError,
+)
 from etzio.kernel.verification_lease import (
     issue_modeled_fixture_verification_lease,
 )
@@ -237,6 +241,28 @@ def _resolve(
     )
 
 
+def test_typed_resolution_propagates_vault_capacity_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    harness = _setup(tmp_path)
+
+    def capacity_failure(self, requests, evidence_store, *, maximum_total):
+        raise StoreCapacityError("simulated resolution vault capacity failure")
+
+    monkeypatch.setattr(
+        SQLiteEventStore,
+        "resolve_evidence_artifacts",
+        capacity_failure,
+    )
+    with SQLiteEventStore(harness.database) as store:
+        with pytest.raises(
+            StoreCapacityError,
+            match="simulated resolution vault capacity failure",
+        ):
+            _resolve(harness, event_store=store)
+
+
 def test_resolution_is_content_bound_replayable_and_nonconsequential(
     tmp_path: Path,
 ) -> None:
@@ -438,7 +464,7 @@ def test_wrong_typed_role_appends_no_partial_state(
     assert projection.verification_artifact_resolution_events == ()
 
 
-def test_target_manifest_is_revalidated_before_resolution(
+def test_canonical_target_vault_wins_over_staging_substitution_before_resolution(
     tmp_path: Path,
 ) -> None:
     harness = _setup(tmp_path)
@@ -451,12 +477,12 @@ def test_target_manifest_is_revalidated_before_resolution(
     harness.evidence_store._path_for(target_digest).write_bytes(b"substituted-target")
 
     with SQLiteEventStore(harness.database) as store:
-        with pytest.raises(VerificationArtifactResolutionError) as caught:
-            _resolve(harness, event_store=store)
+        resolved = _resolve(harness, event_store=store)
         projection = reduce_events(store.load(harness.mission_id))
 
-    assert caught.value.reason_code == "target_manifest_mismatch"
-    assert projection.verification_artifact_resolution_events == ()
+    assert not resolved.replayed
+    assert resolved.resolution.target_artifacts[0].artifact_digest == target_digest
+    assert projection.verification_artifact_resolution_events == (resolved.event,)
 
 
 def test_typed_inputs_cannot_exceed_the_budget_remaining_after_target_bytes(
@@ -719,8 +745,59 @@ class _CrashAfterResolutionAppend:
     def load(self, mission_id: str):
         return self.store.load(mission_id)
 
-    def append(self, event: EventV1, *, expected_head: str):
-        result = self.store.append(event, expected_head=expected_head)
+    def load_event_artifact(
+        self,
+        event_digest: str,
+        role: str,
+        ordinal: int = 0,
+    ):
+        return self.store.load_event_artifact(event_digest, role, ordinal)
+
+    def load_event_artifacts(self, selectors, *, maximum_total: int):
+        return self.store.load_event_artifacts(
+            selectors,
+            maximum_total=maximum_total,
+        )
+
+    def resolve_evidence_artifact(
+        self,
+        role: str,
+        digest: str,
+        maximum: int,
+        evidence_store: FileEvidenceStore,
+    ):
+        return self.store.resolve_evidence_artifact(
+            role,
+            digest,
+            maximum,
+            evidence_store,
+        )
+
+    def resolve_evidence_artifacts(
+        self,
+        requests,
+        evidence_store: FileEvidenceStore,
+        *,
+        maximum_total: int,
+    ):
+        return self.store.resolve_evidence_artifacts(
+            requests,
+            evidence_store,
+            maximum_total=maximum_total,
+        )
+
+    def append_evidence_event(
+        self,
+        event: EventV1,
+        *,
+        expected_head: str,
+        evidence_store: FileEvidenceStore,
+    ):
+        result = self.store.append_evidence_event(
+            event,
+            expected_head=expected_head,
+            evidence_store=evidence_store,
+        )
         if event.kind == "verification_artifacts_resolved" and not self.crashed:
             self.crashed = True
             raise RuntimeError("simulated process loss after durable resolution")
@@ -790,7 +867,7 @@ def test_tampered_event_digest_is_rejected(
         replace(result.event, event_digest=_digest("f"))
 
 
-def test_retry_fails_closed_when_cas_bytes_disappear(
+def test_exact_retry_uses_canonical_vault_when_staging_bytes_disappear(
     tmp_path: Path,
 ) -> None:
     harness = _setup(tmp_path)
@@ -800,12 +877,66 @@ def test_retry_fails_closed_when_cas_bytes_disappear(
     harness.evidence_store._path_for(poc_digest).unlink()
 
     with SQLiteEventStore(harness.database) as store:
-        with pytest.raises(VerificationArtifactResolutionError) as caught:
-            _resolve(harness, event_store=store)
+        replayed = _resolve(harness, event_store=store)
         historical = reduce_events(store.load(harness.mission_id))
 
-    assert caught.value.reason_code == "poc_artifact_unavailable"
+    assert replayed.replayed
+    assert replayed.event == result.event
+    assert replayed.resolution == result.resolution
     assert historical.verification_artifact_resolution_events == (result.event,)
+
+
+def test_new_resolution_reuses_canonical_typed_inputs_after_staging_loss(
+    tmp_path: Path,
+) -> None:
+    harness = _setup(tmp_path)
+    with SQLiteEventStore(harness.database) as store:
+        first = _resolve(harness, event_store=store)
+        projection = reduce_events(store.load(harness.mission_id))
+        second_candidate_id = thaw_json(
+            projection.candidate_events[1].payload
+        )["candidate"]["object_id"]
+        second_lease = issue_modeled_fixture_verification_lease(
+            event_store=store,
+            mission_id=harness.mission_id,
+            expected_head=first.event.event_digest,
+            candidate_id=second_candidate_id,
+            **harness.bindings,
+            verifier_key_id=harness.verifier_signer.key_id,
+            verifier_trust_store=harness.verifier_trust,
+            decision_time=NOW + 3,
+            requested_wallclock_seconds=60,
+        )
+        typed_digests = (
+            harness.bindings["poc_artifact_digest"],
+            *harness.bindings["evidence_artifact_digests"],
+            harness.bindings["environment_digest"],
+            harness.bindings["effect_oracle_id"],
+        )
+        for digest in typed_digests:
+            assert isinstance(digest, str)
+            harness.evidence_store._path_for(digest).unlink()
+
+        reused = resolve_modeled_fixture_verification_artifacts(
+            event_store=store,
+            evidence_store=harness.evidence_store,
+            mission_id=harness.mission_id,
+            expected_head=second_lease.event.event_digest,
+            verification_lease_id=second_lease.lease.lease_id,
+            decision_time=NOW + 4,
+        )
+
+    assert not reused.replayed
+    assert reused.resolution.poc_artifact == first.resolution.poc_artifact
+    assert reused.resolution.evidence_artifacts == (
+        first.resolution.evidence_artifacts
+    )
+    assert reused.resolution.environment_artifact == (
+        first.resolution.environment_artifact
+    )
+    assert reused.resolution.effect_oracle_artifact == (
+        first.resolution.effect_oracle_artifact
+    )
 
 
 def test_cancelled_lease_rejects_even_an_exact_historical_resolution_retry(

@@ -21,14 +21,16 @@ scientific authority remain in the kernel.
 > Python analyzer under a bounded lease, and commits lifecycle-checked events to SQLite. A
 > verification-intent mission can also retain a kernel-issued, authority-bound
 > modeled-fixture verification lease for a retained candidate, resolve every target and
-> predeclared verification-input byte under an exact CAS type, and atomically admit one
-> authenticated modeled receipt while consuming its lease. The receipt signs the retained
-> resolution and four exact typed output digest/size pairs. Explicit expiry, modeled
-> cancellation, atomic reassignment, and receipt-coverage closure now recover
-> verification-intent missions without rewriting history. Etzio does not construct or
-> execute exploits, establish that those opaque outputs came from an execution, adjudicate
-> a finding, access a live target, or learn. No production-readiness or superiority claim
-> is made.
+> predeclared verification-input byte under an exact content-identity type, and atomically
+> admit one authenticated modeled receipt while consuming its lease. A versioned SQLite
+> evidence vault now commits the exact BLOBs, code-derived role mappings, and canonical
+> event together at all four implemented byte-claiming boundaries; the filesystem evidence
+> store is staging and cache only. The receipt signs the retained resolution and four exact
+> typed output digest/size pairs. Explicit expiry, modeled cancellation, atomic
+> reassignment, and receipt-coverage closure recover verification-intent missions without
+> rewriting history. Etzio does not construct or execute exploits, establish that those
+> opaque outputs came from an execution, adjudicate a finding, access a live target, or
+> learn. No production-readiness or superiority claim is made.
 
 ## Why Etzio
 
@@ -94,7 +96,8 @@ The protocol-v1 foundation includes:
   principals;
 - exact-type composition boundaries that copy trust and policy inputs and rebuild fresh
   authenticated snapshots from verified wire before continuity logic runs;
-- exact fixture manifests and a private content-addressed evidence store;
+- exact fixture manifests, a bounded private filesystem staging/cache store, and a
+  canonical SQLite evidence vault retaining exact immutable BLOBs;
 - immutable target, authority, lease, candidate, receipt, and event objects;
 - kernel-issued verification-lease events binding retained authority, target, candidate,
   modeled-fixture grant evidence, and the exact issuance-trust snapshot identity;
@@ -103,15 +106,23 @@ The protocol-v1 foundation includes:
   byte to the retained lease;
 - a signed receipt binding that exact resolution plus execution, effect,
   measured-environment, and termination output digest/size pairs under four separate
-  code-owned CAS types;
+  code-owned artifact types;
 - one atomic receipt-admission event that retains the complete decision trust view,
   preserves every allowed verdict, and derives single-use lease consumption through
   replay;
 - explicit lease expiry, modeled cancellation, atomic nonbranching reassignment, and
   terminal receipt-coverage events with exhaustive candidate partitions;
+- atomic event, role-mapping, and BLOB retention for `authority_admitted`,
+  `mission_opened`, `verification_artifacts_resolved`, and
+  `verifier_receipt_admitted`, with code-derived manifests, staging-independent committed
+  replay/retry, and fail-closed corruption handling;
+- a strict Etzio-identified and versioned SQLite schema with explicit refusal of nonempty
+  pre-vault state, bounded direct BLOB ingestion, a configurable per-opening logical
+  unique-byte ceiling that defaults to 1 GiB, and the existing per-event and authority
+  bounds;
 - uniform compare-and-append SQLite `DELETE`/`EXTRA` storage across every declared runtime,
   with pre-open WAL-header refusal, loaded-version/fix diagnostics, and replay-time
-  lifecycle validation; and
+  lifecycle and vault-integrity validation; and
 - known-bad tests for signature, scope, identity, lifecycle, budget, corruption, replay,
   and filesystem-boundary failures.
 
@@ -131,8 +142,8 @@ unconnected gate.
 flowchart LR
     AQ["AQUILA<br/>authority · budgets · leases"]
     K["ETZIO kernel<br/>protocol · lifecycle · replay"]
-    CAS[("Typed CAS<br/>exact fixture bytes")]
-    DB[("SQLite event ledger<br/>append + replay")]
+    S[("Filesystem staging/cache<br/>bounded pre-ingestion bytes")]
+    DB[("SQLite evidence vault<br/>BLOBs · role mappings · events")]
     V["VELITES<br/>byte-bound AST observations"]
     C["Stable candidates<br/>not findings"]
     L["Modeled verification lease<br/>resolution · recovery"]
@@ -144,7 +155,7 @@ flowchart LR
     N["MINERVA<br/>offline promotion"]
 
     AQ --> K
-    K <--> CAS
+    S -->|"first canonical ingestion"| K
     K <--> DB
     K --> V --> C --> L
     L -->|"modeled statement only"| R
@@ -157,7 +168,7 @@ flowchart LR
 
     classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
     classDef modeled fill:#fff3bf,stroke:#e67700,color:#3b2f00;
-    class AQ,K,CAS,DB,V,C,L,R implemented;
+    class AQ,K,S,DB,V,C,L,R implemented;
     class M,T,A,F,N modeled;
 ```
 
@@ -245,20 +256,29 @@ mkdir -m 700 .etzio-state
 .venv/bin/etzio --fixture vulnerable --state-dir .etzio-state
 ```
 
+Existing persistent-WAL databases and nonempty pre-vault event databases are refused.
+Neither conversion tool exists yet. Use a fresh state path and preserve the refused
+database plus journal bytes unchanged until an explicit stop-the-world migration is
+implemented and qualified.
+
 ## Open gates and next mission
 
 The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments,
 typed input resolutions, atomic modeled-receipt admission, explicit lease recovery, and
-the typed integrity-evidence contract are retained. Completing the foundation-integrity
-boundary still requires:
+the typed integrity-evidence contract are retained. The transactional SQLite vault closes
+the ordinary filesystem-staging/SQLite retention split for all four implemented
+byte-claiming event boundaries. Completing the foundation-integrity boundary still
+requires:
 
 1. qualify external trusted-time, revocation, and head-anchor adapters, then require their
    evidence and crash-safe anchor finality at each consequential command;
-2. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
-   pathname race;
-3. replace opaque modeled outputs with structured, independently produced execution
+2. close the documented same-user SQLite pathname and coherent offline-rewrite boundary;
+3. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
+   quotas, backup/restore, and process-kill and power-fault recovery; sensitive evidence
+   also requires access-control, encryption, and retention policy;
+4. replace opaque modeled outputs with structured, independently produced execution
    evidence; and
-4. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
+5. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
 
 Only then should Etzio run the benchmark-first EVM pack. Live bounty work remains a later,
 target-specific authorization stage.

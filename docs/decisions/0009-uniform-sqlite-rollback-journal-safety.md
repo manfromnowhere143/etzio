@@ -3,6 +3,8 @@
 - Status: accepted
 - Date: 2026-07-29
 - Owner: Daniel Wahnich
+- Superseded in part: the deferred filesystem/SQLite retention work by
+  [ADR-0010](0010-transactional-evidence-vault.md)
 
 ## Context
 

@@ -62,13 +62,17 @@ outcome, not authority to touch a third-party system.
 The first governed fixture vertical slice now has a canonical protocol envelope, signed
 authority admission, content-addressed target snapshot, stable candidates, lifecycle-checked
 SQLite replay, semantic schemas for every typed wire kind, fail-closed terminal states,
-kernel-issued authority-bound modeled-fixture verification leases, typed CAS resolution for
+kernel-issued authority-bound modeled-fixture verification leases, typed resolution for
 every modeled verification input, atomic modeled-receipt admission, single-use lease
-consumption, and known-bad controls. The receipt signs the retained resolution and four
-typed output digest/size pairs, but those opaque outputs do not establish execution or a
-finding. Canonical per-candidate lease lineages now retain explicit expiry, modeled
-cancellation, atomic reassignment to a different verifier, single-use receipt consumption,
-and complete or incomplete receipt-coverage closure.
+consumption, and known-bad controls. A versioned SQLite evidence vault now atomically
+retains the exact BLOBs, code-derived mappings, and event at all four implemented
+byte-claiming boundaries; the filesystem evidence store is staging/cache only. Committed
+replay and retry are staging-independent, and canonical corruption never falls back to
+staging. The receipt signs the retained resolution and four typed output digest/size pairs,
+but those opaque outputs do not establish execution or a finding. Canonical per-candidate
+lease lineages now retain explicit expiry, modeled cancellation, atomic reassignment to a
+different verifier, single-use receipt consumption, and complete or incomplete
+receipt-coverage closure.
 
 The next-gate protocol contract now has typed, required-attestation integrity decisions and
 head checkpoints with proposed-event binding, conservative time intervals, typed provider
@@ -83,11 +87,13 @@ Close the remaining foundation-integrity gates before adding finder breadth:
 
 1. qualify trusted-time, revocation, and anchor adapters, then enforce the typed contract
    with crash-safe external head finality at consequential command boundaries;
-2. close the filesystem-CAS/SQLite atomic-retention gap and the documented same-user SQLite
-   pathname race;
-3. replace opaque modeled outputs with structured independently produced execution
+2. close the documented same-user SQLite pathname and coherent offline-rewrite boundary;
+3. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
+   quotas, backup/restore, process-kill and power-fault recovery, and sensitive-evidence
+   access-control, encryption, and retention policy;
+4. replace opaque modeled outputs with structured independently produced execution
    evidence; and
-4. prove every new refusal and concurrency invariant with a known-bad.
+5. prove every new refusal and concurrency invariant with a known-bad.
 
 Then build MARCELLUS and independent CATO execution on an explicitly accepted Linux/KVM
 profile before the benchmark-first EVM domain pack.

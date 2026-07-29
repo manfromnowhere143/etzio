@@ -1,10 +1,10 @@
 """Canonical historical records of modeled verification-artifact resolution.
 
 The objects in this module describe bytes that a kernel command resolved from Etzio's
-content-addressed evidence store under exact, role-derived types.  They do not accept a
+content-addressed evidence surfaces under exact, role-derived types. They do not accept a
 verifier receipt, consume a lease, execute an artifact, establish an observed effect, or
-mint a finding.  A retained resolution records a historical check; current CAS
-availability must be revalidated by the kernel command.
+mint a finding. A canonical retained resolution has exact vault BLOBs and mappings;
+standalone proposal validation over a supplied filesystem view remains non-authoritative.
 """
 
 from __future__ import annotations

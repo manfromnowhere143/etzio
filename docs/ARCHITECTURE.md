@@ -12,17 +12,18 @@ replaceable research workers, with policy authority and independent scientific v
 outside the generative workers.
 
 The first truthful vertical slice now exists. A signed fixture authority is admitted before
-mission opening; exact target bytes are retained by digest; VELITES analyzes those bytes
-under a bounded lease; canonical events are durably appended and replayed; and AQUILA can
-issue an authority-bound modeled-fixture verification lease for a retained candidate.
-ETZIO can then resolve every predeclared input under a code-owned CAS type and retain the
-exact resolution. It can also authenticate one modeled receipt that signs the resolution
-and four typed output digest/size pairs, retain the complete decision evidence, and consume
-the lease in the same event append. Canonical lease lineages now retain explicit expiry,
-modeled cancellation, atomic reassignment, and exact terminal receipt coverage. This is
-meaningful foundation progress, but it is candidate generation, verification assignment,
-byte resolution, modeled-statement admission, and lifecycle recovery—not a finding
-pipeline.
+mission opening; exact authority and target bytes are retained with their claiming events
+inside one SQLite transaction; VELITES analyzes those bytes under a bounded lease;
+canonical events are durably appended and replayed; and AQUILA can issue an
+authority-bound modeled-fixture verification lease for a retained candidate. ETZIO can
+then resolve every predeclared input under a code-owned artifact type and retain the exact
+resolution, BLOBs, and role mappings atomically. It can also authenticate one modeled
+receipt that signs the resolution and four typed output digest/size pairs, retain those
+exact output BLOBs with the complete decision evidence, and consume the lease in the same
+event append. Canonical lease lineages now retain explicit expiry, modeled cancellation,
+atomic reassignment, and exact terminal receipt coverage. This is meaningful foundation
+progress, but it is candidate generation, verification assignment, byte retention,
+modeled-statement admission, and lifecycle recovery—not a finding pipeline.
 
 ## Target system
 
@@ -66,18 +67,19 @@ The supported executable path is intentionally closed:
 
 ```text
 repository fixture manifest
-  → CAS artifacts + TargetSnapshotV1
+  → bounded filesystem staging/cache + TargetSnapshotV1
   → SignedAuthorityGrantV1
   → AuthorityAdmissionV1
-  → mission_opened
+  → authority_admitted + exact authority-evidence vault BLOB/role
+  → mission_opened + exact target vault BLOBs/roles
   → AnalysisLeaseV1
   → StaticCandidateV1 / explicit parse failure
   → scan_completed
   ├─ ordinary fixture scan → mission_closed
   └─ verification intent → VerificationLeaseV1
-                           ├─ VerificationArtifactResolutionV1
+                           ├─ VerificationArtifactResolutionV1 + input vault BLOBs/roles
                            │  → signed VerifierReceiptV1
-                           │  → verifier_receipt_admitted
+                           │  → verifier_receipt_admitted + output vault BLOBs/roles
                            ├─ verification_lease_expired
                            ├─ verification_lease_cancelled
                            └─ verification_lease_reassigned → successor lease
@@ -90,12 +92,13 @@ takes bytes and owns no filesystem walker.
 
 The verification-intent branch records an assignment, resolves its predeclared bytes, and
 can admit one authenticated modeled receipt while consuming its lease. Four separately
-typed output artifacts must already exist in the fixture evidence store; Etzio binds their
-exact signed digests and sizes but does not produce, parse, or execute them. The path cannot
-create or execute a PoC, run an oracle, establish an observed effect, or adjudicate a
-finding. Explicit lease recovery changes only canonical modeled lifecycle state. Network
-access, credentials, spending, disclosure, publication, and live-target interaction are
-absent.
+typed output artifacts must already exist in the canonical vault or exact filesystem
+staging store; first admission imports staged bytes into the transaction. Etzio binds and
+retains their exact signed digests and sizes but does not produce, parse, or execute them.
+The path cannot create or execute a PoC, run an oracle, establish an observed effect, or
+adjudicate a finding. Explicit lease recovery changes only canonical modeled lifecycle
+state. Network access, credentials, spending, disclosure, publication, and live-target
+interaction are absent.
 
 ## Protocol v1
 
@@ -222,10 +225,12 @@ clock and external authority-evidence procedure are required before live researc
 
 ## Evidence and target identity
 
-`FileEvidenceStore` retains immutable bytes by full SHA-256 digest under private directory
-and file modes. Reads reject symlinks, type changes, mode changes, size drift, hard-link
+`FileEvidenceStore` is the bounded private staging and cache surface before first canonical
+ingestion. It stores immutable names by full SHA-256 digest under private directory and
+file modes. Reads reject symlinks, type changes, mode changes, size drift, hard-link
 aliasing, and digest drift. Writes use exclusive creation, fsync, and post-write
-verification.
+verification. Filesystem availability after commit is not canonical retention and is not
+a replay invariant.
 
 Repository-fixture target bytes retain their original generic evidence identity. Modeled
 verification inputs use a separate type-domain digest:
@@ -240,7 +245,52 @@ measured environment, and termination. Generic reads cannot erase typed identity
 reads reject generic or wrong-type identities, and the kernel—not a caller—derives the
 expected type from each lease or receipt field.
 
-CAS publication is dirfd-relative and atomically no-clobber on supported Darwin
+The SQLite database is the canonical immutable evidence vault. `authority_admitted`,
+`mission_opened`, `verification_artifacts_resolved`, and
+`verifier_receipt_admitted` are protected byte-claiming boundaries. One
+`BEGIN IMMEDIATE` transaction validates locked lifecycle history and the proposed event,
+derives the exact artifact manifest in code, resolves an existing canonical identity or
+reads a first-seen artifact from exact filesystem staging, rehashes and bounds the bytes,
+inserts deduplicated exact BLOBs and complete event-role mappings, and inserts the event.
+Generic append rejects all four protected kinds.
+
+The vault preserves generic authority/target and typed verification digest domains as
+distinct identities. Exact committed replay and retry read canonical BLOBs and mappings
+without staging. Every load compares the retained mapping set with the code-derived event
+manifest, verifies type and size, and rehashes each BLOB retained for the loaded stream. A
+corrupt canonical identity never falls back to otherwise-valid staging bytes.
+
+Each unique BLOB retains its immutable first-origin event. A covering reverse index proves
+that the origin event maps the same identity and size without scanning the role table.
+Exact batch APIs admit at most 515 selectors or role-derived requests and at most 1 GiB of
+selected unique response identities. Identity resolution follows immutable first-origin
+events; selector loads follow exact event owners. Each distinct required mission is
+reduced once, and one shared rehash set ensures each distinct BLOB encountered across
+those complete histories is read and hashed at most once per batch; only requested
+identities remain in the response cache. Production target, verification-input, and
+receipt-output paths use these batches. The selected-response ceiling does not bound the
+additional integrity I/O needed to validate complete required histories.
+
+The strict schema has Etzio `application_id = 0x45545A31` (ASCII `ETZ1`) and
+`user_version = 1`. Empty new
+databases are initialized transactionally. Unknown, malformed, or nonempty pre-vault state
+is refused without promotion; importing a legacy event database requires a separately
+implemented stop-the-world migration that reconstructs and proves every protected event's
+complete byte coverage.
+
+Ingestion remains bounded even when one physical BLOB is deduplicated across events:
+authority evidence is limited to 16 MiB; target snapshots retain the existing 256-file and
+64 MiB aggregate bounds; one artifact resolution remains at most 128 MiB, including at
+most 64 MiB of typed inputs and the grant's tighter signed byte ceiling; receipt output is
+exactly four positive artifacts and at most 64 MiB total; and resolution plus output
+retains the grant's one non-resetting logical byte ceiling. Each store opening also
+enforces an exact configured logical unique-BLOB ceiling, defaulting to 1 GiB and counting
+each distinct identity-scheme/type/digest row once. This operational setting is not
+persisted authority and can differ on a later opening. Direct BLOB insertion is bounded,
+and streaming access is read-only; writable incremental BLOB handles are outside the
+immutable contract.
+
+Staging publication is dirfd-relative and atomically no-clobber on supported Darwin
 `renameatx_np(RENAME_EXCL)` and Linux libc `renameat2(RENAME_NOREPLACE)` filesystems. Etzio
 fails closed when the native primitive or filesystem support is absent; other operating
 systems and older/missing libc surfaces are not currently supported by this store.
@@ -249,8 +299,10 @@ systems and older/missing libc surfaces are not currently supported by this stor
 sizes, and aggregate size. The governed runner revalidates the repository fixture against
 the checked-in manifest before analysis.
 
-Limits: the current CAS is local filesystem storage, not a multi-tenant access-control,
-retention, encryption, or legal-evidence service.
+Limits: neither staging nor the SQLite vault is a multi-tenant access-control, encryption,
+or legal-evidence service. The configured logical quota does not bound SQLite pages,
+rollback-journal headroom, backups, or device consumption; deployment must bound those
+separately.
 
 ## Event kernel and replay
 
@@ -267,7 +319,11 @@ authority, target, decision time, typed payload, and previous event digest.
 - rejects SQLite before 3.37.0 and unknown major versions, classifies the exact 2026
   WAL-reset fix lines for diagnostics, and refuses connection settings outside the
   uniform policy;
-- stores exact canonical event bytes;
+- requires the exact Etzio application identifier, schema version, schema object set,
+  strict-table shape, foreign keys, indexes, and triggers, and refuses nonempty pre-vault
+  event state pending an explicit offline migration;
+- stores exact canonical event bytes and, for protected events, exact immutable evidence
+  BLOBs plus complete code-derived role mappings;
 - validates the full retained stream and proposed transition inside a
   `BEGIN IMMEDIATE` append transaction;
 - compares the expected head;
@@ -302,9 +358,11 @@ Production deployment therefore requires an isolated service identity, protected
 trusted clock, and externally anchored event heads.
 
 The uniform rollback policy closes Etzio-created exposure to SQLite’s disclosed WAL-reset
-defect across the declared mixed-runtime matrix. It does not close filesystem-CAS/SQLite
-retention atomicity, same-user state replacement or mode manipulation, offline rewrites, or
-other SQLite, filesystem, kernel, device, and power-loss failure classes.
+defect across the declared mixed-runtime matrix. The transactional evidence vault
+separately closes the ordinary filesystem-staging/SQLite retention split for the four
+implemented byte-claiming events. Neither claim closes same-user state replacement or mode
+manipulation, coherent offline rewrites, or other SQLite, filesystem, kernel, device, and
+power-loss failure classes.
 
 ## Investigation plane
 
@@ -336,10 +394,12 @@ before reconstructing nonterminal `awaiting_verification`.
 `VerificationArtifactResolutionV1` binds the retained mission, authority, target, candidate,
 and lease to every resolved byte. Its ETZIO event records target files in snapshot order
 and verification inputs in exact role order with their digest, type, and size. Resolution
-is a legal `awaiting_verification` self-loop and is unique per lease. Exact retries
-revalidate current CAS availability before returning retained history; pure reducer replay
-validates the historical event without treating mutable filesystem availability as a
-replay invariant. The target bytes and typed verification inputs share the authority
+is a legal `awaiting_verification` self-loop and is unique per lease. The command resolves
+an already-retained identity from the canonical vault and consults exact filesystem
+staging only on true absence; the protected append then retains all first-seen bytes,
+code-derived mappings, and the resolution event in one transaction. Exact retries and
+replay use the vault after staging deletion. Canonical corruption is an error and never a
+reason to fall back. The target bytes and typed verification inputs share the authority
 grant's single signed `max_bytes` ceiling; resolution cannot reinterpret it as a fresh
 per-action allowance.
 
@@ -347,9 +407,10 @@ Signed receipts retain a canonical exactly-one-attestation wire form, strict siz
 limits, time and verdict consistency checks, and exact lease bindings. The signed body also
 binds the retained resolution identity and four distinct positive output digest/size pairs.
 The supported command derives the lease and unique resolution from canonical history,
-authenticates the receipt under a complete decision-time trust snapshot before CAS access,
-then revalidates the target, resolved inputs, and outputs. Resolution plus output bytes use
-the grant's one non-resetting `max_bytes` ceiling.
+authenticates the receipt under a complete decision-time trust snapshot before evidence
+resolution, then resolves the target, retained inputs, and outputs vault-first with exact
+staging permitted only for genuinely new output identities. Resolution plus output bytes
+use the grant's one non-resetting `max_bytes` ceiling.
 
 One ETZIO `verifier_receipt_admitted` event retains the signed receipt, decision trust body
 and identity, adjudication profile, and four code-derived typed output bindings. The same
@@ -360,7 +421,8 @@ history. If an identical submission commits during that bounded contention windo
 callers return the same event. Persistent contention remains a retryable `StoreBusyError`,
 not corruption; once a competing commit is visible, conflicting-receipt or distinct-lease
 stale-head semantics apply. An exact retry after commit returns retained history without
-depending on current CAS availability, including after head advancement or byte deletion.
+depending on filesystem staging availability, including after head advancement or staged
+byte deletion.
 
 Three recovery events extend the same `awaiting_verification` state. ETZIO explicitly
 records expiry only at or after the retained lease deadline. AQUILA can retain one
@@ -389,18 +451,21 @@ the alias carries only the same vacuous coverage meaning.
 This is modeled-statement admission, not scientific finding admission. Typed output bytes
 are opaque. Their shared receipt proves that one trusted key signed the group, not that one
 measured execution produced them or that their contents are true. The pure reducer can
-validate signed descriptors but cannot replay mutable CAS reads. Generic append therefore
-reserves and rejects this event kind; a dedicated store path repeats current-CAS validation
-against locked history before insertion. That privileged writer path remains a trusted
+validate signed descriptors, while the store validates exact canonical vault BLOBs and
+event-role mappings before reduction. Generic append reserves and rejects all four
+byte-claiming event kinds; dedicated store paths derive and retain their exact manifests
+against locked history before insertion. Those privileged writer paths remain a trusted
 service boundary until event heads are externally authenticated.
 
 Still open:
 
 1. freshness of clock and trust snapshots must be established;
 2. event heads must be authenticated outside the mutable SQLite store;
-3. the filesystem CAS and SQLite event commit need shared atomic retention or an equivalent
-   replay-safe protocol;
-4. the documented same-user SQLite pathname race must be closed;
+3. the documented same-user SQLite pathname and coherent offline-rewrite boundary must be
+   closed;
+4. the SQLite/VFS/filesystem/device profile, physical and journal quotas, backup/restore,
+   process-kill and power-fault recovery, and sensitive-evidence controls must be accepted
+   and qualified;
 5. opaque modeled outputs must become structured, independently produced execution
    evidence with an exact run identity; and
 6. different labels/keys must be replaced by proved process, principal, and isolation
@@ -481,15 +546,17 @@ scientific or policy authority.
 
 Kernel-issued, authority-bound modeled-fixture verification leases, typed input-resolution
 history, atomic modeled-receipt admission, single-use consumption, explicit terminal lease
-recovery, and the typed integrity-decision/head-checkpoint contract are retained. The next
-gate is adapter qualification and crash-safe enforcement of trusted time, revocation
-freshness, and authenticated external event-head anchoring. Foundation integrity is
-accepted only when retained evidence also shows:
+recovery, the typed integrity-decision/head-checkpoint contract, and transactional
+evidence retention for all four protected event kinds are retained. The next gate is
+adapter qualification and crash-safe enforcement of trusted time, revocation freshness,
+and authenticated external event-head anchoring. Foundation integrity is accepted only
+when retained evidence also shows:
 
 - trusted time and revocation freshness for every consequential transition;
 - authenticated, externally anchored event heads;
-- atomic retention across filesystem CAS and the SQLite event commit;
-- closure of the same-user SQLite pathname race; and
+- closure of the same-user SQLite pathname and coherent offline-rewrite boundary; and
+- an accepted and qualified durable-storage profile, physical and journal quotas,
+  backup/restore and fault-recovery evidence, and sensitive-evidence controls; and
 - every new consequential invariant rejecting a known-bad.
 
 Structured Linux/KVM execution evidence and proved MARCELLUS/CATO separation follow; they

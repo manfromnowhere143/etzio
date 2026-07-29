@@ -3,6 +3,8 @@
 - Status: accepted
 - Date: 2026-07-28
 - Owner: Daniel Wahnich
+- Superseded in part: the filesystem/SQLite retention blocker by
+  [ADR-0010](0010-transactional-evidence-vault.md)
 
 ## Context
 

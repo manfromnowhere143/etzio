@@ -156,10 +156,18 @@ def test_legacy_zero_candidate_completion_replays_reopens_and_retries(
     retained_root.mkdir(mode=0o700)
     retained_root.chmod(0o700)
     database = retained_root / "events.sqlite3"
+    evidence_store = FileEvidenceStore(source / "evidence")
     expected_head = GENESIS_DIGEST
     with SQLiteEventStore(database) as store:
         for event in legacy_events:
-            store.append(event, expected_head=expected_head)
+            if event.kind in {"authority_admitted", "mission_opened"}:
+                store.append_evidence_event(
+                    event,
+                    expected_head=expected_head,
+                    evidence_store=evidence_store,
+                )
+            else:
+                store.append(event, expected_head=expected_head)
             expected_head = event.event_digest
 
     with SQLiteEventStore(database) as reopened:

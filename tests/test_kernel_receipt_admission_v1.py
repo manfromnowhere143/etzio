@@ -46,6 +46,7 @@ from etzio.kernel.store import (
     SQLiteEventStore,
     StaleHeadError,
     StoreBusyError,
+    StoreCapacityError,
 )
 from etzio.kernel.verification_lease import (
     VerificationLeaseIssuance,
@@ -340,6 +341,28 @@ def _admit(
     )
 
 
+def test_output_resolution_propagates_vault_capacity_failure(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    harness = _setup(tmp_path)
+
+    def capacity_failure(self, requests, evidence_store, *, maximum_total):
+        raise StoreCapacityError("simulated receipt vault capacity failure")
+
+    monkeypatch.setattr(
+        SQLiteEventStore,
+        "resolve_evidence_artifacts",
+        capacity_failure,
+    )
+    with SQLiteEventStore(harness.database) as store:
+        with pytest.raises(
+            StoreCapacityError,
+            match="simulated receipt vault capacity failure",
+        ):
+            _admit(harness, event_store=store)
+
+
 def _second_resolution(
     harness: _Harness,
     *,
@@ -499,6 +522,43 @@ def test_exact_retry_is_cas_free_after_loss_and_ignores_advanced_head(
     assert replay.output_artifacts == first.output_artifacts
     assert advanced.event.event_digest != first.event.event_digest
     assert replay.projection.events[-1] == advanced.event
+
+
+def test_new_receipt_reuses_canonical_outputs_after_staging_loss(
+    tmp_path: Path,
+) -> None:
+    harness = _setup(tmp_path)
+    with SQLiteEventStore(harness.database) as store:
+        first = _admit(harness, event_store=store)
+        second_lease, second_resolution = _second_resolution(
+            harness,
+            event_store=store,
+            expected_head=first.event.event_digest,
+        )
+        for digest, _ in harness.output_digests.values():
+            harness.evidence_store._path_for(digest).unlink()
+        second_receipt = _signed_receipt(
+            signer=harness.signer,
+            lease=second_lease,
+            resolution_id=second_resolution.resolution.resolution_id,
+            outputs=harness.output_digests,
+            completed_at=NOW + 7,
+        )
+        reused = admit_modeled_fixture_verifier_receipt(
+            event_store=store,
+            evidence_store=harness.evidence_store,
+            mission_id=harness.mission_id,
+            expected_head=second_resolution.event.event_digest,
+            verification_lease_id=second_lease.lease_id,
+            signed_receipt=second_receipt,
+            decision_trust_store=harness.decision_trust,
+            decision_time=NOW + 8,
+        )
+        projection = reduce_events(store.load(harness.mission_id))
+
+    assert not reused.replayed
+    assert reused.output_artifacts == first.output_artifacts
+    assert len(projection.verification_receipt_admission_events) == 2
 
 
 def test_forged_signature_fails_before_any_cas_read(
@@ -711,7 +771,7 @@ def test_direct_duplicate_append_is_rejected_by_reducer_and_store(
             reduce_events((*first.projection.events, duplicate))
         with pytest.raises(
             EventStoreError,
-            match="requires append_receipt_admission",
+            match="requires a dedicated evidence-retaining append",
         ):
             store.append(duplicate, expected_head=first.event.event_digest)
         retained = store.load(harness.mission_id)
@@ -739,6 +799,7 @@ def _forged_admission_event(
 def _retain_prefix(
     root: Path,
     prefix: tuple[EventV1, ...],
+    evidence_store: FileEvidenceStore,
 ) -> Path:
     root.mkdir(mode=0o700, parents=True, exist_ok=True)
     root.chmod(0o700)
@@ -746,7 +807,18 @@ def _retain_prefix(
     expected_head = GENESIS_DIGEST
     with SQLiteEventStore(database) as store:
         for event in prefix:
-            store.append(event, expected_head=expected_head)
+            if event.kind in {
+                "authority_admitted",
+                "mission_opened",
+                "verification_artifacts_resolved",
+            }:
+                store.append_evidence_event(
+                    event,
+                    expected_head=expected_head,
+                    evidence_store=evidence_store,
+                )
+            else:
+                store.append(event, expected_head=expected_head)
             expected_head = event.event_digest
     return database
 
@@ -759,13 +831,17 @@ def test_generic_append_rejects_an_otherwise_valid_receipt_admission(
         admitted = _admit(harness, event_store=store)
     prefix = admitted.projection.events[:-1]
     assert reduce_events((*prefix, admitted.event)).events[-1] == admitted.event
-    database = _retain_prefix(tmp_path / "generic-direct", prefix)
+    database = _retain_prefix(
+        tmp_path / "generic-direct",
+        prefix,
+        harness.evidence_store,
+    )
 
     with SQLiteEventStore(database) as store:
         before = store.load(harness.mission_id)
         with pytest.raises(
             EventStoreError,
-            match="requires append_receipt_admission",
+            match="requires a dedicated evidence-retaining append",
         ):
             store.append(
                 admitted.event,
@@ -773,7 +849,7 @@ def test_generic_append_rejects_an_otherwise_valid_receipt_admission(
             )
         with pytest.raises(
             EventStoreError,
-            match="current-CAS validation must be paired",
+            match="vault retention must be paired",
         ):
             store._append_verified_event(
                 admitted.event,
@@ -791,14 +867,25 @@ def test_internal_append_rejects_receipt_validation_for_an_ordinary_event(
     harness = _setup(tmp_path)
     with SQLiteEventStore(harness.database) as store:
         retained = store.load(harness.mission_id)
+        ordinary_event = next(
+            event
+            for event in reversed(retained)
+            if event.kind
+            not in {
+                "authority_admitted",
+                "mission_opened",
+                "verification_artifacts_resolved",
+                "verifier_receipt_admitted",
+            }
+        )
         with pytest.raises(
             EventStoreError,
-            match="current-CAS validation must be paired",
+            match="vault retention must be paired",
         ):
             store._append_verified_event(
-                retained[-1],
+                ordinary_event,
                 expected_head=retained[-1].event_digest,
-                receipt_evidence_store=harness.evidence_store,
+                evidence_store=harness.evidence_store,
             )
         after = store.load(harness.mission_id)
 
@@ -851,14 +938,18 @@ def test_dedicated_append_revalidates_signed_sizes_before_insertion(
     assert reduce_events((*prefix, undersized_event)).events[-1] == (
         undersized_event
     )
-    database = _retain_prefix(tmp_path / "dedicated-direct", prefix)
+    database = _retain_prefix(
+        tmp_path / "dedicated-direct",
+        prefix,
+        harness.evidence_store,
+    )
 
     with SQLiteEventStore(database) as store:
         before = store.load(harness.mission_id)
         with pytest.raises(
             EventStoreError,
             match=(
-                "receipt admission current-CAS validation failed "
+                "receipt admission evidence-view validation failed "
                 r"\(resolved_execution_output_artifact_size_mismatch\)"
             ),
         ):
@@ -1093,6 +1184,33 @@ class _CrashAfterReceiptAppend:
     def load(self, mission_id: str):
         return self.store.load(mission_id)
 
+    def resolve_evidence_artifact(
+        self,
+        role: str,
+        digest: str,
+        maximum: int,
+        evidence_store: FileEvidenceStore,
+    ):
+        return self.store.resolve_evidence_artifact(
+            role,
+            digest,
+            maximum,
+            evidence_store,
+        )
+
+    def resolve_evidence_artifacts(
+        self,
+        requests,
+        evidence_store: FileEvidenceStore,
+        *,
+        maximum_total: int,
+    ):
+        return self.store.resolve_evidence_artifacts(
+            requests,
+            evidence_store,
+            maximum_total=maximum_total,
+        )
+
     def append_receipt_admission(
         self,
         event: EventV1,
@@ -1201,6 +1319,33 @@ class _AlwaysBusyReceiptStore:
 
     def load(self, mission_id: str):
         return self.store.load(mission_id)
+
+    def resolve_evidence_artifact(
+        self,
+        role: str,
+        digest: str,
+        maximum: int,
+        evidence_store: FileEvidenceStore,
+    ):
+        return self.store.resolve_evidence_artifact(
+            role,
+            digest,
+            maximum,
+            evidence_store,
+        )
+
+    def resolve_evidence_artifacts(
+        self,
+        requests,
+        evidence_store: FileEvidenceStore,
+        *,
+        maximum_total: int,
+    ):
+        return self.store.resolve_evidence_artifacts(
+            requests,
+            evidence_store,
+            maximum_total=maximum_total,
+        )
 
     def append_receipt_admission(
         self,
@@ -1389,6 +1534,33 @@ def test_receipt_and_recovery_same_head_race_has_one_canonical_winner(
 
         def load(self, mission_id: str):
             return self.delegate.load(mission_id)
+
+        def resolve_evidence_artifact(
+            self,
+            role: str,
+            digest: str,
+            maximum: int,
+            evidence_store: FileEvidenceStore,
+        ):
+            return self.delegate.resolve_evidence_artifact(
+                role,
+                digest,
+                maximum,
+                evidence_store,
+            )
+
+        def resolve_evidence_artifacts(
+            self,
+            requests,
+            evidence_store: FileEvidenceStore,
+            *,
+            maximum_total: int,
+        ):
+            return self.delegate.resolve_evidence_artifacts(
+                requests,
+                evidence_store,
+                maximum_total=maximum_total,
+            )
 
         def _synchronize_once(self) -> None:
             if not self.synchronized:

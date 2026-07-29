@@ -20,10 +20,12 @@ from ..authority import (
     admit_authority,
 )
 from ..evidence import (
+    MAX_AUTHORITY_EVIDENCE_BYTES_V1,
     EvidenceError,
     FileEvidenceStore,
     TargetSnapshotV1,
-    validate_etzio_fixture_snapshot,
+    evidence_digest,
+    validate_etzio_fixture_snapshot_bytes,
 )
 from ..mission_v1 import AnalysisLeaseV1, StaticCandidateV1
 from ..protocol import (
@@ -34,8 +36,21 @@ from ..protocol import (
     thaw_json,
 )
 from .events_v1 import GENESIS_DIGEST, EventV1
+from .evidence_vault import (
+    AUTHORITY_EVIDENCE_ROLE_V1,
+    TARGET_SOURCE_ROLE_V1,
+    VaultArtifactResolutionRequestV1,
+    VaultEventArtifactSelectorV1,
+)
 from .reducer import MissionProjection, ProjectionPhase, reduce_events
-from .store import SQLiteEventStore
+from .store import (
+    EventStoreCorruptionError,
+    EventStoreError,
+    SQLiteEventStore,
+    StoreBusyError,
+    StoreCapacityError,
+    StoreOperationalError,
+)
 
 _FULL_SHA = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 UNADMITTED_AUTHORITY_ID = content_id(
@@ -78,6 +93,7 @@ def _append_checked(
     target_id: str,
     decision_time: int,
     payload: dict[str, object],
+    evidence_store: FileEvidenceStore | None = None,
 ) -> tuple[EventV1, ...]:
     head = retained[-1].event_digest if retained else GENESIS_DIGEST
     event = EventV1.create(
@@ -94,7 +110,22 @@ def _append_checked(
     # Keep lifecycle validation at the command boundary as defense in depth. The durable
     # store independently performs the same reduction inside its append transaction.
     reduce_events((*retained, event))
-    store.append(event, expected_head=head)
+    if kind in {"authority_admitted", "mission_opened"}:
+        if evidence_store is None:
+            raise FixtureMissionError(
+                f"{kind} requires atomic event-artifact retention"
+            )
+        store.append_evidence_event(
+            event,
+            expected_head=head,
+            evidence_store=evidence_store,
+        )
+    else:
+        if evidence_store is not None:
+            raise FixtureMissionError(
+                f"{kind} must not use the artifact-retaining append path"
+            )
+        store.append(event, expected_head=head)
     return (*retained, event)
 
 
@@ -126,6 +157,9 @@ def _preflight(
     snapshot: TargetSnapshotV1,
     decision: AdmissionDecision,
     evidence_store: FileEvidenceStore,
+    *,
+    retained: tuple[EventV1, ...],
+    event_store: SQLiteEventStore,
 ) -> tuple[str | None, dict[str, bytes]]:
     if (
         not decision.accepted
@@ -135,10 +169,11 @@ def _preflight(
     ):
         raise FixtureMissionError("preflight requires one admitted authority snapshot")
     grant = decision.grant
-    try:
-        validate_etzio_fixture_snapshot(snapshot, evidence_store)
-    except EvidenceError:
-        return "target_not_in_fixture_manifest", {}
+    resolver = getattr(event_store, "resolve_evidence_artifacts", None)
+    if not callable(resolver):
+        raise FixtureMissionError(
+            "fixture preflight requires canonical batch vault-first artifact resolution"
+        )
     expected_assets = tuple(
         sorted(f"fixture://{snapshot_file.relative_path}" for snapshot_file in snapshot.files)
     )
@@ -151,20 +186,129 @@ def _preflight(
     total_bytes = sum(snapshot_file.size for snapshot_file in snapshot.files)
     if total_bytes > grant.max_bytes:
         return "target_exceeds_byte_budget", {}
-    try:
-        evidence_store.get(grant.evidence_digest)
-    except EvidenceError:
+
+    authority_event = retained[0] if retained else None
+    if authority_event is not None and authority_event.kind != "authority_admitted":
+        raise FixtureMissionError(
+            "retained nonterminal mission omitted authority admission"
+        )
+    if authority_event is None:
+        try:
+            authority_evidence = resolver(
+                (
+                    VaultArtifactResolutionRequestV1(
+                        role=AUTHORITY_EVIDENCE_ROLE_V1,
+                        digest=grant.evidence_digest,
+                        maximum=MAX_AUTHORITY_EVIDENCE_BYTES_V1,
+                    ),
+                ),
+                evidence_store,
+                maximum_total=MAX_AUTHORITY_EVIDENCE_BYTES_V1,
+            )[0]
+        except (
+            EventStoreCorruptionError,
+            StoreBusyError,
+            StoreCapacityError,
+            StoreOperationalError,
+        ):
+            raise
+        except (EvidenceError, EventStoreError):
+            return "authority_evidence_unavailable", {}
+    else:
+        loader = getattr(event_store, "load_event_artifacts", None)
+        if not callable(loader):
+            raise FixtureMissionError(
+                "retained authority resume requires canonical vault artifact reads"
+            )
+        authority_evidence = loader(
+            (
+                VaultEventArtifactSelectorV1(
+                    event_digest=authority_event.event_digest,
+                    role=AUTHORITY_EVIDENCE_ROLE_V1,
+                ),
+            ),
+            maximum_total=MAX_AUTHORITY_EVIDENCE_BYTES_V1,
+        )[0]
+    if (
+        type(authority_evidence) is not bytes
+        or len(authority_evidence) > MAX_AUTHORITY_EVIDENCE_BYTES_V1
+        or evidence_digest(authority_evidence) != grant.evidence_digest
+    ):
+        if authority_event is not None:
+            raise FixtureMissionError(
+                "retained authority evidence differs from its canonical grant"
+            )
         return "authority_evidence_unavailable", {}
 
     source_bytes: dict[str, bytes] = {}
-    try:
-        for snapshot_file in snapshot.files:
-            data = evidence_store.get(snapshot_file.artifact_digest)
-            if len(data) != snapshot_file.size:
-                return "target_size_mismatch", {}
-            source_bytes[snapshot_file.relative_path] = data
-    except EvidenceError:
-        return "target_evidence_unavailable", {}
+    mission_opened_event = next(
+        (event for event in retained if event.kind == "mission_opened"),
+        None,
+    )
+    if mission_opened_event is None:
+        try:
+            resolved_sources = resolver(
+                tuple(
+                    VaultArtifactResolutionRequestV1(
+                        role=TARGET_SOURCE_ROLE_V1,
+                        digest=snapshot_file.artifact_digest,
+                        maximum=snapshot_file.size,
+                    )
+                    for snapshot_file in snapshot.files
+                ),
+                evidence_store,
+                maximum_total=total_bytes,
+            )
+            for snapshot_file, data in zip(
+                snapshot.files,
+                resolved_sources,
+                strict=True,
+            ):
+                if len(data) != snapshot_file.size:
+                    return "target_size_mismatch", {}
+                source_bytes[snapshot_file.relative_path] = data
+        except (
+            EventStoreCorruptionError,
+            StoreBusyError,
+            StoreCapacityError,
+            StoreOperationalError,
+        ):
+            raise
+        except (EvidenceError, EventStoreError):
+            return "target_evidence_unavailable", {}
+        try:
+            validate_etzio_fixture_snapshot_bytes(snapshot, source_bytes)
+        except EvidenceError:
+            return "target_not_in_fixture_manifest", {}
+    else:
+        try:
+            loader = getattr(event_store, "load_event_artifacts", None)
+            if not callable(loader):
+                raise FixtureMissionError(
+                    "retained target resume requires canonical vault artifact reads"
+                )
+            resolved_sources = loader(
+                tuple(
+                    VaultEventArtifactSelectorV1(
+                        event_digest=mission_opened_event.event_digest,
+                        role=TARGET_SOURCE_ROLE_V1,
+                        ordinal=ordinal,
+                    )
+                    for ordinal, _ in enumerate(snapshot.files)
+                ),
+                maximum_total=total_bytes,
+            )
+            for snapshot_file, data in zip(
+                snapshot.files,
+                resolved_sources,
+                strict=True,
+            ):
+                source_bytes[snapshot_file.relative_path] = data
+            validate_etzio_fixture_snapshot_bytes(snapshot, source_bytes)
+        except EvidenceError:
+            raise FixtureMissionError(
+                "retained target bytes differ from the immutable fixture manifest"
+            ) from None
     return None, source_bytes
 
 
@@ -379,8 +523,8 @@ def _run_fixture_scan(
         raise FixtureMissionError("snapshot must be a TargetSnapshotV1")
     if not isinstance(trust_store, TrustStore):
         raise FixtureMissionError("trust_store must be a TrustStore")
-    if not isinstance(evidence_store, FileEvidenceStore):
-        raise FixtureMissionError("evidence_store must be a FileEvidenceStore")
+    if type(evidence_store) is not FileEvidenceStore:
+        raise FixtureMissionError("evidence_store must be an exact FileEvidenceStore")
     if type(decision_time) is not int or decision_time < 0:
         raise FixtureMissionError("decision_time must be a nonnegative integer")
     if type(cancel_requested) is not bool:
@@ -489,7 +633,13 @@ def _run_fixture_scan(
         ):
             raise FixtureMissionError("resume authority differs from the retained admission")
 
-    preflight_reason, source_bytes = _preflight(snapshot, decision, evidence_store)
+    preflight_reason, source_bytes = _preflight(
+        snapshot,
+        decision,
+        evidence_store,
+        retained=retained,
+        event_store=event_store,
+    )
     if not retained and preflight_reason is not None:
         return _refuse_initial_mission(
             event_store,
@@ -530,6 +680,7 @@ def _run_fixture_scan(
                 "key_id": signed.key_id,
                 "signature_b64": signed.signature_b64,
             },
+            evidence_store=evidence_store,
         )
 
     if cancel_requested:
@@ -558,6 +709,7 @@ def _run_fixture_scan(
             target_id=snapshot.object_id,
             decision_time=decision_time,
             payload={"target_snapshot": snapshot.to_envelope().to_dict()},
+            evidence_store=evidence_store,
         )
 
     admission_time = retained[0].decision_time

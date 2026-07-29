@@ -12,3 +12,8 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0007: Explicit modeled verification-lease recovery](0007-explicit-verification-lease-recovery.md)
 - [ADR-0008: Typed integrity-evidence contract before external authority](0008-typed-integrity-evidence-contract.md)
 - [ADR-0009: Uniform SQLite rollback-journal safety](0009-uniform-sqlite-rollback-journal-safety.md)
+- [ADR-0010: Transactional canonical evidence vault](0010-transactional-evidence-vault.md)
+
+ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
+recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
+authentication, and rollback-journal decisions remain current.

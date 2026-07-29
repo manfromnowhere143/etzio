@@ -3,6 +3,8 @@
 - Status: accepted
 - Date: 2026-07-27
 - Owner: Daniel Wahnich
+- Superseded in part: split-store retention and retry caveats by
+  [ADR-0010](0010-transactional-evidence-vault.md)
 
 ## Context
 
