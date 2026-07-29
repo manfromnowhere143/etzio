@@ -148,7 +148,7 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "both_local_release_suites_passed_pending_github",
+    "validation_status": "local_and_github_release_suites_passed",
     "test_count": 910,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -165,9 +165,10 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "github_validated_commit": null,
-    "github_actions_run_id": null,
-    "github_pull_request": null,
+    "github_validated_commit": "3c7a30038de17a673674c81a36a3a3197f1d64e2",
+    "github_actions_run_id": 30491151887,
+    "github_pull_request": 12,
+    "gitguardian_passed": true,
     "claim_boundary": "adds a versioned deterministic networkless contract and qualification harness for repository-owned signed trusted-time and revocation fixture packages with exact profile root policy request source interval freshness floor and retained-byte bindings plus sealed provider-neutral mapping; it is not consumed by modeled lifecycle finality and establishes no native RFC 3161 TUF or provider-format qualification trustworthy UTC current real revocation independent administration external durability non-equivocation same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim"
   },
   "documentation_release_evidence": {

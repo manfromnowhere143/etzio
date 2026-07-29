@@ -379,7 +379,7 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
-## Current adapter-qualification local release evidence
+## Current adapter-qualification release evidence
 
 On the hardened trusted-time/revocation qualification candidate, the canonical release
 command passed under both declared local runtimes:
@@ -408,10 +408,16 @@ The retained SQLite source identities were:
 - CPython 3.14.2 / SQLite 3.51.2:
   `2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075`.
 
-This is local release evidence only until the exact committed bytes are reproduced by
-private GitHub Actions. The current implementation commit, workflow run, draft pull
-request, and GitGuardian result must be resolved from Git and GitHub after publication;
-none is claimed here yet.
+Private GitHub Actions run
+[`30491151887`](https://github.com/manfromnowhere143/etzio/actions/runs/30491151887)
+reproduced repository policy, both declared runtime suites, package build,
+outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on exact
+implementation commit
+[`3c7a30038de17a673674c81a36a3a3197f1d64e2`](https://github.com/manfromnowhere143/etzio/commit/3c7a30038de17a673674c81a36a3a3197f1d64e2);
+GitGuardian also passed. Draft
+[#12](https://github.com/manfromnowhere143/etzio/pull/12) is stacked on the
+integrity-finality branch. This evidence-only handoff and mission-state update follows the
+validated implementation commit.
 
 The evidence scope is repository-owned deterministic fixtures. It validates the
 contract/harness boundary described above, not a real provider, native provider format,
