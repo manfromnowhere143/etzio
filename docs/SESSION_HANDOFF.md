@@ -38,7 +38,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0008](decisions/0008-typed-integrity-evidence-contract.md), and
 [ADR-0009](decisions/0009-uniform-sqlite-rollback-journal-safety.md), and
 [ADR-0010](decisions/0010-transactional-evidence-vault.md), and
-[ADR-0011](decisions/0011-crash-safe-modeled-integrity-finality.md).
+[ADR-0011](decisions/0011-crash-safe-modeled-integrity-finality.md), and
+[ADR-0012](decisions/0012-networkless-time-revocation-adapter-qualification.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -48,10 +49,11 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/integrity-finality-enforcement-v1`
-- Stacked on: `agent/transactional-evidence-vault-v1`
-- Branch base: `4919a0c09f99f545336fc6482a2d52f8fd7c03e1`
-- Branch-base tree: `73ae7dcf5fae6d889dcb1d4d63b0345ae6798361`
+- Current foundation-integrity branch:
+  `agent/time-revocation-adapter-qualification-v1`
+- Stacked on: `agent/integrity-finality-enforcement-v1`
+- Branch base: `d88aa73a3186c380f42181293ceef3e16a53b0e3`
+- Branch-base tree: `e5576962cd2fff0976f0b806169ef87eacf50950`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -299,6 +301,55 @@ production non-equivocation. A typed blocked classification is per recovery atte
 not durably retained; the last immutable local phase remains pending. The ordinary fixture
 CLI remains on the legacy profile.
 
+### Implemented networkless trusted-time and revocation qualification
+
+- [ADR-0012](decisions/0012-networkless-time-revocation-adapter-qualification.md)
+  and `etzio/kernel/integrity_adapters_v1.py` define a separate version-1,
+  repository-owned, networkless qualification boundary; it does not add a protocol-v1
+  object kind, store profile, lifecycle command, provider call, or finality phase;
+- one copied `IntegrityAdapterTrustProfileV1` content-binds the exact service,
+  environment, validation policy, trust root, fixed source roster, source roles and
+  namespaces, distinct fixture keys and principals, provider-policy identities, codec
+  profiles, and revocation-staleness ceiling;
+- source-specific time and revocation requests bind the exact profile/root, scope, event,
+  transition, policy, 256-bit nonce, and time imprint or qualified-time bundle; distinct
+  Ed25519 signature domains separate trusted-time, revocation-metadata, and
+  revocation-floor fixture packages;
+- package authentication resolves the source exclusively from the retained profile,
+  verifies the exact signed statement bytes before parsing provider-controlled claims,
+  and maps the complete canonical signed package—not a normalized claim—to one typed
+  `ProviderEvidenceBlobV1`;
+- every configured time source is required. Its closed interval must share a common
+  overlap with every other source, while the result retains the conservative outer hull;
+  each source and the hull must remain within the purpose-specific policy ceiling;
+- each required revocation namespace uses exactly one metadata source and at least two
+  fixed floor witnesses. The complete closed time hull must fit inside the metadata's
+  half-open validity window, publication age must remain within the exact staleness
+  ceiling, predecessor root/version/snapshot rollback or equal-version mutation is
+  refused, and every floor witness must agree with metadata exactly;
+- authenticated packages, qualified time, qualified revocation, provider-neutral mapped
+  inputs, and the qualification report are privately constructed sealed exact types.
+  Consequential mapping freshly reauthenticates retained request and package bytes and
+  requires exact BLOB/reference and namespace coverage;
+- the content-addressed corpus manifest binds the adapter implementation, profile, vector,
+  ordered cases, exact ordered time intervals, and exact ordered revocation adapter
+  states. The deterministic harness proves byte-identical retry, time and revocation
+  qualification, cross-request replay refusal, and exact provider-neutral mapping; and
+- 81 focused adversarial tests additionally prove canonical parsing, trust/profile/role/
+  scope/policy/claim substitution refusal, hostile duplicate mappings, exact source
+  rosters, interval boundaries, full-hull freshness, rollback/equivocation, namespace
+  swapping, corpus reconfiguration, evidence closure, no ambient clock/network
+  dependency, and direct or dataclass-copy seal bypass refusal.
+
+This establishes deterministic authentication and semantic qualification of
+repository-owned signed fixture packages under the exact retained fixture profile only.
+Distinct fixture labels, principals, and keys do not prove independent operators,
+administration, clocks, storage, or legal authority. No RFC 3161, TUF, PKIX, COSE,
+SCITT, Rekor, or provider-native parser/client is qualified; no trustworthy UTC, current
+real-world revocation, external availability/durability/non-equivocation, lifecycle
+finality, execution, finding, or live-target authority follows. The existing modeled
+finality facade still consumes its separate unsigned code-derived fixture assertions.
+
 ### Implemented for modeled verification admission and recovery
 
 - canonical one-attestation signed verifier receipts;
@@ -328,12 +379,51 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
+## Current adapter-qualification local release evidence
+
+On the hardened trusted-time/revocation qualification candidate, the canonical release
+command passed under both declared local runtimes:
+
+- 910 tests passed;
+- the focused adapter-qualification file passed all 81 tests;
+- the deterministic qualification report retained all ten ordered cases;
+- CPython 3.11.15 loaded SQLite 3.53.1 and used `DELETE`/`EXTRA`;
+- CPython 3.14.2 loaded SQLite 3.51.2 and used `DELETE`/`EXTRA`;
+- both runtimes retained their complete `sqlite_source_id()` values and proved isolated
+  versus repository-import-context agreement;
+- both hash-locked environments passed `pip check`;
+- exact schema, semantic dispatch, repository policy, Ruff, fixture runs, and
+  retained-evidence checks passed; and
+- `git diff --check` passed.
+
+The CPython 3.11 test suite completed in 474.94 seconds and the CPython 3.14 suite
+completed in 484.35 seconds. Each complete release entrypoint also ran the modeled
+demonstrations and the governed vulnerable and clean fixture scans. The working-tree
+status was unchanged by validation.
+
+The retained SQLite source identities were:
+
+- CPython 3.11.15 / SQLite 3.53.1:
+  `2026-05-05 10:34:17 c88b22011a54b4f6fbd149e9f8e4de77658ce58143a1af0e3785e4e6475127e9`;
+- CPython 3.14.2 / SQLite 3.51.2:
+  `2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075`.
+
+This is local release evidence only until the exact committed bytes are reproduced by
+private GitHub Actions. The current implementation commit, workflow run, draft pull
+request, and GitGuardian result must be resolved from Git and GitHub after publication;
+none is claimed here yet.
+
+The evidence scope is repository-owned deterministic fixtures. It validates the
+contract/harness boundary described above, not a real provider, native provider format,
+truthful clock, current external revocation state, lifecycle integration, execution,
+finding, or live-target authority.
+
 ## Current integrity-finality release evidence
 
 On the final audited integrity-finality release candidate, the complete release command
 passed under both declared local runtimes:
 
-- 829 tests passed;
+- the prior integrity-finality suite reported 829 passing tests;
 - CPython 3.11.15 / SQLite 3.53.1 / `DELETE`/`EXTRA`;
 - CPython 3.14.2 / SQLite 3.51.2 / `DELETE`/`EXTRA`;
 - exact schema, semantic dispatch, repository policy, Ruff, fixture runs, and
@@ -379,8 +469,8 @@ implementation:
   offline;
 - adapter claims are scoped to the concrete repository-owned fixture implementation,
   RFC 3161 EKU wording is exact, and durable blocked-finality recovery remains explicit;
-- `AGENTS.md`, the README, and the Roadmap name the same networkless trusted-time and
-  revocation conformance harness as the exact next proof tranche; and
+- `AGENTS.md`, the README, and the Roadmap at that revision named the same networkless
+  trusted-time and revocation conformance harness as the next proof tranche; and
 - the [frontier baseline](FRONTIER_BASELINE.md) incorporates primary 2026 evidence on
   capability-ladder, exploit-generation, long-horizon discovery, multi-host, and
   evaluator-containment benchmarks while preserving every harness, population, budget,
@@ -447,6 +537,19 @@ evidence remains fixture-scoped.
 
 Known-bads now cover:
 
+- adapter profile/root/policy/service/environment/source/role/namespace/key/principal/
+  codec substitution; revoked, unknown, wrong-role, and invalid-signature fixture keys;
+  noncanonical or malformed signed framing; nonce, imprint, purpose, event, transition,
+  request, time-bundle, scope, and authenticated-claim replay or substitution; missing,
+  extra, duplicate, reordered, hostile-mapping, or reconfigured source/corpus inputs;
+  reversed, individually oversized, disjoint, point-overlap, exact-limit, and
+  outer-hull-overlimit trusted-time intervals; future-valid, boundary-straddling,
+  expired, frozen, stale, root/version rollback, skipped-root, same-version mutation,
+  metadata/floor disagreement, namespace swapping, and incomplete revocation coverage;
+  missing, extra, changed, corrupt, or mismapped signed provider BLOBs/references;
+  nondeterministic exact retry, corpus-manifest substitution, ambient clock/network use,
+  and direct, subclass, or dataclass-copy construction of every sealed qualification
+  result;
 - malformed, wrong-source, wrong-kind, wrong-phase, or substituted modeled provider claims
   and references, including arbitrary unsigned floor and anchor-receipt payloads;
 - fixture-adapter profile/version, validation-policy, trust-snapshot, service-scope,
@@ -582,9 +685,11 @@ Known-bads now cover:
 
 ## Open foundation-integrity blockers
 
-1. Modeled commands persist and require signed decisions/checkpoints plus exact
-   code-derived time and revocation assertions, but no qualified external source proves
-   clock or revocation freshness; the ordinary fixture CLI remains on the legacy profile.
+1. The separate networkless harness authenticates and semantically qualifies signed
+   repository-owned time/revocation packages, but modeled commands still consume their
+   own code-derived assertions. No provider-native adapter or independently administered
+   source proves trustworthy clock or current revocation freshness; the ordinary fixture
+   CLI remains on the legacy profile.
 2. Modeled commands persist and require exact-current checkpoint lineages, but no qualified
    externally authenticated and durable anchor/catalog/witness survives local database
    loss or proves non-equivocation.
@@ -608,17 +713,41 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup:** first specify and prove the versioned trusted-time and
-revocation adapter conformance contract and deterministic qualification harness, including
-trust-root and policy binding, conservative interval/freshness semantics, authenticated
-provider-evidence mapping, and substitution, replay, staleness, and ambiguity known-bads.
-Keep that tranche fixture-backed and networkless. Only after it passes should the same
-harness extend to anchor, catalog, and monitor adapters and the durable blocked-finality
-recovery contract; do not connect a real provider, add finder breadth, or add execution
-capability.
+**Exact next-session pickup:** extend the completed versioned, networkless
+trusted-time/revocation qualification boundary to authenticated anchor-registration
+receipts, external head-catalog floors, and monitor-witness evidence. Specify and prove a
+durable blocked-finality disposition, exact reason, policy-authorized recovery decision,
+and recovery replay contract in the same dependency-complete tranche. Keep acquisition
+repository-owned and deterministic; add known-bads for registration replay, inclusion and
+consistency proof substitution, catalog rollback/equivocation/local-loss recovery,
+witness disagreement, blocked-state mutation, and unauthorized recovery. Do not connect
+a real provider, alter the retained lifecycle state machine, add finder breadth, or add
+execution capability.
 
-Next, qualify and connect independently administered trusted-time, revocation, anchor,
-catalog, and monitor adapters inside the retained state machine. Preserve exact
+Concrete continuation map:
+
+1. begin from ADR-0012, `etzio/kernel/integrity_adapters_v1.py`, and
+   `tests/test_integrity_adapter_qualification_v1.py`; preserve authentication before
+   claim parsing, complete fixed source sets, exact raw-package retention, private sealed
+   results, content-bound corpus inputs, and fresh reauthentication before mapping;
+2. specify the anchor/catalog/monitor request, trust, signed-package, conservative
+   consistency/floor, evidence-mapping, and report contracts in a new decision before
+   changing lifecycle behavior;
+3. keep `RepositoryOwnedDeterministicModeledIntegrityServiceV1`,
+   `PendingIntegrityTransitionV1`, and the SQLite finality records unchanged while proving
+   the new networkless adapter boundary; their current validators intentionally accept
+   only the enrolled modeled-fixture claim shape;
+4. separately specify durable blocked-finality state, admissible terminal/retry
+   dispositions, policy authority, atomic persistence point, crash recovery, and
+   database-global barrier interaction; and
+5. only after both deterministic proof sets pass, design an empty-history admitted
+   lifecycle profile that retains exact provider roots, policies, packages, and durable
+   blocked recovery without weakening the four immutable phases, byte-identical
+   at-least-once writes, global/mission continuity, or store-error classifications.
+
+Only after that networkless proof passes, qualify and connect independently administered
+trusted-time, revocation, anchor, catalog, and monitor adapters inside the retained state
+machine. Preserve exact
 fixture-proved pending retention, byte-identical at-least-once retries, global/mission
 continuity, raw pending-replay refusal, and store-error classifications while replacing
 code-derived provider assertions with authenticated external evidence. Add a durable

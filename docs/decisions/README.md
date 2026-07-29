@@ -14,6 +14,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0009: Uniform SQLite rollback-journal safety](0009-uniform-sqlite-rollback-journal-safety.md)
 - [ADR-0010: Transactional canonical evidence vault](0010-transactional-evidence-vault.md)
 - [ADR-0011: Crash-safe modeled integrity finality](0011-crash-safe-modeled-integrity-finality.md)
+- [ADR-0012: Networkless trusted-time and revocation adapter qualification](0012-networkless-time-revocation-adapter-qualification.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -22,3 +23,8 @@ authentication, and rollback-journal decisions remain current.
 ADR-0011 operationalizes ADR-0008 only for an empty-history schema-version-2
 repository-owned deterministic fixture profile. It does not qualify or connect an
 external authority and does not supersede ADR-0008's external-provider gate.
+
+ADR-0012 specifies the repository-owned Ed25519 fixture authentication contract and
+deterministic qualification harness for trusted-time and revocation adapters. It does not
+connect or qualify a native provider, alter lifecycle finality, or qualify anchor, catalog,
+or monitor authority.

@@ -141,7 +141,21 @@ Implemented in this phase:
 - deterministic repository-owned time, revocation, anchor, catalog, and monitor adapters
   demonstrating crash recovery and two-stage semantic idempotence with canonical unsigned
   code-derived provider assertions, without claiming external authentication, time,
-  durability, independence, or production authority.
+  durability, independence, or production authority;
+- a separate versioned, networkless trusted-time and revocation qualification contract with
+  an exact copied profile, trust root, validation policy, role-separated all-required
+  source roster, provider-policy and codec binding, and authentication of exact signed
+  repository-fixture statement bytes before claim parsing;
+- deterministic same-request byte stability and a content-derived corpus manifest; common
+  overlap across all required time sources while retaining their conservative outer hull;
+  complete-hull half-open revocation validity and bounded-staleness checks; unanimous
+  metadata and configured floor witnesses; and fresh sealed mapping to exact
+  provider-neutral evidence BLOBs, references, views, and floors; and
+- eighty-one focused contract tests and known-bads spanning trust/profile/policy/source
+  substitution, cross-request replay, malformed or noncanonical wire, incomplete or
+  reordered rosters, disjoint or over-wide intervals, future/stale/expired revocation
+  state, floor disagreement and rollback, mapping confusion, deterministic retry, corpus
+  substitution, and sealed-boundary abuse.
 
 Current canonical command writers use receipt-coverage status for every verification-intent
 closure. Replay also accepts the exact pre-recovery zero-candidate `completed` shape as a
@@ -150,13 +164,11 @@ claim.
 
 Remaining required:
 
-1. specify and prove a versioned trusted-time and revocation adapter conformance contract
-   and deterministic, networkless qualification harness with trust-root and policy binding,
-   conservative interval and freshness semantics, authenticated provider-evidence mapping,
-   and substitution, replay, staleness, and ambiguity known-bads;
-2. extend that harness to anchor, catalog, and monitor adapters, add durable blocked-finality
-   disposition and governed recovery, and only then qualify independently administered
-   providers without weakening the retained finality state machine;
+1. extend the networkless qualification harness to anchor, catalog, and monitor adapters,
+   and add durable blocked-finality disposition and governed recovery before connecting any
+   external provider;
+2. only then qualify independently administered providers and integrate accepted adapter
+   outputs without weakening the retained finality state machine;
 3. prove external latest-head authority survives local loss, then close the documented
    same-user SQLite pathname and coherent offline-rewrite boundary;
 4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
@@ -178,9 +190,12 @@ persists and recovers exact decision, anchor, checkpoint, and current-floor line
 every event before command success. A later mission begins at its own mission genesis while
 extending the latest instance-global checkpoint, and subsequent events extend both exact
 predecessors. Generic raw replay refuses while any transition is unresolved. Its
-providers remain deterministic fixtures and their assertions are not independently
-authenticated, so none of this establishes execution, external authority, independence,
-truth, or a finding.
+providers remain deterministic fixtures and their modeled-finality assertions are unsigned
+and not independently authenticated. The separate signed trusted-time/revocation
+qualification harness is not consumed by this lifecycle path. It proves only deterministic
+repository-fixture conformance under its exact profile, not truthful UTC, current external
+revocation, native-provider correctness, independent administration, external durability,
+execution, authority, or a finding.
 
 ## Phase 2 — independent proof plane
 

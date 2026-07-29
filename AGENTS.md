@@ -84,20 +84,31 @@ verified wire before applying continuity logic. Empty-history schema-v2 modeled-
 enrollment now pins a fixture-adapter authority binding, and consequential fixture commands
 persist and require that contract through atomic pending retention, four immutable recovery
 phases, two at-least-once modeled protocol writes, one database-global unresolved-transition
-barrier, and exact-current global plus mission completion. This is repository-fixture
-finality only: provider assertions are deterministic and code-derived, no external provider
-is connected, and no external durability, trusted UTC, revocation freshness, independent
-administration, non-equivocation, execution, or finding claim follows.
+barrier, and exact-current global plus mission completion.
+
+Separately, a versioned, networkless trusted-time and revocation qualification contract now
+pins an exact copied profile, trust root, validation policy, role-separated source roster,
+and codec identities. It authenticates exact repository-fixture provider statements before
+parsing claims, proves byte-stable retry under a content-derived corpus manifest, requires
+all time sources to overlap while retaining their conservative outer hull, applies that
+complete hull to half-open revocation validity and staleness, requires unanimous configured
+floors, and freshly reauthenticates sealed mappings into provider-neutral evidence.
+Eighty-one focused tests and known-bads cover substitution, replay, staleness, ambiguity,
+malformed wire, incomplete rosters, and sealed-boundary abuse.
+
+The qualification harness is contract proof only and is not consumed by modeled finality or
+lifecycle commands. Modeled finality still uses unsigned, deterministic, code-derived
+provider assertions. No real or native provider is connected, and no external durability,
+trustworthy UTC, current real-world revocation, independent administration,
+non-equivocation, execution, or finding claim follows.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. specify and prove a versioned trusted-time and revocation adapter conformance contract
-   and deterministic, networkless qualification harness with trust-root and policy binding,
-   conservative interval and freshness semantics, authenticated provider-evidence mapping,
-   and substitution, replay, staleness, and ambiguity known-bads;
-2. extend that harness to anchor, catalog, and monitor adapters, add durable blocked-finality
-   disposition and governed recovery, and only then qualify independently administered
-   providers without weakening the retained recovery state machine;
+1. extend the networkless qualification harness to anchor, catalog, and monitor adapters,
+   and add durable blocked-finality disposition and governed recovery before connecting any
+   external provider;
+2. only then qualify independently administered providers and integrate accepted adapter
+   outputs without weakening the retained recovery state machine;
 3. prove external latest-head authority survives local loss, then close the documented
    same-user SQLite pathname and coherent offline-rewrite boundary;
 4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal

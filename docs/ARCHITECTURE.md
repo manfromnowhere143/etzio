@@ -29,6 +29,14 @@ but its providers are deterministic repository fixtures. It is candidate generat
 verification assignment, byte retention, modeled-statement admission, and lifecycle
 recovery—not external authority or a finding pipeline.
 
+A separate V1 qualification surface now authenticates signed repository-fixture
+trusted-time and revocation statements under an exact copied profile, fuses time
+conservatively, checks revocation validity, freshness, and unanimous floors against the
+complete time hull, and freshly maps sealed results into the provider-neutral integrity
+types. Its deterministic corpus and eighty-one focused tests prove contract and known-bad
+behavior only. The surface is not wired to the modeled-finality state machine, and it
+qualifies no native or externally administered provider.
+
 ## Target system
 
 ```text
@@ -227,6 +235,27 @@ store, and distinct decision/checkpoint identities. One unresolved transition bl
 later events and generic replay across the database, including across missions, and
 provider calls never run inside a SQLite transaction.
 
+ADR-0012 now defines a separate, networkless V1 qualification boundary for repository-owned
+trusted-time and revocation fixture adapters. The exact copied profile binds the complete
+trust root, validation policy, role-separated source roster, provider policies, codecs,
+service, and environment. Exact signed statement bytes authenticate before any claim is
+parsed; the request binds profile, root, policy, scope, purpose, imprint, and nonce. The
+kernel-owned harness also binds its deterministic adapter inputs and ordered cases in a
+content-derived corpus manifest and requires byte-identical same-request retries.
+
+Every configured trusted-time source is required. Their closed intervals must have a common
+overlap, but the result retains the conservative outer hull rather than claiming the
+narrower intersection. Revocation metadata and all configured floor witnesses must agree,
+and the complete time hull must fit the half-open metadata validity window and the bounded
+freshness interval. Sealed results are freshly reauthenticated before mapping exact signed
+BLOBs and references into `ProviderEvidenceBlobV1`, `RevocationViewV1`, and
+`RevocationFloorV1`; direct construction, incomplete rosters, substitutions, replay,
+staleness, ambiguity, and malformed wire fail closed.
+
+This is contract-and-harness proof, not a lifecycle integration. The existing
+`PendingIntegrityTransitionV1` and modeled-finality facade do not consume the qualified
+mapping and continue to use their original unsigned, code-derived fixture assertions.
+
 The canonical four-phase modeled-finality state machine is:
 
 ```text
@@ -252,20 +281,20 @@ integrity inspection and recovery may read or advance the retained lineage, and 
 command can report success before TX4 has been reloaded and verified.
 
 No real trusted-time, revocation, transparency, monitoring, catalog, or anchor service is
-connected. The deterministic sources exercise signed decision/checkpoint authentication,
-continuity, semantic evidence validation, and recovery. Their floor and provider-evidence
-assertions are exact code-derived fixture claims, not externally authenticated
-observations, and do not establish trustworthy UTC, external durability, independent
-administration, or non-equivocation. The legacy SQLite `SignedCheckpoint` remains opaque
-and untrusted.
+connected. Signed qualification statements authenticate deterministic repository-fixture
+producers; they do not establish truthful UTC, current real-world revocation, external
+durability, independent administration, or non-equivocation. Modeled-finality floor and
+provider-evidence assertions remain exact unsigned code-derived fixture claims. The legacy
+SQLite `SignedCheckpoint` remains opaque and untrusted.
 
-The remaining blocked cluster is qualified, independently administered trusted-time,
-revocation, anchor, catalog, and monitor adapters; durable blocked-finality disposition
-and governed recovery; closure of the same-user pathname and coherent offline-rewrite
-boundary; production storage and power-fault qualification plus sensitive-evidence
-controls; and structured independently produced execution evidence with proved
-MARCELLUS/CATO separation. Until those gates close, live-target work and finding admission
-remain blocked.
+The exact next gate is to extend the networkless qualification harness to anchor, catalog,
+and monitor adapters and add durable blocked-finality disposition and governed recovery
+before any external provider connection. The remaining blocked cluster then includes
+qualifying independently administered providers without weakening retained recovery;
+closing the same-user pathname and coherent offline-rewrite boundary; production storage
+and power-fault qualification plus sensitive-evidence controls; and structured
+independently produced execution evidence with proved MARCELLUS/CATO separation. Until
+those gates close, live-target work and finding admission remain blocked.
 
 ## Authority
 
@@ -637,14 +666,17 @@ recovery, the typed integrity-decision/head-checkpoint contract, and transaction
 evidence retention for all four protected event kinds are retained. Under the documented
 SQLite assumptions, an empty-history fixture profile now also demonstrates deterministic
 injected-interruption recovery, byte-exact two-stage retry, and exact-current-head command
-completion for every event. The exact next gate first specifies and proves a versioned
-trusted-time and revocation adapter conformance contract in a deterministic, networkless
-qualification harness with trust-root/policy binding, conservative interval/freshness
-semantics, authenticated provider-evidence mapping, and substitution, replay, staleness,
-and ambiguity known-bads. Only after that proof passes does the same harness extend to
-anchor, catalog, and monitor adapters plus durable blocked-finality recovery; independently
-administered providers are qualified and connected later without weakening the retained
-state machine. Foundation integrity is accepted only when retained evidence also shows:
+completion for every event. A separate versioned, networkless trusted-time and revocation
+qualification harness now proves exact fixture trust-root, policy, profile, source-roster,
+request, signature, interval, freshness, unanimous-floor, retry, corpus-manifest, and
+provider-evidence mapping behavior. It is not wired to lifecycle finality, whose provider
+assertions remain unsigned and code-derived.
+
+The exact next gate extends the networkless harness to anchor, catalog, and monitor adapters
+and adds durable blocked-finality disposition and governed recovery before any external
+provider connection. Independently administered providers are qualified and integrated only
+later, without weakening the retained state machine. Foundation integrity is accepted only
+when retained evidence also shows:
 
 - trusted time and revocation freshness for every consequential transition;
 - authenticated, externally anchored event heads;

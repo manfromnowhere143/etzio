@@ -62,11 +62,27 @@ current adapter-qualification baseline is deliberately compositional:
 | [RFC 9942](https://www.rfc-editor.org/rfc/rfc9942.html), [RFC 9943](https://www.rfc-editor.org/rfc/rfc9943.html), and [RFC 9162](https://www.rfc-editor.org/rfc/rfc9162.html) | byte-bound registration receipts plus inclusion and consistency evidence | accept only configured algorithms and proof forms; require predecessor consistency and a separately authenticated latest-head witness |
 | [Sigstore Rekor](https://docs.sigstore.dev/logging/overview/) | possible future transparency evidence source | never promote one deployment into trusted UTC, revocation freshness, independent witnessing, or complete Etzio command authority |
 
-The current repository-owned adapters model these roles and idempotent recovery only. They
-do not qualify any external provider or prove separate operators, clocks, storage, or
-administration. Their provider-evidence BLOBs are unsigned, canonical, code-derived
-fixture assertions; only the decisions and checkpoints are cryptographically
-authenticated under the permanently enrolled fixture trust binding.
+The modeled-finality adapters currently exercise these roles and idempotent recovery with
+unsigned, canonical, code-derived provider assertions; only their decisions and
+checkpoints authenticate under the permanently enrolled fixture trust binding. They do not
+consume the separate qualified adapter outputs.
+
+ADR-0012 adds a versioned, networkless qualification contract for signed repository-owned
+trusted-time and revocation fixture statements. Its exact copied profile binds the trust
+root, validation policy, all-required role-separated source roster, provider policies,
+codecs, service, and environment. It authenticates the exact statement bytes before parsing
+claims, binds requests and nonces against replay, requires a common overlap while retaining
+the conservative outer time hull, applies that full hull to half-open revocation validity
+and bounded freshness, requires unanimous configured floors, and freshly maps sealed signed
+BLOBs to the provider-neutral evidence types. A deterministic corpus manifest and exact
+same-request retry make the repository-fixture qualification reproducible.
+
+This is a common contract and harness, not RFC 3161, PKIX, TUF, COSE, SCITT, Rekor, or any
+named-provider conformance. It does not establish truthful UTC, current real-world
+revocation, separate operators, independent administration, external storage or durability,
+availability, consistency, or non-equivocation. The next gate extends the same networkless
+harness to anchor, catalog, and monitor adapters and adds durable blocked-finality recovery
+before any external provider connection.
 
 ## Required benchmark portfolio
 

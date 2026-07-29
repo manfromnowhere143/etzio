@@ -4,7 +4,7 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/integrity-finality-enforcement-v1",
+  "active_branch": "agent/time-revocation-adapter-qualification-v1",
   "foundation_base": {
     "commit": "4919a0c09f99f545336fc6482a2d52f8fd7c03e1",
     "tree": "73ae7dcf5fae6d889dcb1d4d63b0345ae6798361"
@@ -29,8 +29,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "qualified_external_integrity_adapters_and_storage_boundary",
-    "next_session_pickup": "first specify and prove the versioned trusted-time and revocation adapter conformance contract and deterministic qualification harness with trust-root and policy binding conservative interval and freshness semantics authenticated provider-evidence mapping and substitution replay staleness and ambiguity known-bads; remain fixture-backed and networkless before extending the harness to anchor catalog monitor and durable blocked-finality recovery",
+    "next_gate": "networkless_anchor_catalog_monitor_and_blocked_finality_contract",
+    "next_session_pickup": "extend the versioned deterministic networkless adapter qualification boundary from the completed trusted-time and revocation tranche to anchor registration receipts external head catalogs and monitor witnesses together with a durable blocked-finality disposition and governed recovery contract; preserve the retained lifecycle state machine and do not connect any real provider until the complete networkless contract and known-bads pass",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -103,6 +103,12 @@
     "two byte-identical at-least-once modeled protocol-write calls with process-local prime_catalog rehydration that is neither durable nor a third protocol write",
     "fully revalidated modeled-lineage replay cache and every writer boundary guarded by exact schema fingerprint application and user versions connection identity data version schema cookie change signals and admitted journal synchronization foreign-key trusted-schema CHECK-enforcement read-isolation and writable-schema settings",
     "store busy capacity operational and corruption classifications preserved through finality recovery while unexpected adapter failures remain typed blocked",
+    "versioned networkless trusted-time and revocation adapter qualification contract with copied exact trust-root validation-policy service environment source-role namespace key principal provider-policy and codec bindings",
+    "authentication-before-semantics Ed25519 fixture packages with role-separated signature domains exact request nonce imprint purpose scope event transition profile root and policy binding and raw signed-byte provider-evidence identities",
+    "all-required trusted-time source qualification with common-overlap refusal conservative outer-hull retention exact decision and checkpoint uncertainty ceilings deterministic byte-identical retry and cross-request replay refusal",
+    "full-hull half-open revocation validity and bounded-staleness qualification with exact predecessor root version and snapshot continuity one metadata source and unanimous fixed floor witnesses per required namespace",
+    "privately sealed freshly reauthenticated trusted-time revocation and provider-neutral mapping results with exact retained BLOB-to-reference closure and no direct or dataclass-copy construction",
+    "content-addressed deterministic adapter qualification corpus binding implementation profile vector ordered cases exact time intervals and revocation adapter states with a sealed ten-case report and adversarial conformance known-bads",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -110,14 +116,15 @@
   "modeled_only": [
     "original in-memory ten-unit behavior loop",
     "modeled target and eight-case verdict corpus",
-    "repository-owned deterministic time revocation anchor catalog and monitor sources",
+    "repository-owned deterministic modeled-finality time revocation anchor catalog and monitor sources",
+    "repository-owned signed trusted-time and revocation qualification packages without external provider acquisition native-format validation or lifecycle authority",
     "unsigned canonical code-derived provider assertions without independently authenticated external observations",
     "process-local modeled anchor and catalog state without external durability or independent administration",
     "opaque modeled output semantics without a structured execution run identity",
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "qualified independently administered trusted-time revocation anchor catalog and monitor adapters replacing deterministic fixture assertions inside the retained lifecycle contract",
+    "networkless anchor catalog monitor and durable blocked-finality qualification followed by independently administered trusted-time revocation anchor catalog and monitor adapters replacing deterministic fixture assertions inside the retained lifecycle contract",
     "externally durable authenticated latest-head authority and witnessing that survives local database loss",
     "durable blocked disposition reason and governed recovery decision",
     "structured independently produced execution effect measured-environment and termination evidence",
@@ -141,21 +148,27 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 829,
+    "validation_status": "both_local_release_suites_passed_pending_github",
+    "test_count": 910,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
     ],
+    "sqlite_source_ids": {
+      "CPython 3.11.15": "2026-05-05 10:34:17 c88b22011a54b4f6fbd149e9f8e4de77658ce58143a1af0e3785e4e6475127e9",
+      "CPython 3.14.2": "2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075"
+    },
     "ruff_clean": true,
     "repository_policy_passed": true,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
-    "github_validated_commit": "82f8ceca3eb0a32cdc67421f70ab45e845a90bdc",
-    "github_actions_run_id": 30474966878,
-    "github_pull_request": 11,
-    "claim_boundary": "implements repository-fixture-only schema-v2 modeled integrity finality with a pinned fixture-adapter authority binding atomic pending retention four immutable phases two at-least-once modeled protocol writes exact code-derived provider assertions multi-mission global and mission continuity generic pending-replay refusal crash and concurrency recovery and exact-current modeled command completion; no trustworthy UTC real revocation freshness provider authentication external durability independent administration non-equivocation same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim"
+    "adapter_qualification_cases": 10,
+    "adapter_qualification_focused_tests": 81,
+    "github_validated_commit": null,
+    "github_actions_run_id": null,
+    "github_pull_request": null,
+    "claim_boundary": "adds a versioned deterministic networkless contract and qualification harness for repository-owned signed trusted-time and revocation fixture packages with exact profile root policy request source interval freshness floor and retained-byte bindings plus sealed provider-neutral mapping; it is not consumed by modeled lifecycle finality and establishes no native RFC 3161 TUF or provider-format qualification trustworthy UTC current real revocation independent administration external durability non-equivocation same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim"
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -217,6 +230,7 @@
     "docs/decisions/0008-typed-integrity-evidence-contract.md",
     "docs/decisions/0009-uniform-sqlite-rollback-journal-safety.md",
     "docs/decisions/0010-transactional-evidence-vault.md",
-    "docs/decisions/0011-crash-safe-modeled-integrity-finality.md"
+    "docs/decisions/0011-crash-safe-modeled-integrity-finality.md",
+    "docs/decisions/0012-networkless-time-revocation-adapter-qualification.md"
   ]
 }

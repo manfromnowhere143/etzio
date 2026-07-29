@@ -35,12 +35,19 @@ scientific authority remain in the kernel.
 > rewriting history. A separate empty-history-only schema-v2 profile now commits every
 > event with a signed integrity decision and exercises a recoverable modeled anchor,
 > checkpoint, and exact-current-head sequence under the documented SQLite assumptions
-> before its fixture command returns. Its
-> clocks, revocation sources, anchor, catalog, and monitor are deterministic
-> repository-owned fixtures—not external authority. Etzio does not construct or execute
-> exploits, establish that those opaque outputs came from an execution, adjudicate a
-> finding, access a live target, or learn. No production-readiness or superiority claim is
-> made.
+> before its fixture command returns. Its clocks, revocation sources, anchor, catalog, and
+> monitor remain deterministic repository-owned fixtures whose provider assertions are
+> unsigned and code-derived—not external authority. Separately, a versioned networkless
+> qualification contract authenticates repository-owned Ed25519-signed time and revocation
+> fixture packages under one exact profile, trust root, validation/provider policy, and
+> fixed all-source roster. It retains the overlapping time sources' conservative outer
+> hull, evaluates revocation validity, staleness, and floor agreement against that complete
+> hull, and freshly reauthenticates exact signed bytes before producing a sealed
+> provider-neutral mapping. Modeled finality and lifecycle commands do not consume that
+> mapping. No real provider or native RFC 3161, PKIX, TUF, COSE, SCITT, or transparency
+> client is qualified. Etzio does not establish trustworthy UTC, current real revocation,
+> external durability or independence, execute an exploit, adjudicate a finding, access a
+> live target, or learn. No production-readiness or superiority claim is made.
 
 ## Why Etzio
 
@@ -64,9 +71,16 @@ That yields six operating laws:
 - **Today:** the supported fixture CLI reaches stable candidates and `mission_closed` on
   the permanent SQLite legacy profile. Separate kernel APIs retain modeled verification
   lifecycle statements; an optional empty-store facade exercises modeled finality.
+- **Signed-fixture qualification:** a separate deterministic, networkless harness proves
+  exact request/profile/root/policy authentication, complete-roster conservative time
+  fusion, full-hull revocation validity/freshness/floor checks, and sealed mapping for
+  repository-owned signed fixtures. It is not connected to modeled finality or lifecycle
+  admission.
 - **Modeled evidence:** receipt outputs and integrity-provider assertions are authenticated
-  or code-derived fixture statements. They do not establish execution, external
-  observation, independent administration, or a finding.
+  or code-derived fixture statements. The modeled-finality provider assertions remain
+  unsigned and code-derived; the separately qualified signed packages do not make them
+  external observations. Neither path establishes execution, trustworthy UTC, current real
+  revocation, independent administration, external durability, or a finding.
 - **Blocked target system:** exploit construction, hard isolation, independent
   reproduction, adjudication, governed disclosure, evaluated promotion, live targets, and
   production external finality remain unavailable.
@@ -128,10 +142,19 @@ The protocol-v1 foundation includes:
   intervals and ordering, context-typed provider evidence, exact current and predecessor
   signed-attestation provenance, scope-bound nonstale revocation/head floors, and distinct
   principals;
+- a separate V1 trusted-time and revocation adapter conformance contract and deterministic
+  networkless qualification harness with an exact copied validation policy, complete trust
+  root, fixed source/key/principal/role roster, role-separated Ed25519 fixture signatures,
+  authentication-before-claim parsing, nonce-bound requests, all-source common-overlap and
+  conservative-outer-hull time fusion, full-hull revocation validity/freshness plus
+  metadata-and-floor agreement, freshly reauthenticated sealed mappings, exact signed-BLOB
+  coverage, and substitution, replay, staleness, ambiguity, roster, and mutation
+  known-bads;
 - an irreversible schema-v2 modeled-integrity profile for an empty history, with atomic
   event-plus-pending retention, four append-only recovery phases, byte-exact two-stage
   idempotency, one instance-global pending barrier, and exact current global/mission floor
-  finalization before the modeled facade returns;
+  finalization before the modeled facade returns; this profile still uses its unsigned
+  code-derived provider assertions and does not consume the separate qualified mapping;
 - exact-type composition boundaries that copy trust and policy inputs and rebuild fresh
   authenticated snapshots from verified wire before continuity logic runs;
 - exact fixture manifests, a bounded private filesystem staging/cache store, and a
@@ -183,7 +206,9 @@ claim.
 
 This compact diagram shows retained repository-fixture paths only. Green nodes and solid
 arrows are implemented; an `optional` edge is implemented but is not used by the supported
-CLI. Blue is the empty-store modeled-finality qualification surface. Legacy behavior-only
+CLI. Blue is the empty-store modeled-finality qualification surface. Amber is the separate
+implemented signed-fixture adapter-qualification surface; it deliberately terminates at a
+sealed mapping and has no edge into lifecycle or modeled finality. Legacy behavior-only
 stubs and blocked target roles are intentionally excluded here and named precisely in the
 status table below. The complete target-state authority topology is in
 [Architecture](docs/ARCHITECTURE.md#target-system); labels, rather than color alone, carry
@@ -213,6 +238,15 @@ flowchart TB
         DBM[("SQLite schema v2 · modeled-integrity profile<br/>permanent after enrollment")]
     end
 
+    subgraph QUAL["Separate implemented signed-fixture adapter qualification"]
+        direction LR
+        AP["Exact adapter profile<br/>trust root · validation/provider policies<br/>fixed all-source roster"]
+        SP["Role-separated signed fixture packages<br/>Ed25519 · exact nonce-bound requests<br/>authenticate before claim parsing"]
+        TH["All-source time qualification<br/>common overlap · conservative outer hull"]
+        RF["Full-hull revocation qualification<br/>validity · staleness · metadata/floors"]
+        SM["Sealed provider-neutral mapping<br/>fresh reauthentication · exact BLOB coverage<br/>not lifecycle/finality input"]
+    end
+
     AQ --> K
     S -->|"first canonical ingestion"| K
     K -->|"analysis lease + immutable bytes"| V
@@ -223,19 +257,28 @@ flowchart TB
     K <--> DBL
     K -->|"optional empty-store facade"| IF
     IF <--> DBM
+    AP --> SP
+    SP --> TH
+    SP --> RF
+    TH --> SM
+    RF --> SM
 
     classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
     classDef fixture fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
+    classDef qualification fill:#fff3bf,stroke:#e67700,color:#3d2100;
     class AQ,K,S,DBL,V,KC,C,VR implemented;
     class IF,DBM fixture;
+    class AP,SP,TH,RF,SM qualification;
     style AUTH fill:#f8f9fa,stroke:#adb5bd,color:#212529
     style SCAN fill:#f8f9fa,stroke:#adb5bd,color:#212529
     style OPTIONAL fill:#f8f9fa,stroke:#adb5bd,color:#212529
+    style QUAL fill:#fff9db,stroke:#f59f00,color:#3d2100
 ```
 
-The optional integrity facade retains four immutable local phases. Future qualified
-adapters replace the deterministic fixture adapters inside this same state machine; they
-are not a post-success hop:
+The optional integrity facade retains four immutable local phases. Its current sources are
+not the separately qualified signed-fixture packages. A future independently administered
+full adapter set must replace the modeled sources inside this state machine; it is not a
+post-success hop:
 
 ```mermaid
 flowchart TB
@@ -247,8 +290,19 @@ flowchart TB
     P3["3 · Checkpoint candidate<br/>retain exact signed head<br/>then modeled publication"]
     P4["4 · Finalization<br/>retain exact current global + mission floor"]
     OK["Facade returns<br/>modeled command success"]
-    FX["Current deterministic fixture adapters<br/>code-derived assertions · process-local writes<br/>not external authority"]
-    EXT["Future qualified adapters<br/>independently authenticated and durable"]
+    FX["Current modeled-finality fixtures<br/>unsigned code-derived provider assertions<br/>not external authority"]
+
+    subgraph QUAL2["Implemented networkless time/revocation qualification · separate proof surface"]
+        direction LR
+        QP["Exact profile · trust root · policies<br/>fixed signed-fixture roster"]
+        QT["All-source common overlap<br/>conservative time outer hull"]
+        QR["Full-hull revocation validity/freshness<br/>metadata + all floor sources agree"]
+        QM["Freshly reauthenticated sealed mapping<br/>exact signed-BLOB coverage"]
+        QN["Contract boundary<br/>not consumed by pending transition<br/>or any lifecycle command"]
+    end
+
+    NEXT["Exact next gate<br/>networkless anchor/catalog/monitor qualification<br/>+ durable blocked disposition/recovery"]
+    EXT["Future full adapter set<br/>independently administered, authenticated,<br/>durable, monitored, and qualified"]
 
     E --> D --> P1 --> RH --> P2 --> P3 --> P4 --> OK
     FX --> D
@@ -256,6 +310,13 @@ flowchart TB
     FX --> P2
     FX --> P3
     FX --> P4
+    QP --> QT
+    QP --> QR
+    QT --> QM
+    QR --> QM
+    QM --> QN
+    QN -. "roadmap succession · no runtime edge" .-> NEXT
+    NEXT -. "later provider qualification" .-> EXT
     EXT -. "future replacement<br/>at trust, write, and read boundaries" .-> D
     EXT -.-> P2
     EXT -.-> P3
@@ -263,10 +324,12 @@ flowchart TB
 
     classDef retained fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
     classDef boundary fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
+    classDef qualification fill:#fff3bf,stroke:#e67700,color:#3d2100;
     classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#3b0a0a;
     class E,D,P1,P2,P3,P4,OK retained;
     class FX,RH boundary;
-    class EXT blocked;
+    class QP,QT,QR,QM,QN qualification;
+    class NEXT,EXT blocked;
 ```
 
 From phase 1 until phase 4, one unresolved transition blocks later appends and generic raw
@@ -275,6 +338,9 @@ bytes. A typed blocked result is attempt-local: the immutable phase remains unre
 but the classification and reason are not durably retained. See the canonical
 [integrity-evidence architecture](docs/ARCHITECTURE.md#integrity-evidence-contract) and
 [ADR-0011](docs/decisions/0011-crash-safe-modeled-integrity-finality.md#four-immutable-local-phases).
+The separate signed-fixture lane ends at `QualifiedIntegrityInputsV1`; no arrow crosses
+from that sealed mapping into the current pending-transition or lifecycle path. See
+[ADR-0012](docs/decisions/0012-networkless-time-revocation-adapter-qualification.md).
 
 | Plane | Unit | Responsibility | Repository status |
 |---|---|---|---|
@@ -346,18 +412,21 @@ assumptions, it exercises and tests same-transaction pending retention, byte-exa
 two-stage recovery, signed checkpoint persistence, multi-mission global and mission
 continuity, and exact-current-head command completion from event zero; it blocks generic
 replay while any modeled transition is unresolved. Its provider assertions are canonical,
-code-derived fixture claims—not authenticated external observations. The transactional
-SQLite vault closes the ordinary filesystem-staging/SQLite retention split for all four
-implemented byte-claiming event boundaries at the logical transaction layer. Completing
-the foundation-integrity boundary still requires:
+code-derived fixture claims—not authenticated external observations. Separately, the V1
+networkless time/revocation qualification harness now proves exact signed-fixture
+authentication, all-source outer-hull time semantics, full-hull revocation
+validity/freshness/floors, and sealed provider-neutral mapping. It is not consumed by the
+modeled pending-transition or lifecycle path and qualifies no real provider or native
+RFC 3161/TUF client. The transactional SQLite vault closes the ordinary
+filesystem-staging/SQLite retention split for all four implemented byte-claiming event
+boundaries at the logical transaction layer. Completing the foundation-integrity boundary
+still requires:
 
-1. specify and prove a versioned trusted-time and revocation adapter conformance contract
-   and deterministic, networkless qualification harness with trust-root and policy binding,
-   conservative interval and freshness semantics, authenticated provider-evidence mapping,
-   and substitution, replay, staleness, and ambiguity known-bads;
-2. extend that harness to anchor, catalog, and monitor adapters, add durable blocked-finality
-   disposition and governed recovery, and only then qualify independently administered
-   providers without weakening the retained recovery state machine;
+1. extend the deterministic networkless harness to signed-fixture anchor, catalog, and
+   monitor adapters, and add durable blocked-finality disposition plus governed recovery;
+2. qualify independently administered trusted-time, revocation, anchor, catalog, and
+   monitor providers, then connect an explicitly admitted profile without weakening the
+   retained recovery state machine;
 3. prove external latest-head authority survives local loss, then close the documented
    same-user SQLite pathname and coherent offline-rewrite boundary;
 4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
@@ -382,6 +451,7 @@ are measurements, never authority.
 - [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
 - [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
 - [Architecture decisions](docs/decisions/README.md)
+- [Networkless time/revocation adapter qualification decision](docs/decisions/0012-networkless-time-revocation-adapter-qualification.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 
