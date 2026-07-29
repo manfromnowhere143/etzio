@@ -149,9 +149,10 @@ last immutable phase unresolved. Invalid deterministic adapter evidence raises a
 schema version 2 does not durably retain a blocked classification or reason. SQLite
 busy, capacity, operational, and corruption errors preserve their store classifications.
 
-### Exactly two modeled protocol-write calls
+### Concrete fixture service: exactly two modeled protocol-write calls
 
-The modeled protocol has two conceptual write calls:
+The repository-supplied and qualified deterministic fixture service contract has exactly
+two conceptual write calls:
 
 1. register the exact pre-receipt anchor statement with the configured anchor adapter
    set; and
@@ -161,7 +162,10 @@ The modeled protocol has two conceptual write calls:
 Trusted-time acquisition, revocation update, floor lookup, consistency lookup, and
 latest-head confirmation return exact code-derived fixture assertions in this profile.
 One conceptual stage may fan out to the bounded quorum fixed by the profile, but no
-unrecorded third protocol write is implied.
+unrecorded third protocol write is part of this concrete fixture implementation. The
+service-port types do not mechanically prevent an arbitrary implementation from adding
+egress or additional calls; merely satisfying those ports does not admit an implementation
+to this profile.
 
 After the second write, modeled finality still requires a separate exact current-floor
 read plus consistency/witness semantics. These fixture assertions carry no provider
@@ -173,22 +177,34 @@ Recovery also invokes process-local `prime_catalog` to reconstruct the determini
 fixture service's in-memory compare-and-set view from retained predecessor lineages. It is
 neither durable nor external and is not a third protocol write.
 
-No adapter call occurs while the SQLite connection is in a transaction. The sequence is
-always:
+The qualified repository fixture implementation makes no service-port call while the
+SQLite connection is in a transaction. Its sequence is always:
 
 ```text
-code-derived modeled adapter reads
-  -> short SQLite transaction
-  -> modeled protocol write
-  -> short SQLite transaction
-  -> modeled protocol write
-  -> exact current-floor read
-  -> short SQLite finalization transaction
+proposed EventV1 / exact prior global + mission heads / enrolled profile authority
+  → authenticated signed IntegrityDecisionV1
+  → TX1 · PHASE 1: event + pending decision/trust dossier + provider assertions
+  → process-local catalog rehydration from retained predecessor lineages
+       (`prime_catalog`; nondurable and not a protocol write)
+  → TX2 · PHASE 2: exact anchor statement + byte-exact registration request
+  → modeled anchor registration                         [protocol write 1]
+  → TX3 · PHASE 3: exact anchor receipts + signed HeadCheckpointV1 candidate
+                    + byte-exact publication request
+  → modeled checkpoint publication                     [protocol write 2]
+  → exact code-derived current-floor assertion
+       (the candidate is both the instance-global and mission head)
+  → TX4 · PHASE 4: exact finalization record
+  → modeled facade success
 ```
 
 Data obtained before a transaction is rechecked against the locked local predecessor and
 profile before insertion. Data obtained after a transaction is bound to the exact durable
 request retained before the modeled provider-side effect.
+
+TX1 activates the database-wide unresolved-transition barrier; TX4 alone releases it.
+Between those points every later append path and generic replay is refused across every
+mission. Only explicit integrity inspection and recovery may read or advance the retained
+lineage, and the facade cannot return command success.
 
 ### At-least-once semantic idempotence
 
@@ -239,13 +255,18 @@ or project the pending event as an externally finalized head.
 
 ### Modeled deterministic adapter profile
 
-The only accepted adapters in this tranche are repository-owned deterministic fixtures.
-They use fixed, versioned keys, policies, namespaces, conservative time intervals,
-revocation versions, anchor statements, receipts, consistency evidence, and catalog
-responses. They perform no network egress, use no credential, incur no spending, and write
-to no third-party service.
+The adapter implementation supplied and qualified in this tranche is the repository-owned
+deterministic fixture service. It uses profile-bound keys fixed at enrollment plus
+versioned policies, namespaces, conservative time intervals, revocation versions, anchor
+statements, receipts, consistency evidence, and catalog responses. This concrete
+implementation performs no network egress, uses no credential, incurs no spending, and
+writes to no third-party service. Those are properties of the supplied implementation and
+its qualification evidence, not capabilities mechanically prohibited by the service-port
+interfaces. An arbitrary implementation is not accepted merely because it conforms
+structurally to those ports.
 
-Fixed keys authenticate decisions and checkpoints only. Provider-evidence BLOBs are
+Profile-bound keys fixed at enrollment authenticate decisions and checkpoints only.
+Provider-evidence BLOBs are
 unsigned, canonical, code-derived assertions checked for exact source, kind, claim, and
 reference equality. Separate fixture source IDs, keys, and logical roles exercise quorum
 and substitution logic but do not prove separate operators, infrastructure, clocks,
@@ -264,8 +285,10 @@ or add a runtime dependency in this decision.
 semantics, nonce and message-imprint binding, TSA policy, CMS verification, `genTime`, and
 the optional `accuracy` value. Etzio converts `genTime` plus and minus the authenticated
 accuracy into the conservative interval required by ADR-0008; absence of acceptable
-accuracy, policy, nonce, imprint, certificate path, signing-time EKU, or revocation
-evidence fails closed.
+accuracy, policy, nonce, imprint, certificate path, or revocation evidence fails closed.
+The TSA signing certificate must carry a critical Extended Key Usage extension containing
+exactly one KeyPurposeID, `id-kp-timeStamping` (`1.3.6.1.5.5.7.3.8`); a noncritical
+extension, another EKU, or multiple EKU instances fails closed.
 
 [RFC 5816](https://www.rfc-editor.org/rfc/rfc5816.html) updates RFC 3161 with
 `ESSCertIDv2`/`SigningCertificateV2` algorithm agility. A future adapter must not fall back
@@ -415,6 +438,12 @@ Still blocked:
 - structured independently produced execution evidence and MARCELLUS/CATO isolation; and
 - every live-target, egress, credential, spending, disclosure, submission, publication,
   and deployment action.
+
+These are one remaining gate cluster, not optional follow-on polish: externally
+authenticated and durable adapter authority, durable blocked-finality adjudication,
+same-user and coherent-offline-rewrite closure, qualified production storage, and
+structured independently produced execution evidence with proved MARCELLUS/CATO
+separation must all remain visibly blocked.
 
 Logical crash recovery is claimed only under the already documented SQLite
 rollback-journal assumptions and deterministic injected failures. It is not power-loss or

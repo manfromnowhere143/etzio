@@ -150,17 +150,21 @@ claim.
 
 Remaining required:
 
-1. qualify independently administered trusted-time, revocation, anchor, catalog, and
-   monitor adapters and replace the deterministic fixture sources at consequential
-   commands without weakening the retained finality and recovery contract;
-2. closure of the documented same-user SQLite pathname and coherent offline-rewrite
-   boundary;
-3. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
+1. specify and prove a versioned trusted-time and revocation adapter conformance contract
+   and deterministic, networkless qualification harness with trust-root and policy binding,
+   conservative interval and freshness semantics, authenticated provider-evidence mapping,
+   and substitution, replay, staleness, and ambiguity known-bads;
+2. extend that harness to anchor, catalog, and monitor adapters, add durable blocked-finality
+   disposition and governed recovery, and only then qualify independently administered
+   providers without weakening the retained finality state machine;
+3. prove external latest-head authority survives local loss, then close the documented
+   same-user SQLite pathname and coherent offline-rewrite boundary;
+4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
    quotas, backup/restore, process-kill and power-fault recovery, and sensitive-evidence
    access-control, encryption, and retention policy;
-4. structured independently produced execution evidence with a common measured run
+5. structured independently produced execution evidence with a common measured run
    identity; and
-5. known-bads for every new refusal, substitution, replay, and concurrency condition.
+6. known-bads for every new refusal, substitution, replay, and concurrency condition.
 
 Current retained boundary: an authority-bound modeled verification assignment, every
 predeclared input, and one authenticated modeled receipt can be resolved and retained today.
@@ -184,16 +188,24 @@ Status: **blocked on an explicitly authorized Linux/KVM environment and Phase 1B
 
 Build separately identified MARCELLUS and CATO workers:
 
-- immutable, measured images and exact toolchains;
+- immutable, measured images and exact dependency closure and toolchains;
+- an accepted host firmware, microcode, SMT, KSM, VFS, and device policy;
+- one unique unprivileged host identity per worker, least-privilege `/dev/kvm` access,
+  cgroup-v2 ceilings, seccomp/jailer confinement, and no shared writable paths;
 - read-only target and artifact inputs;
 - no ambient host credentials;
-- default-deny egress with separately granted destinations;
+- default-deny DNS and egress with separately granted destinations;
 - ephemeral writable layers;
 - CPU, memory, process, storage, and wall-clock ceilings;
-- syscall/device restrictions;
+- syscall/device restrictions plus bounded guest-controlled serial, log, and artifact
+  channels;
 - expiring one-purpose leases;
 - complete stdout, stderr, effect, environment, and termination receipts;
-- out-of-band cancellation and kill; and
+- an explicit trust split among worker, target, dependency mirror, model gateway,
+  controller, evidence receiver, and grader;
+- one-way bounded evidence export, with grader secrets unavailable to the worker;
+- tamper-evident trajectory and network telemetry retained outside the guest;
+- out-of-band cancellation, synchronous kill, and incident-response recovery; and
 - adversarial escape, confusion, stale-lease, replay, and teardown tests.
 
 Acceptance is evidence that builder and verifier differ by principal, key, process, and

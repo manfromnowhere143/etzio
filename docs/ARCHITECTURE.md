@@ -32,42 +32,36 @@ recovery—not external authority or a finding pipeline.
 ## Target system
 
 ```text
-                          human / program authority
-                                      │
-                            exact signed grants
-                                      ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│ AQUILA · policy plane                                                    │
-│ admission · scope · budgets · leases · egress · kill · approvals         │
-└──────────────────────────────┬────────────────────────────────────────────┘
-                               │ admitted commands
-                               ▼
-┌───────────────────────────────────────────────────────────────────────────┐
-│ ETZIO · deterministic control plane                                      │
-│ protocol · reducer · append-only ledger · recovery · evidence graph      │
-└──────────────┬───────────────────────────────┬────────────────────────────┘
-               │ leased work                   │ authenticated receipts
-               ▼                               ▼
-┌──────────────────────────────┐     ┌──────────────────────────────────────┐
-│ research plane              │     │ independent proof plane              │
-│ SCIPIO → FABIUS → VELITES   │     │ MARCELLUS builder → CATO verifier   │
-│ domain + technique packs    │     │ separate identities and isolation   │
-└──────────────┬───────────────┘     └──────────────────┬───────────────────┘
-               └──────────────────────┬─────────────────┘
-                                      ▼
-                         CAMILLUS → FABRICIUS
-                         adjudication   draft
-                                      │
-                                      ▼
-                       MINERVA offline promotion loop
+[human / program authority] ── exact signed grants ──▶ [AQUILA policy plane]
+
+[AQUILA] ── admitted authority and policy decisions ──▶ [ETZIO control kernel]
+
+[ETZIO] ── leases + exact immutable inputs ──▶ [research workers:
+                                                SCIPIO / FABIUS / VELITES]
+[research workers] ── typed proposals ──▶ [ETZIO]
+
+[ETZIO] ── leases + exact immutable inputs ──▶ [independent proof workers:
+                                                MARCELLUS / CATO]
+[independent proof workers] ── typed proposals + signed receipts ──▶ [ETZIO]
+
+[ETZIO] ◀── canonical reads / atomic writes ──▶ [canonical SQLite evidence vault]
+
+[ETZIO] ── kernel-accepted evidence only ──▶ [CAMILLUS adjudication]
+                                             └──▶ [FABRICIUS draft]
+
+[canonical vault: retained positive + negative outcomes]
+  └──▶ [MINERVA offline evaluation and governed promotion proposals]
 ```
 
 Workers return typed proposals. They do not grant authority, mutate canonical state, or
-declare a finding.
+declare a finding. CAMILLUS never consumes a worker proposal or receipt directly: ETZIO
+first authenticates, lifecycle-checks, and retains the evidence. MINERVA evaluates retained
+positive and negative outcomes offline; it cannot directly change authority policy,
+evaluators, benchmarks, or production bytes.
 
 ## Implemented fixture path
 
-The supported executable path is intentionally closed:
+The common repository-fixture admission and analysis prefix is intentionally closed:
 
 ```text
 repository fixture manifest
@@ -79,15 +73,38 @@ repository fixture manifest
   → AnalysisLeaseV1
   → StaticCandidateV1 / explicit parse failure
   → scan_completed
-  ├─ ordinary fixture scan → mission_closed
-  └─ verification intent → VerificationLeaseV1
-                           ├─ VerificationArtifactResolutionV1 + input vault BLOBs/roles
-                           │  → signed VerifierReceiptV1
-                           │  → verifier_receipt_admitted + output vault BLOBs/roles
-                           ├─ verification_lease_expired
-                           ├─ verification_lease_cancelled
-                           └─ verification_lease_reassigned → successor lease
-                           → mission_closed with exact receipt coverage
+  ├─ supported `etzio.scan` CLI
+  │    └─ permanent legacy profile, no verification intent
+  │       → mission_closed(status = completed)
+  │
+  └─ explicit fixture-only verification-intent kernel path (not the CLI)
+       ├─ candidate remains never assigned
+       └─ VerificationLeaseV1
+          ├─ VerificationArtifactResolutionV1
+          │  → verification_artifacts_resolved + exact input vault BLOBs/roles
+          │  → caller-supplied signed VerifierReceiptV1
+          │       (modeled statement only; no verifier or artifact execution)
+          │  → verifier_receipt_admitted + exact output vault BLOBs/roles
+          │       (atomically consumes the lease)
+          ├─ verification_lease_expired
+          ├─ verification_lease_cancelled
+          └─ verification_lease_reassigned → successor VerificationLeaseV1
+                                               └──↺ repeat this lease branch with a
+                                                    successor-specific resolution
+       → mission_closed only when no active lease remains
+          ├─ receipt_coverage_complete
+          └─ receipt_coverage_incomplete
+```
+
+The explicit fixture-only path may optionally be attached to the deterministic finality
+qualification surface:
+
+```text
+completely empty schema-v2 store
+  → irreversible modeled_integrity_fixture_v1 enrollment
+  → ModeledIntegrityFinalizingEventStoreV1 facade
+  → every event traverses the four-phase modeled-finality state machine
+  → facade returns only after exact finalization
 ```
 
 Only `clean_app.py` and `vulnerable_app.py` from the immutable repository manifest are
@@ -95,14 +112,18 @@ admitted. `etzio.scan` has no arbitrary filesystem-target argument. The analyzer
 takes bytes and owns no filesystem walker.
 
 The verification-intent branch records an assignment, resolves its predeclared bytes, and
-can admit one authenticated modeled receipt while consuming its lease. Four separately
-typed output artifacts must already exist in the canonical vault or exact filesystem
-staging store; first admission imports staged bytes into the transaction. Etzio binds and
-retains their exact signed digests and sizes but does not produce, parse, or execute them.
-The path cannot create or execute a PoC, run an oracle, establish an observed effect, or
-adjudicate a finding. Explicit lease recovery changes only canonical modeled lifecycle
-state. Network access, credentials, spending, disclosure, publication, and live-target
-interaction are absent.
+can admit one authenticated, caller-supplied modeled statement while consuming its lease.
+Four separately typed output artifacts must already exist in the canonical vault or exact
+filesystem staging store; first admission imports staged bytes into the transaction. Etzio
+binds and retains their exact signed digests and sizes but does not produce, parse, or
+execute them. The path cannot create or execute a PoC, run an oracle, establish an observed
+effect, or adjudicate a finding. Explicit lease recovery changes only canonical modeled
+lifecycle state. The optional finality facade changes commit and recovery semantics, not
+the authority or execution surface. The supported CLI, explicit fixture kernel path, and
+repository-supplied qualified deterministic finality composition have no network access,
+credentials, spending, disclosure, publication, or live-target interaction. The
+service-port interfaces do not mechanically prohibit those capabilities in an arbitrary
+replacement; structural conformance alone does not admit one.
 
 ## Protocol v1
 
@@ -206,6 +227,30 @@ store, and distinct decision/checkpoint identities. One unresolved transition bl
 later events and generic replay across the database, including across missions, and
 provider calls never run inside a SQLite transaction.
 
+The canonical four-phase modeled-finality state machine is:
+
+```text
+proposed EventV1 / exact prior global + mission heads / enrolled profile authority
+  → authenticated signed IntegrityDecisionV1
+  → TX1 · PHASE 1: event + pending decision/trust dossier + provider assertions
+  → process-local catalog rehydration from retained predecessor lineages
+       (`prime_catalog`; nondurable and not a protocol write)
+  → TX2 · PHASE 2: exact anchor statement + byte-exact registration request
+  → modeled anchor registration                         [protocol write 1]
+  → TX3 · PHASE 3: exact anchor receipts + signed HeadCheckpointV1 candidate
+                    + byte-exact publication request
+  → modeled checkpoint publication                     [protocol write 2]
+  → exact code-derived current-floor assertion
+       (the candidate is both the instance-global and mission head)
+  → TX4 · PHASE 4: exact finalization record
+  → modeled facade success
+```
+
+From TX1 until TX4, the one unresolved transition is an instance-global barrier: every
+later append path and generic replay is refused across every mission. Only explicit
+integrity inspection and recovery may read or advance the retained lineage, and no facade
+command can report success before TX4 has been reloaded and verified.
+
 No real trusted-time, revocation, transparency, monitoring, catalog, or anchor service is
 connected. The deterministic sources exercise signed decision/checkpoint authentication,
 continuity, semantic evidence validation, and recovery. Their floor and provider-evidence
@@ -213,6 +258,14 @@ assertions are exact code-derived fixture claims, not externally authenticated
 observations, and do not establish trustworthy UTC, external durability, independent
 administration, or non-equivocation. The legacy SQLite `SignedCheckpoint` remains opaque
 and untrusted.
+
+The remaining blocked cluster is qualified, independently administered trusted-time,
+revocation, anchor, catalog, and monitor adapters; durable blocked-finality disposition
+and governed recovery; closure of the same-user pathname and coherent offline-rewrite
+boundary; production storage and power-fault qualification plus sensitive-evidence
+controls; and structured independently produced execution evidence with proved
+MARCELLUS/CATO separation. Until those gates close, live-target work and finding admission
+remain blocked.
 
 ## Authority
 
@@ -584,13 +637,18 @@ recovery, the typed integrity-decision/head-checkpoint contract, and transaction
 evidence retention for all four protected event kinds are retained. Under the documented
 SQLite assumptions, an empty-history fixture profile now also demonstrates deterministic
 injected-interruption recovery, byte-exact two-stage retry, and exact-current-head command
-completion for every event. The next gate is qualification and connection of independently
-administered time, revocation, anchor, catalog, and monitor adapters without weakening
-that recovery contract. Foundation integrity is accepted only when retained evidence also
-shows:
+completion for every event. The exact next gate first specifies and proves a versioned
+trusted-time and revocation adapter conformance contract in a deterministic, networkless
+qualification harness with trust-root/policy binding, conservative interval/freshness
+semantics, authenticated provider-evidence mapping, and substitution, replay, staleness,
+and ambiguity known-bads. Only after that proof passes does the same harness extend to
+anchor, catalog, and monitor adapters plus durable blocked-finality recovery; independently
+administered providers are qualified and connected later without weakening the retained
+state machine. Foundation integrity is accepted only when retained evidence also shows:
 
 - trusted time and revocation freshness for every consequential transition;
 - authenticated, externally anchored event heads;
+- a durable blocked-finality disposition, reason, and governed recovery decision;
 - closure of the same-user SQLite pathname and coherent offline-rewrite boundary; and
 - an accepted and qualified durable-storage profile, physical and journal quotas,
   backup/restore and fault-recovery evidence, and sensitive-evidence controls; and

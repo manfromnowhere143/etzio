@@ -189,7 +189,7 @@
     },
     {
       "capability": "live bounty mission",
-      "blocker": "closed integrity and isolation gates plus exact current program authority"
+      "blocker": "closed integrity isolation and benchmark gates plus an exact current TargetContract for the named program and revision"
     }
   ],
   "verify": [

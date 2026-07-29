@@ -23,8 +23,10 @@ not retained.
 
 ## Decision
 
-Etzio adds three exact protocol-v1 events, taking the event registry from 15 to 18 while
-retaining the existing nine semantic object kinds:
+At this decision point, Etzio adds three exact protocol-v1 events, taking the event
+registry from 15 to 18 while retaining the then-existing nine semantic object kinds.
+[ADR-0008](0008-typed-integrity-evidence-contract.md) later raises the object-kind total to
+the current eleven without changing these events:
 
 | Event | Unit | Exact payload |
 |---|---|---|

@@ -80,23 +80,38 @@ evidence, exact current and predecessor signed-attestation provenance, scope-bou
 nonstale external rollback-floor inputs, conservative cross-transition time ordering, and
 global plus mission continuity. Consequential composition rejects subclasses, copies the
 constructed trust store and caller policy, and rebuilds fresh authenticated snapshots from
-verified wire before applying continuity logic. These objects are contract proof only: no
-external provider is connected and lifecycle commands do not yet require or persist them.
+verified wire before applying continuity logic. Empty-history schema-v2 modeled-integrity
+enrollment now pins a fixture-adapter authority binding, and consequential fixture commands
+persist and require that contract through atomic pending retention, four immutable recovery
+phases, two at-least-once modeled protocol writes, one database-global unresolved-transition
+barrier, and exact-current global plus mission completion. This is repository-fixture
+finality only: provider assertions are deterministic and code-derived, no external provider
+is connected, and no external durability, trusted UTC, revocation freshness, independent
+administration, non-equivocation, execution, or finding claim follows.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. qualify trusted-time, revocation, and anchor adapters, then enforce the typed contract
-   with crash-safe external head finality at consequential command boundaries;
-2. close the documented same-user SQLite pathname and coherent offline-rewrite boundary;
-3. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
+1. specify and prove a versioned trusted-time and revocation adapter conformance contract
+   and deterministic, networkless qualification harness with trust-root and policy binding,
+   conservative interval and freshness semantics, authenticated provider-evidence mapping,
+   and substitution, replay, staleness, and ambiguity known-bads;
+2. extend that harness to anchor, catalog, and monitor adapters, add durable blocked-finality
+   disposition and governed recovery, and only then qualify independently administered
+   providers without weakening the retained recovery state machine;
+3. prove external latest-head authority survives local loss, then close the documented
+   same-user SQLite pathname and coherent offline-rewrite boundary;
+4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
    quotas, backup/restore, process-kill and power-fault recovery, and sensitive-evidence
    access-control, encryption, and retention policy;
-4. replace opaque modeled outputs with structured independently produced execution
+5. replace opaque modeled outputs with structured independently produced execution
    evidence; and
-5. prove every new refusal and concurrency invariant with a known-bad.
+6. prove every new refusal and concurrency invariant with a known-bad.
 
 Then build MARCELLUS and independent CATO execution on an explicitly accepted Linux/KVM
-profile before the benchmark-first EVM domain pack.
+profile before the benchmark-first EVM domain pack. Only after the integrity, isolation,
+benchmark, and exact-`TargetContract` gates close may a strictly authorized bounty-research
+lane run in parallel with continued engine development; accepted outcomes and income are
+measurements, never authority.
 
 ## Change discipline
 

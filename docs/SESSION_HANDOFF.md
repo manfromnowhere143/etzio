@@ -290,13 +290,13 @@ external authentication.
   `verifier_receipt_admitted`, including recovery after interruption immediately after
   checkpoint publication.
 
-The service implementations are repository-owned deterministic fixtures. Fixed keys
-authenticate decisions and checkpoints only; provider-evidence BLOBs are unsigned,
-canonical, code-derived assertions checked for exact source, kind, claim, and reference
-equality. Separate labels, evidence, and logical stages do not prove trustworthy UTC,
-external durability, independent operators, current real revocation, or production
-non-equivocation. A typed blocked classification is per recovery attempt and is not
-durably retained; the last immutable local phase remains pending. The ordinary fixture
+The service implementations are repository-owned deterministic fixtures. Profile-bound
+keys fixed at enrollment authenticate decisions and checkpoints only; provider-evidence
+BLOBs are unsigned, canonical, code-derived assertions checked for exact source, kind,
+claim, and reference equality. Separate labels, evidence, and logical stages do not prove
+trustworthy UTC, external durability, independent operators, current real revocation, or
+production non-equivocation. A typed blocked classification is per recovery attempt and is
+not durably retained; the last immutable local phase remains pending. The ordinary fixture
 CLI remains on the legacy profile.
 
 ### Implemented for modeled verification admission and recovery
@@ -360,6 +360,36 @@ then failed closed before test execution because the retained count of 828 lagge
 timeout-regression known-bad's 829 collected tests. Neither run is release evidence. The
 foundation job now has a bounded 30-minute budget protected by repository policy and that
 known-bad.
+
+## Documentation and frontier reconciliation
+
+A complete 2026-07-29 repository-documentation audit reconciled the README, every
+diagrammatic block, Architecture, Roadmap, frontier baseline, ADR-0011, repository
+instructions, this handoff, and machine-readable mission state against the retained
+implementation:
+
+- the visual model now distinguishes the supported CLI legacy profile, the explicit
+  fixture-only verification-intent path, the optional modeled-finality facade, legacy
+  behavior models, and blocked target roles;
+- Architecture and ADR-0011 retain the canonical four-transaction recovery order and the
+  database-global unresolved-transition barrier without collapsing external calls into
+  SQLite transactions;
+- worker receipts flow back through ETZIO admission, CAMILLUS receives only
+  kernel-accepted evidence, and MINERVA evaluates retained positive and negative outcomes
+  offline;
+- adapter claims are scoped to the concrete repository-owned fixture implementation,
+  RFC 3161 EKU wording is exact, and durable blocked-finality recovery remains explicit;
+- `AGENTS.md`, the README, and the Roadmap name the same networkless trusted-time and
+  revocation conformance harness as the exact next proof tranche; and
+- the [frontier baseline](FRONTIER_BASELINE.md) incorporates primary 2026 evidence on
+  capability-ladder, exploit-generation, long-horizon discovery, multi-host, and
+  evaluator-containment benchmarks while preserving every harness, population, budget,
+  information-regime, and vendor/private-evaluation caveat.
+
+This reconciliation changes documentation, not capability or authority. In particular, no
+benchmark corpus was downloaded or executed, no external provider was connected, and no
+live-target, exploit-execution, credential, egress, spending, disclosure, or publication
+grant was created.
 
 ## Inherited transactional-vault evidence
 
