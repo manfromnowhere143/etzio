@@ -831,6 +831,9 @@ def test_store_uses_hardened_sqlite_settings_without_write_handle(
         assert diagnostics.synchronous == policy.synchronous_value
         assert diagnostics.journal_mode != "wal"
         assert diagnostics.foreign_keys
+        assert not diagnostics.ignore_check_constraints
+        assert not diagnostics.read_uncommitted
+        assert not diagnostics.writable_schema
         assert diagnostics.database_mode == 0o600
         assert not hasattr(store, "connection")
 

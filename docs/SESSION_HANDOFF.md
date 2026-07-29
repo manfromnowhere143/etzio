@@ -37,7 +37,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0007](decisions/0007-explicit-verification-lease-recovery.md), and
 [ADR-0008](decisions/0008-typed-integrity-evidence-contract.md), and
 [ADR-0009](decisions/0009-uniform-sqlite-rollback-journal-safety.md), and
-[ADR-0010](decisions/0010-transactional-evidence-vault.md).
+[ADR-0010](decisions/0010-transactional-evidence-vault.md), and
+[ADR-0011](decisions/0011-crash-safe-modeled-integrity-finality.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -47,10 +48,10 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/transactional-evidence-vault-v1`
-- Stacked on: `agent/sqlite-wal-reset-safety-v1`
-- Branch base: `d2807dd2ea71704cb9db95bab7401d75df6ea8b6`
-- Branch-base tree: `6527a9c6e55974b7a8165a5adcbf30f715666a7d`
+- Current foundation-integrity branch: `agent/integrity-finality-enforcement-v1`
+- Stacked on: `agent/transactional-evidence-vault-v1`
+- Branch base: `4919a0c09f99f545336fc6482a2d52f8fd7c03e1`
+- Branch-base tree: `73ae7dcf5fae6d889dcb1d4d63b0345ae6798361`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -78,7 +79,10 @@ The engine should:
 - treat accepted bounty outcomes as one external economic signal, never as authority;
 - preserve findings, contradictions, nulls, failures, cost, and reviewer outcomes;
 - keep scientific and policy authority outside generative workers; and
-- expand through versioned domain and technique packs without fragmenting the kernel.
+- expand through versioned domain and technique packs without fragmenting the kernel; and
+- after the integrity, isolation, benchmark, and exact-target authority gates close, run a
+  strictly authorized bounty-research lane in parallel with continued engine development,
+  measuring accepted outcomes and income without treating either as authority.
 
 Blockchain, Solidity, EVM, and later L1/client research are the first benchmark and economic
 wedge. They are not the ceiling.
@@ -126,9 +130,9 @@ exact authority
 - retained runtime-reported SQLite version/source identity with isolated versus
   repository-import-context agreement;
 - one SQLite schema with exact `application_id = 0x45545A31` (ASCII `ETZ1`) and
-  `user_version = 1`, exact
-  object, strict-table, foreign-key, index, and trigger validation, and transactional
-  initialization;
+  `user_version = 2`, exact object, strict-table, foreign-key, index, and trigger
+  validation, transactional initialization, and an exact version-1 transactional-vault
+  migration into a permanent legacy profile without assigning integrity finality;
 - explicit refusal of malformed, unknown, or nonempty pre-vault event state without
   changing its application/schema identity; no pre-vault backfill tool is implemented;
 - a canonical append-only SQLite evidence vault retaining deduplicated exact BLOBs and
@@ -145,9 +149,13 @@ exact authority
   follow exact event owners, each distinct required mission is reduced once, one shared
   rehash set reads and hashes each distinct BLOB encountered across the complete histories
   at most once, and only requested bytes remain in the response cache;
-- fixed 16 MiB authority-evidence, existing target/resolution/output/grant bounds, and a
-  default 1 GiB configurable per-opening logical unique-vault-byte ceiling independent of
-  physical deduplication;
+- fixed 16 MiB authority-evidence and existing target/resolution/output/grant bounds, plus
+  a default 1 GiB configurable per-opening logical evidence-storage ceiling. The ceiling
+  charges distinct vault BLOB bytes, deduplicated integrity-provider BLOB bytes, canonical
+  pending/anchor/candidate/finalization record bytes, and modeled profile, policy, and
+  fixture-adapter authority-binding bytes. Enrollment and each pending append additionally
+  preflight 80 MiB of worst-case finality headroom; that reserve is neither retained data
+  nor a bound on SQLite pages, journals, backups, or device use;
 - kernel-issued verification leases under the exact admitted
   `modeled_fixture_verification` grant;
 - complete verifier trust and revocation evidence retained with each issuance;
@@ -236,10 +244,60 @@ exact authority
 - an explicit dependency decision: official TUF direction, conditional RFC 3161 adapter
   qualification, and no accepted canonical Python SCITT verifier yet.
 
-This is a provider-neutral contract proof. It does not connect a real time, revocation,
-anchor, transparency, or monitoring service; persist typed checkpoints; or make lifecycle
-commands require them. Directly constructed floor objects validate shape only and do not
-prove external authentication.
+The contract remains provider-neutral. A separate modeled fixture profile now persists and
+requires it, as described below. No real time, revocation, anchor, transparency, catalog,
+or monitoring service is connected, and directly constructed floor objects do not prove
+external authentication.
+
+### Implemented modeled integrity finality and recovery
+
+- schema version 2 retains an immutable legacy or
+  `modeled_integrity_fixture_v1` profile; only an entirely empty history can enter the
+  modeled profile, while an exact nonempty version-1 vault migrates only to legacy;
+- enrollment permanently retains the exact modeled fixture-adapter profile/version,
+  service instance, environment, validation policy, complete trust snapshot and identity,
+  and distinct decision/checkpoint key and principal identities; every pending decision
+  and checkpoint candidate is cross-checked against that binding;
+- every modeled event atomically commits with one exact reauthenticated signed
+  pending-decision/trust dossier and complete canonical code-derived provider assertions
+  before the event can exist;
+- one unresolved transition is serialized across the database, so another mission or
+  append path cannot bypass finality; a later mission's event zero extends the latest
+  finalized instance-global checkpoint while beginning from its own mission genesis, and
+  later events extend both exact predecessors;
+- anchor statement, signed checkpoint candidate, and external-floor finalization are
+  immutable append-only records with exact predecessor identities and evidence coverage;
+- exact anchor registration-request bytes and the exact signed checkpoint candidate are
+  retained before their respective modeled protocol-write calls, giving at-least-once
+  byte-identical recovery under deterministic idempotency keys;
+- process-local `prime_catalog` rehydrates the deterministic service's in-memory
+  compare-and-set view from retained predecessor lineages; it is neither durable nor a
+  third protocol write;
+- provider calls occur outside SQLite transactions; generic raw
+  `SQLiteEventStore.load()` refuses while any transition is unresolved, explicit
+  integrity-inspection APIs alone can read that lineage, and facade load recovers it
+  before exposing lifecycle history or a replay shortcut;
+- command success requires an exact code-derived current-floor assertion naming the exact
+  checkpoint as both instance-global and mission head;
+- fully revalidated modeled-lineage replay is cached only under mutation-sensitive SQLite
+  signals, the exact schema fingerprint, and exact `journal_mode`, `synchronous`,
+  `foreign_keys`, `trusted_schema`, `ignore_check_constraints`, `read_uncommitted`, and
+  `writable_schema` settings; drift fails closed on cached replay and every writer
+  boundary, while raw same-connection, other-connection, and schema-cookie tampering
+  invalidates or fails the cache; and
+- the complete fourteen-event repository-fixture receipt vertical retains a contiguous
+  finalized lineage from `authority_admitted` through
+  `verifier_receipt_admitted`, including recovery after interruption immediately after
+  checkpoint publication.
+
+The service implementations are repository-owned deterministic fixtures. Fixed keys
+authenticate decisions and checkpoints only; provider-evidence BLOBs are unsigned,
+canonical, code-derived assertions checked for exact source, kind, claim, and reference
+equality. Separate labels, evidence, and logical stages do not prove trustworthy UTC,
+external durability, independent operators, current real revocation, or production
+non-equivocation. A typed blocked classification is per recovery attempt and is not
+durably retained; the last immutable local phase remains pending. The ordinary fixture
+CLI remains on the legacy profile.
 
 ### Implemented for modeled verification admission and recovery
 
@@ -270,13 +328,31 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
-## Reproduced local evidence
+## Current integrity-finality release evidence
+
+On the final audited integrity-finality release candidate, the complete release command
+passed under both declared local runtimes:
+
+- 828 tests passed;
+- CPython 3.11.15 / SQLite 3.53.1 / `DELETE`/`EXTRA`;
+- CPython 3.14.2 / SQLite 3.51.2 / `DELETE`/`EXTRA`;
+- exact schema, semantic dispatch, repository policy, Ruff, fixture runs, and
+  retained-evidence checks on both local hash-locked environments; and
+- private GitHub Actions reproduction plus package build and outside-checkout wheel smoke
+  on the exact implementation commit.
+
+The CPython 3.11 suite completed in 487.37 seconds and the CPython 3.14 suite in 504.10
+seconds. Both hash-locked environments passed `pip check`. Private CI remains the
+publication gate; do not hand off until its exact implementation commit, run, and
+pull-request identifiers are recorded in the evidence-only handoff commit.
+
+## Inherited transactional-vault evidence
 
 On transactional-vault implementation commit
 `612953648eff751a49054e8a700005216ddf7fb6`, the complete release command passed under
 both declared runtimes:
 
-- 730 tests passed;
+- the inherited suite reported 730 passing tests;
 - CPython 3.11.15 loaded SQLite 3.53.1 and used `DELETE`/`EXTRA`;
 - CPython 3.14.2 loaded SQLite 3.51.2 and used `DELETE`/`EXTRA`;
 - each verification log retained `sqlite_source_id()` and proved that the isolated and
@@ -311,6 +387,23 @@ evidence remains fixture-scoped.
 
 Known-bads now cover:
 
+- malformed, wrong-source, wrong-kind, wrong-phase, or substituted modeled provider claims
+  and references, including arbitrary unsigned floor and anchor-receipt payloads;
+- fixture-adapter profile/version, validation-policy, trust-snapshot, service-scope,
+  key/principal, and replacement-service authority-binding substitution;
+- generic raw replay while pending, cross-mission append bypass, later-mission global
+  continuity, exact predecessor recovery, and self-predecessor exclusion;
+- low-quota enrollment and pending-transition refusal before mutation, including the exact
+  modeled profile bytes and 80 MiB worst-case finality reserve;
+- interruption before and after every immutable recovery phase, lost anchor/publication
+  responses, exact finalization retry after caller-response loss, and concurrent recovery
+  through independent SQLite connections; and
+- typed pending, typed blocked, and preserved SQLite busy/capacity/operational/corruption
+  classifications without reclassifying store failures as adapter failures;
+- cached replay, pending append, and finalization refusal after drift in any of the seven
+  authenticated SQLite security settings, with zero partial write or finalization;
+- oversized direct anchor time-evidence tuples rejected by count before any entry is
+  inspected;
 - cross-runtime Unicode identity divergence;
 - duplicate/noncanonical/oversized protocol values;
 - arbitrary semantic bodies, missing/unknown per-kind fields, forbidden or multiple
@@ -429,20 +522,24 @@ Known-bads now cover:
 
 ## Open foundation-integrity blockers
 
-1. Authority/verifier clock and revocation snapshot freshness have an exact contract but
-   are not externally proved or required by lifecycle commands.
-2. Event heads have an exact checkpoint/floor contract but are not persisted, externally
-   authenticated, anchored, monitored, or required for command success.
-3. SQLite retains a documented same-user pathname race, and a coherent offline rewrite
+1. Modeled commands persist and require signed decisions/checkpoints plus exact
+   code-derived time and revocation assertions, but no qualified external source proves
+   clock or revocation freshness; the ordinary fixture CLI remains on the legacy profile.
+2. Modeled commands persist and require exact-current checkpoint lineages, but no qualified
+   externally authenticated and durable anchor/catalog/witness survives local database
+   loss or proves non-equivocation.
+3. Typed blocked results are attempt-local; no durable blocked disposition, reason, or
+   governed recovery decision exists beyond the unresolved immutable phase.
+4. SQLite retains a documented same-user pathname race, and a coherent offline rewrite
    remains undetectable without an authenticated external latest-head catalog.
-4. Production storage still needs an accepted SQLite/VFS/filesystem/device profile,
+5. Production storage still needs an accepted SQLite/VFS/filesystem/device profile,
    physical and journal quotas, backup/restore, process-kill and power-fault qualification,
    and sensitive-evidence access-control, encryption, and retention policy.
-5. Modeled output artifacts are opaque signed descriptors, not structured evidence tied to
+6. Modeled output artifacts are opaque signed descriptors, not structured evidence tied to
    an independently measured execution identity.
-6. Separate verifier labels and keys do not prove separate principals, processes, or
+7. Separate verifier labels and keys do not prove separate principals, processes, or
    isolation.
-7. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
+8. MARCELLUS/CATO Linux/KVM execution, live adapters, learning, cockpit, and domain packs
    are not implemented.
 
 These blockers prevent a finding pipeline and all live-target work.
@@ -451,13 +548,15 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-Next, qualify concrete trusted-time, revocation, anchor, and monitor adapters, then enforce
-the typed contract through one receipt-admission vertical. Local commit must become
-pending, external registration and latest-head verification must be idempotently
-recoverable, and command success plus later append must wait for anchor finality. Atomic
-retention of exact BLOBs, mappings, and protected events is now closed for the implemented
-boundaries. Closure of the same-user SQLite pathname and coherent offline-rewrite boundary
-remains mandatory before a finding pipeline can be accepted.
+Next, qualify and connect independently administered trusted-time, revocation, anchor,
+catalog, and monitor adapters inside the retained state machine. Preserve exact
+fixture-proved pending retention, byte-identical at-least-once retries, global/mission
+continuity, raw pending-replay refusal, and store-error classifications while replacing
+code-derived provider assertions with authenticated external evidence. Add a durable
+blocked disposition and governed recovery decision, then prove that external head
+authority survives local database loss. Closure of the same-user SQLite pathname,
+coherent offline-rewrite, and qualified physical-storage boundaries remains mandatory
+before a finding pipeline can be accepted.
 
 ### Mission 2 — independent proof plane
 

@@ -39,6 +39,7 @@ from etzio.integrity_v1 import (
     classify_deadline,
     head_checkpoint_genesis_id,
     mission_checkpoint_genesis_id,
+    require_external_floor_is_current,
     require_interval_within,
     signed_head_checkpoint_attestation_id,
     signed_integrity_decision_attestation_id,
@@ -642,6 +643,251 @@ def _head_floor(
         mission_checkpoint_trust_snapshot_id=checkpoint.trust_snapshot_id,
         evidence=_floor_evidence(),
     )
+
+
+def test_integrity_adapter_values_round_trip_without_aliases(
+    decision_signer: IntegritySigner,
+    checkpoint_signer: IntegritySigner,
+) -> None:
+    trust_store = _trust_store(decision_signer, checkpoint_signer)
+    trust_body = trust_store.to_snapshot_body()
+    reconstructed_trust = IntegrityTrustStore.from_snapshot_body(
+        trust_body,
+        expected_snapshot_id=trust_store.snapshot_id,
+    )
+    assert reconstructed_trust.to_snapshot_body() == trust_body
+    assert reconstructed_trust.snapshot_id == trust_store.snapshot_id
+
+    policy = _validation_policy()
+    policy_body = policy.to_body()
+    reconstructed_policy = IntegrityValidationPolicyV1.from_body(policy_body)
+    assert reconstructed_policy == policy
+
+    decision = _decision()
+    revocation_floor = _revocation_floors(decision)[0]
+    revocation_body = revocation_floor.to_body()
+    reconstructed_revocation = RevocationFloorV1.from_body(revocation_body)
+    assert reconstructed_revocation == revocation_floor
+
+    authenticated_decision = _authenticate(
+        decision,
+        decision_signer,
+        checkpoint_signer,
+    )
+    checkpoint = _checkpoint(
+        decision,
+        authenticated_decision=authenticated_decision,
+    )
+    authenticated_checkpoint = _authenticate_checkpoint(
+        checkpoint,
+        authenticated_decision,
+        decision_signer,
+        checkpoint_signer,
+    )
+    head_floor = _head_floor(authenticated_checkpoint)
+    head_body = head_floor.to_body()
+    reconstructed_head = HeadCheckpointFloorV1.from_body(head_body)
+    assert reconstructed_head == head_floor
+
+    trust_body["keys"][0]["principal_id"] = "mutated.principal"  # type: ignore[index]
+    policy_body["required_revocation_namespaces"].append("mutated")  # type: ignore[union-attr]
+    revocation_body["evidence"][0]["source_id"] = "mutated.source"  # type: ignore[index]
+    head_body["evidence"][0]["source_id"] = "mutated.source"  # type: ignore[index]
+
+    assert reconstructed_trust.snapshot_id == trust_store.snapshot_id
+    assert reconstructed_policy == policy
+    assert reconstructed_revocation == revocation_floor
+    assert reconstructed_head == head_floor
+
+
+def test_integrity_adapter_reconstruction_rejects_noncanonical_values(
+    decision_signer: IntegritySigner,
+    checkpoint_signer: IntegritySigner,
+) -> None:
+    policy_body = _validation_policy().to_body()
+    policy_body["required_revocation_namespaces"] = list(
+        reversed(policy_body["required_revocation_namespaces"])  # type: ignore[arg-type]
+    )
+    with pytest.raises(IntegrityError) as caught:
+        IntegrityValidationPolicyV1.from_body(policy_body)
+    assert caught.value.reason_code == "invalid_validation_policy"
+
+    with pytest.raises(IntegrityError) as caught:
+        IntegrityValidationPolicyV1.from_body(
+            {
+                **_validation_policy().to_body(),
+                "unknown": _digest("unknown"),
+            }
+        )
+    assert caught.value.reason_code == "invalid_validation_policy"
+
+    revocation_body = _revocation_floors(_decision())[0].to_body()
+    revocation_body["evidence"] = list(
+        reversed(revocation_body["evidence"])  # type: ignore[arg-type]
+    )
+    with pytest.raises(IntegrityError) as caught:
+        RevocationFloorV1.from_body(revocation_body)
+    assert caught.value.reason_code == "invalid_external_revocation_floor"
+
+    authenticated_decision = _authenticate(
+        _decision(),
+        decision_signer,
+        checkpoint_signer,
+    )
+    checkpoint = _checkpoint(
+        authenticated_decision.decision,
+        authenticated_decision=authenticated_decision,
+    )
+    authenticated_checkpoint = _authenticate_checkpoint(
+        checkpoint,
+        authenticated_decision,
+        decision_signer,
+        checkpoint_signer,
+    )
+    head_body = _head_floor(authenticated_checkpoint).to_body()
+    head_body["instance_sequence"] = True
+    with pytest.raises(IntegrityError) as caught:
+        HeadCheckpointFloorV1.from_body(head_body)
+    assert caught.value.reason_code == "invalid_external_head_floor"
+
+    trust_store = _trust_store(decision_signer, checkpoint_signer)
+    trust_body = trust_store.to_snapshot_body()
+    trust_body["keys"] = list(reversed(trust_body["keys"]))  # type: ignore[arg-type]
+    with pytest.raises(IntegrityError) as caught:
+        IntegrityTrustStore.from_snapshot_body(trust_body)
+    assert caught.value.reason_code == "invalid_trust_snapshot"
+
+    with pytest.raises(IntegrityError) as caught:
+        IntegrityTrustStore.from_snapshot_body(
+            trust_store.to_snapshot_body(),
+            expected_snapshot_id=_digest("wrong-integrity-trust-snapshot"),
+        )
+    assert caught.value.reason_code == "trust_snapshot_mismatch"
+
+    oversized = trust_store.to_snapshot_body()
+    oversized["keys"] = oversized["keys"] * (integrity_contract.MAX_INTEGRITY_KEYS + 1)  # type: ignore[operator]
+    with pytest.raises(IntegrityError) as caught:
+        IntegrityTrustStore.from_snapshot_body(oversized)
+    assert caught.value.reason_code == "invalid_trust_snapshot"
+
+
+def test_external_floor_must_name_both_exact_current_projections(
+    decision_signer: IntegritySigner,
+    checkpoint_signer: IntegritySigner,
+) -> None:
+    decision = _decision()
+    authenticated_decision = _authenticate(
+        decision,
+        decision_signer,
+        checkpoint_signer,
+    )
+    checkpoint = _checkpoint(
+        decision,
+        authenticated_decision=authenticated_decision,
+    )
+    authenticated_checkpoint = _authenticate_checkpoint(
+        checkpoint,
+        authenticated_decision,
+        decision_signer,
+        checkpoint_signer,
+    )
+    trust_store = _trust_store(decision_signer, checkpoint_signer)
+    policy = _validation_policy()
+    current_floor = _head_floor(authenticated_checkpoint)
+
+    require_external_floor_is_current(
+        authenticated_checkpoint,
+        trust_store,
+        current_floor,
+        policy,
+    )
+
+    predecessor_floor = _genesis_head_floor(decision)
+    with pytest.raises(IntegrityError) as caught:
+        require_external_floor_is_current(
+            authenticated_checkpoint,
+            trust_store,
+            predecessor_floor,
+            policy,
+        )
+    assert caught.value.reason_code == "external_head_floor_not_current"
+
+    mixed_floor = HeadCheckpointFloorV1(
+        service_instance_id=current_floor.service_instance_id,
+        environment_id=current_floor.environment_id,
+        instance_sequence=current_floor.instance_sequence,
+        checkpoint_id=current_floor.checkpoint_id,
+        checkpoint_attestation_id=current_floor.checkpoint_attestation_id,
+        checkpoint_principal_id=current_floor.checkpoint_principal_id,
+        checkpoint_trust_snapshot_id=(
+            current_floor.checkpoint_trust_snapshot_id
+        ),
+        mission_id=current_floor.mission_id,
+        mission_event_seq=predecessor_floor.mission_event_seq,
+        mission_checkpoint_id=predecessor_floor.mission_checkpoint_id,
+        mission_checkpoint_attestation_id=None,
+        mission_checkpoint_principal_id=None,
+        mission_checkpoint_trust_snapshot_id=None,
+        evidence=_floor_evidence(),
+    )
+    with pytest.raises(IntegrityError) as caught:
+        require_external_floor_is_current(
+            authenticated_checkpoint,
+            trust_store,
+            mixed_floor,
+            policy,
+        )
+    assert caught.value.reason_code == "external_head_floor_not_current"
+
+    substituted_attestation = _digest("substituted-checkpoint-attestation")
+    substituted_floor = replace(
+        current_floor,
+        checkpoint_attestation_id=substituted_attestation,
+        mission_checkpoint_attestation_id=substituted_attestation,
+    )
+    with pytest.raises(IntegrityError) as caught:
+        require_external_floor_is_current(
+            authenticated_checkpoint,
+            trust_store,
+            substituted_floor,
+            policy,
+        )
+    assert caught.value.reason_code == "external_head_floor_not_current"
+
+    with pytest.raises(IntegrityError) as caught:
+        require_external_floor_is_current(
+            authenticated_checkpoint,
+            trust_store,
+            replace(current_floor, environment_id="other.environment"),
+            policy,
+        )
+    assert caught.value.reason_code == "external_head_floor_scope_mismatch"
+
+    with pytest.raises(IntegrityError) as caught:
+        require_external_floor_is_current(
+            authenticated_checkpoint,
+            trust_store,
+            current_floor,
+            _validation_policy(anchor_policy_id=_digest("other-anchor-policy")),
+        )
+    assert caught.value.reason_code == "anchor_policy_mismatch"
+
+    with pytest.raises(IntegrityError) as caught:
+        require_external_floor_is_current(
+            authenticated_checkpoint,
+            _trust_store(
+                decision_signer,
+                checkpoint_signer,
+                revoked_key_ids=(
+                    authenticated_checkpoint.signed_checkpoint.key_id,
+                ),
+            ),
+            current_floor,
+            policy,
+        )
+    assert caught.value.reason_code == "key_revoked"
+
+    assert "require_external_floor_is_current" in integrity_contract.__all__
 
 
 def test_signed_integrity_objects_round_trip_and_dispatch(

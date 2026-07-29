@@ -28,9 +28,14 @@ scientific authority remain in the kernel.
 > store is staging and cache only. The receipt signs the retained resolution and four exact
 > typed output digest/size pairs. Explicit expiry, modeled cancellation, atomic
 > reassignment, and receipt-coverage closure recover verification-intent missions without
-> rewriting history. Etzio does not construct or execute exploits, establish that those
-> opaque outputs came from an execution, adjudicate a finding, access a live target, or
-> learn. No production-readiness or superiority claim is made.
+> rewriting history. A separate empty-history-only schema-v2 profile now commits every
+> event with a signed integrity decision and completes a crash-recoverable modeled anchor,
+> checkpoint, and exact-current-head sequence before its fixture command returns. Its
+> clocks, revocation sources, anchor, catalog, and monitor are deterministic
+> repository-owned fixtures—not external authority. Etzio does not construct or execute
+> exploits, establish that those opaque outputs came from an execution, adjudicate a
+> finding, access a live target, or learn. No production-readiness or superiority claim is
+> made.
 
 ## Why Etzio
 
@@ -77,6 +82,14 @@ verifier, then close with exact complete or incomplete receipt coverage. This is
 authenticated statement and lifecycle-decision retention—not PoC, oracle, or verifier
 execution and not finding adjudication.
 
+When that repository-fixture flow is attached to the exact
+`ModeledIntegrityFinalizingEventStoreV1` facade on an empty store, each event first commits
+with its complete signed decision dossier, then advances through retained anchor statement,
+signed checkpoint candidate, and exact-current external-floor records. Recovery repeats
+only the same byte-bound anchor registration and checkpoint publication. The ordinary
+fixture CLI remains on the legacy profile; the modeled finality facade is a deterministic
+qualification surface, not production external authority.
+
 The command has no arbitrary target-path option. It emits candidates only; neither fixture
 path can mint a finding, execute a PoC, use the network, access credentials, spend,
 disclose, or publish.
@@ -94,6 +107,10 @@ The protocol-v1 foundation includes:
   intervals and ordering, context-typed provider evidence, exact current and predecessor
   signed-attestation provenance, scope-bound nonstale revocation/head floors, and distinct
   principals;
+- an irreversible schema-v2 modeled-integrity profile for an empty history, with atomic
+  event-plus-pending retention, four append-only recovery phases, byte-exact two-stage
+  idempotency, one instance-global pending barrier, and exact current global/mission floor
+  finalization before the modeled facade returns;
 - exact-type composition boundaries that copy trust and policy inputs and rebuild fresh
   authenticated snapshots from verified wire before continuity logic runs;
 - exact fixture manifests, a bounded private filesystem staging/cache store, and a
@@ -117,12 +134,16 @@ The protocol-v1 foundation includes:
   `verifier_receipt_admitted`, with code-derived manifests, staging-independent committed
   replay/retry, and fail-closed corruption handling;
 - a strict Etzio-identified and versioned SQLite schema with explicit refusal of nonempty
-  pre-vault state, bounded direct BLOB ingestion, a configurable per-opening logical
-  unique-byte ceiling that defaults to 1 GiB, and the existing per-event and authority
-  bounds;
+  pre-vault state, bounded direct BLOB ingestion, and a configurable per-opening logical
+  evidence-storage ceiling that defaults to 1 GiB and charges distinct vault BLOBs,
+  integrity-provider BLOBs, canonical integrity-phase records, and modeled profile,
+  policy, and fixture-adapter authority-binding bytes; enrollment and each pending append
+  additionally preflight 80 MiB of worst-case finality headroom;
 - uniform compare-and-append SQLite `DELETE`/`EXTRA` storage across every declared runtime,
-  with pre-open WAL-header refusal, loaded-version/fix diagnostics, and replay-time
-  lifecycle and vault-integrity validation; and
+  with pre-open WAL-header refusal, loaded-version/fix diagnostics, and fail-closed
+  authentication of journal mode, synchronization, foreign keys, trusted schema, CHECK
+  enforcement, read isolation, and writable-schema state on cached replay and every writer
+  boundary; and
 - known-bad tests for signature, scope, identity, lifecycle, budget, corruption, replay,
   and filesystem-boundary failures.
 
@@ -172,7 +193,8 @@ flowchart LR
     class M,T,A,F,N modeled;
 ```
 
-The new integrity tranche is deliberately a contract proof, not runtime enforcement:
+The integrity tranche now has modeled runtime enforcement, while real authority remains
+blocked:
 
 ```mermaid
 flowchart TB
@@ -184,8 +206,10 @@ flowchart TB
     E["Canonical proposed EventV1"]
     H["Signed HeadCheckpointV1<br/>global + mission continuity + decision provenance"]
     AR["Typed anchor receipt references<br/>pre-receipt statement avoids a hash cycle"]
-    XF["External revocation/head floors<br/>shape checked; adapter authentication still required"]
-    CMD["Lifecycle command enforcement<br/>not connected in this tranche"]
+    XF["Deterministic fixture assertions<br/>code-derived · not externally authenticated"]
+    P["Atomic local pending + immutable recovery phases"]
+    CMD["Modeled fixture command finality<br/>exact current global + mission head"]
+    EXT["Qualified external adapters<br/>not connected"]
 
     PG --> D
     PG --> H
@@ -197,14 +221,16 @@ flowchart TB
     AR --> H
     XF --> D
     XF --> H
-    H -. "next vertical slice" .-> CMD
+    D --> P --> H --> CMD
+    CMD -. "next authority gate" .-> EXT
 
     classDef retained fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
     classDef boundary fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
     classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#3b0a0a;
     class PG,PE,PM,TR,D,E,H,AR retained;
     class XF boundary;
-    class CMD blocked;
+    class P,CMD retained;
+    class EXT blocked;
 ```
 
 | Plane | Unit | Responsibility | Repository status |
@@ -261,17 +287,29 @@ Neither conversion tool exists yet. Use a fresh state path and preserve the refu
 database plus journal bytes unchanged until an explicit stop-the-world migration is
 implemented and qualified.
 
+An exact `user_version = 1` transactional-vault database is the narrow exception: opening
+it atomically installs the version-2 integrity tables under the permanent legacy profile
+without relabeling any retained event as finalized. Only an entirely empty legacy profile
+can enroll in modeled integrity finality.
+
 ## Open gates and next mission
 
 The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments,
 typed input resolutions, atomic modeled-receipt admission, explicit lease recovery, and
-the typed integrity-evidence contract are retained. The transactional SQLite vault closes
-the ordinary filesystem-staging/SQLite retention split for all four implemented
-byte-claiming event boundaries. Completing the foundation-integrity boundary still
-requires:
+the typed integrity-evidence contract are retained. The schema-v2 deterministic fixture
+profile pins its exact policy, trust store, adapter profile, decision and checkpoint
+principals, and service scope; proves atomic pending retention, byte-exact two-stage
+recovery, signed checkpoint persistence, multi-mission global and mission continuity, and
+exact-current-head command completion from event zero; and blocks generic replay while
+any modeled transition is unresolved. Its provider assertions are canonical,
+code-derived fixture claims—not authenticated external observations. The transactional
+SQLite vault closes the ordinary filesystem-staging/SQLite retention split for all four
+implemented byte-claiming event boundaries. Completing the foundation-integrity boundary
+still requires:
 
-1. qualify external trusted-time, revocation, and head-anchor adapters, then require their
-   evidence and crash-safe anchor finality at each consequential command;
+1. qualify independently administered trusted-time, revocation, anchor, catalog, and
+   monitor adapters, then replace the deterministic fixture sources at consequential
+   command boundaries without weakening the retained recovery contract;
 2. close the documented same-user SQLite pathname and coherent offline-rewrite boundary;
 3. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
    quotas, backup/restore, and process-kill and power-fault recovery; sensitive evidence

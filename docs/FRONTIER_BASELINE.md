@@ -1,6 +1,6 @@
 # 2026 Vulnerability-Research Frontier Baseline
 
-Snapshot date: **2026-07-27**. This is a design baseline, not an Etzio performance claim.
+Snapshot date: **2026-07-29**. This is a design baseline, not an Etzio performance claim.
 Sources are primary project, research, program, or vendor publications where available.
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
@@ -37,6 +37,24 @@ The public evidence does not support a universal autonomous vulnerability resear
 - model-generated verifiers can game weak graders and must not define their own success.
 
 Etzio therefore needs an evaluation system, not a leaderboard number.
+
+## Integrity-authority baseline
+
+No single transparency or timestamp service answers every Etzio authority question. The
+current adapter-qualification baseline is deliberately compositional:
+
+| Standard or service | Etzio use | Required narrowing |
+|---|---|---|
+| [RFC 3161](https://www.rfc-editor.org/rfc/rfc3161.html), [RFC 5816](https://www.rfc-editor.org/rfc/rfc5816.html), and [RFC 9921](https://www.rfc-editor.org/rfc/rfc9921.html) | conservative trusted-time evidence over exact bytes | nonce, imprint, policy, certificate path, EKU, revocation, accuracy, algorithm agility, and COSE timestamp ordering must all be explicit |
+| [TUF 1.0.35](https://theupdateframework.github.io/specification/v1.0.35/) | versioned revocation and trust metadata | pin the exact specification/client closure; require sequential root, threshold, expiry, hash/length, and rollback checks against trusted time |
+| [RFC 9942](https://www.rfc-editor.org/rfc/rfc9942.html), [RFC 9943](https://www.rfc-editor.org/rfc/rfc9943.html), and [RFC 9162](https://www.rfc-editor.org/rfc/rfc9162.html) | byte-bound registration receipts plus inclusion and consistency evidence | accept only configured algorithms and proof forms; require predecessor consistency and a separately authenticated latest-head witness |
+| [Sigstore Rekor](https://docs.sigstore.dev/logging/overview/) | possible future transparency evidence source | never promote one deployment into trusted UTC, revocation freshness, independent witnessing, or complete Etzio command authority |
+
+The current repository-owned adapters model these roles and idempotent recovery only. They
+do not qualify any external provider or prove separate operators, clocks, storage, or
+administration. Their provider-evidence BLOBs are unsigned, canonical, code-derived
+fixture assertions; only the decisions and checkpoints are cryptographically
+authenticated under the permanently enrolled fixture trust binding.
 
 ## Required benchmark portfolio
 

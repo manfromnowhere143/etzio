@@ -60,9 +60,13 @@ Implemented in this phase:
 - pre-open refusal of persistent WAL state, exact upstream WAL-fix classification,
   explicit SQLite 3.37 minimum/major-version admission, and known-bads proving fixed and
   affected accessors cannot choose different journal policies;
-- exact SQLite `application_id = 0x45545A31` (ASCII `ETZ1`) and `user_version = 1`, strict append-only
-  evidence and event-role tables, full schema-shape validation, and explicit refusal to
-  promote nonempty pre-vault event state without an offline migration;
+- fail-closed authentication of the exact journal, synchronization, foreign-key,
+  trusted-schema, CHECK-enforcement, read-isolation, and writable-schema settings on
+  cached replay and every writer boundary;
+- exact SQLite `application_id = 0x45545A31` (ASCII `ETZ1`) and `user_version = 2`,
+  strict append-only evidence, event-role, integrity-phase, and integrity-evidence tables,
+  full schema-shape validation, an exact version-1-to-version-2 legacy-layout migration,
+  and explicit refusal to promote any nonempty legacy history into integrity finality;
 - one canonical evidence vault transaction that derives artifact manifests in code and
   commits exact immutable BLOBs, complete role mappings, and the event together for
   `authority_admitted`, `mission_opened`, `verification_artifacts_resolved`, and
@@ -70,8 +74,10 @@ Implemented in this phase:
 - staging-independent committed replay and exact retry, canonical-vault-first reuse, and
   fail-closed corruption handling that never substitutes otherwise-valid staging bytes;
 - fixed authority, target, resolution, output, and aggregate grant bounds plus a default
-  1 GiB configurable per-opening logical unique-vault-byte ceiling, without treating
-  physical deduplication as a mission budget discount;
+  1 GiB configurable per-opening logical evidence ceiling covering unique vault BLOBs and
+  modeled-integrity profile, phase-record, and provider-evidence bytes, with conservative
+  finality reservation and without treating physical deduplication as a mission budget
+  discount;
 - installed semantic per-kind wire schemas for all eleven typed objects and all eighteen event
   variants;
 - runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and
@@ -121,7 +127,21 @@ Implemented in this phase:
 - adapter-facing external revocation and instance-catalog floors with rollback,
   scope/provenance replay, equivocation, branch, gap, evidence-confusion,
   event/checkpoint-lineage splice, stale-floor, mixed-projection, and historical
-  attestation-substitution known-bads.
+  attestation-substitution known-bads;
+- one empty-history-only modeled-integrity profile that atomically retains each event with
+  its signed decision dossier, permanently binds the exact fixture adapter/version,
+  service scope, policy, complete trust snapshot, and distinct decision/checkpoint
+  identities, globally serializes one unresolved transition across missions, and makes
+  every modeled facade append wait for an exact current global and mission checkpoint;
+- four immutable local recovery phases—pending event, byte-exact anchor statement, signed
+  checkpoint candidate, and external-floor finalization—with provider calls outside
+  SQLite transactions and exact retry reconciliation after every retained phase;
+- two modeled protocol-write calls, plus process-local `prime_catalog` rehydration that is
+  neither a durable phase nor a third protocol write; and
+- deterministic repository-owned time, revocation, anchor, catalog, and monitor adapters
+  demonstrating crash recovery and two-stage semantic idempotence with canonical unsigned
+  code-derived provider assertions, without claiming external authentication, time,
+  durability, independence, or production authority.
 
 Current canonical command writers use receipt-coverage status for every verification-intent
 closure. Replay also accepts the exact pre-recovery zero-candidate `completed` shape as a
@@ -130,18 +150,17 @@ claim.
 
 Remaining required:
 
-1. qualify concrete trusted-time and revocation adapters, retain their validation
-   evidence, and enforce freshness at consequential commands;
-2. qualify independent anchor/monitor adapters, persist typed checkpoints, and make
-   verified external latest-head finality part of command completion and recovery;
-3. closure of the documented same-user SQLite pathname and coherent offline-rewrite
+1. qualify independently administered trusted-time, revocation, anchor, catalog, and
+   monitor adapters and replace the deterministic fixture sources at consequential
+   commands without weakening the retained finality and recovery contract;
+2. closure of the documented same-user SQLite pathname and coherent offline-rewrite
    boundary;
-4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
+3. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
    quotas, backup/restore, process-kill and power-fault recovery, and sensitive-evidence
    access-control, encryption, and retention policy;
-5. structured independently produced execution evidence with a common measured run
+4. structured independently produced execution evidence with a common measured run
    identity; and
-6. known-bads for every new refusal, substitution, replay, and concurrency condition.
+5. known-bads for every new refusal, substitution, replay, and concurrency condition.
 
 Current retained boundary: an authority-bound modeled verification assignment, every
 predeclared input, and one authenticated modeled receipt can be resolved and retained today.
@@ -150,8 +169,14 @@ and their event together; committed replay and retry no longer depend on filesys
 staging. Receipt admission and lease consumption are one event. Explicit expiry, modeled
 cancellation, atomic reassignment, and exact receipt-coverage closure can recover the
 mission without rewriting its history. This authenticates and retains modeled statements
-and lifecycle decisions; it does not establish execution, independence, truth, or a
-finding.
+and lifecycle decisions. On a separately enrolled empty store, the modeled facade also
+persists and recovers exact decision, anchor, checkpoint, and current-floor lineages for
+every event before command success. A later mission begins at its own mission genesis while
+extending the latest instance-global checkpoint, and subsequent events extend both exact
+predecessors. Generic raw replay refuses while any transition is unresolved. Its
+providers remain deterministic fixtures and their assertions are not independently
+authenticated, so none of this establishes execution, external authority, independence,
+truth, or a finding.
 
 ## Phase 2 — independent proof plane
 

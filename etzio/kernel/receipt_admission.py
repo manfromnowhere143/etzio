@@ -46,6 +46,10 @@ from .evidence_vault import (
     VERIFICATION_TERMINATION_OUTPUT_ROLE_V1,
     VaultArtifactResolutionRequestV1,
 )
+from .integrity_transition import (
+    FinalizedIntegrityTransitionV1,
+    ModeledIntegrityFinalizingEventStoreV1,
+)
 from .reducer import MissionProjection, ProjectionPhase, reduce_events
 from .store import (
     EventStoreCorruptionError,
@@ -98,6 +102,14 @@ class VerificationReceiptAdmission:
     authenticated_receipt: AuthenticatedVerifierReceiptV1
     output_artifacts: VerificationOutputArtifactsV1
     replayed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class IntegrityFinalizedVerificationReceiptAdmission:
+    """One admitted receipt paired with its exact current-head finalization."""
+
+    admission: VerificationReceiptAdmission
+    finalization: FinalizedIntegrityTransitionV1
 
 
 def _reject(reason_code: str, message: str) -> NoReturn:
@@ -796,4 +808,46 @@ def admit_modeled_fixture_verifier_receipt(
         authenticated_receipt=authenticated,
         output_artifacts=_outputs_from_event(committed_event),
         replayed=False,
+    )
+
+
+def admit_modeled_fixture_verifier_receipt_with_integrity(
+    *,
+    event_store: ModeledIntegrityFinalizingEventStoreV1,
+    evidence_store: FileEvidenceStore,
+    mission_id: str,
+    expected_head: str,
+    verification_lease_id: str,
+    signed_receipt: object,
+    decision_trust_store: VerifierTrustStore,
+    decision_time: int,
+) -> IntegrityFinalizedVerificationReceiptAdmission:
+    """Admit one receipt only after its modeled checkpoint is exactly current.
+
+    Recovery deliberately precedes the underlying command.  That ordering closes the
+    replay path where the receipt event was committed and externally published before
+    local finalization, but a retry would otherwise return the existing admission
+    without finishing its integrity lineage.
+    """
+
+    if type(event_store) is not ModeledIntegrityFinalizingEventStoreV1:
+        _reject(
+            "invalid_integrity_event_store",
+            "integrity receipt admission requires an exact ModeledIntegrityFinalizingEventStoreV1",
+        )
+    event_store.recover()
+    admission = admit_modeled_fixture_verifier_receipt(
+        event_store=event_store,
+        evidence_store=evidence_store,
+        mission_id=mission_id,
+        expected_head=expected_head,
+        verification_lease_id=verification_lease_id,
+        signed_receipt=signed_receipt,
+        decision_trust_store=decision_trust_store,
+        decision_time=decision_time,
+    )
+    finalization = event_store.require_finalized(admission.event.event_digest)
+    return IntegrityFinalizedVerificationReceiptAdmission(
+        admission=admission,
+        finalization=finalization,
     )

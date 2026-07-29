@@ -21,9 +21,13 @@ resolution, BLOBs, and role mappings atomically. It can also authenticate one mo
 receipt that signs the resolution and four typed output digest/size pairs, retain those
 exact output BLOBs with the complete decision evidence, and consume the lease in the same
 event append. Canonical lease lineages now retain explicit expiry, modeled cancellation,
-atomic reassignment, and exact terminal receipt coverage. This is meaningful foundation
-progress, but it is candidate generation, verification assignment, byte retention,
-modeled-statement admission, and lifecycle recovery—not a finding pipeline.
+atomic reassignment, and exact terminal receipt coverage. An empty-history-only schema-v2
+profile can additionally commit every event with a signed decision dossier and recover a
+byte-exact anchor statement, signed checkpoint candidate, and exact-current global and
+mission floor before the modeled facade returns. This is meaningful foundation progress,
+but its providers are deterministic repository fixtures. It is candidate generation,
+verification assignment, byte retention, modeled-statement admission, and lifecycle
+recovery—not external authority or a finding pipeline.
 
 ## Target system
 
@@ -191,9 +195,24 @@ global sequence. Older mission-head ancestry and co-residency depend on a qualif
 external catalog adapter and retained consistency evidence; directly constructing the
 floor value does not prove them.
 
-This is a provider-neutral contract proof. No real trusted-time, revocation, transparency,
-monitoring, or anchor service is connected; typed floor construction alone is not external
-authentication. The legacy SQLite `SignedCheckpoint` remains opaque and untrusted.
+The core objects remain provider-neutral. The modeled integrity facade now persists and
+enforces them for an empty repository-fixture history: event plus pending dossier commit
+atomically; anchor statement, checkpoint candidate, and finalization are separate
+append-only records; the two conceptual modeled protocol writes are retried under retained
+byte-exact identities; and command success requires the deterministic fixture floor to
+name the exact current global and mission checkpoint. The permanent store profile pins
+the exact validation policy, modeled adapter profile, service scope, complete trust
+store, and distinct decision/checkpoint identities. One unresolved transition blocks
+later events and generic replay across the database, including across missions, and
+provider calls never run inside a SQLite transaction.
+
+No real trusted-time, revocation, transparency, monitoring, catalog, or anchor service is
+connected. The deterministic sources exercise signed decision/checkpoint authentication,
+continuity, semantic evidence validation, and recovery. Their floor and provider-evidence
+assertions are exact code-derived fixture claims, not externally authenticated
+observations, and do not establish trustworthy UTC, external durability, independent
+administration, or non-equivocation. The legacy SQLite `SignedCheckpoint` remains opaque
+and untrusted.
 
 ## Authority
 
@@ -272,11 +291,13 @@ receipt-output paths use these batches. The selected-response ceiling does not b
 additional integrity I/O needed to validate complete required histories.
 
 The strict schema has Etzio `application_id = 0x45545A31` (ASCII `ETZ1`) and
-`user_version = 1`. Empty new
-databases are initialized transactionally. Unknown, malformed, or nonempty pre-vault state
-is refused without promotion; importing a legacy event database requires a separately
-implemented stop-the-world migration that reconstructs and proves every protected event's
-complete byte coverage.
+`user_version = 2`. Empty new databases are initialized transactionally. An exact
+version-1 transactional vault is migrated atomically to the version-2 layout under a
+permanent legacy profile, preserving its history without assigning integrity finality.
+Only a completely empty profile can irreversibly enroll in modeled integrity. Unknown,
+malformed, or nonempty pre-vault state is still refused without promotion; importing that
+older event-only state requires a separately implemented stop-the-world migration that
+reconstructs and proves every protected event's complete byte coverage.
 
 Ingestion remains bounded even when one physical BLOB is deduplicated across events:
 authority evidence is limited to 16 MiB; target snapshots retain the existing 256-file and
@@ -284,11 +305,13 @@ authority evidence is limited to 16 MiB; target snapshots retain the existing 25
 most 64 MiB of typed inputs and the grant's tighter signed byte ceiling; receipt output is
 exactly four positive artifacts and at most 64 MiB total; and resolution plus output
 retains the grant's one non-resetting logical byte ceiling. Each store opening also
-enforces an exact configured logical unique-BLOB ceiling, defaulting to 1 GiB and counting
-each distinct identity-scheme/type/digest row once. This operational setting is not
-persisted authority and can differ on a later opening. Direct BLOB insertion is bounded,
-and streaming access is read-only; writable incremental BLOB handles are outside the
-immutable contract.
+enforces an exact configured logical evidence ceiling, defaulting to 1 GiB. It counts each
+distinct identity-scheme/type/digest BLOB once and, for the modeled-integrity profile,
+also counts exact profile bytes, immutable phase records, and typed provider-evidence
+bytes. Enrollment and every transition reserve a conservative worst-case finality
+allowance before mutation. This operational setting is not persisted authority and can
+differ on a later opening. Direct BLOB insertion is bounded, and streaming access is
+read-only; writable incremental BLOB handles are outside the immutable contract.
 
 Staging publication is dirfd-relative and atomically no-clobber on supported Darwin
 `renameatx_np(RENAME_EXCL)` and Linux libc `renameat2(RENAME_NOREPLACE)` filesystems. Etzio
@@ -314,6 +337,10 @@ authority, target, decision time, typed payload, and previous event digest.
 - requires an explicit private filesystem path;
 - requires every declared runtime to use rollback-journal `DELETE` mode with
   `synchronous=EXTRA`;
+- reauthenticates `journal_mode=DELETE`, `synchronous=EXTRA`, `foreign_keys=ON`,
+  `trusted_schema=OFF`, `ignore_check_constraints=OFF`, `read_uncommitted=OFF`, and
+  `writable_schema=OFF` on every retained-state cache check and protected writer
+  boundary;
 - refuses a preexisting WAL header before SQLite opens the path, leaving conversion to an
   explicit stop-the-world migration under a fixed runtime;
 - rejects SQLite before 3.37.0 and unknown major versions, classifies the exact 2026
@@ -324,6 +351,12 @@ authority, target, decision time, typed payload, and previous event digest.
   event state pending an explicit offline migration;
 - stores exact canonical event bytes and, for protected events, exact immutable evidence
   BLOBs plus complete code-derived role mappings;
+- retains an exact permanent legacy or modeled-integrity profile; only an empty history
+  can enter the latter;
+- under the modeled profile, requires one signed pending dossier in the same transaction
+  as every event and blocks every different append while any transition is unresolved;
+- retains append-only anchor, checkpoint-candidate, finalization, and typed provider-
+  evidence rows, with exact duplicate reconciliation and conflicting-body refusal;
 - validates the full retained stream and proposed transition inside a
   `BEGIN IMMEDIATE` append transaction;
 - compares the expected head;
@@ -350,8 +383,9 @@ Limits:
   monitor; a hostile same-user SQLite connection can race journal state after admission;
 - a coherent offline database rewrite is not detectable without a connected external
   latest-head catalog;
-- legacy checkpoint storage is opaque, while typed checkpoints are not yet persisted or
-  required by lifecycle commands; and
+- legacy checkpoint storage is opaque; typed checkpoints are persisted and required only
+  by the deterministic modeled-integrity facade, not by the ordinary CLI or a qualified
+  external-authority profile; and
 - event time is only as trustworthy as the invoking service’s supplied clock.
 
 Production deployment therefore requires an isolated service identity, protected mount,
@@ -547,10 +581,13 @@ scientific or policy authority.
 Kernel-issued, authority-bound modeled-fixture verification leases, typed input-resolution
 history, atomic modeled-receipt admission, single-use consumption, explicit terminal lease
 recovery, the typed integrity-decision/head-checkpoint contract, and transactional
-evidence retention for all four protected event kinds are retained. The next gate is
-adapter qualification and crash-safe enforcement of trusted time, revocation freshness,
-and authenticated external event-head anchoring. Foundation integrity is accepted only
-when retained evidence also shows:
+evidence retention for all four protected event kinds are retained. Under the documented
+SQLite assumptions, an empty-history fixture profile now also demonstrates deterministic
+injected-interruption recovery, byte-exact two-stage retry, and exact-current-head command
+completion for every event. The next gate is qualification and connection of independently
+administered time, revocation, anchor, catalog, and monitor adapters without weakening
+that recovery contract. Foundation integrity is accepted only when retained evidence also
+shows:
 
 - trusted time and revocation freshness for every consequential transition;
 - authenticated, externally anchored event heads;

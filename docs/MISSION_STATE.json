@@ -4,10 +4,10 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/transactional-evidence-vault-v1",
+  "active_branch": "agent/integrity-finality-enforcement-v1",
   "foundation_base": {
-    "commit": "d2807dd2ea71704cb9db95bab7401d75df6ea8b6",
-    "tree": "6527a9c6e55974b7a8165a5adcbf30f715666a7d"
+    "commit": "4919a0c09f99f545336fc6482a2d52f8fd7c03e1",
+    "tree": "73ae7dcf5fae6d889dcb1d4d63b0345ae6798361"
   },
   "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
   "author": {
@@ -29,7 +29,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "qualified_integrity_adapters_and_crash_safe_external_head_finality"
+    "next_gate": "qualified_external_integrity_adapters_and_storage_boundary",
+    "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
     "repository_modify": true,
@@ -61,15 +62,15 @@
     "pre-open refusal of persistent WAL state with explicit offline migration required",
     "exact WAL-reset fix classification plus SQLite minimum and major-version admission",
     "retained runtime-reported SQLite version and source identity with isolated versus repository-context agreement",
-    "exact SQLite application_id 0x45545A31 (ASCII ETZ1) and user_version 1 with transactional initialization and full schema-shape validation",
-    "explicit refusal of malformed unknown or nonempty pre-vault event state pending an offline migration",
+    "exact SQLite application_id 0x45545A31 (ASCII ETZ1) and user_version 2 with transactional initialization full schema-shape validation exact version-1 legacy migration and empty-only modeled-integrity enrollment",
+    "explicit refusal of malformed unknown or nonempty pre-vault event state pending an offline migration with nonempty version-1 history permanently non-promotable",
     "canonical append-only SQLite evidence vault retaining deduplicated exact immutable BLOBs and complete code-derived event-role mappings",
     "immutable first-origin event provenance per unique vault BLOB plus a covering reverse artifact-identity size and event index",
     "single-transaction BLOB mapping and event retention for authority_admitted mission_opened verification_artifacts_resolved and verifier_receipt_admitted",
     "generic append refusal for every protected byte-claiming event",
     "canonical-vault-first reuse plus staging-independent committed replay and retry with corruption never falling back to staging",
     "bounded batched production reads that follow immutable first origins or exact event owners reduce each distinct required mission once share one rehash per distinct BLOB across complete histories and cache requested responses only",
-    "fixed authority target resolution output and grant bounds plus a default 1 GiB configurable per-opening logical unique-vault-byte ceiling",
+    "fixed authority target resolution output and grant bounds plus a default 1 GiB configurable per-opening logical evidence-storage ceiling charging distinct vault BLOBs deduplicated provider BLOBs canonical integrity records and modeled profile policy and authority-binding bytes with an 80 MiB worst-case finality reserve",
     "distinct refusal, failure, cancellation, timeout, budget, completion, and closure states",
     "kernel-issued authority-bound modeled-fixture verification leases",
     "retained verifier trust and revocation snapshots for replayable lease assignment",
@@ -93,6 +94,14 @@
     "scope-bound nonstale external revocation floors and exact-provenance instance-catalog floors with rollback equivocation branch gap mixed-projection and whole-history deletion refusal",
     "sealed exact-type authentication results rebuilt from freshly verified signed bytes with copied trust-store and caller-policy snapshots at consequential integrity composition boundaries",
     "decision predecessor sequence ceilings that reserve one representable signed-int64 successor event and checkpoint",
+    "permanent modeled fixture-adapter authority binding over exact adapter profile and version service scope validation policy complete trust snapshot and distinct decision and checkpoint key and principal identities",
+    "atomic event plus reauthenticated signed pending-decision dossier retention with exact canonical code-derived provider assertions for every modeled event",
+    "four immutable append-only integrity phases for pending event anchor statement signed checkpoint candidate and exact-current modeled finalization",
+    "one database-global unresolved-transition barrier across missions plus generic raw replay refusal until finalization",
+    "later-mission event-zero extension of the exact instance-global head with independent mission genesis and exact dual-predecessor continuation thereafter",
+    "two byte-identical at-least-once modeled protocol-write calls with process-local prime_catalog rehydration that is neither durable nor a third protocol write",
+    "fully revalidated modeled-lineage replay cache and every writer boundary guarded by exact schema fingerprint application and user versions connection identity data version schema cookie change signals and admitted journal synchronization foreign-key trusted-schema CHECK-enforcement read-isolation and writable-schema settings",
+    "store busy capacity operational and corruption classifications preserved through finality recovery while unexpected adapter failures remain typed blocked",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -100,20 +109,25 @@
   "modeled_only": [
     "original in-memory ten-unit behavior loop",
     "modeled target and eight-case verdict corpus",
+    "repository-owned deterministic time revocation anchor catalog and monitor sources",
+    "unsigned canonical code-derived provider assertions without independently authenticated external observations",
+    "process-local modeled anchor and catalog state without external durability or independent administration",
     "opaque modeled output semantics without a structured execution run identity",
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "qualified trusted-time and revocation adapters plus lifecycle enforcement",
-    "persisted authenticated external event-head anchoring monitoring and command finality",
+    "qualified independently administered trusted-time revocation anchor catalog and monitor adapters replacing deterministic fixture assertions inside the retained lifecycle contract",
+    "externally durable authenticated latest-head authority and witnessing that survives local database loss",
+    "durable blocked disposition reason and governed recovery decision",
     "structured independently produced execution effect measured-environment and termination evidence",
     "closure of the documented SQLite same-user pathname and coherent offline-rewrite boundary",
     "qualification of an accepted SQLite VFS filesystem and device profile physical and journal quotas backup and restore process-kill and power-fault recovery plus sensitive-evidence access-control encryption and retention policy",
     "proved verifier principal, process, and isolation separation"
   ],
   "not_implemented": [
-    "qualified trusted-time revocation anchor and monitor adapters",
-    "persisted typed checkpoints and crash-safe anchor-final command state machine",
+    "qualified externally administered integrity-finality adapter profile",
+    "durable externally authenticated latest-head catalog surviving local database loss",
+    "durable blocked finality disposition and recovery decision",
     "offline conversion tooling for persistent-WAL event databases",
     "offline backfill tooling for nonempty pre-vault event databases",
     "isolated exploit construction",
@@ -126,8 +140,8 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 730,
+    "validation_status": "local_release_suites_passed_github_pending",
+    "test_count": 828,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -137,9 +151,16 @@
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
+    "github_validated_commit": null,
+    "github_actions_run_id": null,
+    "claim_boundary": "implements repository-fixture-only schema-v2 modeled integrity finality with a pinned fixture-adapter authority binding atomic pending retention four immutable phases two at-least-once modeled protocol writes exact code-derived provider assertions multi-mission global and mission continuity generic pending-replay refusal crash and concurrency recovery and exact-current modeled command completion; no trustworthy UTC real revocation freshness provider authentication external durability independent administration non-equivocation same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim"
+  },
+  "inherited_transactional_vault_evidence": {
+    "validation_status": "local_and_github_release_suites_passed",
+    "test_count": 730,
     "github_validated_commit": "612953648eff751a49054e8a700005216ddf7fb6",
     "github_actions_run_id": 30450447700,
-    "claim_boundary": "closes Etzio-created exposure to the disclosed SQLite WAL-reset defect for the declared runtime matrix and closes the ordinary filesystem-staging and SQLite event-retention split at the four implemented byte-claiming boundaries; no same-user or offline-rewrite safety, general storage safety, execution truth, real-world precision, finding validity, isolation, live authorization, learning, or superiority claim"
+    "claim_boundary": "prior transactional evidence-vault implementation only; predates and does not validate schema-v2 modeled integrity finality"
   },
   "inherited_foundation_evidence": {
     "validation_status": "local_and_github_release_suites_passed",
@@ -151,6 +172,10 @@
     {
       "capability": "externally proved time revocation freshness and head durability",
       "blocker": "qualified independently administered providers trust roots retention policy and explicit operational authority"
+    },
+    {
+      "capability": "durable finality-block adjudication and recovery",
+      "blocker": "a versioned blocked disposition reason policy-authorized recovery decision and known-bads"
     },
     {
       "capability": "isolated MARCELLUS and CATO execution",
@@ -179,6 +204,7 @@
     "docs/decisions/0007-explicit-verification-lease-recovery.md",
     "docs/decisions/0008-typed-integrity-evidence-contract.md",
     "docs/decisions/0009-uniform-sqlite-rollback-journal-safety.md",
-    "docs/decisions/0010-transactional-evidence-vault.md"
+    "docs/decisions/0010-transactional-evidence-vault.md",
+    "docs/decisions/0011-crash-safe-modeled-integrity-finality.md"
   ]
 }

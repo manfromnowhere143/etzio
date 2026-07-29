@@ -17,7 +17,7 @@ from ..evidence import (
     EvidenceError,
     FileEvidenceStore,
 )
-from ..protocol import ProtocolError
+from ..protocol import ProtocolError, canonical_dumps, content_id, strict_loads
 from .events_v1 import GENESIS_DIGEST, EventIntegrityError, EventV1
 from .evidence_vault import (
     AUTHORITY_EVIDENCE_ROLE_V1,
@@ -67,10 +67,34 @@ _DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
 _SQLITE_HEADER_MAGIC: Final = b"SQLite format 3\x00"
 _SQLITE_HEADER_SIZE: Final = 100
 _SQLITE_APPLICATION_ID: Final = 0x45545A31  # ASCII "ETZ1".
-_SQLITE_SCHEMA_VERSION: Final = 1
+_SQLITE_SCHEMA_VERSION: Final = 2
+_SQLITE_LEGACY_VAULT_SCHEMA_VERSION: Final = 1
+_INTEGRITY_IDENTITY_RE: Final = re.compile(
+    r"^[A-Za-z][A-Za-z0-9_.:-]{1,127}$",
+    re.ASCII,
+)
 _SET_SQLITE_APPLICATION_ID: Final = "PRAGMA application_id = 1163156017"
-_SET_SQLITE_SCHEMA_VERSION: Final = "PRAGMA user_version = 1"
-_SQLITE_SCHEMA_CONTRACT_SHA256: Final = "9d29c7abe7aef05db290cef46687eb19833c073d256558ff5ec555bbe9a04b90"
+_SET_SQLITE_SCHEMA_VERSION: Final = "PRAGMA user_version = 2"
+_SQLITE_LEGACY_VAULT_SCHEMA_CONTRACT_SHA256: Final = (
+    "9d29c7abe7aef05db290cef46687eb19833c073d256558ff5ec555bbe9a04b90"
+)
+# Recomputed from SQLite's retained canonical schema SQL after every intentional
+# schema change.  The temporary sentinel makes an incomplete migration fail closed.
+_SQLITE_SCHEMA_CONTRACT_SHA256: Final = (
+    "8fca39b7027ae6df3f6044d064a7c9346bc0d617c174839197ba334355db34f2"
+)
+_LEGACY_STORE_PROFILE_V1: Final = "legacy_fixture_v1"
+_MODELED_INTEGRITY_STORE_PROFILE_V1: Final = "modeled_integrity_fixture_v1"
+_INTEGRITY_PHASES_V1: Final = frozenset(
+    {"pending", "anchor_statement", "checkpoint_candidate", "finalization"}
+)
+_MAX_INTEGRITY_RECORD_BYTES_V1: Final = 16 * 1024 * 1024
+_MAX_INTEGRITY_EVIDENCE_BYTES_V1: Final = 1024 * 1024
+_MAX_INTEGRITY_TRANSITION_EVIDENCE_BYTES_V1: Final = 16 * 1024 * 1024
+_INTEGRITY_FINALITY_CAPACITY_RESERVE_BYTES_V1: Final = (
+    (4 * _MAX_INTEGRITY_RECORD_BYTES_V1)
+    + _MAX_INTEGRITY_TRANSITION_EVIDENCE_BYTES_V1
+)
 _VAULT_READ_CHUNK_BYTES: Final = 1024 * 1024
 _CONCRETE_PATH_TYPE: Final = type(Path())
 
@@ -170,6 +194,18 @@ class ClosedStreamError(EventStoreError):
     """Raised when an append targets a terminal mission stream."""
 
 
+class IntegrityFinalityRequiredError(EventStoreError):
+    """Raised when an integrity-enrolled store receives an ordinary append."""
+
+
+class PendingIntegrityTransitionError(EventStoreError):
+    """Raised when an unfinalized instance-global transition blocks progress."""
+
+
+class IntegrityTransitionConflictError(EventStoreError):
+    """Raised when an idempotency identity is reused with different bytes."""
+
+
 def _sqlite_store_failure(
     context: str,
     error: sqlite3.DatabaseError,
@@ -240,6 +276,9 @@ class StoreDiagnostics:
     synchronous: int
     foreign_keys: bool
     trusted_schema: bool
+    ignore_check_constraints: bool
+    read_uncommitted: bool
+    writable_schema: bool
     database_mode: int
 
 
@@ -249,6 +288,22 @@ class _PreparedStorePath:
     descriptor: int
     device: int
     inode: int
+
+
+@dataclass(frozen=True, slots=True)
+class _IntegrityValidationCacheKey:
+    """SQLite change signals for one fully authenticated retained-state replay."""
+
+    total_changes: int
+    data_version: int
+    schema_version: int
+    journal_mode: str
+    synchronous: int
+    foreign_keys: int
+    trusted_schema: int
+    ignore_check_constraints: int
+    read_uncommitted: int
+    writable_schema: int
 
 
 class SQLiteEventStore:
@@ -280,6 +335,10 @@ class SQLiteEventStore:
         if type(max_vault_bytes) is not int or max_vault_bytes <= 0 or max_vault_bytes > (2**63) - 1:
             raise EventStoreError("max_vault_bytes must be a positive signed-int64 byte ceiling")
         self._max_vault_bytes = max_vault_bytes
+        self._integrity_validation_cache: _IntegrityValidationCacheKey | None = (
+            None
+        )
+        self._validated_schema_version: int | None = None
         self._journal_policy = _sqlite_journal_policy(
             sqlite3.sqlite_version_info,
         )
@@ -299,19 +358,51 @@ class SQLiteEventStore:
             self._connection.execute("PRAGMA synchronous = EXTRA")
             self._connection.execute("PRAGMA foreign_keys = ON")
             self._connection.execute("PRAGMA trusted_schema = OFF")
+            self._connection.execute(
+                "PRAGMA ignore_check_constraints = OFF"
+            )
+            self._connection.execute("PRAGMA read_uncommitted = OFF")
+            self._connection.execute("PRAGMA writable_schema = OFF")
             if self._connection.execute("PRAGMA foreign_keys").fetchone() != (1,):
                 raise EventStoreError("SQLite foreign-key enforcement is unavailable")
             if self._connection.execute("PRAGMA trusted_schema").fetchone() != (0,):
                 raise EventStoreError("SQLite trusted-schema hardening is unavailable")
+            if self._connection.execute(
+                "PRAGMA ignore_check_constraints"
+            ).fetchone() != (0,):
+                raise EventStoreError(
+                    "SQLite CHECK-constraint enforcement is unavailable"
+                )
+            if self._connection.execute(
+                "PRAGMA read_uncommitted"
+            ).fetchone() != (0,):
+                raise EventStoreError(
+                    "SQLite refused committed-only reads"
+                )
+            if self._connection.execute(
+                "PRAGMA writable_schema"
+            ).fetchone() != (0,):
+                raise EventStoreError(
+                    "SQLite writable-schema hardening is unavailable"
+                )
             if self._connection.execute("PRAGMA synchronous").fetchone() != (self._journal_policy.synchronous_value,):
                 raise EventStoreError("SQLite refused the required safe synchronous mode")
             if str(journal_mode[0]).lower() == "wal":
                 raise EventStoreError("Etzio does not admit WAL under the declared runtime matrix")
             self._initialize_schema()
+            self._refresh_validated_schema_version_locked()
             retained_vault_bytes = self._vault_used_bytes_locked()
             if retained_vault_bytes > self._max_vault_bytes:
                 raise EvidenceVaultCapacityError(
                     "retained unique evidence exceeds the configured database vault byte ceiling"
+                )
+            self._validate_integrity_state_locked()
+            if (
+                self._logical_evidence_storage_used_locked()
+                > self._max_vault_bytes
+            ):
+                raise EvidenceVaultCapacityError(
+                    "retained vault plus integrity evidence exceeds the configured byte ceiling"
                 )
             self._verify_post_connect_identity(prepared)
         except sqlite3.DatabaseError as exc:
@@ -532,6 +623,12 @@ class SQLiteEventStore:
         if identity == expected:
             self._validate_schema()
             return
+        if identity == (
+            _SQLITE_APPLICATION_ID,
+            _SQLITE_LEGACY_VAULT_SCHEMA_VERSION,
+        ):
+            self._migrate_vault_v1_to_integrity_v2()
+            return
         if identity != (0, 0):
             raise EventStoreError("event store has an unsupported application or schema version")
         legacy_allowed_objects = {
@@ -558,6 +655,434 @@ class SQLiteEventStore:
         if any(self._table_has_rows(table_name) for table_name in ("events", "signed_checkpoints")):
             raise EventStoreError("nonempty pre-vault event state requires an explicit offline migration")
         self._create_schema()
+
+    @staticmethod
+    def _integrity_schema_sql() -> str:
+        digest_check = """
+            length({column}) = 71
+            AND substr({column}, 1, 7) = 'sha256:'
+            AND substr({column}, 8) NOT GLOB '*[^0-9a-f]*'
+        """
+
+        def checked(column: str) -> str:
+            return digest_check.format(column=column)
+
+        identity_check = """
+            length({column}) BETWEEN 2 AND 128
+            AND substr({column}, 1, 1) GLOB '[A-Za-z]'
+            AND {column} NOT GLOB '*[^A-Za-z0-9_.:-]*'
+        """
+
+        def identity_checked(column: str) -> str:
+            return identity_check.format(column=column)
+
+        phases_sql = ", ".join(
+            f"'{phase}'" for phase in sorted(_INTEGRITY_PHASES_V1)
+        )
+        return f"""
+            CREATE TABLE IF NOT EXISTS store_profile (
+                singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                profile TEXT NOT NULL CHECK (
+                    profile IN (
+                        '{_LEGACY_STORE_PROFILE_V1}',
+                        '{_MODELED_INTEGRITY_STORE_PROFILE_V1}'
+                    )
+                ),
+                service_instance_id TEXT,
+                environment_id TEXT,
+                validation_policy_id TEXT,
+                validation_policy_wire BLOB,
+                authority_binding_id TEXT,
+                authority_binding_wire BLOB,
+                CHECK (
+                    (
+                        profile = '{_LEGACY_STORE_PROFILE_V1}'
+                        AND service_instance_id IS NULL
+                        AND environment_id IS NULL
+                        AND validation_policy_id IS NULL
+                        AND validation_policy_wire IS NULL
+                        AND authority_binding_id IS NULL
+                        AND authority_binding_wire IS NULL
+                    )
+                    OR (
+                        profile = '{_MODELED_INTEGRITY_STORE_PROFILE_V1}'
+                        AND typeof(service_instance_id) = 'text'
+                        AND {identity_checked("service_instance_id")}
+                        AND typeof(environment_id) = 'text'
+                        AND {identity_checked("environment_id")}
+                        AND typeof(validation_policy_id) = 'text'
+                        AND {checked("validation_policy_id")}
+                        AND typeof(validation_policy_wire) = 'blob'
+                        AND length(validation_policy_wire)
+                            BETWEEN 1 AND {_MAX_INTEGRITY_RECORD_BYTES_V1}
+                        AND typeof(authority_binding_id) = 'text'
+                        AND {checked("authority_binding_id")}
+                        AND typeof(authority_binding_wire) = 'blob'
+                        AND length(authority_binding_wire)
+                            BETWEEN 1 AND {_MAX_INTEGRITY_RECORD_BYTES_V1}
+                    )
+                )
+            ) STRICT;
+
+            INSERT OR IGNORE INTO store_profile (
+                singleton,
+                profile,
+                service_instance_id,
+                environment_id,
+                validation_policy_id,
+                validation_policy_wire,
+                authority_binding_id,
+                authority_binding_wire
+            ) VALUES (
+                1,
+                '{_LEGACY_STORE_PROFILE_V1}',
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS integrity_evidence_artifacts (
+                evidence_id TEXT PRIMARY KEY CHECK ({checked("evidence_id")}),
+                byte_size INTEGER NOT NULL CHECK (
+                    byte_size >= 0
+                    AND byte_size <= {_MAX_INTEGRITY_EVIDENCE_BYTES_V1}
+                ),
+                content BLOB NOT NULL CHECK (
+                    typeof(content) = 'blob'
+                    AND length(content) = byte_size
+                )
+            ) STRICT, WITHOUT ROWID;
+
+            CREATE TABLE IF NOT EXISTS integrity_pending_transitions (
+                event_digest TEXT PRIMARY KEY CHECK ({checked("event_digest")}),
+                mission_id TEXT NOT NULL CHECK ({checked("mission_id")}),
+                event_seq INTEGER NOT NULL CHECK (event_seq >= 0),
+                instance_sequence INTEGER NOT NULL UNIQUE CHECK (
+                    instance_sequence >= 0
+                ),
+                record_id TEXT NOT NULL UNIQUE CHECK ({checked("record_id")}),
+                record BLOB NOT NULL CHECK (
+                    typeof(record) = 'blob'
+                    AND length(record) BETWEEN 1 AND {_MAX_INTEGRITY_RECORD_BYTES_V1}
+                ),
+                UNIQUE (mission_id, event_seq),
+                FOREIGN KEY (event_digest)
+                    REFERENCES events (digest)
+                    ON UPDATE RESTRICT ON DELETE RESTRICT
+                    DEFERRABLE INITIALLY DEFERRED
+            ) STRICT, WITHOUT ROWID;
+
+            CREATE TABLE IF NOT EXISTS integrity_anchor_statements (
+                event_digest TEXT PRIMARY KEY,
+                record_id TEXT NOT NULL UNIQUE CHECK ({checked("record_id")}),
+                anchor_statement_id TEXT NOT NULL UNIQUE CHECK (
+                    {checked("anchor_statement_id")}
+                ),
+                record BLOB NOT NULL CHECK (
+                    typeof(record) = 'blob'
+                    AND length(record) BETWEEN 1 AND {_MAX_INTEGRITY_RECORD_BYTES_V1}
+                ),
+                FOREIGN KEY (event_digest)
+                    REFERENCES integrity_pending_transitions (event_digest)
+                    ON UPDATE RESTRICT ON DELETE RESTRICT
+            ) STRICT, WITHOUT ROWID;
+
+            CREATE TABLE IF NOT EXISTS integrity_checkpoint_candidates (
+                event_digest TEXT PRIMARY KEY,
+                record_id TEXT NOT NULL UNIQUE CHECK ({checked("record_id")}),
+                checkpoint_id TEXT NOT NULL UNIQUE CHECK (
+                    {checked("checkpoint_id")}
+                ),
+                checkpoint_attestation_id TEXT NOT NULL UNIQUE CHECK (
+                    {checked("checkpoint_attestation_id")}
+                ),
+                record BLOB NOT NULL CHECK (
+                    typeof(record) = 'blob'
+                    AND length(record) BETWEEN 1 AND {_MAX_INTEGRITY_RECORD_BYTES_V1}
+                ),
+                FOREIGN KEY (event_digest)
+                    REFERENCES integrity_anchor_statements (event_digest)
+                    ON UPDATE RESTRICT ON DELETE RESTRICT
+            ) STRICT, WITHOUT ROWID;
+
+            CREATE TABLE IF NOT EXISTS integrity_finalizations (
+                event_digest TEXT PRIMARY KEY,
+                record_id TEXT NOT NULL UNIQUE CHECK ({checked("record_id")}),
+                record BLOB NOT NULL CHECK (
+                    typeof(record) = 'blob'
+                    AND length(record) BETWEEN 1 AND {_MAX_INTEGRITY_RECORD_BYTES_V1}
+                ),
+                FOREIGN KEY (event_digest)
+                    REFERENCES integrity_checkpoint_candidates (event_digest)
+                    ON UPDATE RESTRICT ON DELETE RESTRICT
+            ) STRICT, WITHOUT ROWID;
+
+            CREATE TABLE IF NOT EXISTS integrity_transition_evidence (
+                event_digest TEXT NOT NULL,
+                phase TEXT NOT NULL CHECK (phase IN ({phases_sql})),
+                slot INTEGER NOT NULL CHECK (slot BETWEEN 0 AND 255),
+                evidence_kind TEXT NOT NULL CHECK (
+                    evidence_kind IN (
+                        'trusted_time',
+                        'revocation_metadata',
+                        'head_anchor_receipt',
+                        'external_floor'
+                    )
+                ),
+                source_id TEXT NOT NULL CHECK (
+                    length(source_id) BETWEEN 1 AND 256
+                ),
+                evidence_id TEXT NOT NULL,
+                PRIMARY KEY (event_digest, phase, slot),
+                UNIQUE (
+                    event_digest,
+                    phase,
+                    evidence_kind,
+                    source_id,
+                    evidence_id
+                ),
+                FOREIGN KEY (event_digest)
+                    REFERENCES integrity_pending_transitions (event_digest)
+                    ON UPDATE RESTRICT ON DELETE RESTRICT
+                    DEFERRABLE INITIALLY DEFERRED,
+                FOREIGN KEY (evidence_id)
+                    REFERENCES integrity_evidence_artifacts (evidence_id)
+                    ON UPDATE RESTRICT ON DELETE RESTRICT
+            ) STRICT, WITHOUT ROWID;
+
+            CREATE INDEX IF NOT EXISTS integrity_finalized_mission_head
+                ON integrity_pending_transitions (
+                    mission_id,
+                    event_seq DESC,
+                    instance_sequence DESC
+                );
+
+            CREATE INDEX IF NOT EXISTS integrity_transition_evidence_identity
+                ON integrity_transition_evidence (
+                    evidence_id,
+                    event_digest,
+                    phase,
+                    slot
+                );
+
+            CREATE TRIGGER IF NOT EXISTS store_profile_reject_delete
+            BEFORE DELETE ON store_profile
+            BEGIN
+                SELECT RAISE(ABORT, 'store profile is permanent');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS store_profile_validate_update
+            BEFORE UPDATE ON store_profile
+            WHEN NOT (
+                OLD.singleton = 1
+                AND OLD.profile = '{_LEGACY_STORE_PROFILE_V1}'
+                AND OLD.service_instance_id IS NULL
+                AND OLD.environment_id IS NULL
+                AND OLD.validation_policy_id IS NULL
+                AND OLD.validation_policy_wire IS NULL
+                AND OLD.authority_binding_id IS NULL
+                AND OLD.authority_binding_wire IS NULL
+                AND NEW.singleton = 1
+                AND NEW.profile = '{_MODELED_INTEGRITY_STORE_PROFILE_V1}'
+                AND NOT EXISTS (SELECT 1 FROM events)
+                AND NOT EXISTS (SELECT 1 FROM signed_checkpoints)
+                AND NOT EXISTS (SELECT 1 FROM evidence_artifacts)
+                AND NOT EXISTS (SELECT 1 FROM event_artifact_roles)
+                AND NOT EXISTS (
+                    SELECT 1 FROM integrity_pending_transitions
+                )
+            )
+            BEGIN
+                SELECT RAISE(ABORT, 'store profile transition is forbidden');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_pending_require_profile
+            BEFORE INSERT ON integrity_pending_transitions
+            WHEN (
+                SELECT profile FROM store_profile WHERE singleton = 1
+            ) != '{_MODELED_INTEGRITY_STORE_PROFILE_V1}'
+            BEGIN
+                SELECT RAISE(
+                    ABORT,
+                    'typed integrity requires the modeled integrity profile'
+                );
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_pending_require_next_global
+            BEFORE INSERT ON integrity_pending_transitions
+            WHEN NEW.instance_sequence != (
+                SELECT count(*) FROM integrity_finalizations
+            )
+            BEGIN
+                SELECT RAISE(
+                    ABORT,
+                    'integrity instance sequence is not the finalized successor'
+                );
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_pending_reject_open_transition
+            BEFORE INSERT ON integrity_pending_transitions
+            WHEN EXISTS (
+                SELECT 1
+                FROM integrity_pending_transitions AS pending
+                LEFT JOIN integrity_finalizations AS finalized
+                  ON finalized.event_digest = pending.event_digest
+                WHERE finalized.event_digest IS NULL
+            )
+            BEGIN
+                SELECT RAISE(
+                    ABORT,
+                    'an instance-global integrity transition is pending'
+                );
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS events_require_integrity_pending
+            BEFORE INSERT ON events
+            WHEN (
+                SELECT profile FROM store_profile WHERE singleton = 1
+            ) = '{_MODELED_INTEGRITY_STORE_PROFILE_V1}'
+            AND NOT EXISTS (
+                SELECT 1
+                FROM integrity_pending_transitions AS pending
+                WHERE pending.event_digest = NEW.digest
+                  AND pending.mission_id = NEW.mission_id
+                  AND pending.event_seq = NEW.seq
+            )
+            BEGIN
+                SELECT RAISE(
+                    ABORT,
+                    'modeled integrity event omitted its pending transition'
+                );
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS events_reject_while_integrity_pending
+            BEFORE INSERT ON events
+            WHEN EXISTS (
+                SELECT 1
+                FROM integrity_pending_transitions AS pending
+                LEFT JOIN integrity_finalizations AS finalized
+                  ON finalized.event_digest = pending.event_digest
+                WHERE finalized.event_digest IS NULL
+                  AND pending.event_digest != NEW.digest
+            )
+            BEGIN
+                SELECT RAISE(
+                    ABORT,
+                    'an instance-global integrity transition is pending'
+                );
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_evidence_reject_update
+            BEFORE UPDATE ON integrity_evidence_artifacts
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity evidence is append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_evidence_reject_delete
+            BEFORE DELETE ON integrity_evidence_artifacts
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity evidence is append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_transition_evidence_reject_update
+            BEFORE UPDATE ON integrity_transition_evidence
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity evidence mappings are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_transition_evidence_reject_delete
+            BEFORE DELETE ON integrity_transition_evidence
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity evidence mappings are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_pending_reject_update
+            BEFORE UPDATE ON integrity_pending_transitions
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity pending transitions are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_pending_reject_delete
+            BEFORE DELETE ON integrity_pending_transitions
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity pending transitions are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_anchor_reject_update
+            BEFORE UPDATE ON integrity_anchor_statements
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity anchor statements are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_anchor_reject_delete
+            BEFORE DELETE ON integrity_anchor_statements
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity anchor statements are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_checkpoint_reject_update
+            BEFORE UPDATE ON integrity_checkpoint_candidates
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity checkpoint candidates are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_checkpoint_reject_delete
+            BEFORE DELETE ON integrity_checkpoint_candidates
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity checkpoint candidates are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_finalization_reject_update
+            BEFORE UPDATE ON integrity_finalizations
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity finalizations are append-only');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_finalization_reject_delete
+            BEFORE DELETE ON integrity_finalizations
+            BEGIN
+                SELECT RAISE(ABORT, 'integrity finalizations are append-only');
+            END;
+        """
+
+    def _migrate_vault_v1_to_integrity_v2(self) -> None:
+        schema_rows = self._connection.execute(
+            """
+            SELECT type, name, sql
+            FROM sqlite_schema
+            WHERE name NOT LIKE 'sqlite_%'
+            ORDER BY type ASC, name ASC
+            """
+        ).fetchall()
+        schema_contract = "\n".join(
+            f"{object_type}\0{name}\0{sql}"
+            for object_type, name, sql in schema_rows
+        ).encode("utf-8")
+        if (
+            hashlib.sha256(schema_contract).hexdigest()
+            != _SQLITE_LEGACY_VAULT_SCHEMA_CONTRACT_SHA256
+        ):
+            raise EventStoreCorruptionError(
+                "legacy vault schema differs from its exact migration contract"
+            )
+        try:
+            self._connection.executescript(
+                f"""
+                BEGIN IMMEDIATE;
+                {self._integrity_schema_sql()}
+                {_SET_SQLITE_SCHEMA_VERSION};
+                """
+            )
+            self._validate_schema()
+            self._require_writer_transaction()
+            self._connection.execute("COMMIT")
+        except BaseException:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise
 
     def _create_schema(self) -> None:
         genesis = GENESIS_DIGEST.replace("'", "''")
@@ -977,6 +1502,8 @@ class SQLiteEventStore:
                 SELECT RAISE(ABORT, 'checkpoints are append-only');
             END;
 
+            {self._integrity_schema_sql()}
+
             """
             )
             self._require_writer_transaction()
@@ -991,6 +1518,37 @@ class SQLiteEventStore:
                 self._connection.execute("ROLLBACK")
             raise
 
+    def _schema_contract_locked(
+        self,
+    ) -> tuple[tuple[tuple[str, str, str], ...], str]:
+        schema_rows = tuple(
+            self._connection.execute(
+                """
+                SELECT type, name, sql
+                FROM sqlite_schema
+                WHERE name NOT LIKE 'sqlite_%'
+                ORDER BY type ASC, name ASC
+                """
+            ).fetchall()
+        )
+        if any(
+            type(object_type) is not str
+            or type(name) is not str
+            or type(sql) is not str
+            for object_type, name, sql in schema_rows
+        ):
+            raise EventStoreCorruptionError(
+                "event-store schema contains an invalid retained definition"
+            )
+        schema_contract = "\n".join(
+            f"{object_type}\0{name}\0{sql}"
+            for object_type, name, sql in schema_rows
+        ).encode("utf-8")
+        return (
+            schema_rows,
+            hashlib.sha256(schema_contract).hexdigest(),
+        )
+
     def _validate_schema(self) -> None:
         application_id = self._connection.execute("PRAGMA application_id").fetchone()
         user_version = self._connection.execute("PRAGMA user_version").fetchone()
@@ -999,19 +1557,30 @@ class SQLiteEventStore:
         required_objects = {
             ("index", "event_artifact_roles_artifact_identity"),
             ("index", "events_mission_head"),
+            ("index", "integrity_finalized_mission_head"),
+            ("index", "integrity_transition_evidence_identity"),
             ("table", "event_artifact_roles"),
             ("table", "events"),
             ("table", "evidence_artifacts"),
+            ("table", "integrity_anchor_statements"),
+            ("table", "integrity_checkpoint_candidates"),
+            ("table", "integrity_evidence_artifacts"),
+            ("table", "integrity_finalizations"),
+            ("table", "integrity_pending_transitions"),
+            ("table", "integrity_transition_evidence"),
             ("table", "signed_checkpoints"),
+            ("table", "store_profile"),
             ("trigger", "checkpoints_reject_delete"),
             ("trigger", "checkpoints_reject_update"),
             ("trigger", "event_artifact_roles_reject_delete"),
             ("trigger", "event_artifact_roles_reject_late_insert"),
             ("trigger", "event_artifact_roles_reject_update"),
+            ("trigger", "events_reject_while_integrity_pending"),
             ("trigger", "events_reject_delete"),
             ("trigger", "events_reject_unexpected_evidence"),
             ("trigger", "events_reject_update"),
             ("trigger", "events_require_authority_evidence"),
+            ("trigger", "events_require_integrity_pending"),
             ("trigger", "events_require_matching_artifact_kind"),
             ("trigger", "events_require_receipt_evidence"),
             ("trigger", "events_require_resolution_evidence"),
@@ -1019,41 +1588,61 @@ class SQLiteEventStore:
             ("trigger", "events_validate_insert"),
             ("trigger", "evidence_artifacts_reject_delete"),
             ("trigger", "evidence_artifacts_reject_update"),
+            ("trigger", "integrity_anchor_reject_delete"),
+            ("trigger", "integrity_anchor_reject_update"),
+            ("trigger", "integrity_checkpoint_reject_delete"),
+            ("trigger", "integrity_checkpoint_reject_update"),
+            ("trigger", "integrity_evidence_reject_delete"),
+            ("trigger", "integrity_evidence_reject_update"),
+            ("trigger", "integrity_finalization_reject_delete"),
+            ("trigger", "integrity_finalization_reject_update"),
+            ("trigger", "integrity_pending_reject_delete"),
+            ("trigger", "integrity_pending_reject_open_transition"),
+            ("trigger", "integrity_pending_reject_update"),
+            ("trigger", "integrity_pending_require_next_global"),
+            ("trigger", "integrity_pending_require_profile"),
+            ("trigger", "integrity_transition_evidence_reject_delete"),
+            ("trigger", "integrity_transition_evidence_reject_update"),
+            ("trigger", "store_profile_reject_delete"),
+            ("trigger", "store_profile_validate_update"),
         }
-        schema_rows = self._connection.execute(
-            """
-            SELECT type, name, sql
-            FROM sqlite_schema
-            WHERE name NOT LIKE 'sqlite_%'
-            ORDER BY type ASC, name ASC
-            """
-        ).fetchall()
+        schema_rows, schema_contract_digest = (
+            self._schema_contract_locked()
+        )
         retained_objects = {(row[0], row[1]) for row in schema_rows}
         if retained_objects != required_objects:
             raise EventStoreCorruptionError(
                 "event-store schema objects differ from the vault contract"
             )
-        schema_contract = "\n".join(f"{object_type}\0{name}\0{sql}" for object_type, name, sql in schema_rows).encode(
-            "utf-8"
-        )
-        if hashlib.sha256(schema_contract).hexdigest() != _SQLITE_SCHEMA_CONTRACT_SHA256:
+        if schema_contract_digest != _SQLITE_SCHEMA_CONTRACT_SHA256:
             raise EventStoreCorruptionError(
-                "event-store schema definitions differ from the vault contract"
+                "event-store schema definitions differ from the vault contract "
+                f"({schema_contract_digest})"
             )
         table_rows = {row[1]: row for row in self._connection.execute("PRAGMA table_list").fetchall()}
-        artifacts = table_rows.get("evidence_artifacts")
-        roles = table_rows.get("event_artifact_roles")
-        if (
-            artifacts is None
-            or roles is None
-            or artifacts[-1] != 1
-            or artifacts[-2] != 0
-            or roles[-1] != 1
-            or roles[-2] != 1
-        ):
-            raise EventStoreCorruptionError(
-                "event-store vault tables do not retain their STRICT/rowid contract"
-            )
+        expected_table_shape = {
+            "events": (0, 1),
+            "signed_checkpoints": (0, 1),
+            "evidence_artifacts": (0, 1),
+            "event_artifact_roles": (1, 1),
+            "store_profile": (0, 1),
+            "integrity_evidence_artifacts": (1, 1),
+            "integrity_pending_transitions": (1, 1),
+            "integrity_anchor_statements": (1, 1),
+            "integrity_checkpoint_candidates": (1, 1),
+            "integrity_finalizations": (1, 1),
+            "integrity_transition_evidence": (1, 1),
+        }
+        for table_name, (without_rowid, strict) in expected_table_shape.items():
+            retained = table_rows.get(table_name)
+            if (
+                retained is None
+                or retained[-2] != without_rowid
+                or retained[-1] != strict
+            ):
+                raise EventStoreCorruptionError(
+                    f"{table_name} differs from its STRICT/rowid contract"
+                )
         expected_columns = {
             "events": (
                 (0, "mission_id", "TEXT", 1, None, 1, 0),
@@ -1091,6 +1680,55 @@ class SQLiteEventStore:
                 (7, "type_tag", "TEXT", 1, None, 0, 0),
                 (8, "artifact_digest", "TEXT", 1, None, 0, 0),
                 (9, "byte_size", "INTEGER", 1, None, 0, 0),
+            ),
+            "store_profile": (
+                (0, "singleton", "INTEGER", 0, None, 1, 0),
+                (1, "profile", "TEXT", 1, None, 0, 0),
+                (2, "service_instance_id", "TEXT", 0, None, 0, 0),
+                (3, "environment_id", "TEXT", 0, None, 0, 0),
+                (4, "validation_policy_id", "TEXT", 0, None, 0, 0),
+                (5, "validation_policy_wire", "BLOB", 0, None, 0, 0),
+                (6, "authority_binding_id", "TEXT", 0, None, 0, 0),
+                (7, "authority_binding_wire", "BLOB", 0, None, 0, 0),
+            ),
+            "integrity_evidence_artifacts": (
+                (0, "evidence_id", "TEXT", 1, None, 1, 0),
+                (1, "byte_size", "INTEGER", 1, None, 0, 0),
+                (2, "content", "BLOB", 1, None, 0, 0),
+            ),
+            "integrity_pending_transitions": (
+                (0, "event_digest", "TEXT", 1, None, 1, 0),
+                (1, "mission_id", "TEXT", 1, None, 0, 0),
+                (2, "event_seq", "INTEGER", 1, None, 0, 0),
+                (3, "instance_sequence", "INTEGER", 1, None, 0, 0),
+                (4, "record_id", "TEXT", 1, None, 0, 0),
+                (5, "record", "BLOB", 1, None, 0, 0),
+            ),
+            "integrity_anchor_statements": (
+                (0, "event_digest", "TEXT", 1, None, 1, 0),
+                (1, "record_id", "TEXT", 1, None, 0, 0),
+                (2, "anchor_statement_id", "TEXT", 1, None, 0, 0),
+                (3, "record", "BLOB", 1, None, 0, 0),
+            ),
+            "integrity_checkpoint_candidates": (
+                (0, "event_digest", "TEXT", 1, None, 1, 0),
+                (1, "record_id", "TEXT", 1, None, 0, 0),
+                (2, "checkpoint_id", "TEXT", 1, None, 0, 0),
+                (3, "checkpoint_attestation_id", "TEXT", 1, None, 0, 0),
+                (4, "record", "BLOB", 1, None, 0, 0),
+            ),
+            "integrity_finalizations": (
+                (0, "event_digest", "TEXT", 1, None, 1, 0),
+                (1, "record_id", "TEXT", 1, None, 0, 0),
+                (2, "record", "BLOB", 1, None, 0, 0),
+            ),
+            "integrity_transition_evidence": (
+                (0, "event_digest", "TEXT", 1, None, 1, 0),
+                (1, "phase", "TEXT", 1, None, 2, 0),
+                (2, "slot", "INTEGER", 1, None, 3, 0),
+                (3, "evidence_kind", "TEXT", 1, None, 0, 0),
+                (4, "source_id", "TEXT", 1, None, 0, 0),
+                (5, "evidence_id", "TEXT", 1, None, 0, 0),
             ),
         }
         for table_name, expected_table_columns in expected_columns.items():
@@ -1169,6 +1807,78 @@ class SQLiteEventStore:
             raise EventStoreCorruptionError(
                 "evidence-artifact foreign keys differ from the schema contract"
             )
+        integrity_foreign_keys = {
+            "integrity_pending_transitions": {
+                (
+                    "events",
+                    "event_digest",
+                    "digest",
+                    "RESTRICT",
+                    "RESTRICT",
+                    "NONE",
+                ),
+            },
+            "integrity_anchor_statements": {
+                (
+                    "integrity_pending_transitions",
+                    "event_digest",
+                    "event_digest",
+                    "RESTRICT",
+                    "RESTRICT",
+                    "NONE",
+                ),
+            },
+            "integrity_checkpoint_candidates": {
+                (
+                    "integrity_anchor_statements",
+                    "event_digest",
+                    "event_digest",
+                    "RESTRICT",
+                    "RESTRICT",
+                    "NONE",
+                ),
+            },
+            "integrity_finalizations": {
+                (
+                    "integrity_checkpoint_candidates",
+                    "event_digest",
+                    "event_digest",
+                    "RESTRICT",
+                    "RESTRICT",
+                    "NONE",
+                ),
+            },
+            "integrity_transition_evidence": {
+                (
+                    "integrity_pending_transitions",
+                    "event_digest",
+                    "event_digest",
+                    "RESTRICT",
+                    "RESTRICT",
+                    "NONE",
+                ),
+                (
+                    "integrity_evidence_artifacts",
+                    "evidence_id",
+                    "evidence_id",
+                    "RESTRICT",
+                    "RESTRICT",
+                    "NONE",
+                ),
+            },
+        }
+        for table_name, expected_foreign_keys in integrity_foreign_keys.items():
+            retained_foreign_keys = {
+                tuple(row[2:])
+                for row in self._connection.execute(
+                    "SELECT * FROM pragma_foreign_key_list(?)",
+                    (table_name,),
+                ).fetchall()
+            }
+            if retained_foreign_keys != expected_foreign_keys:
+                raise EventStoreCorruptionError(
+                    f"{table_name} foreign keys differ from the integrity schema contract"
+                )
         head_index = tuple(
             row
             for row in self._connection.execute("PRAGMA index_xinfo(events_mission_head)").fetchall()
@@ -1196,19 +1906,904 @@ class SQLiteEventStore:
             raise EventStoreCorruptionError(
                 "artifact-identity index differs from the schema contract"
             )
-        if self._connection.execute("PRAGMA foreign_key_check").fetchone() is not None:
+        integrity_mission_index = tuple(
+            self._connection.execute(
+                "PRAGMA index_info(integrity_finalized_mission_head)"
+            ).fetchall()
+        )
+        if integrity_mission_index != (
+            (0, 1, "mission_id"),
+            (1, 2, "event_seq"),
+            (2, 3, "instance_sequence"),
+        ):
+            raise EventStoreCorruptionError(
+                "integrity mission-head index differs from the schema contract"
+            )
+        integrity_evidence_index = tuple(
+            self._connection.execute(
+                "PRAGMA index_info(integrity_transition_evidence_identity)"
+            ).fetchall()
+        )
+        if integrity_evidence_index != (
+            (0, 5, "evidence_id"),
+            (1, 0, "event_digest"),
+            (2, 1, "phase"),
+            (3, 2, "slot"),
+        ):
+            raise EventStoreCorruptionError(
+                "integrity-evidence index differs from the schema contract"
+            )
+        profile_rows = self._connection.execute(
+            """
+            SELECT
+                singleton,
+                profile,
+                service_instance_id,
+                environment_id,
+                validation_policy_id,
+                validation_policy_wire,
+                authority_binding_id,
+                authority_binding_wire
+            FROM store_profile
+            """
+        ).fetchall()
+        if len(profile_rows) != 1 or profile_rows[0][0] != 1:
+            raise EventStoreCorruptionError(
+                "event store does not retain one exact profile row"
+            )
+        foreign_key_violation = self._connection.execute(
+            "PRAGMA foreign_key_check"
+        ).fetchone()
+        if foreign_key_violation is not None:
+            if (
+                len(foreign_key_violation) >= 3
+                and foreign_key_violation[2] == "evidence_artifacts"
+            ):
+                raise EventStoreCorruptionError(
+                    "retained event artifact is absent from the canonical vault"
+                )
             raise EventStoreCorruptionError(
                 "event-store schema has foreign-key violations"
             )
+
+    def _authenticated_connection_settings_locked(
+        self,
+    ) -> tuple[str, int, int, int, int, int, int]:
+        """Return the exact admitted connection-local SQLite security settings."""
+
+        journal = self._connection.execute(
+            "PRAGMA journal_mode"
+        ).fetchone()
+        synchronous = self._connection.execute(
+            "PRAGMA synchronous"
+        ).fetchone()
+        foreign_keys = self._connection.execute(
+            "PRAGMA foreign_keys"
+        ).fetchone()
+        trusted_schema = self._connection.execute(
+            "PRAGMA trusted_schema"
+        ).fetchone()
+        ignore_check_constraints = self._connection.execute(
+            "PRAGMA ignore_check_constraints"
+        ).fetchone()
+        read_uncommitted = self._connection.execute(
+            "PRAGMA read_uncommitted"
+        ).fetchone()
+        writable_schema = self._connection.execute(
+            "PRAGMA writable_schema"
+        ).fetchone()
+        if (
+            journal is None
+            or len(journal) != 1
+            or type(journal[0]) is not str
+            or synchronous is None
+            or len(synchronous) != 1
+            or type(synchronous[0]) is not int
+            or foreign_keys is None
+            or len(foreign_keys) != 1
+            or type(foreign_keys[0]) is not int
+            or trusted_schema is None
+            or len(trusted_schema) != 1
+            or type(trusted_schema[0]) is not int
+            or ignore_check_constraints is None
+            or len(ignore_check_constraints) != 1
+            or type(ignore_check_constraints[0]) is not int
+            or read_uncommitted is None
+            or len(read_uncommitted) != 1
+            or type(read_uncommitted[0]) is not int
+            or writable_schema is None
+            or len(writable_schema) != 1
+            or type(writable_schema[0]) is not int
+        ):
+            self._integrity_validation_cache = None
+            raise EventStoreCorruptionError(
+                "SQLite returned incomplete connection security settings"
+            )
+        settings = (
+            journal[0].lower(),
+            synchronous[0],
+            foreign_keys[0],
+            trusted_schema[0],
+            ignore_check_constraints[0],
+            read_uncommitted[0],
+            writable_schema[0],
+        )
+        if settings != (
+            self._journal_policy.journal_mode,
+            self._journal_policy.synchronous_value,
+            1,
+            0,
+            0,
+            0,
+            0,
+        ):
+            self._integrity_validation_cache = None
+            raise EventStoreCorruptionError(
+                "SQLite security settings differ from the admitted journal policy"
+            )
+        return settings
+
+    def _integrity_validation_cache_key_locked(
+        self,
+    ) -> _IntegrityValidationCacheKey:
+        application_id = self._connection.execute(
+            "PRAGMA application_id"
+        ).fetchone()
+        user_version = self._connection.execute(
+            "PRAGMA user_version"
+        ).fetchone()
+        if (
+            application_id != (_SQLITE_APPLICATION_ID,)
+            or user_version != (_SQLITE_SCHEMA_VERSION,)
+        ):
+            self._integrity_validation_cache = None
+            raise EventStoreCorruptionError(
+                "event-store schema identity is invalid"
+            )
+        (
+            journal_mode,
+            synchronous_value,
+            foreign_keys_value,
+            trusted_schema_value,
+            ignore_check_constraints_value,
+            read_uncommitted_value,
+            writable_schema_value,
+        ) = self._authenticated_connection_settings_locked()
+        data_version = self._connection.execute(
+            "PRAGMA data_version"
+        ).fetchone()
+        schema_version = self._connection.execute(
+            "PRAGMA schema_version"
+        ).fetchone()
+        total_changes = self._connection.total_changes
+        if (
+            data_version is None
+            or len(data_version) != 1
+            or type(data_version[0]) is not int
+            or data_version[0] < 0
+            or schema_version is None
+            or len(schema_version) != 1
+            or type(schema_version[0]) is not int
+            or schema_version[0] < 0
+            or type(total_changes) is not int
+            or total_changes < 0
+        ):
+            raise EventStoreCorruptionError(
+                "SQLite returned invalid authenticated-state change signals"
+            )
+        return _IntegrityValidationCacheKey(
+            total_changes=total_changes,
+            data_version=data_version[0],
+            schema_version=schema_version[0],
+            journal_mode=journal_mode,
+            synchronous=synchronous_value,
+            foreign_keys=foreign_keys_value,
+            trusted_schema=trusted_schema_value,
+            ignore_check_constraints=ignore_check_constraints_value,
+            read_uncommitted=read_uncommitted_value,
+            writable_schema=writable_schema_value,
+        )
+
+    def _refresh_validated_schema_version_locked(self) -> None:
+        """Authenticate the exact schema and bind that result to one version."""
+
+        before = self._integrity_validation_cache_key_locked()
+        self._validate_schema()
+        after = self._integrity_validation_cache_key_locked()
+        if before.schema_version != after.schema_version:
+            self._integrity_validation_cache = None
+            self._validated_schema_version = None
+            raise EventStoreCorruptionError(
+                "event-store schema changed while it was being authenticated"
+            )
+        self._validated_schema_version = after.schema_version
+
+    def _store_profile_locked(
+        self,
+    ) -> tuple[
+        str,
+        str | None,
+        str | None,
+        str | None,
+        bytes | None,
+        str | None,
+        bytes | None,
+        object | None,
+    ]:
+        try:
+            row = self._connection.execute(
+                """
+                SELECT
+                    profile,
+                    service_instance_id,
+                    environment_id,
+                    validation_policy_id,
+                    validation_policy_wire,
+                    authority_binding_id,
+                    authority_binding_wire
+                FROM store_profile
+                WHERE singleton = 1
+                """
+            ).fetchone()
+        except sqlite3.DatabaseError as exc:
+            raise _sqlite_store_failure(
+                "could not read the event-store profile",
+                exc,
+            ) from exc
+        if row is None or len(row) != 7:
+            raise EventStoreCorruptionError(
+                "event store omitted its exact profile"
+            )
+        (
+            profile,
+            service_instance_id,
+            environment_id,
+            policy_id,
+            policy_wire,
+            authority_binding_id,
+            authority_binding_wire,
+        ) = row
+        if profile == _LEGACY_STORE_PROFILE_V1:
+            if any(
+                value is not None
+                for value in (
+                    service_instance_id,
+                    environment_id,
+                    policy_id,
+                    policy_wire,
+                    authority_binding_id,
+                    authority_binding_wire,
+                )
+            ):
+                raise EventStoreCorruptionError(
+                    "legacy store profile retained modeled integrity fields"
+                )
+            return (
+                profile,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+        if (
+            profile != _MODELED_INTEGRITY_STORE_PROFILE_V1
+            or type(service_instance_id) is not str
+            or _INTEGRITY_IDENTITY_RE.fullmatch(service_instance_id) is None
+            or type(environment_id) is not str
+            or _INTEGRITY_IDENTITY_RE.fullmatch(environment_id) is None
+            or type(policy_id) is not str
+            or _DIGEST_RE.fullmatch(policy_id) is None
+            or type(policy_wire) is not bytes
+            or type(authority_binding_id) is not str
+            or _DIGEST_RE.fullmatch(authority_binding_id) is None
+            or type(authority_binding_wire) is not bytes
+        ):
+            raise EventStoreCorruptionError(
+                "modeled integrity store profile is malformed"
+            )
+        try:
+            from ..integrity_v1 import IntegrityValidationPolicyV1
+            from .integrity_transition import (
+                ModeledIntegrityAuthorityBindingV1,
+            )
+
+            body = strict_loads(policy_wire)
+            policy = IntegrityValidationPolicyV1.from_body(body)
+            authority_binding = (
+                ModeledIntegrityAuthorityBindingV1.from_canonical_bytes(
+                    authority_binding_wire
+                )
+            )
+        except (ProtocolError, TypeError, ValueError) as exc:
+            raise EventStoreCorruptionError(
+                f"modeled integrity profile cannot be reconstructed: {exc}"
+            ) from exc
+        if (
+            canonical_dumps(policy.to_body()) != policy_wire
+            or content_id("integrity_validation_policy", policy.to_body())
+            != policy_id
+            or authority_binding.to_canonical_bytes()
+            != authority_binding_wire
+            or authority_binding.binding_id != authority_binding_id
+        ):
+            raise EventStoreCorruptionError(
+                "modeled integrity profile identity is inconsistent"
+            )
+        return (
+            profile,
+            service_instance_id,
+            environment_id,
+            policy_id,
+            policy_wire,
+            authority_binding_id,
+            authority_binding_wire,
+            authority_binding,
+        )
+
+    def _unresolved_integrity_digest_locked(self) -> str | None:
+        rows = self._connection.execute(
+            """
+            SELECT pending.event_digest
+            FROM integrity_pending_transitions AS pending
+            LEFT JOIN integrity_finalizations AS finalized
+              ON finalized.event_digest = pending.event_digest
+            WHERE finalized.event_digest IS NULL
+            ORDER BY pending.instance_sequence ASC
+            LIMIT 2
+            """
+        ).fetchall()
+        if len(rows) > 1:
+            raise EventStoreCorruptionError(
+                "multiple instance-global integrity transitions are unresolved"
+            )
+        if not rows:
+            return None
+        event_digest = rows[0][0]
+        if type(event_digest) is not str or _DIGEST_RE.fullmatch(event_digest) is None:
+            raise EventStoreCorruptionError(
+                "unresolved integrity transition has an invalid event identity"
+            )
+        return event_digest
+
+    def _validate_integrity_state_locked(self) -> None:
+        observed = self._integrity_validation_cache_key_locked()
+        _schema_rows, schema_contract_digest = (
+            self._schema_contract_locked()
+        )
+        if schema_contract_digest != _SQLITE_SCHEMA_CONTRACT_SHA256:
+            self._integrity_validation_cache = None
+            raise EventStoreCorruptionError(
+                "event-store schema definitions differ from the vault contract "
+                f"({schema_contract_digest})"
+            )
+        if self._validated_schema_version != observed.schema_version:
+            self._integrity_validation_cache = None
+            self._refresh_validated_schema_version_locked()
+            observed = self._integrity_validation_cache_key_locked()
+        if self._integrity_validation_cache == observed:
+            return
+
+        self._integrity_validation_cache = None
+        self._validate_integrity_state_uncached_locked()
+        validated = self._integrity_validation_cache_key_locked()
+        if (
+            validated == observed
+            and validated.schema_version
+            == self._validated_schema_version
+        ):
+            self._integrity_validation_cache = validated
+
+    def _publish_owned_integrity_validation_cache_locked(self) -> None:
+        """Advance a validated cache across one exact store-owned append."""
+
+        self._require_writer_transaction()
+        prior = self._integrity_validation_cache
+        current = self._integrity_validation_cache_key_locked()
+        _schema_rows, schema_contract_digest = (
+            self._schema_contract_locked()
+        )
+        if schema_contract_digest != _SQLITE_SCHEMA_CONTRACT_SHA256:
+            self._integrity_validation_cache = None
+            raise EventStoreCorruptionError(
+                "event-store schema definitions differ from the vault contract "
+                f"({schema_contract_digest})"
+            )
+        if (
+            prior is None
+            or prior.data_version != current.data_version
+            or prior.schema_version != current.schema_version
+            or prior.schema_version != self._validated_schema_version
+            or current.total_changes < prior.total_changes
+        ):
+            self._integrity_validation_cache = None
+            raise EventStoreError(
+                "owned write did not extend one fully authenticated SQLite state"
+            )
+        self._integrity_validation_cache = current
+
+    def _validate_integrity_state_uncached_locked(self) -> None:
+        (
+            profile,
+            _service_instance_id,
+            _environment_id,
+            _policy_id,
+            _policy_wire,
+            _authority_binding_id,
+            _authority_binding_wire,
+            authority_binding,
+        ) = self._store_profile_locked()
+        integrity_tables = (
+            "integrity_pending_transitions",
+            "integrity_anchor_statements",
+            "integrity_checkpoint_candidates",
+            "integrity_finalizations",
+            "integrity_evidence_artifacts",
+            "integrity_transition_evidence",
+        )
+        count_row = self._connection.execute(
+            """
+            SELECT
+                (SELECT count(*) FROM integrity_pending_transitions),
+                (SELECT count(*) FROM integrity_anchor_statements),
+                (SELECT count(*) FROM integrity_checkpoint_candidates),
+                (SELECT count(*) FROM integrity_finalizations),
+                (SELECT count(*) FROM integrity_evidence_artifacts),
+                (SELECT count(*) FROM integrity_transition_evidence)
+            """
+        ).fetchone()
+        if (
+            count_row is None
+            or len(count_row) != len(integrity_tables)
+            or any(type(value) is not int for value in count_row)
+        ):
+            raise EventStoreCorruptionError(
+                "SQLite omitted an integrity-state table count"
+            )
+        counts = dict(zip(integrity_tables, count_row, strict=True))
+        foreign_key_violation = self._connection.execute(
+            "PRAGMA foreign_key_check"
+        ).fetchone()
+        if foreign_key_violation is not None:
+            raise EventStoreCorruptionError(
+                "modeled integrity state has a foreign-key violation"
+            )
+        if profile == _LEGACY_STORE_PROFILE_V1:
+            if any(counts.values()):
+                raise EventStoreCorruptionError(
+                    "legacy store profile contains typed integrity state"
+                )
+            return
+        event_count = int(
+            self._connection.execute("SELECT count(*) FROM events").fetchone()[0]
+        )
+        pending_count = counts["integrity_pending_transitions"]
+        if event_count != pending_count:
+            raise EventStoreCorruptionError(
+                "modeled integrity profile has an event without one pending dossier"
+            )
+        missing = self._connection.execute(
+            """
+            SELECT 1
+            FROM events AS event
+            LEFT JOIN integrity_pending_transitions AS pending
+              ON pending.event_digest = event.digest
+             AND pending.mission_id = event.mission_id
+             AND pending.event_seq = event.seq
+            WHERE pending.event_digest IS NULL
+            LIMIT 1
+            """
+        ).fetchone()
+        if missing is not None:
+            raise EventStoreCorruptionError(
+                "modeled integrity event metadata differs from its pending dossier"
+            )
+        sequence_gap = self._connection.execute(
+            """
+            SELECT 1
+            FROM integrity_pending_transitions AS pending
+            WHERE pending.instance_sequence != (
+                SELECT count(*)
+                FROM integrity_pending_transitions AS earlier
+                WHERE earlier.instance_sequence < pending.instance_sequence
+            )
+            LIMIT 1
+            """
+        ).fetchone()
+        if sequence_gap is not None:
+            raise EventStoreCorruptionError(
+                "modeled integrity instance sequence has a gap"
+            )
+        finalized_count = counts["integrity_finalizations"]
+        if (
+            counts["integrity_anchor_statements"] > pending_count
+            or counts["integrity_anchor_statements"] < finalized_count
+            or counts["integrity_checkpoint_candidates"] < finalized_count
+            or counts["integrity_anchor_statements"]
+            < counts["integrity_checkpoint_candidates"]
+            or pending_count - finalized_count not in {0, 1}
+        ):
+            raise EventStoreCorruptionError(
+                "modeled integrity phase cardinalities are inconsistent"
+            )
+        phase_parent_gap = self._connection.execute(
+            """
+            SELECT 1
+            WHERE EXISTS (
+                SELECT 1
+                FROM integrity_anchor_statements AS anchor
+                LEFT JOIN integrity_pending_transitions AS pending
+                  ON pending.event_digest = anchor.event_digest
+                WHERE pending.event_digest IS NULL
+            )
+            OR EXISTS (
+                SELECT 1
+                FROM integrity_checkpoint_candidates AS candidate
+                LEFT JOIN integrity_anchor_statements AS anchor
+                  ON anchor.event_digest = candidate.event_digest
+                WHERE anchor.event_digest IS NULL
+            )
+            OR EXISTS (
+                SELECT 1
+                FROM integrity_finalizations AS finalized
+                LEFT JOIN integrity_checkpoint_candidates AS candidate
+                  ON candidate.event_digest = finalized.event_digest
+                WHERE candidate.event_digest IS NULL
+            )
+            LIMIT 1
+            """
+        ).fetchone()
+        if phase_parent_gap is not None:
+            raise EventStoreCorruptionError(
+                "modeled integrity phase record omitted its exact parent"
+            )
+        finalized_gap = self._connection.execute(
+            """
+            SELECT 1
+            FROM integrity_pending_transitions AS pending
+            LEFT JOIN integrity_finalizations AS finalized
+              ON finalized.event_digest = pending.event_digest
+            WHERE pending.instance_sequence < (
+                SELECT count(*) FROM integrity_finalizations
+            )
+              AND finalized.event_digest IS NULL
+            LIMIT 1
+            """
+        ).fetchone()
+        if finalized_gap is not None:
+            raise EventStoreCorruptionError(
+                "modeled integrity finalizations are not a global prefix"
+            )
+        orphan_evidence = self._connection.execute(
+            """
+            SELECT 1
+            FROM integrity_evidence_artifacts AS artifact
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM integrity_transition_evidence AS mapping
+                WHERE mapping.evidence_id = artifact.evidence_id
+            )
+            LIMIT 1
+            """
+        ).fetchone()
+        if orphan_evidence is not None:
+            raise EventStoreCorruptionError(
+                "modeled integrity state retains orphan provider evidence"
+            )
+        phase_mapping_gap = self._connection.execute(
+            """
+            SELECT 1
+            FROM integrity_transition_evidence AS mapping
+            WHERE (
+                mapping.phase = 'pending'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM integrity_pending_transitions AS pending
+                    WHERE pending.event_digest = mapping.event_digest
+                )
+            )
+            OR (
+                mapping.phase = 'anchor_statement'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM integrity_anchor_statements AS anchor
+                    WHERE anchor.event_digest = mapping.event_digest
+                )
+            )
+            OR (
+                mapping.phase = 'checkpoint_candidate'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM integrity_checkpoint_candidates AS candidate
+                    WHERE candidate.event_digest = mapping.event_digest
+                )
+            )
+            OR (
+                mapping.phase = 'finalization'
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM integrity_finalizations AS finalized
+                    WHERE finalized.event_digest = mapping.event_digest
+                )
+            )
+            LIMIT 1
+            """
+        ).fetchone()
+        if phase_mapping_gap is not None:
+            raise EventStoreCorruptionError(
+                "integrity provider evidence precedes its immutable phase record"
+            )
+        self._unresolved_integrity_digest_locked()
+        from .integrity_transition import (
+            validate_anchor_statement,
+            validate_checkpoint_candidate,
+            validate_finalized_integrity_transition,
+            validate_pending_transition,
+        )
+
+        try:
+            from ..integrity_v1 import IntegrityValidationPolicyV1
+
+            validation_policy = IntegrityValidationPolicyV1.from_body(
+                strict_loads(_policy_wire)
+            )
+        except (ProtocolError, TypeError, ValueError) as exc:
+            raise EventStoreCorruptionError(
+                f"retained integrity policy cannot be reconstructed: {exc}"
+            ) from exc
+        previous_global = None
+        previous_by_mission: dict[str, object] = {}
+        for (event_digest,) in self._connection.execute(
+            """
+            SELECT event_digest
+            FROM integrity_pending_transitions
+            ORDER BY instance_sequence ASC
+            """
+        ).fetchall():
+            lineage = self._load_integrity_lineage_locked(event_digest)
+            if lineage is None:
+                raise EventStoreCorruptionError(
+                    "integrity transition index names no retained lineage"
+                )
+            event = self._event_for_integrity_digest_locked(event_digest)
+            previous_mission = previous_by_mission.get(event.mission_id)
+            try:
+                if not self._integrity_lineage_matches_authority_binding(
+                    pending=lineage.pending,
+                    checkpoint_candidate=lineage.checkpoint_candidate,
+                    authority_binding=authority_binding,
+                ):
+                    raise EventStoreCorruptionError(
+                        "retained integrity lineage differs from its enrolled "
+                        "authority binding"
+                    )
+                validate_pending_transition(
+                    event,
+                    lineage.pending,
+                    previous_global=previous_global,
+                    previous_mission=previous_mission,
+                    service_instance_id=_service_instance_id,
+                    environment_id=_environment_id,
+                    validation_policy=validation_policy,
+                )
+                if lineage.anchor_statement is not None:
+                    validate_anchor_statement(
+                        lineage.pending,
+                        lineage.anchor_statement,
+                        previous_mission=previous_mission,
+                    )
+                if lineage.checkpoint_candidate is not None:
+                    if lineage.anchor_statement is None:
+                        raise EventStoreCorruptionError(
+                            "checkpoint candidate omitted its anchor statement"
+                        )
+                    validate_checkpoint_candidate(
+                        event,
+                        lineage.pending,
+                        lineage.anchor_statement,
+                        lineage.checkpoint_candidate,
+                        previous_global=previous_global,
+                        previous_mission=previous_mission,
+                    )
+                if lineage.finalization is not None:
+                    validate_finalized_integrity_transition(
+                        lineage,
+                        event=event,
+                        previous_global=previous_global,
+                        previous_mission=previous_mission,
+                    )
+            except EventStoreCorruptionError:
+                raise
+            except (ProtocolError, TypeError, ValueError) as exc:
+                reason_code = getattr(
+                    exc,
+                    "reason_code",
+                    "invalid_retained_integrity_lineage",
+                )
+                raise EventStoreCorruptionError(
+                    "retained integrity lineage failed authenticated replay "
+                    f"({reason_code}): {exc}"
+                ) from exc
+            if lineage.finalization is not None:
+                previous_global = lineage
+                previous_by_mission[event.mission_id] = lineage
+
+    def enroll_modeled_integrity(
+        self,
+        *,
+        service_instance_id: str,
+        environment_id: str,
+        validation_policy: object,
+        authority_binding: object,
+    ) -> None:
+        """Irreversibly enroll one empty store in the modeled-integrity profile."""
+
+        try:
+            from ..integrity_v1 import IntegrityValidationPolicyV1
+            from .integrity_transition import (
+                ModeledIntegrityAuthorityBindingV1,
+            )
+
+            if type(validation_policy) is not IntegrityValidationPolicyV1:
+                raise EventStoreError(
+                    "modeled integrity enrollment requires an exact validation policy"
+                )
+            if (
+                type(authority_binding)
+                is not ModeledIntegrityAuthorityBindingV1
+            ):
+                raise EventStoreError(
+                    "modeled integrity enrollment requires an exact authority binding"
+                )
+            policy = IntegrityValidationPolicyV1.from_body(
+                validation_policy.to_body()
+            )
+            policy_wire = canonical_dumps(policy.to_body())
+            policy_id = content_id(
+                "integrity_validation_policy",
+                policy.to_body(),
+            )
+            authority_binding_wire = (
+                authority_binding.to_canonical_bytes()
+            )
+            retained_authority_binding = (
+                ModeledIntegrityAuthorityBindingV1.from_canonical_bytes(
+                    authority_binding_wire
+                )
+            )
+            authority_binding_id = retained_authority_binding.binding_id
+        except EventStoreError:
+            raise
+        except (AttributeError, ProtocolError, TypeError, ValueError) as exc:
+            raise EventStoreError(
+                f"invalid modeled integrity enrollment profile: {exc}"
+            ) from exc
+        if (
+            type(service_instance_id) is not str
+            or _INTEGRITY_IDENTITY_RE.fullmatch(service_instance_id) is None
+            or type(environment_id) is not str
+            or _INTEGRITY_IDENTITY_RE.fullmatch(environment_id) is None
+        ):
+            raise EventStoreError(
+                "modeled integrity scope requires canonical ASCII identities"
+            )
+        requested = (
+            _MODELED_INTEGRITY_STORE_PROFILE_V1,
+            service_instance_id,
+            environment_id,
+            policy_id,
+            policy_wire,
+            authority_binding_id,
+            authority_binding_wire,
+            retained_authority_binding,
+        )
+        requested_profile_bytes = (
+            self._modeled_integrity_profile_storage_bytes(
+                service_instance_id=service_instance_id,
+                environment_id=environment_id,
+                validation_policy_id=policy_id,
+                validation_policy_wire=policy_wire,
+                authority_binding_id=authority_binding_id,
+                authority_binding_wire=authority_binding_wire,
+            )
+        )
+        try:
+            self._connection.execute("BEGIN IMMEDIATE")
+            self._require_writer_transaction()
+            self._validate_integrity_state_locked()
+            retained = self._store_profile_locked()
+            if retained[:7] == requested[:7]:
+                self._require_integrity_enrollment_capacity_locked(
+                    additional_profile_bytes=0
+                )
+                self._connection.execute("COMMIT")
+                return
+            if retained[0] != _LEGACY_STORE_PROFILE_V1:
+                raise EventStoreError(
+                    "modeled integrity enrollment conflicts with the retained profile"
+                )
+            if any(
+                self._table_has_rows(table_name)
+                for table_name in (
+                    "events",
+                    "signed_checkpoints",
+                    "evidence_artifacts",
+                    "event_artifact_roles",
+                )
+            ):
+                raise EventStoreError(
+                    "nonempty legacy history cannot be promoted to pre-transition integrity"
+                )
+            self._require_integrity_enrollment_capacity_locked(
+                additional_profile_bytes=requested_profile_bytes
+            )
+            self._require_writer_transaction()
+            self._connection.execute(
+                """
+                UPDATE store_profile
+                SET
+                    profile = ?,
+                    service_instance_id = ?,
+                    environment_id = ?,
+                    validation_policy_id = ?,
+                    validation_policy_wire = ?,
+                    authority_binding_id = ?,
+                    authority_binding_wire = ?
+                WHERE singleton = 1
+                """,
+                (
+                    _MODELED_INTEGRITY_STORE_PROFILE_V1,
+                    service_instance_id,
+                    environment_id,
+                    policy_id,
+                    sqlite3.Binary(policy_wire),
+                    authority_binding_id,
+                    sqlite3.Binary(authority_binding_wire),
+                ),
+            )
+            if self._store_profile_locked()[:7] != requested[:7]:
+                raise EventStoreCorruptionError(
+                    "modeled integrity enrollment did not retain its exact profile"
+                )
+            self._require_integrity_enrollment_capacity_locked(
+                additional_profile_bytes=0
+            )
+            self._publish_owned_integrity_validation_cache_locked()
+            self._require_writer_transaction()
+            self._connection.execute("COMMIT")
+        except EventStoreError:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise
+        except sqlite3.IntegrityError as exc:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise EventStoreError(
+                f"SQLite rejected modeled integrity enrollment: {exc}"
+            ) from exc
+        except sqlite3.DatabaseError as exc:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise _sqlite_store_failure(
+                "modeled integrity enrollment failed",
+                exc,
+            ) from exc
 
     def diagnostics(self) -> StoreDiagnostics:
         """Return fixed diagnostics without exposing a writable SQL connection."""
 
         try:
-            journal = self._connection.execute("PRAGMA journal_mode").fetchone()
-            synchronous = self._connection.execute("PRAGMA synchronous").fetchone()
-            foreign_keys = self._connection.execute("PRAGMA foreign_keys").fetchone()
-            trusted_schema = self._connection.execute("PRAGMA trusted_schema").fetchone()
+            (
+                journal_value,
+                synchronous_value,
+                foreign_keys_value,
+                trusted_schema_value,
+                ignore_check_constraints_value,
+                read_uncommitted_value,
+                writable_schema_value,
+            ) = self._authenticated_connection_settings_locked()
             mode = stat.S_IMODE(os.lstat(self.path).st_mode)
         except sqlite3.DatabaseError as exc:
             raise _sqlite_store_failure(
@@ -1217,25 +2812,18 @@ class SQLiteEventStore:
             ) from exc
         except OSError as exc:
             raise EventStoreCorruptionError(f"could not read store diagnostics: {exc}") from exc
-        if journal is None or synchronous is None or foreign_keys is None or trusted_schema is None:
-            raise EventStoreCorruptionError("SQLite returned incomplete diagnostics")
-        journal_value = str(journal[0]).lower()
-        synchronous_value = int(synchronous[0])
-        if (
-            journal_value != self._journal_policy.journal_mode
-            or synchronous_value != self._journal_policy.synchronous_value
-            or journal_value == "wal"
-            or foreign_keys != (1,)
-            or trusted_schema != (0,)
-        ):
-            raise EventStoreCorruptionError("SQLite security settings differ from the admitted journal policy")
         return StoreDiagnostics(
             sqlite_version=sqlite3.sqlite_version,
             wal_reset_bug_fixed=(self._journal_policy.wal_reset_bug_fixed),
             journal_mode=journal_value,
             synchronous=synchronous_value,
-            foreign_keys=bool(foreign_keys[0]),
-            trusted_schema=bool(trusted_schema[0]),
+            foreign_keys=bool(foreign_keys_value),
+            trusted_schema=bool(trusted_schema_value),
+            ignore_check_constraints=bool(
+                ignore_check_constraints_value
+            ),
+            read_uncommitted=bool(read_uncommitted_value),
+            writable_schema=bool(writable_schema_value),
             database_mode=mode,
         )
 
@@ -1277,6 +2865,7 @@ class SQLiteEventStore:
     def _require_writer_transaction(self) -> None:
         if not self._connection.in_transaction:
             raise EventStoreError("SQLite writer transaction ended before the protected operation")
+        self._authenticated_connection_settings_locked()
 
     def _artifact_row_locked(
         self,
@@ -2108,6 +3697,16 @@ class SQLiteEventStore:
     def load(self, mission_id: str) -> tuple[EventV1, ...]:
         """Load and fully verify one mission-local event stream and lifecycle."""
 
+        if type(mission_id) is not str or _DIGEST_RE.fullmatch(mission_id) is None:
+            raise EventStoreError(
+                "mission_id must be a full lowercase sha256 digest"
+            )
+        self._validate_integrity_state_locked()
+        if self._unresolved_integrity_digest_locked() is not None:
+            raise PendingIntegrityTransitionError(
+                "generic mission replay is unavailable while an integrity "
+                "transition is pending"
+            )
         events = self._decode_rows(mission_id, self._rows(mission_id))
         if events:
             self._validate_retained_lifecycle(events)
@@ -2196,12 +3795,768 @@ class SQLiteEventStore:
             ),
         )
 
+    @staticmethod
+    def _snapshot_integrity_record(record: object, expected_type: type) -> object:
+        if type(record) is not expected_type:
+            raise EventStoreError(
+                f"integrity phase requires an exact {expected_type.__name__}"
+            )
+        try:
+            wire = record.to_canonical_bytes()
+            if (
+                type(wire) is not bytes
+                or not wire
+                or len(wire) > _MAX_INTEGRITY_RECORD_BYTES_V1
+            ):
+                raise EventStoreError(
+                    "integrity recovery record exceeds its canonical byte ceiling"
+                )
+            return expected_type.from_canonical_bytes(wire)
+        except EventStoreError:
+            raise
+        except (AttributeError, ProtocolError, TypeError, ValueError) as exc:
+            raise EventStoreError(
+                f"invalid {expected_type.__name__}: {exc}"
+            ) from exc
+
+    @staticmethod
+    def _integrity_lineage_matches_authority_binding(
+        *,
+        pending: object,
+        checkpoint_candidate: object | None,
+        authority_binding: object,
+    ) -> bool:
+        try:
+            decision_trust_store = pending.decision_trust_store
+            decision_key = decision_trust_store.keys.get(
+                authority_binding.decision_key_id
+            )
+            if (
+                decision_trust_store.snapshot_id
+                != authority_binding.trust_snapshot_id
+                or decision_trust_store.to_snapshot_body()
+                != authority_binding.trust_store.to_snapshot_body()
+                or pending.signed_decision.key_id
+                != authority_binding.decision_key_id
+                or decision_key is None
+                or decision_key.principal_id
+                != authority_binding.decision_principal_id
+            ):
+                return False
+            if checkpoint_candidate is None:
+                return True
+            checkpoint_trust_store = (
+                checkpoint_candidate.checkpoint_trust_store
+            )
+            checkpoint_key = checkpoint_trust_store.keys.get(
+                authority_binding.checkpoint_key_id
+            )
+            return (
+                checkpoint_trust_store.snapshot_id
+                == authority_binding.trust_snapshot_id
+                and checkpoint_trust_store.to_snapshot_body()
+                == authority_binding.trust_store.to_snapshot_body()
+                and checkpoint_candidate.signed_checkpoint.key_id
+                == authority_binding.checkpoint_key_id
+                and checkpoint_key is not None
+                and checkpoint_key.principal_id
+                == authority_binding.checkpoint_principal_id
+            )
+        except (AttributeError, TypeError, ValueError):
+            return False
+
+    @staticmethod
+    def _modeled_integrity_profile_storage_bytes(
+        *,
+        service_instance_id: str,
+        environment_id: str,
+        validation_policy_id: str,
+        validation_policy_wire: bytes,
+        authority_binding_id: str,
+        authority_binding_wire: bytes,
+    ) -> int:
+        text_values = (
+            _MODELED_INTEGRITY_STORE_PROFILE_V1,
+            service_instance_id,
+            environment_id,
+            validation_policy_id,
+            authority_binding_id,
+        )
+        return (
+            sum(len(value.encode("ascii")) for value in text_values)
+            + len(validation_policy_wire)
+            + len(authority_binding_wire)
+        )
+
+    def _logical_evidence_storage_used_locked(self) -> int:
+        integrity_row = self._connection.execute(
+            """
+            SELECT
+                (
+                    SELECT COALESCE(sum(byte_size), 0)
+                    FROM integrity_evidence_artifacts
+                )
+                + (
+                    SELECT COALESCE(sum(length(record)), 0)
+                    FROM integrity_pending_transitions
+                )
+                + (
+                    SELECT COALESCE(sum(length(record)), 0)
+                    FROM integrity_anchor_statements
+                )
+                + (
+                    SELECT COALESCE(sum(length(record)), 0)
+                    FROM integrity_checkpoint_candidates
+                )
+                + (
+                    SELECT COALESCE(sum(length(record)), 0)
+                    FROM integrity_finalizations
+                )
+                + (
+                    SELECT COALESCE(
+                        sum(
+                            CASE
+                                WHEN profile = ?
+                                THEN
+                                    length(profile)
+                                    + length(service_instance_id)
+                                    + length(environment_id)
+                                    + length(validation_policy_id)
+                                    + length(validation_policy_wire)
+                                    + length(authority_binding_id)
+                                    + length(authority_binding_wire)
+                                ELSE 0
+                            END
+                        ),
+                        0
+                    )
+                    FROM store_profile
+                )
+            """,
+            (_MODELED_INTEGRITY_STORE_PROFILE_V1,),
+        ).fetchone()
+        if integrity_row is None or type(integrity_row[0]) is not int:
+            raise EventStoreCorruptionError(
+                "SQLite omitted the integrity evidence storage total"
+            )
+        return self._vault_used_bytes_locked() + integrity_row[0]
+
+    def _require_integrity_enrollment_capacity_locked(
+        self,
+        *,
+        additional_profile_bytes: int,
+    ) -> None:
+        if (
+            type(additional_profile_bytes) is not int
+            or additional_profile_bytes < 0
+        ):
+            raise EventStoreError(
+                "integrity enrollment capacity delta is invalid"
+            )
+        if (
+            self._logical_evidence_storage_used_locked()
+            + additional_profile_bytes
+            + _INTEGRITY_FINALITY_CAPACITY_RESERVE_BYTES_V1
+            > self._max_vault_bytes
+        ):
+            raise EvidenceVaultCapacityError(
+                "modeled integrity enrollment lacks exact profile and "
+                "worst-case finality capacity"
+            )
+
+    def _reserve_integrity_finality_capacity_locked(self) -> None:
+        if (
+            self._logical_evidence_storage_used_locked()
+            + _INTEGRITY_FINALITY_CAPACITY_RESERVE_BYTES_V1
+            > self._max_vault_bytes
+        ):
+            raise EvidenceVaultCapacityError(
+                "integrity transition lacks worst-case finality evidence capacity"
+            )
+
+    def _retain_integrity_evidence_locked(
+        self,
+        *,
+        event_digest: str,
+        phase: str,
+        provider_evidence: tuple[object, ...],
+    ) -> None:
+        if phase not in _INTEGRITY_PHASES_V1:
+            raise EventStoreError("integrity evidence has an unsupported phase")
+        if type(provider_evidence) is not tuple or len(provider_evidence) > 256:
+            raise EventStoreError(
+                "integrity provider evidence must be a bounded tuple"
+            )
+        existing_rows = self._connection.execute(
+            """
+            SELECT DISTINCT evidence_id
+            FROM integrity_transition_evidence
+            WHERE event_digest = ?
+            """,
+            (event_digest,),
+        ).fetchall()
+        existing_ids = {row[0] for row in existing_rows}
+        requested: list[tuple[str, str, str, bytes]] = []
+        for blob in provider_evidence:
+            try:
+                evidence_kind = blob.evidence_kind
+                source_id = blob.source_id
+                evidence_id = blob.evidence_id
+                content = blob.content
+            except AttributeError as exc:
+                raise EventStoreError(
+                    "integrity provider evidence is malformed"
+                ) from exc
+            if (
+                type(evidence_kind) is not str
+                or evidence_kind
+                not in {
+                    "trusted_time",
+                    "revocation_metadata",
+                    "head_anchor_receipt",
+                    "external_floor",
+                }
+                or type(source_id) is not str
+                or not source_id
+                or len(source_id) > 256
+                or type(evidence_id) is not str
+                or _DIGEST_RE.fullmatch(evidence_id) is None
+                or type(content) is not bytes
+                or not content
+                or len(content) > _MAX_INTEGRITY_EVIDENCE_BYTES_V1
+                or evidence_id
+                != "sha256:" + hashlib.sha256(content).hexdigest()
+            ):
+                raise EventStoreError(
+                    "integrity provider evidence violates its typed BLOB contract"
+                )
+            requested.append(
+                (evidence_kind, source_id, evidence_id, bytes(content))
+            )
+        canonical = sorted(
+            requested,
+            key=lambda value: (value[0], value[1], value[2]),
+        )
+        if requested != canonical or len(
+            {(kind, source, evidence_id) for kind, source, evidence_id, _ in requested}
+        ) != len(requested):
+            raise EventStoreError(
+                "integrity provider evidence must be canonical and unique"
+            )
+        new_by_id = {
+            evidence_id: content
+            for _, _, evidence_id, content in requested
+            if evidence_id not in existing_ids
+        }
+        globally_retained_ids = {
+            evidence_id
+            for evidence_id in new_by_id
+            if self._connection.execute(
+                """
+                SELECT 1
+                FROM integrity_evidence_artifacts
+                WHERE evidence_id = ?
+                """,
+                (evidence_id,),
+            ).fetchone()
+            == (1,)
+        }
+        new_global_bytes = sum(
+            len(content)
+            for evidence_id, content in new_by_id.items()
+            if evidence_id not in globally_retained_ids
+        )
+        if (
+            self._logical_evidence_storage_used_locked()
+            + new_global_bytes
+            > self._max_vault_bytes
+        ):
+            raise EvidenceVaultCapacityError(
+                "integrity finality evidence exceeds logical database capacity"
+            )
+        retained_total_row = self._connection.execute(
+            """
+            SELECT COALESCE(sum(artifact.byte_size), 0)
+            FROM integrity_evidence_artifacts AS artifact
+            WHERE artifact.evidence_id IN (
+                SELECT DISTINCT mapping.evidence_id
+                FROM integrity_transition_evidence AS mapping
+                WHERE mapping.event_digest = ?
+            )
+            """,
+            (event_digest,),
+        ).fetchone()
+        retained_total = int(retained_total_row[0])
+        if retained_total + sum(len(value) for value in new_by_id.values()) > (
+            _MAX_INTEGRITY_TRANSITION_EVIDENCE_BYTES_V1
+        ):
+            raise StoreCapacityError(
+                "integrity transition evidence exceeds its aggregate byte ceiling"
+            )
+        self._require_writer_transaction()
+        for evidence_id, content in new_by_id.items():
+            self._connection.execute(
+                """
+                INSERT INTO integrity_evidence_artifacts (
+                    evidence_id,
+                    byte_size,
+                    content
+                ) VALUES (?, ?, ?)
+                ON CONFLICT(evidence_id) DO NOTHING
+                """,
+                (
+                    evidence_id,
+                    len(content),
+                    sqlite3.Binary(content),
+                ),
+            )
+            retained = self._connection.execute(
+                """
+                SELECT byte_size, content
+                FROM integrity_evidence_artifacts
+                WHERE evidence_id = ?
+                """,
+                (evidence_id,),
+            ).fetchone()
+            if retained != (len(content), content):
+                raise IntegrityTransitionConflictError(
+                    "provider evidence identity names different retained bytes"
+                )
+        for slot, (kind, source, evidence_id, _content) in enumerate(requested):
+            self._connection.execute(
+                """
+                INSERT INTO integrity_transition_evidence (
+                    event_digest,
+                    phase,
+                    slot,
+                    evidence_kind,
+                    source_id,
+                    evidence_id
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(event_digest, phase, slot) DO NOTHING
+                """,
+                (
+                    event_digest,
+                    phase,
+                    slot,
+                    kind,
+                    source,
+                    evidence_id,
+                ),
+            )
+            retained = self._connection.execute(
+                """
+                SELECT evidence_kind, source_id, evidence_id
+                FROM integrity_transition_evidence
+                WHERE event_digest = ? AND phase = ? AND slot = ?
+                """,
+                (event_digest, phase, slot),
+            ).fetchone()
+            if retained != (kind, source, evidence_id):
+                raise IntegrityTransitionConflictError(
+                    "integrity evidence slot was reused with different material"
+                )
+        count = self._connection.execute(
+            """
+            SELECT count(*)
+            FROM integrity_transition_evidence
+            WHERE event_digest = ? AND phase = ?
+            """,
+            (event_digest, phase),
+        ).fetchone()
+        if count != (len(requested),):
+            raise IntegrityTransitionConflictError(
+                "integrity evidence phase has additional retained material"
+            )
+
+    def _verify_integrity_evidence_locked(
+        self,
+        *,
+        event_digest: str,
+        phase: str,
+        provider_evidence: tuple[object, ...],
+    ) -> None:
+        rows = self._connection.execute(
+            """
+            SELECT
+                mapping.evidence_kind,
+                mapping.source_id,
+                mapping.evidence_id,
+                artifact.byte_size,
+                artifact.content
+            FROM integrity_transition_evidence AS mapping
+            JOIN integrity_evidence_artifacts AS artifact
+              ON artifact.evidence_id = mapping.evidence_id
+            WHERE mapping.event_digest = ? AND mapping.phase = ?
+            ORDER BY mapping.slot ASC
+            """,
+            (event_digest, phase),
+        ).fetchall()
+        expected = []
+        for blob in provider_evidence:
+            expected.append(
+                (
+                    blob.evidence_kind,
+                    blob.source_id,
+                    blob.evidence_id,
+                    len(blob.content),
+                    blob.content,
+                )
+            )
+        if rows != expected:
+            raise EventStoreCorruptionError(
+                f"retained {phase} provider evidence differs from its canonical record"
+            )
+
+    def _load_integrity_lineage_locked(
+        self,
+        event_digest: str,
+    ) -> object | None:
+        from .integrity_transition import (
+            AnchorStatementRecordV1,
+            CheckpointCandidateRecordV1,
+            FinalizedIntegrityTransitionV1,
+            IntegrityLineageV1,
+            PendingIntegrityTransitionV1,
+        )
+
+        pending_row = self._connection.execute(
+            """
+            SELECT
+                mission_id,
+                event_seq,
+                instance_sequence,
+                record_id,
+                record
+            FROM integrity_pending_transitions
+            WHERE event_digest = ?
+            """,
+            (event_digest,),
+        ).fetchone()
+        if pending_row is None:
+            return None
+        try:
+            pending = PendingIntegrityTransitionV1.from_canonical_bytes(
+                pending_row[4]
+            )
+        except (ProtocolError, TypeError, ValueError) as exc:
+            raise EventStoreCorruptionError(
+                f"retained pending integrity record is invalid: {exc}"
+            ) from exc
+        if (
+            pending.event_digest != event_digest
+            or pending.mission_id != pending_row[0]
+            or pending.event_seq != pending_row[1]
+            or pending.instance_sequence != pending_row[2]
+            or pending.record_id != pending_row[3]
+            or pending.to_canonical_bytes() != pending_row[4]
+        ):
+            raise EventStoreCorruptionError(
+                "pending integrity row differs from its canonical record"
+            )
+        event_row = self._connection.execute(
+            """
+            SELECT mission_id, seq
+            FROM events
+            WHERE digest = ?
+            """,
+            (event_digest,),
+        ).fetchone()
+        if event_row != (pending.mission_id, pending.event_seq):
+            raise EventStoreCorruptionError(
+                "pending integrity record differs from its retained event"
+            )
+        self._verify_integrity_evidence_locked(
+            event_digest=event_digest,
+            phase="pending",
+            provider_evidence=pending.provider_evidence,
+        )
+
+        anchor_row = self._connection.execute(
+            """
+            SELECT record_id, anchor_statement_id, record
+            FROM integrity_anchor_statements
+            WHERE event_digest = ?
+            """,
+            (event_digest,),
+        ).fetchone()
+        anchor = None
+        if anchor_row is not None:
+            try:
+                anchor = AnchorStatementRecordV1.from_canonical_bytes(
+                    anchor_row[2]
+                )
+            except (ProtocolError, TypeError, ValueError) as exc:
+                raise EventStoreCorruptionError(
+                    f"retained anchor statement record is invalid: {exc}"
+                ) from exc
+            if (
+                anchor.event_digest != event_digest
+                or anchor.record_id != anchor_row[0]
+                or anchor.anchor_statement_id != anchor_row[1]
+                or anchor.to_canonical_bytes() != anchor_row[2]
+            ):
+                raise EventStoreCorruptionError(
+                    "anchor statement row differs from its canonical record"
+                )
+            self._verify_integrity_evidence_locked(
+                event_digest=event_digest,
+                phase="anchor_statement",
+                provider_evidence=anchor.provider_evidence,
+            )
+
+        candidate_row = self._connection.execute(
+            """
+            SELECT
+                record_id,
+                checkpoint_id,
+                checkpoint_attestation_id,
+                record
+            FROM integrity_checkpoint_candidates
+            WHERE event_digest = ?
+            """,
+            (event_digest,),
+        ).fetchone()
+        candidate = None
+        if candidate_row is not None:
+            try:
+                candidate = (
+                    CheckpointCandidateRecordV1.from_canonical_bytes(
+                        candidate_row[3]
+                    )
+                )
+            except (ProtocolError, TypeError, ValueError) as exc:
+                raise EventStoreCorruptionError(
+                    f"retained checkpoint candidate is invalid: {exc}"
+                ) from exc
+            checkpoint = candidate.checkpoint
+            from ..integrity_v1 import signed_head_checkpoint_attestation_id
+
+            if (
+                candidate.event_digest != event_digest
+                or candidate.record_id != candidate_row[0]
+                or checkpoint.checkpoint_id != candidate_row[1]
+                or signed_head_checkpoint_attestation_id(
+                    candidate.signed_checkpoint
+                )
+                != candidate_row[2]
+                or candidate.to_canonical_bytes() != candidate_row[3]
+            ):
+                raise EventStoreCorruptionError(
+                    "checkpoint candidate row differs from its canonical record"
+                )
+            self._verify_integrity_evidence_locked(
+                event_digest=event_digest,
+                phase="checkpoint_candidate",
+                provider_evidence=candidate.provider_evidence,
+            )
+
+        finalization_row = self._connection.execute(
+            """
+            SELECT record_id, record
+            FROM integrity_finalizations
+            WHERE event_digest = ?
+            """,
+            (event_digest,),
+        ).fetchone()
+        finalization = None
+        if finalization_row is not None:
+            try:
+                finalization = (
+                    FinalizedIntegrityTransitionV1.from_canonical_bytes(
+                        finalization_row[1]
+                    )
+                )
+            except (ProtocolError, TypeError, ValueError) as exc:
+                raise EventStoreCorruptionError(
+                    f"retained integrity finalization is invalid: {exc}"
+                ) from exc
+            if (
+                finalization.event_digest != event_digest
+                or finalization.record_id != finalization_row[0]
+                or finalization.to_canonical_bytes() != finalization_row[1]
+            ):
+                raise EventStoreCorruptionError(
+                    "integrity finalization row differs from its canonical record"
+                )
+            self._verify_integrity_evidence_locked(
+                event_digest=event_digest,
+                phase="finalization",
+                provider_evidence=finalization.provider_evidence,
+            )
+        try:
+            return IntegrityLineageV1(
+                pending=pending,
+                anchor_statement=anchor,
+                checkpoint_candidate=candidate,
+                finalization=finalization,
+            )
+        except (ProtocolError, TypeError, ValueError) as exc:
+            raise EventStoreCorruptionError(
+                f"retained integrity lineage is invalid: {exc}"
+            ) from exc
+
+    def _previous_integrity_lineages_locked(
+        self,
+        mission_id: str,
+    ) -> tuple[object | None, object | None]:
+        global_row = self._connection.execute(
+            """
+            SELECT pending.event_digest
+            FROM integrity_pending_transitions AS pending
+            JOIN integrity_finalizations AS finalized
+              ON finalized.event_digest = pending.event_digest
+            ORDER BY pending.instance_sequence DESC
+            LIMIT 1
+            """
+        ).fetchone()
+        mission_row = self._connection.execute(
+            """
+            SELECT pending.event_digest
+            FROM integrity_pending_transitions AS pending
+            JOIN integrity_finalizations AS finalized
+              ON finalized.event_digest = pending.event_digest
+            WHERE pending.mission_id = ?
+            ORDER BY pending.event_seq DESC
+            LIMIT 1
+            """,
+            (mission_id,),
+        ).fetchone()
+        previous_global = (
+            None
+            if global_row is None
+            else self._load_integrity_lineage_locked(global_row[0])
+        )
+        previous_mission = (
+            None
+            if mission_row is None
+            else self._load_integrity_lineage_locked(mission_row[0])
+        )
+        if (
+            previous_global is not None
+            and previous_global.finalization is None
+        ) or (
+            previous_mission is not None
+            and previous_mission.finalization is None
+        ):
+            raise EventStoreCorruptionError(
+                "finalized integrity predecessor omitted its finalization record"
+            )
+        return previous_global, previous_mission
+
+    def _insert_integrity_pending_locked(
+        self,
+        event: EventV1,
+        pending_record: object,
+    ) -> object:
+        from .integrity_transition import (
+            PendingIntegrityTransitionV1,
+            validate_pending_transition,
+        )
+
+        pending = self._snapshot_integrity_record(
+            pending_record,
+            PendingIntegrityTransitionV1,
+        )
+        if (
+            pending.event_digest != event.event_digest
+            or pending.mission_id != event.mission_id
+            or pending.event_seq != event.seq
+        ):
+            raise EventStoreError(
+                "pending integrity dossier does not bind the proposed event"
+            )
+        (
+            profile,
+            service_instance_id,
+            environment_id,
+            policy_id,
+            policy_wire,
+            _authority_binding_id,
+            _authority_binding_wire,
+            authority_binding,
+        ) = self._store_profile_locked()
+        decision = pending.decision
+        retained_policy_wire = canonical_dumps(
+            pending.validation_policy.to_body()
+        )
+        if (
+            profile != _MODELED_INTEGRITY_STORE_PROFILE_V1
+            or decision.service_instance_id != service_instance_id
+            or decision.environment_id != environment_id
+            or retained_policy_wire != policy_wire
+            or content_id(
+                "integrity_validation_policy",
+                pending.validation_policy.to_body(),
+            )
+            != policy_id
+            or not self._integrity_lineage_matches_authority_binding(
+                pending=pending,
+                checkpoint_candidate=None,
+                authority_binding=authority_binding,
+            )
+        ):
+            raise EventStoreError(
+                "pending integrity dossier differs from the enrolled store profile"
+            )
+        previous_global, previous_mission = (
+            self._previous_integrity_lineages_locked(event.mission_id)
+        )
+        try:
+            validate_pending_transition(
+                event,
+                pending,
+                previous_global=previous_global,
+                previous_mission=previous_mission,
+                service_instance_id=service_instance_id,
+                environment_id=environment_id,
+                validation_policy=pending.validation_policy,
+            )
+        except (ProtocolError, TypeError, ValueError) as exc:
+            reason_code = getattr(
+                exc,
+                "reason_code",
+                "invalid_pending_integrity_transition",
+            )
+            raise EventStoreError(
+                f"pending integrity validation failed ({reason_code}): {exc}"
+            ) from exc
+        self._reserve_integrity_finality_capacity_locked()
+        self._require_writer_transaction()
+        self._connection.execute(
+            """
+            INSERT INTO integrity_pending_transitions (
+                event_digest,
+                mission_id,
+                event_seq,
+                instance_sequence,
+                record_id,
+                record
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                pending.event_digest,
+                pending.mission_id,
+                pending.event_seq,
+                pending.instance_sequence,
+                pending.record_id,
+                sqlite3.Binary(pending.to_canonical_bytes()),
+            ),
+        )
+        self._retain_integrity_evidence_locked(
+            event_digest=pending.event_digest,
+            phase="pending",
+            provider_evidence=pending.provider_evidence,
+        )
+        return pending
+
     def _append_verified_event(
         self,
         event: EventV1,
         *,
         expected_head: str,
         evidence_store: FileEvidenceStore | None = None,
+        integrity_pending: object | None = None,
     ) -> EventV1:
         self._validate_append_request(event, expected_head)
         is_protected = event.kind in PROTECTED_EVIDENCE_EVENT_KINDS_V1
@@ -2211,6 +4566,22 @@ class SQLiteEventStore:
         try:
             self._connection.execute("BEGIN IMMEDIATE")
             self._require_writer_transaction()
+            self._validate_integrity_state_locked()
+            profile = self._store_profile_locked()[0]
+            unresolved = self._unresolved_integrity_digest_locked()
+            if unresolved is not None and unresolved != event.event_digest:
+                raise PendingIntegrityTransitionError(
+                    "an instance-global integrity transition is pending"
+                )
+            if profile == _MODELED_INTEGRITY_STORE_PROFILE_V1:
+                if integrity_pending is None:
+                    raise IntegrityFinalityRequiredError(
+                        "modeled integrity profile requires an atomic pending dossier"
+                    )
+            elif integrity_pending is not None:
+                raise EventStoreError(
+                    "typed integrity pending state requires modeled profile enrollment"
+                )
             events = self._prepare_append_locked(
                 event,
                 expected_head=expected_head,
@@ -2263,6 +4634,12 @@ class SQLiteEventStore:
                     )
                 except EvidenceVaultError as exc:
                     raise EventStoreError(f"protected evidence retention failed: {exc}") from exc
+            retained_pending = None
+            if integrity_pending is not None:
+                retained_pending = self._insert_integrity_pending_locked(
+                    event,
+                    integrity_pending,
+                )
             self._insert_event_locked(event)
             if trusted_staging is not None:
                 self._verify_event_manifest_locked(event)
@@ -2284,6 +4661,28 @@ class SQLiteEventStore:
                 ).fetchone()
                 if orphan is not None:
                     raise EventStoreCorruptionError("protected append would retain an orphan artifact")
+            retained_event = self._event_for_integrity_digest_locked(
+                event.event_digest
+            )
+            if retained_event != event:
+                raise EventStoreCorruptionError(
+                    "retained event did not replay exactly after append"
+                )
+            if retained_pending is not None:
+                lineage = self._load_integrity_lineage_locked(
+                    event.event_digest
+                )
+                if (
+                    lineage is None
+                    or lineage.pending != retained_pending
+                    or lineage.anchor_statement is not None
+                    or lineage.checkpoint_candidate is not None
+                    or lineage.finalization is not None
+                ):
+                    raise EventStoreCorruptionError(
+                        "retained pending integrity extension did not replay exactly"
+                    )
+            self._publish_owned_integrity_validation_cache_locked()
             self._require_writer_transaction()
             self._connection.execute("COMMIT")
             return event
@@ -2360,6 +4759,663 @@ class SQLiteEventStore:
             evidence_store=trusted_staging,
         )
 
+    def append_pending_integrity_event(
+        self,
+        event: EventV1,
+        *,
+        expected_head: str,
+        pending: object,
+        evidence_store: FileEvidenceStore | None = None,
+    ) -> EventV1:
+        """Atomically retain one event, its claimed BLOBs, and its pending dossier."""
+
+        self._validate_append_request(event, expected_head)
+        is_protected = event.kind in PROTECTED_EVIDENCE_EVENT_KINDS_V1
+        if is_protected:
+            if type(evidence_store) is not FileEvidenceStore:
+                raise EventStoreError(
+                    "protected integrity append requires an exact FileEvidenceStore"
+                )
+            trusted_staging = self._trusted_staging_store(evidence_store)
+        else:
+            if evidence_store is not None:
+                raise EventStoreError(
+                    "ordinary integrity append cannot receive an evidence store"
+                )
+            trusted_staging = None
+        try:
+            return self._append_verified_event(
+                event,
+                expected_head=expected_head,
+                evidence_store=trusted_staging,
+                integrity_pending=pending,
+            )
+        except StaleHeadError as exc:
+            from .integrity_transition import PendingIntegrityTransitionV1
+
+            requested = self._snapshot_integrity_record(
+                pending,
+                PendingIntegrityTransitionV1,
+            )
+            lineage = self.load_integrity_lineage(event.event_digest)
+            retained = self.load_integrity_event(
+                event.event_digest
+            )
+            if (
+                expected_head == event.prev_digest
+                and retained == event
+                and lineage is not None
+                and lineage.pending == requested
+            ):
+                return retained
+            if retained == event and lineage is not None:
+                raise IntegrityTransitionConflictError(
+                    "retained event has a different pending integrity dossier"
+                ) from exc
+            raise
+
+    def load_integrity_event(
+        self,
+        event_digest: str,
+    ) -> EventV1 | None:
+        """Load one exact modeled-integrity event without exposing mission replay."""
+
+        if type(event_digest) is not str or _DIGEST_RE.fullmatch(event_digest) is None:
+            raise EventStoreError(
+                "event_digest must be a full lowercase sha256 digest"
+            )
+        self._validate_integrity_state_locked()
+        if (
+            self._store_profile_locked()[0]
+            != _MODELED_INTEGRITY_STORE_PROFILE_V1
+        ):
+            raise IntegrityFinalityRequiredError(
+                "exact integrity event reads require modeled profile enrollment"
+            )
+        retained = self._connection.execute(
+            """
+            SELECT 1
+            FROM integrity_pending_transitions
+            WHERE event_digest = ?
+            """,
+            (event_digest,),
+        ).fetchone()
+        if retained is None:
+            return None
+        return self._event_for_integrity_digest_locked(event_digest)
+
+    def load_latest_finalized_integrity_lineages(
+        self,
+        mission_id: str,
+    ) -> tuple[object | None, object | None]:
+        """Return authenticated latest global and mission-local finality."""
+
+        if type(mission_id) is not str or _DIGEST_RE.fullmatch(mission_id) is None:
+            raise EventStoreError(
+                "mission_id must be a full lowercase sha256 digest"
+            )
+        self._validate_integrity_state_locked()
+        if (
+            self._store_profile_locked()[0]
+            != _MODELED_INTEGRITY_STORE_PROFILE_V1
+        ):
+            raise IntegrityFinalityRequiredError(
+                "integrity lineage reads require modeled profile enrollment"
+            )
+        return self._previous_integrity_lineages_locked(mission_id)
+
+    def load_integrity_predecessor_lineages(
+        self,
+        event_digest: str,
+    ) -> tuple[object | None, object | None]:
+        """Return exact finalized global and mission predecessors of one event."""
+
+        if type(event_digest) is not str or _DIGEST_RE.fullmatch(event_digest) is None:
+            raise EventStoreError(
+                "event_digest must be a full lowercase sha256 digest"
+            )
+        self._validate_integrity_state_locked()
+        if (
+            self._store_profile_locked()[0]
+            != _MODELED_INTEGRITY_STORE_PROFILE_V1
+        ):
+            raise IntegrityFinalityRequiredError(
+                "integrity predecessor reads require modeled profile enrollment"
+            )
+        retained = self._connection.execute(
+            """
+            SELECT mission_id, event_seq, instance_sequence
+            FROM integrity_pending_transitions
+            WHERE event_digest = ?
+            """,
+            (event_digest,),
+        ).fetchone()
+        if retained is None:
+            raise EventStoreError(
+                "integrity predecessor read requires a retained event digest"
+            )
+        mission_id, event_seq, instance_sequence = retained
+        if (
+            type(mission_id) is not str
+            or _DIGEST_RE.fullmatch(mission_id) is None
+            or type(event_seq) is not int
+            or event_seq < 0
+            or type(instance_sequence) is not int
+            or instance_sequence < 0
+        ):
+            raise EventStoreCorruptionError(
+                "integrity predecessor index is malformed"
+            )
+        global_row = self._connection.execute(
+            """
+            SELECT pending.event_digest
+            FROM integrity_pending_transitions AS pending
+            JOIN integrity_finalizations AS finalized
+              ON finalized.event_digest = pending.event_digest
+            WHERE pending.instance_sequence = ?
+            """,
+            (instance_sequence - 1,),
+        ).fetchone()
+        mission_row = self._connection.execute(
+            """
+            SELECT pending.event_digest
+            FROM integrity_pending_transitions AS pending
+            JOIN integrity_finalizations AS finalized
+              ON finalized.event_digest = pending.event_digest
+            WHERE
+                pending.mission_id = ?
+                AND pending.event_seq = ?
+            """,
+            (mission_id, event_seq - 1),
+        ).fetchone()
+        if (
+            (instance_sequence == 0) != (global_row is None)
+            or (event_seq == 0) != (mission_row is None)
+        ):
+            raise EventStoreCorruptionError(
+                "integrity event omitted an exact finalized predecessor"
+            )
+        previous_global = (
+            None
+            if global_row is None
+            else self._load_integrity_lineage_locked(global_row[0])
+        )
+        previous_mission = (
+            None
+            if mission_row is None
+            else self._load_integrity_lineage_locked(mission_row[0])
+        )
+        if (
+            previous_global is not None
+            and previous_global.finalization is None
+        ) or (
+            previous_mission is not None
+            and previous_mission.finalization is None
+        ):
+            raise EventStoreCorruptionError(
+                "integrity predecessor omitted its finalization"
+            )
+        return previous_global, previous_mission
+
+    def load_integrity_lineage(self, event_digest: str) -> object | None:
+        """Load and reconstruct one exact append-only integrity lineage."""
+
+        if type(event_digest) is not str or _DIGEST_RE.fullmatch(event_digest) is None:
+            raise EventStoreError(
+                "event_digest must be a full lowercase sha256 digest"
+            )
+        self._validate_integrity_state_locked()
+        return self._load_integrity_lineage_locked(event_digest)
+
+    def load_unresolved_integrity_transition(self) -> object | None:
+        """Return the singleton unresolved lineage, if present."""
+
+        self._validate_integrity_state_locked()
+        event_digest = self._unresolved_integrity_digest_locked()
+        if event_digest is None:
+            return None
+        lineage = self._load_integrity_lineage_locked(event_digest)
+        if lineage is None or lineage.finalization is not None:
+            raise EventStoreCorruptionError(
+                "unresolved integrity transition cannot be reconstructed"
+            )
+        return lineage
+
+    def load_integrity_anchor_statement(
+        self,
+        event_digest: str,
+    ) -> object | None:
+        lineage = self.load_integrity_lineage(event_digest)
+        return None if lineage is None else lineage.anchor_statement
+
+    def load_integrity_checkpoint_candidate(
+        self,
+        event_digest: str,
+    ) -> object | None:
+        lineage = self.load_integrity_lineage(event_digest)
+        return None if lineage is None else lineage.checkpoint_candidate
+
+    def load_integrity_finalization(
+        self,
+        event_digest: str,
+    ) -> object | None:
+        lineage = self.load_integrity_lineage(event_digest)
+        return None if lineage is None else lineage.finalization
+
+    def _event_for_integrity_digest_locked(
+        self,
+        event_digest: str,
+    ) -> EventV1:
+        row = self._connection.execute(
+            """
+            SELECT canonical
+            FROM events
+            WHERE digest = ?
+            """,
+            (event_digest,),
+        ).fetchone()
+        if row is None or type(row[0]) is not bytes:
+            raise EventStoreCorruptionError(
+                "integrity transition does not reference one retained event"
+            )
+        try:
+            event = EventV1.from_canonical_bytes(row[0])
+        except (ProtocolError, TypeError, ValueError) as exc:
+            raise EventStoreCorruptionError(
+                f"integrity event bytes are invalid: {exc}"
+            ) from exc
+        if (
+            event.event_digest != event_digest
+            or event.to_canonical_bytes() != row[0]
+        ):
+            raise EventStoreCorruptionError(
+                "integrity event identity differs from its canonical bytes"
+            )
+        return event
+
+    def retain_integrity_anchor_statement(
+        self,
+        record: object,
+    ) -> object:
+        """Persist the exact pre-receipt statement before its external registration."""
+
+        from .integrity_transition import (
+            AnchorStatementRecordV1,
+            validate_anchor_statement,
+        )
+
+        anchor = self._snapshot_integrity_record(
+            record,
+            AnchorStatementRecordV1,
+        )
+        try:
+            self._connection.execute("BEGIN IMMEDIATE")
+            self._require_writer_transaction()
+            self._validate_integrity_state_locked()
+            lineage = self._load_integrity_lineage_locked(
+                anchor.event_digest
+            )
+            if lineage is None:
+                raise EventStoreCorruptionError(
+                    "anchor statement omitted its pending transition"
+                )
+            if lineage.anchor_statement is not None:
+                if lineage.anchor_statement != anchor:
+                    raise IntegrityTransitionConflictError(
+                        "anchor statement identity was reused with different bytes"
+                    )
+                self._connection.execute("COMMIT")
+                return lineage.anchor_statement
+            unresolved = self._unresolved_integrity_digest_locked()
+            if unresolved != anchor.event_digest:
+                raise PendingIntegrityTransitionError(
+                    "anchor statement must extend the singleton pending transition"
+                )
+            _previous_global, previous_mission = (
+                self._previous_integrity_lineages_locked(
+                    lineage.pending.mission_id
+                )
+            )
+            try:
+                validate_anchor_statement(
+                    lineage.pending,
+                    anchor,
+                    previous_mission=previous_mission,
+                )
+            except (ProtocolError, TypeError, ValueError) as exc:
+                reason_code = getattr(
+                    exc,
+                    "reason_code",
+                    "invalid_anchor_statement",
+                )
+                raise EventStoreError(
+                    f"anchor statement validation failed ({reason_code}): {exc}"
+                ) from exc
+            self._require_writer_transaction()
+            self._connection.execute(
+                """
+                INSERT INTO integrity_anchor_statements (
+                    event_digest,
+                    record_id,
+                    anchor_statement_id,
+                    record
+                ) VALUES (?, ?, ?, ?)
+                """,
+                (
+                    anchor.event_digest,
+                    anchor.record_id,
+                    anchor.anchor_statement_id,
+                    sqlite3.Binary(anchor.to_canonical_bytes()),
+                ),
+            )
+            self._retain_integrity_evidence_locked(
+                event_digest=anchor.event_digest,
+                phase="anchor_statement",
+                provider_evidence=anchor.provider_evidence,
+            )
+            retained = self._load_integrity_lineage_locked(
+                anchor.event_digest
+            )
+            if retained is None or retained.anchor_statement != anchor:
+                raise EventStoreCorruptionError(
+                    "retained anchor statement did not replay exactly"
+                )
+            self._publish_owned_integrity_validation_cache_locked()
+            self._require_writer_transaction()
+            self._connection.execute("COMMIT")
+            return retained.anchor_statement
+        except (
+            EventStoreError,
+            PendingIntegrityTransitionError,
+            IntegrityTransitionConflictError,
+        ):
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise
+        except sqlite3.IntegrityError as exc:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise IntegrityTransitionConflictError(
+                f"SQLite rejected anchor statement retention: {exc}"
+            ) from exc
+        except sqlite3.DatabaseError as exc:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise _sqlite_store_failure(
+                "anchor statement retention failed",
+                exc,
+            ) from exc
+
+    def retain_integrity_checkpoint_candidate(
+        self,
+        record: object,
+    ) -> object:
+        """Persist one exact signed checkpoint before external publication."""
+
+        from ..integrity_v1 import signed_head_checkpoint_attestation_id
+        from .integrity_transition import (
+            CheckpointCandidateRecordV1,
+            validate_checkpoint_candidate,
+        )
+
+        candidate = self._snapshot_integrity_record(
+            record,
+            CheckpointCandidateRecordV1,
+        )
+        try:
+            self._connection.execute("BEGIN IMMEDIATE")
+            self._require_writer_transaction()
+            self._validate_integrity_state_locked()
+            lineage = self._load_integrity_lineage_locked(
+                candidate.event_digest
+            )
+            if lineage is None or lineage.anchor_statement is None:
+                raise EventStoreError(
+                    "checkpoint candidate requires its retained anchor statement"
+                )
+            if lineage.checkpoint_candidate is not None:
+                if lineage.checkpoint_candidate != candidate:
+                    raise IntegrityTransitionConflictError(
+                        "checkpoint candidate identity was reused with different bytes"
+                    )
+                self._connection.execute("COMMIT")
+                return lineage.checkpoint_candidate
+            unresolved = self._unresolved_integrity_digest_locked()
+            if unresolved != candidate.event_digest:
+                raise PendingIntegrityTransitionError(
+                    "checkpoint candidate must extend the singleton pending transition"
+                )
+            event = self._event_for_integrity_digest_locked(
+                candidate.event_digest
+            )
+            authority_binding = self._store_profile_locked()[-1]
+            if not self._integrity_lineage_matches_authority_binding(
+                pending=lineage.pending,
+                checkpoint_candidate=candidate,
+                authority_binding=authority_binding,
+            ):
+                raise EventStoreError(
+                    "checkpoint candidate differs from the enrolled "
+                    "authority binding"
+                )
+            previous_global, previous_mission = (
+                self._previous_integrity_lineages_locked(
+                    lineage.pending.mission_id
+                )
+            )
+            try:
+                validate_checkpoint_candidate(
+                    event,
+                    lineage.pending,
+                    lineage.anchor_statement,
+                    candidate,
+                    previous_global=previous_global,
+                    previous_mission=previous_mission,
+                )
+            except (ProtocolError, TypeError, ValueError) as exc:
+                reason_code = getattr(
+                    exc,
+                    "reason_code",
+                    "invalid_checkpoint_candidate",
+                )
+                raise EventStoreError(
+                    f"checkpoint candidate validation failed ({reason_code}): {exc}"
+                ) from exc
+            checkpoint = candidate.checkpoint
+            attestation_id = signed_head_checkpoint_attestation_id(
+                candidate.signed_checkpoint
+            )
+            self._require_writer_transaction()
+            self._connection.execute(
+                """
+                INSERT INTO integrity_checkpoint_candidates (
+                    event_digest,
+                    record_id,
+                    checkpoint_id,
+                    checkpoint_attestation_id,
+                    record
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    candidate.event_digest,
+                    candidate.record_id,
+                    checkpoint.checkpoint_id,
+                    attestation_id,
+                    sqlite3.Binary(candidate.to_canonical_bytes()),
+                ),
+            )
+            self._retain_integrity_evidence_locked(
+                event_digest=candidate.event_digest,
+                phase="checkpoint_candidate",
+                provider_evidence=candidate.provider_evidence,
+            )
+            retained = self._load_integrity_lineage_locked(
+                candidate.event_digest
+            )
+            if retained is None or retained.checkpoint_candidate != candidate:
+                raise EventStoreCorruptionError(
+                    "retained checkpoint candidate did not replay exactly"
+                )
+            self._publish_owned_integrity_validation_cache_locked()
+            self._require_writer_transaction()
+            self._connection.execute("COMMIT")
+            return retained.checkpoint_candidate
+        except (
+            EventStoreError,
+            PendingIntegrityTransitionError,
+            IntegrityTransitionConflictError,
+        ):
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise
+        except sqlite3.IntegrityError as exc:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise IntegrityTransitionConflictError(
+                f"SQLite rejected checkpoint candidate retention: {exc}"
+            ) from exc
+        except sqlite3.DatabaseError as exc:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise _sqlite_store_failure(
+                "checkpoint candidate retention failed",
+                exc,
+            ) from exc
+
+    def finalize_integrity_transition(
+        self,
+        record: object,
+    ) -> object:
+        """Commit finality only after the monitor floor names the exact checkpoint."""
+
+        from .integrity_transition import (
+            FinalizedIntegrityTransitionV1,
+            validate_finalization,
+            validate_finalized_integrity_transition,
+        )
+
+        finalization = self._snapshot_integrity_record(
+            record,
+            FinalizedIntegrityTransitionV1,
+        )
+        try:
+            self._connection.execute("BEGIN IMMEDIATE")
+            self._require_writer_transaction()
+            self._validate_integrity_state_locked()
+            unresolved = self._unresolved_integrity_digest_locked()
+            lineage = self._load_integrity_lineage_locked(
+                finalization.event_digest
+            )
+            if lineage is None or lineage.checkpoint_candidate is None:
+                raise EventStoreError(
+                    "integrity finalization requires one retained checkpoint candidate"
+                )
+            if lineage.finalization is not None:
+                if lineage.finalization != finalization:
+                    raise IntegrityTransitionConflictError(
+                        "finalization identity was reused with different bytes"
+                    )
+                self._connection.execute("COMMIT")
+                return lineage.finalization
+            if unresolved != finalization.event_digest:
+                raise PendingIntegrityTransitionError(
+                    "finalization must close the singleton pending transition"
+                )
+            event = self._event_for_integrity_digest_locked(
+                finalization.event_digest
+            )
+            previous_global, previous_mission = (
+                self._previous_integrity_lineages_locked(
+                    lineage.pending.mission_id
+                )
+            )
+            try:
+                validate_finalization(
+                    event,
+                    lineage,
+                    finalization,
+                    previous_global=previous_global,
+                    previous_mission=previous_mission,
+                )
+            except (ProtocolError, TypeError, ValueError) as exc:
+                reason_code = getattr(
+                    exc,
+                    "reason_code",
+                    "invalid_integrity_finalization",
+                )
+                raise EventStoreError(
+                    f"integrity finalization validation failed ({reason_code}): {exc}"
+                ) from exc
+            self._require_writer_transaction()
+            self._connection.execute(
+                """
+                INSERT INTO integrity_finalizations (
+                    event_digest,
+                    record_id,
+                    record
+                ) VALUES (?, ?, ?)
+                """,
+                (
+                    finalization.event_digest,
+                    finalization.record_id,
+                    sqlite3.Binary(finalization.to_canonical_bytes()),
+                ),
+            )
+            self._retain_integrity_evidence_locked(
+                event_digest=finalization.event_digest,
+                phase="finalization",
+                provider_evidence=finalization.provider_evidence,
+            )
+            retained = self._load_integrity_lineage_locked(
+                finalization.event_digest
+            )
+            if retained is None or retained.finalization != finalization:
+                raise EventStoreCorruptionError(
+                    "retained integrity finalization did not replay exactly"
+                )
+            try:
+                validate_finalized_integrity_transition(
+                    retained,
+                    event=event,
+                    previous_global=previous_global,
+                    previous_mission=previous_mission,
+                )
+            except (ProtocolError, TypeError, ValueError) as exc:
+                reason_code = getattr(
+                    exc,
+                    "reason_code",
+                    "invalid_retained_integrity_finalization",
+                )
+                raise EventStoreCorruptionError(
+                    "retained integrity finalization failed authenticated replay "
+                    f"({reason_code}): {exc}"
+                ) from exc
+            self._publish_owned_integrity_validation_cache_locked()
+            self._require_writer_transaction()
+            self._connection.execute("COMMIT")
+            return retained.finalization
+        except (
+            EventStoreError,
+            PendingIntegrityTransitionError,
+            IntegrityTransitionConflictError,
+        ):
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise
+        except sqlite3.IntegrityError as exc:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise IntegrityTransitionConflictError(
+                f"SQLite rejected integrity finalization: {exc}"
+            ) from exc
+        except sqlite3.DatabaseError as exc:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise _sqlite_store_failure(
+                "integrity finalization failed",
+                exc,
+            ) from exc
+
     def store_checkpoint(self, checkpoint: SignedCheckpoint) -> SignedCheckpoint:
         """Retain opaque signed-head data without claiming that it has been verified."""
 
@@ -2368,6 +5424,14 @@ class SQLiteEventStore:
         try:
             self._connection.execute("BEGIN IMMEDIATE")
             self._require_writer_transaction()
+            self._validate_integrity_state_locked()
+            if (
+                self._store_profile_locked()[0]
+                == _MODELED_INTEGRITY_STORE_PROFILE_V1
+            ):
+                raise IntegrityFinalityRequiredError(
+                    "opaque legacy checkpoints are forbidden in the modeled integrity profile"
+                )
             events = self._decode_rows(
                 checkpoint.mission_id,
                 self._rows(checkpoint.mission_id),
@@ -2400,6 +5464,32 @@ class SQLiteEventStore:
                     sqlite3.Binary(checkpoint.signature),
                 ),
             )
+            retained_row = self._connection.execute(
+                """
+                SELECT
+                    mission_id,
+                    event_digest,
+                    signer_id,
+                    algorithm,
+                    signed_at,
+                    signature
+                FROM signed_checkpoints
+                WHERE
+                    mission_id = ?
+                    AND event_digest = ?
+                    AND signer_id = ?
+                """,
+                (
+                    checkpoint.mission_id,
+                    checkpoint.event_digest,
+                    checkpoint.signer_id,
+                ),
+            ).fetchone()
+            if retained_row is None or SignedCheckpoint(*retained_row) != checkpoint:
+                raise EventStoreCorruptionError(
+                    "stored checkpoint differs from its exact retained representation"
+                )
+            self._publish_owned_integrity_validation_cache_locked()
             self._require_writer_transaction()
             self._connection.execute("COMMIT")
             return checkpoint

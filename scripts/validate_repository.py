@@ -81,6 +81,7 @@ REQUIRED_PATHS = (
     "docs/decisions/0008-typed-integrity-evidence-contract.md",
     "docs/decisions/0009-uniform-sqlite-rollback-journal-safety.md",
     "docs/decisions/0010-transactional-evidence-vault.md",
+    "docs/decisions/0011-crash-safe-modeled-integrity-finality.md",
     "docs/decisions/README.md",
     "schemas/finding.schema.json",
     "etzio/schemas/__init__.py",

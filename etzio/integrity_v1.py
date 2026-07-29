@@ -97,6 +97,53 @@ _DECISION_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1[
 _CHECKPOINT_BODY_FIELDS: Final = SEMANTIC_BODY_FIELDS_BY_KIND_V1[
     HEAD_CHECKPOINT_OBJECT_KIND
 ]
+_INTEGRITY_TRUST_SNAPSHOT_FIELDS: Final = frozenset(
+    {"keys", "revoked_key_ids"}
+)
+_INTEGRITY_TRUST_KEY_FIELDS: Final = frozenset(
+    {"key_id", "principal_id", "public_key_b64", "role"}
+)
+_VALIDATION_POLICY_FIELDS: Final = frozenset(
+    {
+        "anchor_policy_id",
+        "checkpoint_time_policy_id",
+        "decision_policy_id",
+        "decision_time_policy_id",
+        "max_checkpoint_uncertainty_seconds",
+        "max_decision_uncertainty_seconds",
+        "required_revocation_namespaces",
+    }
+)
+_REVOCATION_FLOOR_FIELDS: Final = frozenset(
+    {
+        "decision_policy_id",
+        "environment_id",
+        "evidence",
+        "namespace",
+        "root_version",
+        "service_instance_id",
+        "snapshot_id",
+        "version",
+    }
+)
+_HEAD_CHECKPOINT_FLOOR_FIELDS: Final = frozenset(
+    {
+        "checkpoint_attestation_id",
+        "checkpoint_id",
+        "checkpoint_principal_id",
+        "checkpoint_trust_snapshot_id",
+        "environment_id",
+        "evidence",
+        "instance_sequence",
+        "mission_checkpoint_attestation_id",
+        "mission_checkpoint_id",
+        "mission_checkpoint_principal_id",
+        "mission_checkpoint_trust_snapshot_id",
+        "mission_event_seq",
+        "mission_id",
+        "service_instance_id",
+    }
+)
 
 
 class IntegrityError(ValueError):
@@ -1405,6 +1452,155 @@ class IntegrityTrustStore:
         )
         return cls(keys, revoked)
 
+    @classmethod
+    def from_snapshot_body(
+        cls,
+        body: object,
+        *,
+        expected_snapshot_id: str | None = None,
+    ) -> IntegrityTrustStore:
+        """Strictly reconstruct one canonical integrity trust snapshot."""
+
+        if (
+            type(body) is not dict
+            or len(body) != len(_INTEGRITY_TRUST_SNAPSHOT_FIELDS)
+            or set(body) != _INTEGRITY_TRUST_SNAPSHOT_FIELDS
+        ):
+            raise IntegrityError(
+                "invalid_trust_snapshot",
+                "integrity trust snapshot has missing or unknown fields",
+            )
+        keys = body["keys"]
+        revoked_key_ids = body["revoked_key_ids"]
+        if type(keys) is not list or type(revoked_key_ids) is not list:
+            raise IntegrityError(
+                "invalid_trust_snapshot",
+                "integrity trust snapshot collections must be arrays",
+            )
+        if len(keys) > MAX_INTEGRITY_KEYS:
+            raise IntegrityError(
+                "invalid_trust_snapshot",
+                "integrity trust snapshot exceeds the key-count ceiling",
+            )
+        if len(revoked_key_ids) > MAX_INTEGRITY_REVOCATIONS:
+            raise IntegrityError(
+                "invalid_trust_snapshot",
+                "integrity trust snapshot exceeds the revocation-count ceiling",
+            )
+
+        trusted_keys: list[TrustedIntegrityKey] = []
+        observed_key_ids: list[str] = []
+        for entry in keys:
+            if (
+                type(entry) is not dict
+                or len(entry) != len(_INTEGRITY_TRUST_KEY_FIELDS)
+                or set(entry) != _INTEGRITY_TRUST_KEY_FIELDS
+            ):
+                raise IntegrityError(
+                    "invalid_trust_snapshot",
+                    "integrity trust snapshot key entry is malformed",
+                )
+            key_id = entry["key_id"]
+            principal_id = entry["principal_id"]
+            public_key_b64 = entry["public_key_b64"]
+            role = entry["role"]
+            if (
+                type(key_id) is not str
+                or _KEY_ID.fullmatch(key_id) is None
+                or type(principal_id) is not str
+                or _IDENTITY.fullmatch(principal_id) is None
+                or principal_id != principal_id.strip()
+                or type(public_key_b64) is not str
+                or len(public_key_b64) != 44
+                or type(role) is not str
+                or role not in INTEGRITY_ROLES_V1
+            ):
+                raise IntegrityError(
+                    "invalid_trust_snapshot",
+                    "integrity trust snapshot key identity or role is noncanonical",
+                )
+            try:
+                public_key_bytes = base64.b64decode(
+                    public_key_b64,
+                    validate=True,
+                )
+            except (binascii.Error, ValueError) as exc:
+                raise IntegrityError(
+                    "invalid_trust_snapshot",
+                    "integrity trust snapshot public key is malformed",
+                ) from exc
+            if (
+                len(public_key_bytes) != 32
+                or base64.b64encode(public_key_bytes).decode("ascii")
+                != public_key_b64
+                or integrity_key_id(public_key_bytes) != key_id
+                or not is_valid_ed25519_public_key(public_key_bytes)
+            ):
+                raise IntegrityError(
+                    "invalid_trust_snapshot",
+                    "integrity trust snapshot public key identity is malformed",
+                )
+            try:
+                trusted_key = TrustedIntegrityKey(
+                    principal_id=principal_id,
+                    public_key_bytes=public_key_bytes,
+                    role=role,
+                )
+            except (IntegrityError, TypeError, ValueError) as exc:
+                raise IntegrityError(
+                    "invalid_trust_snapshot",
+                    "integrity trust snapshot contains an invalid trusted key",
+                ) from exc
+            observed_key_ids.append(key_id)
+            trusted_keys.append(trusted_key)
+        if observed_key_ids != sorted(set(observed_key_ids)):
+            raise IntegrityError(
+                "invalid_trust_snapshot",
+                "integrity trust snapshot keys are not in unique canonical order",
+            )
+        if (
+            any(
+                type(key_id) is not str
+                or _KEY_ID.fullmatch(key_id) is None
+                for key_id in revoked_key_ids
+            )
+            or revoked_key_ids != sorted(set(revoked_key_ids))
+        ):
+            raise IntegrityError(
+                "invalid_trust_snapshot",
+                "integrity trust snapshot revocations are noncanonical",
+            )
+        try:
+            store = IntegrityTrustStore.from_keys(
+                trusted_keys,
+                revoked_key_ids=revoked_key_ids,
+            )
+        except (IntegrityError, TypeError, ValueError) as exc:
+            raise IntegrityError(
+                "invalid_trust_snapshot",
+                "integrity trust snapshot cannot be reconstructed",
+            ) from exc
+        if store.to_snapshot_body() != body:
+            raise IntegrityError(
+                "invalid_trust_snapshot",
+                "integrity trust snapshot body is not canonical",
+            )
+        if expected_snapshot_id is not None:
+            if (
+                type(expected_snapshot_id) is not str
+                or _FULL_DIGEST.fullmatch(expected_snapshot_id) is None
+            ):
+                raise IntegrityError(
+                    "invalid_trust_snapshot",
+                    "expected snapshot ID must be a full sha256 content ID",
+                )
+            if store.snapshot_id != expected_snapshot_id:
+                raise IntegrityError(
+                    "trust_snapshot_mismatch",
+                    "integrity trust snapshot ID does not match its canonical body",
+                )
+        return store
+
     def to_snapshot_body(self) -> dict[str, object]:
         keys = [
             {
@@ -1471,6 +1667,78 @@ class IntegrityValidationPolicyV1:
             namespaces,
         )
 
+    @classmethod
+    def from_body(cls, body: object) -> IntegrityValidationPolicyV1:
+        """Reconstruct one exact canonical integrity validation policy."""
+
+        if (
+            type(body) is not dict
+            or len(body) != len(_VALIDATION_POLICY_FIELDS)
+            or set(body) != _VALIDATION_POLICY_FIELDS
+        ):
+            raise IntegrityError(
+                "invalid_validation_policy",
+                "integrity validation policy has missing or unknown fields",
+            )
+        namespaces = body["required_revocation_namespaces"]
+        if (
+            type(namespaces) is not list
+            or not namespaces
+            or len(namespaces) > MAX_REVOCATION_VIEWS
+            or any(type(namespace) is not str for namespace in namespaces)
+            or namespaces != sorted(set(namespaces))
+        ):
+            raise IntegrityError(
+                "invalid_validation_policy",
+                "policy revocation namespaces must be a nonempty canonical array",
+            )
+        try:
+            policy = IntegrityValidationPolicyV1(
+                decision_policy_id=body["decision_policy_id"],
+                decision_time_policy_id=body["decision_time_policy_id"],
+                checkpoint_time_policy_id=body[
+                    "checkpoint_time_policy_id"
+                ],
+                anchor_policy_id=body["anchor_policy_id"],
+                required_revocation_namespaces=frozenset(namespaces),
+                max_decision_uncertainty_seconds=body[
+                    "max_decision_uncertainty_seconds"
+                ],
+                max_checkpoint_uncertainty_seconds=body[
+                    "max_checkpoint_uncertainty_seconds"
+                ],
+            )
+        except (IntegrityError, TypeError, ValueError) as exc:
+            raise IntegrityError(
+                "invalid_validation_policy",
+                "integrity validation policy cannot be reconstructed",
+            ) from exc
+        if policy.to_body() != body:
+            raise IntegrityError(
+                "invalid_validation_policy",
+                "integrity validation policy body is not canonical",
+            )
+        return policy
+
+    def to_body(self) -> dict[str, object]:
+        """Return one detached deterministic validation-policy body."""
+
+        return {
+            "anchor_policy_id": self.anchor_policy_id,
+            "checkpoint_time_policy_id": self.checkpoint_time_policy_id,
+            "decision_policy_id": self.decision_policy_id,
+            "decision_time_policy_id": self.decision_time_policy_id,
+            "max_checkpoint_uncertainty_seconds": (
+                self.max_checkpoint_uncertainty_seconds
+            ),
+            "max_decision_uncertainty_seconds": (
+                self.max_decision_uncertainty_seconds
+            ),
+            "required_revocation_namespaces": sorted(
+                self.required_revocation_namespaces
+            ),
+        }
+
 
 @dataclass(frozen=True, slots=True)
 class RevocationFloorV1:
@@ -1507,6 +1775,69 @@ class RevocationFloorV1:
                 evidence_kind=EXTERNAL_FLOOR_EVIDENCE_KIND,
             ),
         )
+
+    @classmethod
+    def from_body(cls, body: object) -> RevocationFloorV1:
+        """Reconstruct one exact canonical external revocation floor."""
+
+        if (
+            type(body) is not dict
+            or len(body) != len(_REVOCATION_FLOOR_FIELDS)
+            or set(body) != _REVOCATION_FLOOR_FIELDS
+        ):
+            raise IntegrityError(
+                "invalid_external_revocation_floor",
+                "external revocation floor has missing or unknown fields",
+            )
+        evidence = body["evidence"]
+        if (
+            type(evidence) is not list
+            or len(evidence) < 2
+            or len(evidence) > MAX_EVIDENCE_REFS
+        ):
+            raise IntegrityError(
+                "invalid_external_revocation_floor",
+                "external revocation floor evidence is not a bounded quorum",
+            )
+        try:
+            floor = RevocationFloorV1(
+                service_instance_id=body["service_instance_id"],
+                environment_id=body["environment_id"],
+                decision_policy_id=body["decision_policy_id"],
+                namespace=body["namespace"],
+                root_version=body["root_version"],
+                version=body["version"],
+                snapshot_id=body["snapshot_id"],
+                evidence=tuple(
+                    EvidenceReferenceV1.from_body(reference)
+                    for reference in evidence
+                ),
+            )
+        except (IntegrityError, TypeError, ValueError) as exc:
+            raise IntegrityError(
+                "invalid_external_revocation_floor",
+                "external revocation floor cannot be reconstructed",
+            ) from exc
+        if floor.to_body() != body:
+            raise IntegrityError(
+                "invalid_external_revocation_floor",
+                "external revocation floor body is not canonical",
+            )
+        return floor
+
+    def to_body(self) -> dict[str, object]:
+        """Return one detached deterministic revocation-floor body."""
+
+        return {
+            "decision_policy_id": self.decision_policy_id,
+            "environment_id": self.environment_id,
+            "evidence": [reference.to_body() for reference in self.evidence],
+            "namespace": self.namespace,
+            "root_version": self.root_version,
+            "service_instance_id": self.service_instance_id,
+            "snapshot_id": self.snapshot_id,
+            "version": self.version,
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -1638,6 +1969,99 @@ class HeadCheckpointFloorV1:
                 evidence_kind=EXTERNAL_FLOOR_EVIDENCE_KIND,
             ),
         )
+
+    @classmethod
+    def from_body(cls, body: object) -> HeadCheckpointFloorV1:
+        """Reconstruct one exact canonical external head-catalog floor."""
+
+        if (
+            type(body) is not dict
+            or len(body) != len(_HEAD_CHECKPOINT_FLOOR_FIELDS)
+            or set(body) != _HEAD_CHECKPOINT_FLOOR_FIELDS
+        ):
+            raise IntegrityError(
+                "invalid_external_head_floor",
+                "external head floor has missing or unknown fields",
+            )
+        evidence = body["evidence"]
+        if (
+            type(evidence) is not list
+            or len(evidence) < 2
+            or len(evidence) > MAX_EVIDENCE_REFS
+        ):
+            raise IntegrityError(
+                "invalid_external_head_floor",
+                "external head floor evidence is not a bounded quorum",
+            )
+        try:
+            floor = HeadCheckpointFloorV1(
+                service_instance_id=body["service_instance_id"],
+                environment_id=body["environment_id"],
+                instance_sequence=body["instance_sequence"],
+                checkpoint_id=body["checkpoint_id"],
+                checkpoint_attestation_id=body[
+                    "checkpoint_attestation_id"
+                ],
+                checkpoint_principal_id=body["checkpoint_principal_id"],
+                checkpoint_trust_snapshot_id=body[
+                    "checkpoint_trust_snapshot_id"
+                ],
+                mission_id=body["mission_id"],
+                mission_event_seq=body["mission_event_seq"],
+                mission_checkpoint_id=body["mission_checkpoint_id"],
+                mission_checkpoint_attestation_id=body[
+                    "mission_checkpoint_attestation_id"
+                ],
+                mission_checkpoint_principal_id=body[
+                    "mission_checkpoint_principal_id"
+                ],
+                mission_checkpoint_trust_snapshot_id=body[
+                    "mission_checkpoint_trust_snapshot_id"
+                ],
+                evidence=tuple(
+                    EvidenceReferenceV1.from_body(reference)
+                    for reference in evidence
+                ),
+            )
+        except (IntegrityError, TypeError, ValueError) as exc:
+            raise IntegrityError(
+                "invalid_external_head_floor",
+                "external head floor cannot be reconstructed",
+            ) from exc
+        if floor.to_body() != body:
+            raise IntegrityError(
+                "invalid_external_head_floor",
+                "external head floor body is not canonical",
+            )
+        return floor
+
+    def to_body(self) -> dict[str, object]:
+        """Return one detached deterministic external-head-floor body."""
+
+        return {
+            "checkpoint_attestation_id": self.checkpoint_attestation_id,
+            "checkpoint_id": self.checkpoint_id,
+            "checkpoint_principal_id": self.checkpoint_principal_id,
+            "checkpoint_trust_snapshot_id": (
+                self.checkpoint_trust_snapshot_id
+            ),
+            "environment_id": self.environment_id,
+            "evidence": [reference.to_body() for reference in self.evidence],
+            "instance_sequence": self.instance_sequence,
+            "mission_checkpoint_attestation_id": (
+                self.mission_checkpoint_attestation_id
+            ),
+            "mission_checkpoint_id": self.mission_checkpoint_id,
+            "mission_checkpoint_principal_id": (
+                self.mission_checkpoint_principal_id
+            ),
+            "mission_checkpoint_trust_snapshot_id": (
+                self.mission_checkpoint_trust_snapshot_id
+            ),
+            "mission_event_seq": self.mission_event_seq,
+            "mission_id": self.mission_id,
+            "service_instance_id": self.service_instance_id,
+        }
 
     @staticmethod
     def _validate_attestation_provenance(
@@ -3385,6 +3809,60 @@ def validate_checkpoint_advance(
     )
 
 
+def require_external_floor_is_current(
+    checkpoint: AuthenticatedHeadCheckpointV1,
+    trust_store: IntegrityTrustStore,
+    external_floor: HeadCheckpointFloorV1,
+    validation_policy: IntegrityValidationPolicyV1,
+) -> None:
+    """Require an external catalog floor to name this exact checkpoint twice.
+
+    This is the strict command-finality predicate.  Unlike checkpoint-advance
+    validation, an exact predecessor floor is not a reconciliation success: both the
+    instance-global and selected mission projections must name the supplied checkpoint
+    with its exact attestation, principal, and historical trust provenance.
+    """
+
+    if type(checkpoint) is not AuthenticatedHeadCheckpointV1:
+        raise IntegrityError(
+            "invalid_head_checkpoint",
+            "current external-floor validation requires an authenticated checkpoint",
+        )
+    policy = _snapshot_validation_policy(validation_policy)
+    authenticated = _reauthenticate_checkpoint_result(
+        checkpoint,
+        trust_store,
+    )
+    _validate_checkpoint_against_policy(
+        authenticated.checkpoint,
+        policy,
+    )
+    if type(external_floor) is not HeadCheckpointFloorV1:
+        raise IntegrityError(
+            "missing_external_head_floor",
+            "command finality requires an exact external catalog floor",
+        )
+    floor = _snapshot_head_checkpoint_floor(external_floor)
+    value = authenticated.checkpoint
+    if (
+        floor.service_instance_id != value.service_instance_id
+        or floor.environment_id != value.environment_id
+        or floor.mission_id != value.mission_id
+    ):
+        raise IntegrityError(
+            "external_head_floor_scope_mismatch",
+            "external head floor belongs to another service scope or mission",
+        )
+    if not (
+        _global_floor_matches_checkpoint(floor, authenticated)
+        and _mission_floor_matches_checkpoint(floor, authenticated)
+    ):
+        raise IntegrityError(
+            "external_head_floor_not_current",
+            "external global and mission floors must both name the exact current checkpoint",
+        )
+
+
 def _decision_body(**values: object) -> dict[str, object]:
     time_evidence = _validated_evidence_references(
         values["time_evidence"],
@@ -4251,6 +4729,7 @@ __all__ = [
     "head_checkpoint_genesis_id",
     "integrity_key_id",
     "mission_checkpoint_genesis_id",
+    "require_external_floor_is_current",
     "require_interval_within",
     "signed_head_checkpoint_attestation_id",
     "signed_integrity_decision_attestation_id",
