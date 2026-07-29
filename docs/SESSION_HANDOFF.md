@@ -333,15 +333,14 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 On the final audited integrity-finality release candidate, the complete release command
 passed under both declared local runtimes:
 
-- 828 tests passed;
+- 829 tests passed;
 - CPython 3.11.15 / SQLite 3.53.1 / `DELETE`/`EXTRA`;
 - CPython 3.14.2 / SQLite 3.51.2 / `DELETE`/`EXTRA`;
 - exact schema, semantic dispatch, repository policy, Ruff, fixture runs, and
   retained-evidence checks on both local hash-locked environments; and
-- private GitHub Actions reproduction plus package build and outside-checkout wheel smoke
-  on the exact implementation commit.
+- full local release entrypoints completed without changing repository state.
 
-The CPython 3.11 suite completed in 487.37 seconds and the CPython 3.14 suite in 504.10
+The CPython 3.11 suite completed in 486.56 seconds and the CPython 3.14 suite in 507.92
 seconds. Both hash-locked environments passed `pip check`. Private CI remains the
 publication gate; do not hand off until its exact implementation commit, run, and
 pull-request identifiers are recorded in the evidence-only handoff commit.
