@@ -157,6 +157,16 @@
     "github_pull_request": 11,
     "claim_boundary": "implements repository-fixture-only schema-v2 modeled integrity finality with a pinned fixture-adapter authority binding atomic pending retention four immutable phases two at-least-once modeled protocol writes exact code-derived provider assertions multi-mission global and mission continuity generic pending-replay refusal crash and concurrency recovery and exact-current modeled command completion; no trustworthy UTC real revocation freshness provider authentication external durability independent administration non-equivocation same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim"
   },
+  "documentation_release_evidence": {
+    "scope": "2026-07-29 documentation and frontier reconciliation only",
+    "validation_status": "local_and_github_release_suites_passed",
+    "github_validated_commit": "a0f43a4267e65251afd2a7a32012f5c8ea31dfea",
+    "github_actions_run_id": 30480296580,
+    "github_pull_request": 11,
+    "gitguardian_passed": true,
+    "implementation_evidence_commit": "82f8ceca3eb0a32cdc67421f70ab45e845a90bdc",
+    "claim_boundary": "validates the 2026-07-29 documentation and frontier reconciliation only; adds no capability or authority and does not supersede current_evidence"
+  },
   "inherited_transactional_vault_evidence": {
     "validation_status": "local_and_github_release_suites_passed",
     "test_count": 730,

@@ -391,6 +391,21 @@ benchmark corpus was downloaded or executed, no external provider was connected,
 live-target, exploit-execution, credential, egress, spending, disclosure, or publication
 grant was created.
 
+Documentation-release evidence is separate from implementation evidence. On exact
+documentation-reconciliation commit
+[`a0f43a4267e65251afd2a7a32012f5c8ea31dfea`](https://github.com/manfromnowhere143/etzio/commit/a0f43a4267e65251afd2a7a32012f5c8ea31dfea),
+the complete local release command passed all 829 tests under CPython 3.11.15 in 467.49
+seconds and CPython 3.14.2 in 480.81 seconds. Repository policy, mission-state JSON,
+relative Markdown links, and both README Mermaid diagrams also passed their exact
+validation or render checks. Private GitHub Actions run
+[`30480296580`](https://github.com/manfromnowhere143/etzio/actions/runs/30480296580)
+then reproduced repository policy, both declared runtime suites, package build,
+outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on that
+same commit; GitGuardian also passed. This validates the documentation reconciliation
+only, adds no capability or authority, and does not supersede implementation evidence
+commit `82f8ceca3eb0a32cdc67421f70ab45e845a90bdc`. This evidence-only handoff and
+mission-state update follows the validated documentation commit.
+
 ## Inherited transactional-vault evidence
 
 On transactional-vault implementation commit
