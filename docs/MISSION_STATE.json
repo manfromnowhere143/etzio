@@ -30,6 +30,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "qualified_external_integrity_adapters_and_storage_boundary",
+    "next_session_pickup": "first specify and prove the versioned trusted-time and revocation adapter conformance contract and deterministic qualification harness with trust-root and policy binding conservative interval and freshness semantics authenticated provider-evidence mapping and substitution replay staleness and ambiguity known-bads; remain fixture-backed and networkless before extending the harness to anchor catalog monitor and durable blocked-finality recovery",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -140,7 +141,7 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_release_suites_passed_github_pending",
+    "validation_status": "local_and_github_release_suites_passed",
     "test_count": 829,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -151,8 +152,9 @@
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
-    "github_validated_commit": null,
-    "github_actions_run_id": null,
+    "github_validated_commit": "82f8ceca3eb0a32cdc67421f70ab45e845a90bdc",
+    "github_actions_run_id": 30474966878,
+    "github_pull_request": 11,
     "claim_boundary": "implements repository-fixture-only schema-v2 modeled integrity finality with a pinned fixture-adapter authority binding atomic pending retention four immutable phases two at-least-once modeled protocol writes exact code-derived provider assertions multi-mission global and mission continuity generic pending-replay refusal crash and concurrency recovery and exact-current modeled command completion; no trustworthy UTC real revocation freshness provider authentication external durability independent administration non-equivocation same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim"
   },
   "inherited_transactional_vault_evidence": {

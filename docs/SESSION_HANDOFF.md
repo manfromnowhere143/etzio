@@ -341,9 +341,25 @@ passed under both declared local runtimes:
 - full local release entrypoints completed without changing repository state.
 
 The CPython 3.11 suite completed in 486.56 seconds and the CPython 3.14 suite in 507.92
-seconds. Both hash-locked environments passed `pip check`. Private CI remains the
-publication gate; do not hand off until its exact implementation commit, run, and
-pull-request identifiers are recorded in the evidence-only handoff commit.
+seconds. Both hash-locked environments passed `pip check`. Private GitHub Actions run
+[`30474966878`](https://github.com/manfromnowhere143/etzio/actions/runs/30474966878)
+reproduced repository policy, both declared runtime suites, package build,
+outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on exact
+release-candidate commit
+[`82f8ceca3eb0a32cdc67421f70ab45e845a90bdc`](https://github.com/manfromnowhere143/etzio/commit/82f8ceca3eb0a32cdc67421f70ab45e845a90bdc);
+GitGuardian also passed. Draft
+[#11](https://github.com/manfromnowhere143/etzio/pull/11) is stacked on the transactional
+evidence-vault branch. This evidence-only handoff update follows the validated candidate.
+
+Earlier run
+[`30472204976`](https://github.com/manfromnowhere143/etzio/actions/runs/30472204976)
+was cancelled by the obsolete 12-minute foundation-job ceiling after both declared
+runtime suites reached 78 percent. Run
+[`30473383200`](https://github.com/manfromnowhere143/etzio/actions/runs/30473383200)
+then failed closed before test execution because the retained count of 828 lagged the new
+timeout-regression known-bad's 829 collected tests. Neither run is release evidence. The
+foundation job now has a bounded 30-minute budget protected by repository policy and that
+known-bad.
 
 ## Inherited transactional-vault evidence
 
@@ -546,6 +562,15 @@ These blockers prevent a finding pipeline and all live-target work.
 ## Current mission order
 
 ### Mission 1 — close finding-admission integrity
+
+**Exact next-session pickup:** first specify and prove the versioned trusted-time and
+revocation adapter conformance contract and deterministic qualification harness, including
+trust-root and policy binding, conservative interval/freshness semantics, authenticated
+provider-evidence mapping, and substitution, replay, staleness, and ambiguity known-bads.
+Keep that tranche fixture-backed and networkless. Only after it passes should the same
+harness extend to anchor, catalog, and monitor adapters and the durable blocked-finality
+recovery contract; do not connect a real provider, add finder breadth, or add execution
+capability.
 
 Next, qualify and connect independently administered trusted-time, revocation, anchor,
 catalog, and monitor adapters inside the retained state machine. Preserve exact
