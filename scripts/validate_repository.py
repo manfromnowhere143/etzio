@@ -108,11 +108,12 @@ EXPECTED_EVENT_KIND_COUNT_V1 = 18
 EXPECTED_REQUIRED_ATTESTED_OBJECT_KINDS_V1 = frozenset({"head_checkpoint", "integrity_decision"})
 EXPECTED_INTEGRITY_EVIDENCE_REFERENCE_FIELDS_V1 = frozenset({"evidence_id", "evidence_kind", "source_id"})
 EXPECTED_FOUNDATION_PYTHON_MATRIX = ("3.11.15", "3.14.2")
+EXPECTED_FOUNDATION_TIMEOUT_MINUTES = 30
 EXPECTED_TOP_LEVEL_WORKFLOW_ENV = (
     'PYTHONDONTWRITEBYTECODE: "1"',
     'PIP_DISABLE_PIP_VERSION_CHECK: "1"',
 )
-EXPECTED_CI_WORKFLOW_NORMALIZED_SHA256 = "eb6a884715e6af4e2c14dab5f01868ebf11b9f8b27b289ae1ffa272e7c1e3396"
+EXPECTED_CI_WORKFLOW_NORMALIZED_SHA256 = "f110b62c6db370326ed8b8ec242e3a48ea9bb8b3f804ea1db4c9eb92ec14eaf9"
 EXPECTED_MAKEFILE_NORMALIZED_SHA256 = "490e139bf70b5f3c4c658dce69d3a9ee587a3db1352ba00b4223b7248516de61"
 EXPECTED_PYTEST_INI_OPTIONS = {
     "testpaths": ["tests"],
@@ -686,6 +687,18 @@ def foundation_workflow_issues(
     )
     if matrix_keys != ["python-version:"] or versions != EXPECTED_FOUNDATION_PYTHON_MATRIX:
         issues.append(f"{source}: foundation Python matrix must be exactly 3.11.15 and 3.14.2")
+
+    foundation_timeout_entries = (
+        []
+        if foundation is None
+        else [
+            code.strip()
+            for _, code in foundation[1:]
+            if len(code) - len(code.lstrip()) == 4 and code.strip().startswith("timeout-minutes:")
+        ]
+    )
+    if foundation_timeout_entries != [f"timeout-minutes: {EXPECTED_FOUNDATION_TIMEOUT_MINUTES}"]:
+        issues.append(f"{source}: foundation job timeout must retain the 30-minute release budget")
 
     defaults = _workflow_mapping_block(lines, header="defaults:", indent=0)
     default_keys = (

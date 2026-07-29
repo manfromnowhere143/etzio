@@ -1019,9 +1019,14 @@ def test_makefile_policy_rejects_noop_verify_recipe() -> None:
             "workflow run shell must remain bash",
         ),
         (
-            "    timeout-minutes: 12",
-            "    timeout-minutes: 12\n    continue-on-error: true",
+            "    timeout-minutes: 30",
+            "    timeout-minutes: 30\n    continue-on-error: true",
             "foundation job may not bypass verification failure",
+        ),
+        (
+            "    timeout-minutes: 30",
+            "    timeout-minutes: 12",
+            "foundation job timeout must retain the 30-minute release budget",
         ),
     ],
     ids=(
@@ -1029,6 +1034,7 @@ def test_makefile_policy_rejects_noop_verify_recipe() -> None:
         "verifier-invocation-removed",
         "pipefail-shell-removed",
         "job-failure-masked",
+        "timeout-budget-reduced",
     ),
 )
 def test_foundation_workflow_contract_rejects_release_gate_weakening(
