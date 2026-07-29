@@ -259,13 +259,13 @@ On the current candidate bytes, `make verify` passed under both declared runtime
 - both modeled regression demonstrations retained their historical outputs.
 
 The hash-locked environments passed `pip check`. GitHub Actions run
-[`30386314385`](https://github.com/manfromnowhere143/etzio/actions/runs/30386314385)
+[`30438318919`](https://github.com/manfromnowhere143/etzio/actions/runs/30438318919)
 reproduced repository policy plus both declared runtime suites, package build,
-outside-checkout wheel smoke, and clean-tree proof on the exact integrity-contract
-implementation commit `ad90fb2b3629b2aa006c63894de3cd7880602a12`; GitGuardian also
+outside-checkout wheel smoke, and clean-tree proof on the exact SQLite journal-safety
+implementation commit `4dfbcc319a63a14a3a223b80b1740fbd05fc676e`; GitGuardian also
 passed. This evidence-only handoff update follows that implementation commit. Resolve the
-current branch head and checks from GitHub rather than treating this dated statement as
-live state. All evidence remains fixture-scoped.
+current branch head and checks from GitHub rather than treating this dated statement as live
+state. All evidence remains fixture-scoped.
 
 ## Closed adversarial findings in this tranche
 
