@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
+import etzio.kernel.store as event_store_module
 from etzio.analysis import StaticFinding
 from etzio.authority import (
     AuthorityAdmissionV1,
@@ -721,13 +722,100 @@ def test_store_uses_hardened_sqlite_settings_without_write_handle(
 
     with SQLiteEventStore(path) as store:
         diagnostics = store.diagnostics()
-        assert diagnostics.journal_mode == "wal"
-        assert diagnostics.synchronous == 2
+        policy = event_store_module._sqlite_journal_policy(
+            sqlite3.sqlite_version_info
+        )
+        assert diagnostics.sqlite_version == sqlite3.sqlite_version
+        assert (
+            diagnostics.wal_reset_bug_fixed
+            is policy.wal_reset_bug_fixed
+        )
+        assert diagnostics.journal_mode == policy.journal_mode
+        assert diagnostics.synchronous == policy.synchronous_value
+        assert diagnostics.journal_mode != "wal"
         assert diagnostics.foreign_keys
         assert diagnostics.database_mode == 0o600
         assert not hasattr(store, "connection")
 
     assert stat.S_IMODE(path.stat().st_mode) == 0o600
+
+
+@pytest.mark.parametrize(
+    ("version_info", "expected"),
+    [
+        ((3, 44, 5), False),
+        ((3, 44, 6), True),
+        ((3, 45, 0), False),
+        ((3, 50, 6), False),
+        ((3, 50, 7), True),
+        ((3, 51, 2), False),
+        ((3, 51, 3), True),
+        ((3, 53, 1), True),
+    ],
+)
+def test_sqlite_wal_reset_fix_boundaries_are_exact(
+    version_info: tuple[int, int, int],
+    expected: bool,
+) -> None:
+    assert (
+        event_store_module._sqlite_wal_reset_bug_fixed(version_info)
+        is expected
+    )
+
+
+def test_unknown_sqlite_major_release_is_not_admitted() -> None:
+    with pytest.raises(EventStoreError, match="unsupported library"):
+        event_store_module._sqlite_journal_policy((4, 0, 0))
+
+
+def test_sqlite_before_strict_table_support_is_not_admitted() -> None:
+    with pytest.raises(EventStoreError, match="unsupported library"):
+        event_store_module._sqlite_journal_policy((3, 36, 0))
+
+
+def test_all_supported_sqlite_releases_share_rollback_journal_policy() -> None:
+    affected = event_store_module._sqlite_journal_policy((3, 51, 2))
+    assert not affected.wal_reset_bug_fixed
+    assert affected.journal_mode == "delete"
+    assert affected.synchronous_name == "EXTRA"
+    assert affected.synchronous_value == 3
+
+    fixed = event_store_module._sqlite_journal_policy((3, 53, 1))
+    assert fixed.wal_reset_bug_fixed
+    assert fixed.journal_mode == affected.journal_mode
+    assert fixed.synchronous_name == affected.synchronous_name
+    assert fixed.synchronous_value == affected.synchronous_value
+
+
+def test_preexisting_wal_header_requires_offline_migration(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    parent = tmp_path / "private"
+    parent.mkdir(mode=0o700)
+    path = parent / "events.sqlite3"
+    connection = sqlite3.connect(path)
+    connection.execute("CREATE TABLE prior_state (value INTEGER NOT NULL)")
+    connection.commit()
+    connection.close()
+    path.chmod(0o600)
+
+    retained = bytearray(path.read_bytes())
+    retained[18:20] = b"\x02\x02"
+    path.write_bytes(retained)
+    before = path.read_bytes()
+    monkeypatch.setattr(
+        event_store_module.sqlite3,
+        "connect",
+        lambda *args, **kwargs: pytest.fail(
+            "SQLite must not open a preexisting WAL database"
+        ),
+    )
+
+    with pytest.raises(EventStoreError, match="offline migration"):
+        SQLiteEventStore(path)
+
+    assert path.read_bytes() == before
 
 
 def test_store_requires_private_nonsymlink_directory_chain(tmp_path: Path) -> None:

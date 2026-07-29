@@ -15,7 +15,7 @@ Solidity, EVM, and later L1/client research are the first benchmark and economic
 the architectural ceiling. Domain knowledge belongs in versioned packs; policy and
 scientific authority remain in the kernel.
 
-> **Status — architecture foundation, 2026-07-28.**
+> **Status — architecture foundation, 2026-07-29.**
 > One repository-fixture candidate-generation path is implemented end to end. It admits a
 > signed authority record, resolves immutable content-addressed bytes, executes a narrow
 > Python analyzer under a bounded lease, and commits lifecycle-checked events to SQLite. A
@@ -109,9 +109,17 @@ The protocol-v1 foundation includes:
   replay;
 - explicit lease expiry, modeled cancellation, atomic nonbranching reassignment, and
   terminal receipt-coverage events with exhaustive candidate partitions;
-- compare-and-append SQLite storage with replay-time lifecycle validation; and
+- uniform compare-and-append SQLite `DELETE`/`EXTRA` storage across every declared runtime,
+  with pre-open WAL-header refusal, loaded-version/fix diagnostics, and replay-time
+  lifecycle validation; and
 - known-bad tests for signature, scope, identity, lifecycle, budget, corruption, replay,
   and filesystem-boundary failures.
+
+CPython 3.11.15/SQLite 3.53.1 and CPython 3.14.2/SQLite 3.51.2 both use the
+same rollback-journal policy. Canonical verification records the runtime-reported SQLite
+version and source ID and rejects a different SQLite identity under the repository import
+context. This is dependency evidence, not binary provenance or a general storage-safety
+claim.
 
 ## System map
 

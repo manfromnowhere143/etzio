@@ -22,6 +22,7 @@ from scripts.validate_repository import (
     protocol_schema_contract_issues,
     pyproject_configuration_issues,
     required_path_issues,
+    root_import_shadow_issues,
     verification_entrypoint_issues,
     workflow_permission_issues,
     workflow_syntax_issues,
@@ -51,6 +52,22 @@ def test_missing_required_schema_is_rejected(tmp_path: Path):
     required = ("etzio/schemas/protocol.v1.schema.json",)
     assert required_path_issues(tmp_path, required) == [
         "missing required repository file: etzio/schemas/protocol.v1.schema.json"
+    ]
+
+
+@pytest.mark.parametrize("shadow", ["sqlite3.py", "sqlite3"])
+def test_repository_root_sqlite_shadow_is_rejected(
+    tmp_path: Path,
+    shadow: str,
+) -> None:
+    path = tmp_path / shadow
+    if "." in shadow:
+        path.write_text("raise RuntimeError('shadowed')\n", encoding="utf-8")
+    else:
+        path.mkdir()
+
+    assert root_import_shadow_issues(tmp_path) == [
+        f"forbidden repository-root standard-library shadow: {shadow}"
     ]
 
 
@@ -836,12 +853,17 @@ def test_wrong_project_state_is_rejected():
             "set -euo pipefail",
             "set +e",
         ),
+        (
+            'connection.execute("SELECT sqlite_source_id()").fetchone()',
+            '("unrecorded-sqlite-source",)',
+        ),
     ],
     ids=(
         "retained-evidence-flag-removed",
         "command-commented-out",
         "command-unreachable",
         "failure-masked",
+        "sqlite-source-probe-removed",
     ),
 )
 def test_full_verifier_rejects_retained_evidence_bypasses(
@@ -876,6 +898,43 @@ def test_verifier_runtime_probe_rejects_a_noop_interpreter() -> None:
 
     assert completed.returncode != 0
     assert "requires CPython 3.11.15 or 3.14.2" in completed.stderr
+
+
+def test_verifier_rejects_sqlite_identity_changed_by_import_context(
+    tmp_path: Path,
+) -> None:
+    fake_python = tmp_path / "fake-python"
+    fake_python.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        'if [[ "$*" == *"sys.implementation.name"* ]]; then\n'
+        "  printf 'cpython:3.11.15\\n'\n"
+        'elif [[ "$*" == *"sqlite_source_id"* && "${1:-}" == "-I" ]]; then\n'
+        "  printf '3.53.1:isolated-source\\n'\n"
+        'elif [[ "$*" == *"sqlite_source_id"* ]]; then\n'
+        "  printf '3.53.1:repository-shadow\\n'\n"
+        "else\n"
+        "  exit 99\n"
+        "fi\n",
+        encoding="utf-8",
+    )
+    fake_python.chmod(0o700)
+    verifier = Path(repository_policy.ROOT) / "scripts" / "ci" / "verify.sh"
+
+    completed = subprocess.run(
+        ["bash", str(verifier)],
+        cwd=repository_policy.ROOT,
+        env={**os.environ, "ETZIO_PYTHON": str(fake_python)},
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    assert (
+        "SQLite identity changed under repository import context"
+        in completed.stderr
+    )
 
 
 def test_pyproject_policy_rejects_collect_only_pytest_addopts() -> None:

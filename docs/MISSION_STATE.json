@@ -1,13 +1,13 @@
 {
   "schema_version": "etzio.mission_state.v2",
-  "updated": "2026-07-28",
+  "updated": "2026-07-29",
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/integrity-evidence-contract-v1",
+  "active_branch": "agent/sqlite-wal-reset-safety-v1",
   "foundation_base": {
-    "commit": "3a3c3b5d361108f78fe6ef0073869d3e18f49774",
-    "tree": "68e85ba4dfb0d458cb40a40ccc7ceb63405c028a"
+    "commit": "5d0de3915a0b44f90668d0a66ecb27bcd4f24d48",
+    "tree": "6d782f93f12495e16ba4d4158ec5e13ddf703006"
   },
   "recovery_entrypoint": "docs/SESSION_HANDOFF.md",
   "author": {
@@ -19,7 +19,7 @@
     "target": "https://github.com/manfromnowhere143/etzio.git",
     "visibility": "private",
     "default_branch": "main",
-    "verified": "2026-07-28",
+    "verified": "2026-07-29",
     "merge_policy": "squash_only_delete_branch",
     "actions_default_token": "read_only",
     "branch_protection": "unavailable_on_current_private_repository_plan"
@@ -57,6 +57,10 @@
     "bounded analysis leases and stable candidate identities",
     "byte-bound Python AST analyzer without a production filesystem walker",
     "lifecycle-validated append-only SQLite event streams and replay",
+    "uniform rollback-journal DELETE and synchronous EXTRA policy across every declared SQLite runtime",
+    "pre-open refusal of persistent WAL state with explicit offline migration required",
+    "exact WAL-reset fix classification plus SQLite minimum and major-version admission",
+    "retained runtime-reported SQLite version and source identity with isolated versus repository-context agreement",
     "distinct refusal, failure, cancellation, timeout, budget, completion, and closure states",
     "kernel-issued authority-bound modeled-fixture verification leases",
     "retained verifier trust and revocation snapshots for replayable lease assignment",
@@ -111,11 +115,11 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 659,
+    "validation_status": "local_release_suites_passed_prior_github_base_green",
+    "test_count": 675,
     "validated_runtimes": [
-      "CPython 3.11.15",
-      "CPython 3.14.2"
+      "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
+      "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
     ],
     "ruff_clean": true,
     "repository_policy_passed": true,
@@ -124,7 +128,7 @@
     "clean_fixtures": 1,
     "github_validated_commit": "ad90fb2b3629b2aa006c63894de3cd7880602a12",
     "github_actions_run_id": 30386314385,
-    "claim_boundary": "no real-world precision, finding validity, isolation, live authorization, learning, or superiority claim"
+    "claim_boundary": "closes Etzio-created exposure to the disclosed SQLite WAL-reset defect for the declared runtime matrix only; no general storage safety, real-world precision, finding validity, isolation, live authorization, learning, or superiority claim"
   },
   "external_blockers": [
     {
@@ -152,6 +156,7 @@
     "docs/decisions/0005-typed-verification-artifact-resolution.md",
     "docs/decisions/0006-atomic-modeled-receipt-admission.md",
     "docs/decisions/0007-explicit-verification-lease-recovery.md",
-    "docs/decisions/0008-typed-integrity-evidence-contract.md"
+    "docs/decisions/0008-typed-integrity-evidence-contract.md",
+    "docs/decisions/0009-uniform-sqlite-rollback-journal-safety.md"
   ]
 }

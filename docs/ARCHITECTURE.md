@@ -1,6 +1,6 @@
 # Etzio Architecture
 
-Status: **architecture foundation**, 2026-07-28.
+Status: **architecture foundation**, 2026-07-29.
 
 This document distinguishes implemented, modeled, proposed, and blocked behavior. A green
 test proves only its named fixture and invariant.
@@ -260,7 +260,13 @@ authority, target, decision time, typed payload, and previous event digest.
 `SQLiteEventStore`:
 
 - requires an explicit private filesystem path;
-- uses WAL and `synchronous=FULL`;
+- requires every declared runtime to use rollback-journal `DELETE` mode with
+  `synchronous=EXTRA`;
+- refuses a preexisting WAL header before SQLite opens the path, leaving conversion to an
+  explicit stop-the-world migration under a fixed runtime;
+- rejects SQLite before 3.37.0 and unknown major versions, classifies the exact 2026
+  WAL-reset fix lines for diagnostics, and refuses connection settings outside the
+  uniform policy;
 - stores exact canonical event bytes;
 - validates the full retained stream and proposed transition inside a
   `BEGIN IMMEDIATE` append transaction;
@@ -284,6 +290,8 @@ Limits:
 
 - Python’s SQLite API cannot connect through Etzio’s already validated file descriptor, so
   a hostile process under the same OS user retains a pathname-race opportunity;
+- connection diagnostics are observational rather than a continuous cross-process mode
+  monitor; a hostile same-user SQLite connection can race journal state after admission;
 - a coherent offline database rewrite is not detectable without a connected external
   latest-head catalog;
 - legacy checkpoint storage is opaque, while typed checkpoints are not yet persisted or
@@ -292,6 +300,11 @@ Limits:
 
 Production deployment therefore requires an isolated service identity, protected mount,
 trusted clock, and externally anchored event heads.
+
+The uniform rollback policy closes Etzio-created exposure to SQLite’s disclosed WAL-reset
+defect across the declared mixed-runtime matrix. It does not close filesystem-CAS/SQLite
+retention atomicity, same-user state replacement or mode manipulation, offline rewrites, or
+other SQLite, filesystem, kernel, device, and power-loss failure classes.
 
 ## Investigation plane
 

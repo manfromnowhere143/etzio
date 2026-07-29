@@ -1,6 +1,6 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-07-28, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-07-29, Asia/Jerusalem.
 
 This file describes Etzio only. It is not authority to access a live target, execute an
 exploit, use research credentials, spend, disclose, publish, deploy, or change repository
@@ -14,7 +14,7 @@ test "$(basename "$(git rev-parse --show-toplevel)")" = "etzio"
 git status --short --branch
 git log --oneline -6
 git remote -v
-sed -n '1,360p' docs/SESSION_HANDOFF.md
+cat docs/SESSION_HANDOFF.md
 python3.11 -m venv .venv
 .venv/bin/python -m pip install \
   --no-input \
@@ -35,7 +35,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0005](decisions/0005-typed-verification-artifact-resolution.md), and
 [ADR-0006](decisions/0006-atomic-modeled-receipt-admission.md), and
 [ADR-0007](decisions/0007-explicit-verification-lease-recovery.md), and
-[ADR-0008](decisions/0008-typed-integrity-evidence-contract.md).
+[ADR-0008](decisions/0008-typed-integrity-evidence-contract.md), and
+[ADR-0009](decisions/0009-uniform-sqlite-rollback-journal-safety.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -45,17 +46,17 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/integrity-evidence-contract-v1`
-- Stacked on: `agent/verification-lease-recovery-v1`
-- Branch base: `3a3c3b5d361108f78fe6ef0073869d3e18f49774`
-- Branch-base tree: `68e85ba4dfb0d458cb40a40ccc7ceb63405c028a`
+- Current foundation-integrity branch: `agent/sqlite-wal-reset-safety-v1`
+- Stacked on: `agent/integrity-evidence-contract-v1`
+- Branch base: `5d0de3915a0b44f90668d0a66ecb27bcd4f24d48`
+- Branch-base tree: `6d782f93f12495e16ba4d4158ec5e13ddf703006`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
 Resolve the current branch head, pull request, workflow state, visibility, and default branch
 from Git and GitHub. Do not infer them from this dated packet.
 
-The private remote and `main` default branch were verified on 2026-07-28. Read-only Actions
+The private remote and `main` default branch were verified on 2026-07-29. Read-only Actions
 permissions, SHA-pinned actions, squash-only merging, and automatic branch deletion were
 configured. GitHub branch protection/rulesets were unavailable for this private repository
 on the current account plan; never change visibility to obtain them.
@@ -115,6 +116,12 @@ exact authority
 - bounded analysis leases and stable candidate/claim identities;
 - byte-bound Python AST analysis with no production filesystem walker;
 - lifecycle-validated append-only SQLite storage and deterministic replay;
+- one uniform rollback-journal `DELETE`/`EXTRA` policy across the declared SQLite matrix,
+  with a pre-open persistent-WAL refusal and explicit offline-migration boundary;
+- exact WAL-reset-fix classification, SQLite 3.37 minimum and major-version admission, and
+  loaded-version/fix diagnostics;
+- retained runtime-reported SQLite version/source identity with isolated versus
+  repository-import-context agreement;
 - kernel-issued verification leases under the exact admitted
   `modeled_fixture_verification` grant;
 - complete verifier trust and revocation evidence retained with each issuance;
@@ -235,10 +242,13 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 
 ## Reproduced local evidence
 
-On the current candidate bytes, `make verify` passed under both CPython 3.11.15 and
-CPython 3.14.2:
+On the current candidate bytes, `make verify` passed under both declared runtimes:
 
-- 659 tests passed;
+- 675 tests passed;
+- CPython 3.11.15 loaded SQLite 3.53.1 and used `DELETE`/`EXTRA`;
+- CPython 3.14.2 loaded SQLite 3.51.2 and used `DELETE`/`EXTRA`;
+- each verification log retained `sqlite_source_id()` and proved that the isolated and
+  repository import contexts reported the same identity;
 - Ruff was clean;
 - the installed semantic protocol schema, three explicitly modeled legacy schemas, and
   repository policy passed;
@@ -347,6 +357,11 @@ Known-bads now cover:
   receipt-coverage partitions;
 - bounded SQLite writer contention, identical-commit reconciliation after one retry, and
   retryable `StoreBusyError` exhaustion without a corruption classification;
+- exact SQLite WAL-reset fix/backport boundaries, unsupported pre-3.37 and future-major
+  releases, matrix-wide fixed/affected rollback-policy agreement, and preexisting WAL
+  header refusal before ordinary startup;
+- removal of the SQLite source probe, repository-root `sqlite3` shadowing, and isolated
+  versus repository-context SQLite identity disagreement;
 - generic and direct-internal append bypass, receipt-event/evidence-store pairing mismatch,
   wrong-kind dedicated append, direct undersized-output event injection, and rollback with
   unchanged history on dedicated CAS validation failure;

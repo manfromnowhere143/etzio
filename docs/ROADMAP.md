@@ -1,6 +1,6 @@
 # Etzio Roadmap
 
-Status: **architecture foundation**, updated 2026-07-28.
+Status: **architecture foundation**, updated 2026-07-29.
 
 The roadmap advances by retained evidence, not calendar dates. A phase may start only when
 its predecessor’s named acceptance conditions are reproduced.
@@ -13,6 +13,8 @@ Evidence in the private repository:
 
 - sole-author provenance policy;
 - exact CPython patch matrix and hash-locked dependencies;
+- isolated and repository-context agreement on the runtime-reported SQLite version and
+  source ID in retained verification output;
 - least-privilege GitHub Actions pinned to immutable commit SHAs;
 - repository-policy known-bads and retained CI logs;
 - private remote, charter, security policy, architecture, frontier baseline, handoff, and
@@ -39,7 +41,8 @@ Status: **implemented for repository fixtures**.
 - exact manifest-backed clean and vulnerable fixtures;
 - bounded analysis leases;
 - stable, source-minimized static candidates;
-- lifecycle-validated compare-and-append SQLite events;
+- lifecycle-validated compare-and-append SQLite events under one matrix-wide
+  rollback-journal `DELETE`/`EXTRA` policy;
 - deterministic replay, interruption recovery, and distinct terminal states;
 - supported CLI with no arbitrary target path; and
 - known-bads for cryptographic, protocol, authority, evidence, lifecycle, budget,
@@ -53,6 +56,9 @@ Status: **running**.
 
 Implemented in this phase:
 
+- pre-open refusal of persistent WAL state, exact upstream WAL-fix classification,
+  explicit SQLite 3.37 minimum/major-version admission, and known-bads proving fixed and
+  affected accessors cannot choose different journal policies;
 - installed semantic per-kind wire schemas for all eleven typed objects and all eighteen event
   variants;
 - runtime/schema dispatch parity plus schema-expressible and runtime-only known-bads; and

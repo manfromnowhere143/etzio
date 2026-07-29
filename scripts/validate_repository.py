@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -78,6 +79,7 @@ REQUIRED_PATHS = (
     "docs/decisions/0006-atomic-modeled-receipt-admission.md",
     "docs/decisions/0007-explicit-verification-lease-recovery.md",
     "docs/decisions/0008-typed-integrity-evidence-contract.md",
+    "docs/decisions/0009-uniform-sqlite-rollback-journal-safety.md",
     "docs/decisions/README.md",
     "schemas/finding.schema.json",
     "etzio/schemas/__init__.py",
@@ -126,6 +128,7 @@ ALTERNATE_TOOL_CONFIG_NAMES = {
     "pytest": ("pytest.ini", ".pytest.ini", "tox.ini", "setup.cfg"),
     "Ruff": ("ruff.toml", ".ruff.toml"),
 }
+FORBIDDEN_ROOT_IMPORT_SHADOWS = ("sqlite3.py", "sqlite3")
 EXPECTED_MAKEFILE_LINES = (
     ".PHONY: demo model-demo test lint policy verify all",
     "ETZIO_PYTHON ?= python3",
@@ -164,6 +167,37 @@ EXPECTED_VERIFICATION_SCRIPT_LINES = (
     ),
     "exit 2",
     "fi",
+    'etzio_sqlite_identity="$(',
+    (
+        '"${etzio_python}" -I -c \'import sqlite3; connection = '
+        'sqlite3.connect(":memory:"); source_id = '
+        'connection.execute("SELECT sqlite_source_id()").fetchone(); '
+        'connection.close(); print(f"{sqlite3.sqlite_version}:{source_id[0]}")\''
+    ),
+    ')"',
+    'etzio_repository_sqlite_identity="$(',
+    (
+        '"${etzio_python}" -c \'import sqlite3; connection = '
+        'sqlite3.connect(":memory:"); source_id = '
+        'connection.execute("SELECT sqlite_source_id()").fetchone(); '
+        'connection.close(); print(f"{sqlite3.sqlite_version}:{source_id[0]}")\''
+    ),
+    ')"',
+    (
+        'if [[ "${etzio_repository_sqlite_identity}" != '
+        '"${etzio_sqlite_identity}" ]]; then'
+    ),
+    (
+        "printf 'Etzio SQLite identity changed under repository import context: "
+        "isolated=%s repository=%s\\n' "
+        '"${etzio_sqlite_identity}" "${etzio_repository_sqlite_identity}" >&2'
+    ),
+    "exit 2",
+    "fi",
+    (
+        "printf 'Etzio verification runtime: %s SQLite:%s\\n' "
+        '"${etzio_python_version}" "${etzio_sqlite_identity}"'
+    ),
     '"${etzio_python}" scripts/validate_repository.py',
     ('"${etzio_python}" -m ruff check --config pyproject.toml etzio tests scripts'),
     ('"${etzio_python}" -m pytest -q -c pyproject.toml --verify-mission-evidence tests'),
@@ -346,6 +380,19 @@ EXPECTED_RECEIPT_ADMISSION_PAYLOAD_FIELDS_V1 = frozenset(
 
 def required_path_issues(root: Path, required: tuple[str, ...] = REQUIRED_PATHS) -> list[str]:
     return [f"missing required repository file: {relative}" for relative in required if not (root / relative).is_file()]
+
+
+def root_import_shadow_issues(
+    root: Path,
+    forbidden: tuple[str, ...] = FORBIDDEN_ROOT_IMPORT_SHADOWS,
+) -> list[str]:
+    """Reject repository-root paths that can shadow security-relevant stdlib modules."""
+
+    return [
+        f"forbidden repository-root standard-library shadow: {relative}"
+        for relative in forbidden
+        if os.path.lexists(root / relative)
+    ]
 
 
 def _workflow_structure_lines(text: str) -> list[tuple[int, str]]:
@@ -1757,6 +1804,7 @@ def _tracked_artifact_issues() -> list[str]:
 
 def validate() -> list[str]:
     issues = required_path_issues(ROOT)
+    issues.extend(root_import_shadow_issues(ROOT))
 
     python_version = (ROOT / ".python-version").read_text(encoding="utf-8").strip()
     if not re.fullmatch(r"3\.\d+\.\d+", python_version):

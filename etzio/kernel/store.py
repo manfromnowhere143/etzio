@@ -25,6 +25,62 @@ TERMINAL_KINDS: Final = frozenset(
     }
 )
 _DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
+_SQLITE_HEADER_MAGIC: Final = b"SQLite format 3\x00"
+_SQLITE_HEADER_SIZE: Final = 100
+
+
+@dataclass(frozen=True, slots=True)
+class _SQLiteJournalPolicy:
+    journal_mode: str
+    synchronous_name: str
+    synchronous_value: int
+    wal_reset_bug_fixed: bool
+
+
+def _sqlite_wal_reset_bug_fixed(
+    version_info: tuple[int, int, int],
+) -> bool:
+    """Return whether this SQLite release contains the 2026 WAL-reset fix.
+
+    SQLite fixed the race in 3.51.3 and later, with explicit backports to the
+    3.44.6 and 3.50.7 patch lines. Other releases in Etzio's supported 3.x
+    range through 3.51.2 remain affected.
+    """
+
+    if (
+        type(version_info) is not tuple
+        or len(version_info) != 3
+        or any(
+            type(component) is not int or component < 0
+            for component in version_info
+        )
+    ):
+        raise EventStoreError("SQLite exposed an invalid version tuple")
+    if version_info[0] != 3 or version_info < (3, 37, 0):
+        raise EventStoreError("SQLite exposed an unsupported library version")
+    return (
+        version_info >= (3, 51, 3)
+        or (3, 50, 7) <= version_info < (3, 51, 0)
+        or (3, 44, 6) <= version_info < (3, 45, 0)
+    )
+
+
+def _sqlite_journal_policy(
+    version_info: tuple[int, int, int],
+) -> _SQLiteJournalPolicy:
+    """Select one safe journal policy for every supported Etzio runtime.
+
+    Journal mode is persistent database state but cached per connection. Etzio therefore
+    cannot safely mix WAL-capable and WAL-affected accessors against one database. Until
+    every declared runtime contains the upstream fix, all accessors use rollback journaling.
+    """
+
+    return _SQLiteJournalPolicy(
+        journal_mode="delete",
+        synchronous_name="EXTRA",
+        synchronous_value=3,
+        wal_reset_bug_fixed=_sqlite_wal_reset_bug_fixed(version_info),
+    )
 
 
 class EventStoreError(ProtocolError):
@@ -98,6 +154,8 @@ class SignedCheckpoint:
 class StoreDiagnostics:
     """A fixed, immutable read-only view of security-relevant store settings."""
 
+    sqlite_version: str
+    wal_reset_bug_fixed: bool
     journal_mode: str
     synchronous: int
     foreign_keys: bool
@@ -115,7 +173,10 @@ class _PreparedStorePath:
 class SQLiteEventStore:
     """Mission-local compare-and-append streams in one explicit SQLite database.
 
-    The database uses WAL mode and ``synchronous=FULL``.  Every append obtains a
+    Every supported runtime uses rollback-journal ``DELETE`` mode with
+    ``synchronous=EXTRA``. This uniform database-wide policy prevents a fixed-runtime
+    Etzio accessor from placing shared state in WAL underneath an accessor whose SQLite
+    release remains exposed to the 2026 WAL-reset defect. Every append obtains a
     ``BEGIN IMMEDIATE`` writer lock, verifies the complete existing mission stream and the
     proposed lifecycle transition, compares the caller's expected head, and commits one
     exact canonical event BLOB.
@@ -130,23 +191,61 @@ class SQLiteEventStore:
     """
 
     def __init__(self, path: str | os.PathLike[str]) -> None:
+        self._journal_policy = _sqlite_journal_policy(
+            sqlite3.sqlite_version_info,
+        )
         prepared = self._prepare_path(path)
         self.path = prepared.path
         try:
+            self._refuse_preexisting_wal(prepared.descriptor)
             self._connection = sqlite3.connect(str(self.path), isolation_level=None)
             self._verify_post_connect_identity(prepared)
             self._connection.execute("PRAGMA busy_timeout = 5000")
-            journal_mode = self._connection.execute("PRAGMA journal_mode = WAL").fetchone()
-            if journal_mode is None or str(journal_mode[0]).lower() != "wal":
-                raise EventStoreError("SQLite refused WAL journal mode")
-            self._connection.execute("PRAGMA synchronous = FULL")
+            initial_journal_mode = self._connection.execute(
+                "PRAGMA journal_mode"
+            ).fetchone()
+            if (
+                initial_journal_mode is None
+                or str(initial_journal_mode[0]).lower() != "delete"
+            ):
+                raise EventStoreError(
+                    "Etzio state must be in rollback-journal DELETE mode before use"
+                )
+            journal_mode = self._connection.execute(
+                "PRAGMA journal_mode = DELETE"
+            ).fetchone()
+            if (
+                journal_mode is None
+                or str(journal_mode[0]).lower()
+                != self._journal_policy.journal_mode
+            ):
+                raise EventStoreError(
+                    "SQLite refused the required safe journal mode"
+                )
+            self._connection.execute("PRAGMA synchronous = EXTRA")
             self._connection.execute("PRAGMA foreign_keys = ON")
             if self._connection.execute("PRAGMA foreign_keys").fetchone() != (1,):
                 raise EventStoreError("SQLite foreign-key enforcement is unavailable")
-            if self._connection.execute("PRAGMA synchronous").fetchone() != (2,):
-                raise EventStoreError("SQLite FULL synchronous mode is unavailable")
+            if self._connection.execute("PRAGMA synchronous").fetchone() != (
+                self._journal_policy.synchronous_value,
+            ):
+                raise EventStoreError(
+                    "SQLite refused the required safe synchronous mode"
+                )
+            if str(journal_mode[0]).lower() == "wal":
+                raise EventStoreError(
+                    "Etzio does not admit WAL under the declared runtime matrix"
+                )
             self._create_schema()
             self._verify_post_connect_identity(prepared)
+        except sqlite3.DatabaseError as exc:
+            connection = getattr(self, "_connection", None)
+            if connection is not None:
+                connection.close()
+            raise _sqlite_store_failure(
+                "could not initialize event store",
+                exc,
+            ) from exc
         except Exception:
             connection = getattr(self, "_connection", None)
             if connection is not None:
@@ -154,6 +253,37 @@ class SQLiteEventStore:
             raise
         finally:
             os.close(prepared.descriptor)
+
+    @staticmethod
+    def _refuse_preexisting_wal(descriptor: int) -> None:
+        """Refuse persistent WAL state before SQLite opens the database path."""
+
+        try:
+            file_size = os.fstat(descriptor).st_size
+            if file_size == 0:
+                return
+            header = os.pread(descriptor, _SQLITE_HEADER_SIZE, 0)
+        except OSError as exc:
+            raise EventStoreError(
+                f"cannot inspect event-store journal header: {exc}"
+            ) from exc
+        if len(header) != _SQLITE_HEADER_SIZE:
+            raise EventStoreCorruptionError(
+                "existing event store has a truncated SQLite header"
+            )
+        if header[: len(_SQLITE_HEADER_MAGIC)] != _SQLITE_HEADER_MAGIC:
+            raise EventStoreCorruptionError(
+                "existing event store has an invalid SQLite header"
+            )
+        journal_versions = header[18:20]
+        if 2 in journal_versions:
+            raise EventStoreError(
+                "preexisting WAL state requires an explicit offline migration"
+            )
+        if journal_versions != b"\x01\x01":
+            raise EventStoreCorruptionError(
+                "existing event store has invalid journal-format bytes"
+            )
 
     @classmethod
     def _prepare_path(cls, path: str | os.PathLike[str]) -> _PreparedStorePath:
@@ -440,9 +570,24 @@ class SQLiteEventStore:
             ) from exc
         if journal is None or synchronous is None or foreign_keys is None:
             raise EventStoreCorruptionError("SQLite returned incomplete diagnostics")
+        journal_value = str(journal[0]).lower()
+        synchronous_value = int(synchronous[0])
+        if (
+            journal_value != self._journal_policy.journal_mode
+            or synchronous_value
+            != self._journal_policy.synchronous_value
+            or journal_value == "wal"
+        ):
+            raise EventStoreCorruptionError(
+                "SQLite security settings differ from the admitted journal policy"
+            )
         return StoreDiagnostics(
-            journal_mode=str(journal[0]).lower(),
-            synchronous=int(synchronous[0]),
+            sqlite_version=sqlite3.sqlite_version,
+            wal_reset_bug_fixed=(
+                self._journal_policy.wal_reset_bug_fixed
+            ),
+            journal_mode=journal_value,
+            synchronous=synchronous_value,
             foreign_keys=bool(foreign_keys[0]),
             database_mode=mode,
         )
