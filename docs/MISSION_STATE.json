@@ -154,7 +154,7 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_release_suites_pending_github_reproduction",
+    "validation_status": "local_and_github_release_suites_passed",
     "test_count": 988,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -173,7 +173,11 @@
     "adapter_qualification_focused_tests": 81,
     "claim_boundary": "adds a versioned deterministic networkless contract and qualification harness for repository-owned signed anchor catalog and monitor fixture packages with byte-bound anchor registration leaves RFC 9162 inclusion and consistency verification equal-size root-change refusal unanimous monitor agreement full-hull freshness and sealed provider-neutral mapping to anchor references and one HeadCheckpointFloorV1; it is not consumed by modeled lifecycle finality and establishes no native RFC 9162 RFC 9942 RFC 9943 SCITT or Rekor qualification trustworthy UTC real publication time independent observers or administration external durability availability real non-equivocation survival of local loss same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim",
     "head_authority_qualification_focused_tests": 78,
-    "head_authority_qualification_cases": 9
+    "head_authority_qualification_cases": 9,
+    "github_validated_commit": "377ed659da407dc87e4d3ae20cc00792914b5b44",
+    "github_actions_run_id": 30588650930,
+    "github_pull_request": 13,
+    "gitguardian_passed": true
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
