@@ -43,7 +43,13 @@ scientific authority remain in the kernel.
 > fixed all-source roster. It retains the overlapping time sources' conservative outer
 > hull, evaluates revocation validity, staleness, and floor agreement against that complete
 > hull, and freshly reauthenticates exact signed bytes before producing a sealed
-> provider-neutral mapping. Modeled finality and lifecycle commands do not consume that
+> provider-neutral mapping. A second versioned networkless contract closes the remaining
+> two evidence kinds: it authenticates repository-owned Ed25519-signed anchor, catalog, and
+> monitor packages, recomputes RFC 9162 inclusion proofs against a byte-bound Etzio
+> anchor-registration leaf, recomputes RFC 9162 consistency proofs from the exact retained
+> predecessor root, refuses an unchanged tree size whose root changed, and requires
+> unanimous monitor agreement on one catalog head before mapping a sealed
+> `HeadCheckpointFloorV1`. Modeled finality and lifecycle commands do not consume that
 > mapping. No real provider or native RFC 3161, PKIX, TUF, COSE, SCITT, or transparency
 > client is qualified. Etzio does not establish trustworthy UTC, current real revocation,
 > external durability or independence, execute an exploit, adjudicate a finding, access a
@@ -71,11 +77,12 @@ That yields six operating laws:
 - **Today:** the supported fixture CLI reaches stable candidates and `mission_closed` on
   the permanent SQLite legacy profile. Separate kernel APIs retain modeled verification
   lifecycle statements; an optional empty-store facade exercises modeled finality.
-- **Signed-fixture qualification:** a separate deterministic, networkless harness proves
+- **Signed-fixture qualification:** two separate deterministic, networkless harnesses prove
   exact request/profile/root/policy authentication, complete-roster conservative time
-  fusion, full-hull revocation validity/freshness/floor checks, and sealed mapping for
-  repository-owned signed fixtures. It is not connected to modeled finality or lifecycle
-  admission.
+  fusion, full-hull revocation validity/freshness/floor checks, RFC 9162 inclusion and
+  consistency verification, unanimous monitor agreement on one catalog head, and sealed
+  mapping for repository-owned signed fixtures. Neither is connected to modeled finality or
+  lifecycle admission.
 - **Modeled evidence:** receipt outputs and integrity-provider assertions are authenticated
   or code-derived fixture statements. The modeled-finality provider assertions remain
   unsigned and code-derived; the separately qualified signed packages do not make them
@@ -301,7 +308,16 @@ flowchart TB
         QN["Contract boundary<br/>not consumed by pending transition<br/>or any lifecycle command"]
     end
 
-    NEXT["Exact next gate<br/>networkless anchor/catalog/monitor qualification<br/>+ durable blocked disposition/recovery"]
+    subgraph QUAL3["Implemented networkless head-authority qualification · separate proof surface"]
+        direction LR
+        HP["Exact profile · trust root · log origins<br/>2 anchors · 1 catalog · 2 monitors"]
+        HA["Byte-bound registration leaf<br/>RFC 9162 inclusion proof recomputed"]
+        HC["RFC 9162 consistency from retained root<br/>equal size cannot change root"]
+        HM["Unanimous monitor agreement<br/>split view refused"]
+        HN["Contract boundary<br/>not consumed by pending transition<br/>or any lifecycle command"]
+    end
+
+    NEXT["Exact next gate<br/>durable blocked-finality disposition<br/>+ governed recovery decision"]
     EXT["Future full adapter set<br/>independently administered, authenticated,<br/>durable, monitored, and qualified"]
 
     E --> D --> P1 --> RH --> P2 --> P3 --> P4 --> OK
@@ -417,13 +433,16 @@ networkless time/revocation qualification harness now proves exact signed-fixtur
 authentication, all-source outer-hull time semantics, full-hull revocation
 validity/freshness/floors, and sealed provider-neutral mapping. It is not consumed by the
 modeled pending-transition or lifecycle path and qualifies no real provider or native
-RFC 3161/TUF client. The transactional SQLite vault closes the ordinary
+RFC 3161/TUF client. The V1 networkless head-authority harness additionally proves
+byte-bound anchor registration, RFC 9162 inclusion and consistency verification against the
+published reference tree, catalog rollback and equivocation refusal, and unanimous monitor
+agreement; it qualifies no real transparency log and proves no independent observer. The transactional SQLite vault closes the ordinary
 filesystem-staging/SQLite retention split for all four implemented byte-claiming event
 boundaries at the logical transaction layer. Completing the foundation-integrity boundary
 still requires:
 
-1. extend the deterministic networkless harness to signed-fixture anchor, catalog, and
-   monitor adapters, and add durable blocked-finality disposition plus governed recovery;
+1. specify and prove durable blocked-finality disposition, exact reason, policy-authorized
+   recovery decision, and recovery replay;
 2. qualify independently administered trusted-time, revocation, anchor, catalog, and
    monitor providers, then connect an explicitly admitted profile without weakening the
    retained recovery state machine;
@@ -452,6 +471,7 @@ are measurements, never authority.
 - [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
 - [Architecture decisions](docs/decisions/README.md)
 - [Networkless time/revocation adapter qualification decision](docs/decisions/0012-networkless-time-revocation-adapter-qualification.md)
+- [Networkless head-authority adapter qualification decision](docs/decisions/0013-networkless-head-authority-adapter-qualification.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 

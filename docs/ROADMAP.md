@@ -155,7 +155,18 @@ Implemented in this phase:
   substitution, cross-request replay, malformed or noncanonical wire, incomplete or
   reordered rosters, disjoint or over-wide intervals, future/stale/expired revocation
   state, floor disagreement and rollback, mapping confusion, deterministic retry, corpus
-  substitution, and sealed-boundary abuse.
+  substitution, and sealed-boundary abuse;
+- a separate versioned, networkless anchor, catalog, and monitor qualification contract
+  binding an exact copied head-authority profile, trust root, validation policy, log
+  origins, and role-separated roster of at least two anchor sources, exactly one catalog
+  source, and at least two monitor witnesses; and
+- RFC 9162 inclusion verification against a byte-bound Etzio anchor-registration leaf,
+  RFC 9162 consistency verification from the exact retained predecessor root, refusal of an
+  unchanged tree size whose root changed, unanimous monitor agreement on one catalog head,
+  full-hull freshness, sealed mapping to provider-neutral anchor references and one
+  `HeadCheckpointFloorV1`, and seventy-eight focused tests and known-bads covering the
+  published RFC reference tree, tampered, truncated, padded, forged, and forked proofs,
+  rollback, equivocation, split view, substitution, staleness, and sealed-boundary abuse.
 
 Current canonical command writers use receipt-coverage status for every verification-intent
 closure. Replay also accepts the exact pre-recovery zero-candidate `completed` shape as a
@@ -164,9 +175,8 @@ claim.
 
 Remaining required:
 
-1. extend the networkless qualification harness to anchor, catalog, and monitor adapters,
-   and add durable blocked-finality disposition and governed recovery before connecting any
-   external provider;
+1. specify and prove durable blocked-finality disposition, exact reason, policy-authorized
+   recovery decision, and recovery replay before connecting any external provider;
 2. only then qualify independently administered providers and integrate accepted adapter
    outputs without weakening the retained finality state machine;
 3. prove external latest-head authority survives local loss, then close the documented

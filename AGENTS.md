@@ -96,17 +96,29 @@ floors, and freshly reauthenticates sealed mappings into provider-neutral eviden
 Eighty-one focused tests and known-bads cover substitution, replay, staleness, ambiguity,
 malformed wire, incomplete rosters, and sealed-boundary abuse.
 
-The qualification harness is contract proof only and is not consumed by modeled finality or
-lifecycle commands. Modeled finality still uses unsigned, deterministic, code-derived
-provider assertions. No real or native provider is connected, and no external durability,
-trustworthy UTC, current real-world revocation, independent administration,
-non-equivocation, execution, or finding claim follows.
+A second versioned, networkless qualification contract now closes the remaining two
+integrity evidence kinds. It pins an exact copied head-authority profile, trust root,
+validation policy, role-separated anchor, catalog, and monitor roster, log origins, and
+codec identities. It authenticates exact repository-fixture statements before parsing
+claims, recomputes RFC 9162 inclusion proofs against a byte-bound Etzio anchor-registration
+leaf, recomputes RFC 9162 consistency proofs from the exact retained predecessor root,
+refuses an unchanged tree size whose root changed, requires unanimous monitor agreement on
+one catalog head, evaluates freshness only against the complete qualified time hull, and
+freshly reauthenticates sealed mappings into provider-neutral anchor references and one
+`HeadCheckpointFloorV1`. Seventy-eight focused tests and known-bads cover the published
+RFC reference tree, tampered, truncated, padded, forged, and forked proofs, rollback,
+equivocation, split view, substitution, staleness, and sealed-boundary abuse.
+
+Both qualification harnesses are contract proof only and are not consumed by modeled
+finality or lifecycle commands. Modeled finality still uses unsigned, deterministic,
+code-derived provider assertions. No real or native provider is connected, and no external
+durability, trustworthy UTC, current real-world revocation, independent administration,
+real non-equivocation, execution, or finding claim follows.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. extend the networkless qualification harness to anchor, catalog, and monitor adapters,
-   and add durable blocked-finality disposition and governed recovery before connecting any
-   external provider;
+1. specify and prove durable blocked-finality disposition, exact reason, policy-authorized
+   recovery decision, and recovery replay before connecting any external provider;
 2. only then qualify independently administered providers and integrate accepted adapter
    outputs without weakening the retained recovery state machine;
 3. prove external latest-head authority survives local loss, then close the documented

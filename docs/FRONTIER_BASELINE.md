@@ -80,9 +80,23 @@ same-request retry make the repository-fixture qualification reproducible.
 This is a common contract and harness, not RFC 3161, PKIX, TUF, COSE, SCITT, Rekor, or any
 named-provider conformance. It does not establish truthful UTC, current real-world
 revocation, separate operators, independent administration, external storage or durability,
-availability, consistency, or non-equivocation. The next gate extends the same networkless
-harness to anchor, catalog, and monitor adapters and adds durable blocked-finality recovery
-before any external provider connection.
+availability, consistency, or non-equivocation.
+
+ADR-0013 closes the remaining two evidence kinds under the same discipline. Its exact copied
+head-authority profile binds the trust root, validation policy, log origins, and a fixed
+roster of at least two anchor sources, exactly one catalog source, and at least two monitor
+witnesses. It recomputes RFC 9162 inclusion proofs against a byte-bound Etzio
+anchor-registration leaf, recomputes RFC 9162 consistency proofs from the exact retained
+predecessor root, refuses an unchanged tree size whose root changed, and requires unanimous
+monitor agreement on one catalog head before mapping a sealed `HeadCheckpointFloorV1`. The
+Merkle core is validated against the published RFC 6962/9162 reference tree, so correctness
+does not rest on agreement with Etzio's own prover.
+
+This remains a common contract and harness, not RFC 9162, RFC 9942, RFC 9943, SCITT, or
+Rekor conformance; no native wire format, certificate path, or provider client is parsed.
+Unanimous fixture monitors prove the acceptance rule for split-view detection, not the
+existence of independent observers. The next gate adds durable blocked-finality disposition
+and governed recovery before any external provider connection.
 
 ## Required benchmark portfolio
 

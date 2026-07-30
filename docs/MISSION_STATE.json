@@ -1,6 +1,6 @@
 {
   "schema_version": "etzio.mission_state.v2",
-  "updated": "2026-07-29",
+  "updated": "2026-07-31",
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
@@ -29,8 +29,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "networkless_anchor_catalog_monitor_and_blocked_finality_contract",
-    "next_session_pickup": "extend the versioned deterministic networkless adapter qualification boundary from the completed trusted-time and revocation tranche to anchor registration receipts external head catalogs and monitor witnesses together with a durable blocked-finality disposition and governed recovery contract; preserve the retained lifecycle state machine and do not connect any real provider until the complete networkless contract and known-bads pass",
+    "next_gate": "durable_blocked_finality_disposition_and_governed_recovery",
+    "next_session_pickup": "specify and prove a durable blocked-finality disposition, exact reason, policy-authorized recovery decision, atomic persistence point, crash recovery, and database-global barrier interaction; the networkless time, revocation, anchor, catalog, and monitor qualification boundaries are complete and remain unconsumed by lifecycle finality; do not connect any real provider until the durable blocked-state contract and its known-bads pass",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -109,6 +109,12 @@
     "full-hull half-open revocation validity and bounded-staleness qualification with exact predecessor root version and snapshot continuity one metadata source and unanimous fixed floor witnesses per required namespace",
     "privately sealed freshly reauthenticated trusted-time revocation and provider-neutral mapping results with exact retained BLOB-to-reference closure and no direct or dataclass-copy construction",
     "content-addressed deterministic adapter qualification corpus binding implementation profile vector ordered cases exact time intervals and revocation adapter states with a sealed ten-case report and adversarial conformance known-bads",
+    "versioned networkless anchor catalog and monitor qualification contract with copied exact head-authority profile trust root validation policy log origins role-separated roster and codec bindings",
+    "byte-bound AnchorRegistrationLeafV1 registration with RFC 9162 inclusion verification to each anchor log's own claimed root and refusal of any receipt claiming another leaf",
+    "RFC 9162 consistency verification from the exact retained predecessor root with rollback refusal and refusal of an unchanged tree size whose root changed",
+    "unanimous monitor agreement on one catalog log origin tree size and root hash with split-view refusal and witnessed-source binding",
+    "full-hull head freshness plus privately sealed freshly reauthenticated anchor catalog and provider-neutral head-authority mapping to exact anchor references and one HeadCheckpointFloorV1",
+    "content-addressed deterministic head-authority qualification corpus with a sealed nine-case report and adversarial conformance known-bads validated against the published RFC 6962 and RFC 9162 reference tree",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -117,14 +123,14 @@
     "original in-memory ten-unit behavior loop",
     "modeled target and eight-case verdict corpus",
     "repository-owned deterministic modeled-finality time revocation anchor catalog and monitor sources",
-    "repository-owned signed trusted-time and revocation qualification packages without external provider acquisition native-format validation or lifecycle authority",
+    "repository-owned signed trusted-time revocation anchor catalog and monitor qualification packages without external provider acquisition native-format validation independent observers or lifecycle authority",
     "unsigned canonical code-derived provider assertions without independently authenticated external observations",
     "process-local modeled anchor and catalog state without external durability or independent administration",
     "opaque modeled output semantics without a structured execution run identity",
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "networkless anchor catalog monitor and durable blocked-finality qualification followed by independently administered trusted-time revocation anchor catalog and monitor adapters replacing deterministic fixture assertions inside the retained lifecycle contract",
+    "durable blocked-finality qualification followed by independently administered trusted-time revocation anchor catalog and monitor adapters replacing deterministic fixture assertions inside the retained lifecycle contract",
     "externally durable authenticated latest-head authority and witnessing that survives local database loss",
     "durable blocked disposition reason and governed recovery decision",
     "structured independently produced execution effect measured-environment and termination evidence",
@@ -148,8 +154,8 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 910,
+    "validation_status": "local_release_suites_pending_github_reproduction",
+    "test_count": 988,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -165,11 +171,9 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "github_validated_commit": "3c7a30038de17a673674c81a36a3a3197f1d64e2",
-    "github_actions_run_id": 30491151887,
-    "github_pull_request": 12,
-    "gitguardian_passed": true,
-    "claim_boundary": "adds a versioned deterministic networkless contract and qualification harness for repository-owned signed trusted-time and revocation fixture packages with exact profile root policy request source interval freshness floor and retained-byte bindings plus sealed provider-neutral mapping; it is not consumed by modeled lifecycle finality and establishes no native RFC 3161 TUF or provider-format qualification trustworthy UTC current real revocation independent administration external durability non-equivocation same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim"
+    "claim_boundary": "adds a versioned deterministic networkless contract and qualification harness for repository-owned signed anchor catalog and monitor fixture packages with byte-bound anchor registration leaves RFC 9162 inclusion and consistency verification equal-size root-change refusal unanimous monitor agreement full-hull freshness and sealed provider-neutral mapping to anchor references and one HeadCheckpointFloorV1; it is not consumed by modeled lifecycle finality and establishes no native RFC 9162 RFC 9942 RFC 9943 SCITT or Rekor qualification trustworthy UTC real publication time independent observers or administration external durability availability real non-equivocation survival of local loss same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim",
+    "head_authority_qualification_focused_tests": 78,
+    "head_authority_qualification_cases": 9
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -196,7 +200,7 @@
   },
   "external_blockers": [
     {
-      "capability": "externally proved time revocation freshness and head durability",
+      "capability": "externally proved time revocation head durability and non-equivocation",
       "blocker": "qualified independently administered providers trust roots retention policy and explicit operational authority"
     },
     {
@@ -232,6 +236,7 @@
     "docs/decisions/0009-uniform-sqlite-rollback-journal-safety.md",
     "docs/decisions/0010-transactional-evidence-vault.md",
     "docs/decisions/0011-crash-safe-modeled-integrity-finality.md",
-    "docs/decisions/0012-networkless-time-revocation-adapter-qualification.md"
+    "docs/decisions/0012-networkless-time-revocation-adapter-qualification.md",
+    "docs/decisions/0013-networkless-head-authority-adapter-qualification.md"
   ]
 }

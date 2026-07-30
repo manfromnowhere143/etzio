@@ -1,6 +1,6 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-07-29, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-07-31, Asia/Jerusalem.
 
 This file describes Etzio only. It is not authority to access a live target, execute an
 exploit, use research credentials, spend, disclose, publish, deploy, or change repository
@@ -39,7 +39,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0009](decisions/0009-uniform-sqlite-rollback-journal-safety.md), and
 [ADR-0010](decisions/0010-transactional-evidence-vault.md), and
 [ADR-0011](decisions/0011-crash-safe-modeled-integrity-finality.md), and
-[ADR-0012](decisions/0012-networkless-time-revocation-adapter-qualification.md).
+[ADR-0012](decisions/0012-networkless-time-revocation-adapter-qualification.md), and
+[ADR-0013](decisions/0013-networkless-head-authority-adapter-qualification.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -50,10 +51,9 @@ memory. A green check validates only what it names.
 - Engine: **Etzio**
 - Canonical branch: `main`
 - Current foundation-integrity branch:
-  `agent/time-revocation-adapter-qualification-v1`
-- Stacked on: `agent/integrity-finality-enforcement-v1`
-- Branch base: `d88aa73a3186c380f42181293ceef3e16a53b0e3`
-- Branch-base tree: `e5576962cd2fff0976f0b806169ef87eacf50950`
+  `agent/head-authority-adapter-qualification-v1`
+- Stacked on: `agent/time-revocation-adapter-qualification-v1`
+- Branch base: `7a5ab21`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -350,6 +350,80 @@ real-world revocation, external availability/durability/non-equivocation, lifecy
 finality, execution, finding, or live-target authority follows. The existing modeled
 finality facade still consumes its separate unsigned code-derived fixture assertions.
 
+### Implemented networkless anchor, catalog, and monitor qualification
+
+- [ADR-0013](decisions/0013-networkless-head-authority-adapter-qualification.md)
+  and `etzio/kernel/head_authority_adapters_v1.py` define a separate version-1,
+  repository-owned, networkless head-authority qualification boundary; it does not add a
+  protocol-v1 object kind, store profile, lifecycle command, provider call, or finality
+  phase;
+- one copied `HeadAuthorityTrustProfileV1` content-binds the exact service, environment,
+  validation policy, trust root, fixed source roster, roles, log origins, distinct fixture
+  keys and principals, provider-policy identities, codec profiles, and head-staleness
+  ceiling. The roster requires at least two anchor sources over distinct log origins,
+  exactly one catalog source, and at least two monitor sources witnessing the catalog's
+  exact log origin;
+- three distinct Ed25519 signature domains separate anchor-receipt, catalog, and monitor
+  fixture packages, and all three differ from every ADR-0012 domain, so no time or
+  revocation package can authenticate into a head-authority role;
+- package authentication resolves the source exclusively from the retained profile,
+  verifies the exact signed statement bytes before parsing provider-controlled claims, and
+  maps the complete canonical signed package to one typed `ProviderEvidenceBlobV1`;
+- the registered object is one closed canonical `AnchorRegistrationLeafV1` binding contract
+  version, service, environment, mission, instance sequence, anchor policy, and anchor
+  statement. The qualifier recomputes its RFC 9162 leaf hash from the request and refuses
+  any authenticated receipt claiming a different leaf, so a receipt for another statement,
+  mission, sequence, or policy cannot satisfy the request even when its own proof is
+  internally valid;
+- `verify_merkle_inclusion_v1` implements RFC 9162 section 2.1.3.2 and
+  `verify_merkle_consistency_v1` implements section 2.1.4.2 over SHA-256 with the
+  domain-separated `0x00` leaf and `0x01` node prefixes. Both recompute the claimed roots
+  and refuse proofs that are shorter or longer than the tree geometry requires;
+- every anchor source must carry a verifying inclusion proof to its own claimed root, must
+  not regress below its retained tree size, and must agree exactly on the anchor statement.
+  Anchor sources are deliberately not required to agree on tree size or root, because each
+  is an independent log;
+- the catalog head must carry a verifying consistency proof from the exact retained
+  predecessor size and root; an unchanged tree size must retain its exact root and carry an
+  empty proof; and the instance-global and mission heads may not regress;
+- every monitor must name the exact catalog source and agree exactly on log origin, tree
+  size, and root hash. Unanimity is required, so a single disagreeing witness refuses the
+  bundle instead of being outvoted;
+- anchor, catalog, and monitor freshness are evaluated only against the complete freshly
+  reauthenticated ADR-0012 qualified time hull under the exact retained staleness ceiling;
+- authenticated packages, qualified anchor and catalog bundles, provider-neutral mapped
+  inputs, and the qualification report are privately constructed sealed exact types.
+  Consequential mapping freshly reauthenticates retained request and package bytes and
+  requires exact BLOB/reference coverage across the anchor references and head floor;
+- the sealed catalog bundle constructs one `HeadCheckpointFloorV1`, whose own constructor
+  reapplies the ADR-0008 genesis, attestation-provenance, and mission-not-ahead rules, so a
+  qualified bundle can never produce a floor the integrity contract would reject;
+- the content-addressed corpus manifest binds the adapter implementation, profile, vector,
+  ordered cases, each anchor adapter's source, log origin, and ordered leaf digests, the
+  catalog adapter's ordered leaf digests and head projection, each monitor's source and
+  witnessed leaves, and the retained catalog prefix and root. The deterministic harness
+  builds real Merkle trees and computes genuine proofs, so no case can pass by agreeing
+  with a precomputed constant; and
+- 78 focused adversarial tests additionally prove the published RFC 6962/9162 reference
+  tree heads for sizes zero through eight, all 36 reference inclusion proofs and all 36
+  reference consistency proofs, leaf/node domain separation, tampered, truncated, padded,
+  substituted, forked, and unbounded proof refusal, roster and log-origin requirements,
+  cross-request replay, foreign-leaf and foreign-statement receipts, forged proofs,
+  asserted roots without proofs, tree and head rollback, equal-size equivocation, monitor
+  split view and witness substitution, half-open freshness at both boundaries, exact
+  evidence coverage, corpus and adapter substitution, no ambient clock or network
+  dependency, and direct construction of every sealed result.
+
+This establishes deterministic authentication and semantic qualification of
+repository-owned signed fixture packages under the exact retained head-authority profile
+only. Distinct fixture labels, principals, keys, and log origins do not prove independent
+operators, administration, storage, or observers. No RFC 9162, RFC 9942, RFC 9943, SCITT,
+Rekor, or provider-native parser/client is qualified; no trustworthy UTC, real publication
+time, external availability/durability, real-world non-equivocation, survival of local
+database loss, lifecycle finality, execution, finding, or live-target authority follows.
+The existing modeled finality facade still consumes its separate unsigned code-derived
+fixture assertions.
+
 ### Implemented for modeled verification admission and recovery
 
 - canonical one-attestation signed verifier receipts;
@@ -379,14 +453,19 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
-## Current adapter-qualification release evidence
+## Current head-authority qualification release evidence
 
-On the hardened trusted-time/revocation qualification candidate, the canonical release
-command passed under both declared local runtimes:
+On the networkless anchor, catalog, and monitor qualification candidate, the canonical
+release command passed under both declared local runtimes:
 
-- 910 tests passed;
-- the focused adapter-qualification file passed all 81 tests;
-- the deterministic qualification report retained all ten ordered cases;
+- 988 tests passed;
+- the focused head-authority qualification file passed all 78 tests;
+- the deterministic head-authority report retained all nine ordered cases;
+- the Merkle core reproduced the published RFC 6962/9162 reference tree heads for sizes
+  zero through eight and verified all 36 reference inclusion proofs and all 36 reference
+  consistency proofs;
+- the inherited focused adapter-qualification file passed all 81 tests;
+- the inherited deterministic qualification report retained all ten ordered cases;
 - CPython 3.11.15 loaded SQLite 3.53.1 and used `DELETE`/`EXTRA`;
 - CPython 3.14.2 loaded SQLite 3.51.2 and used `DELETE`/`EXTRA`;
 - both runtimes retained their complete `sqlite_source_id()` values and proved isolated
@@ -396,10 +475,10 @@ command passed under both declared local runtimes:
   retained-evidence checks passed; and
 - `git diff --check` passed.
 
-The CPython 3.11 test suite completed in 474.94 seconds and the CPython 3.14 suite
-completed in 484.35 seconds. Each complete release entrypoint also ran the modeled
-demonstrations and the governed vulnerable and clean fixture scans. The working-tree
-status was unchanged by validation.
+The CPython 3.11 test suite completed in 468.78 seconds and the CPython 3.14 suite
+completed in 482.84 seconds; the complete release entrypoints took 472 and 486 seconds.
+Each complete release entrypoint also ran the modeled demonstrations and the governed
+vulnerable and clean fixture scans. The working-tree status was unchanged by validation.
 
 The retained SQLite source identities were:
 
@@ -408,21 +487,20 @@ The retained SQLite source identities were:
 - CPython 3.14.2 / SQLite 3.51.2:
   `2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075`.
 
-Private GitHub Actions run
-[`30491151887`](https://github.com/manfromnowhere143/etzio/actions/runs/30491151887)
-reproduced repository policy, both declared runtime suites, package build,
-outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on exact
+GitHub Actions reproduction for this tranche is pending; resolve the current run,
+pull-request, and GitGuardian state from GitHub rather than from this packet. The inherited
+trusted-time/revocation tranche was reproduced by private run
+[`30491151887`](https://github.com/manfromnowhere143/etzio/actions/runs/30491151887) on
 implementation commit
-[`3c7a30038de17a673674c81a36a3a3197f1d64e2`](https://github.com/manfromnowhere143/etzio/commit/3c7a30038de17a673674c81a36a3a3197f1d64e2);
-GitGuardian also passed. Draft
-[#12](https://github.com/manfromnowhere143/etzio/pull/12) is stacked on the
-integrity-finality branch. This evidence-only handoff and mission-state update follows the
-validated implementation commit.
+[`3c7a30038de17a673674c81a36a3a3197f1d64e2`](https://github.com/manfromnowhere143/etzio/commit/3c7a30038de17a673674c81a36a3a3197f1d64e2),
+with draft [#12](https://github.com/manfromnowhere143/etzio/pull/12) stacked on the
+integrity-finality branch.
 
 The evidence scope is repository-owned deterministic fixtures. It validates the
 contract/harness boundary described above, not a real provider, native provider format,
-truthful clock, current external revocation state, lifecycle integration, execution,
-finding, or live-target authority.
+truthful clock, real publication time, current external revocation state, independent
+observers, external durability, real-world non-equivocation, survival of local database
+loss, lifecycle integration, execution, finding, or live-target authority.
 
 ## Current integrity-finality release evidence
 
@@ -543,6 +621,21 @@ evidence remains fixture-scoped.
 
 Known-bads now cover:
 
+- head-authority profile/root/policy/service/environment/source/role/log-origin/key/
+  principal/codec substitution; rosters missing a required anchor, catalog, or monitor;
+  anchor sources sharing one log origin; monitors witnessing a foreign log origin or
+  source; the published RFC 6962/9162 reference tree heads for sizes zero through eight;
+  all 36 reference inclusion proofs and all 36 reference consistency proofs; leaf versus
+  node domain separation; tampered, truncated, padded, substituted-leaf, out-of-range,
+  forked, and unbounded proofs; asserted roots carried without a verifying proof; anchor
+  and catalog tree rollback; equal-size root change; monitor split view; foreign-leaf and
+  foreign-statement receipts; cross-request replay; resigned request, log-origin, statement,
+  and claim substitution; invalid signatures; revoked fixture keys; signature-domain
+  substitution across roles; half-open head freshness at both boundaries; instance-global
+  and mission head regression; a mission head above the global head; exact evidence
+  coverage; corpus-manifest, adapter-order, and retained-root substitution; absence of any
+  ambient clock or network dependency; and direct construction of every sealed
+  head-authority result;
 - adapter profile/root/policy/service/environment/source/role/namespace/key/principal/
   codec substitution; revoked, unknown, wrong-role, and invalid-signature fixture keys;
   noncanonical or malformed signed framing; nonce, imprint, purpose, event, transition,
@@ -719,26 +812,25 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup:** extend the completed versioned, networkless
-trusted-time/revocation qualification boundary to authenticated anchor-registration
-receipts, external head-catalog floors, and monitor-witness evidence. Specify and prove a
-durable blocked-finality disposition, exact reason, policy-authorized recovery decision,
-and recovery replay contract in the same dependency-complete tranche. Keep acquisition
-repository-owned and deterministic; add known-bads for registration replay, inclusion and
-consistency proof substitution, catalog rollback/equivocation/local-loss recovery,
-witness disagreement, blocked-state mutation, and unauthorized recovery. Do not connect
-a real provider, alter the retained lifecycle state machine, add finder breadth, or add
-execution capability.
+**Exact next-session pickup:** the networkless anchor, catalog, and monitor qualification
+boundary is complete. Specify and prove a durable blocked-finality disposition, exact
+reason, policy-authorized recovery decision, atomic persistence point, crash recovery, and
+database-global barrier interaction as the next dependency-complete tranche. Keep
+acquisition repository-owned and deterministic; add known-bads for blocked-state mutation,
+unauthorized recovery, duplicate or conflicting disposition, and recovery replay after
+interruption at every immutable phase. Do not connect a real provider, alter the retained
+lifecycle state machine, add finder breadth, or add execution capability.
 
 Concrete continuation map:
 
-1. begin from ADR-0012, `etzio/kernel/integrity_adapters_v1.py`, and
-   `tests/test_integrity_adapter_qualification_v1.py`; preserve authentication before
-   claim parsing, complete fixed source sets, exact raw-package retention, private sealed
-   results, content-bound corpus inputs, and fresh reauthentication before mapping;
-2. specify the anchor/catalog/monitor request, trust, signed-package, conservative
-   consistency/floor, evidence-mapping, and report contracts in a new decision before
-   changing lifecycle behavior;
+1. begin from ADR-0013, `etzio/kernel/head_authority_adapters_v1.py`, and
+   `tests/test_head_authority_qualification_v1.py`; preserve authentication before claim
+   parsing, complete fixed source sets, exact raw-package retention, private sealed
+   results, content-bound corpus inputs, recomputed RFC 9162 proofs, and fresh
+   reauthentication before mapping;
+2. specify the durable blocked-finality disposition, admissible terminal and retry states,
+   policy authority, and recovery replay contract in a new decision before changing
+   lifecycle behavior;
 3. keep `RepositoryOwnedDeterministicModeledIntegrityServiceV1`,
    `PendingIntegrityTransitionV1`, and the SQLite finality records unchanged while proving
    the new networkless adapter boundary; their current validators intentionally accept
@@ -751,9 +843,9 @@ Concrete continuation map:
    blocked recovery without weakening the four immutable phases, byte-identical
    at-least-once writes, global/mission continuity, or store-error classifications.
 
-Only after that networkless proof passes, qualify and connect independently administered
-trusted-time, revocation, anchor, catalog, and monitor adapters inside the retained state
-machine. Preserve exact
+Only after the durable blocked-state proof passes, qualify and connect independently
+administered trusted-time, revocation, anchor, catalog, and monitor adapters inside the
+retained state machine. Preserve exact
 fixture-proved pending retention, byte-identical at-least-once retries, global/mission
 continuity, raw pending-replay refusal, and store-error classifications while replacing
 code-derived provider assertions with authenticated external evidence. Add a durable

@@ -243,6 +243,20 @@ parsed; the request binds profile, root, policy, scope, purpose, imprint, and no
 kernel-owned harness also binds its deterministic adapter inputs and ordered cases in a
 content-derived corpus manifest and requires byte-identical same-request retries.
 
+ADR-0013 extends that boundary to the remaining two evidence kinds with a separate
+networkless V1 head-authority qualification profile. Its fixed roster pins at least two
+anchor sources over distinct log origins, exactly one catalog source, and at least two
+monitor sources witnessing the catalog's exact log origin. The registered object is one
+closed canonical `AnchorRegistrationLeafV1`; the qualifier recomputes its RFC 9162 leaf
+hash from the request and refuses any receipt claiming another leaf. Anchor receipts must
+carry a verifying RFC 9162 inclusion proof to their own claimed root, and the catalog head
+must carry a verifying RFC 9162 consistency proof from the exact retained predecessor root.
+An unchanged tree size may not change its root, and every monitor must agree exactly on log
+origin, tree size, and root hash. Head freshness is evaluated only against the complete
+ADR-0012 qualified time hull, and the sealed result maps to provider-neutral anchor
+references plus one `HeadCheckpointFloorV1` whose own constructor reapplies the ADR-0008
+genesis, provenance, and mission-not-ahead rules.
+
 Every configured trusted-time source is required. Their closed intervals must have a common
 overlap, but the result retains the conservative outer hull rather than claiming the
 narrower intersection. Revocation metadata and all configured floor witnesses must agree,
@@ -287,9 +301,9 @@ durability, independent administration, or non-equivocation. Modeled-finality fl
 provider-evidence assertions remain exact unsigned code-derived fixture claims. The legacy
 SQLite `SignedCheckpoint` remains opaque and untrusted.
 
-The exact next gate is to extend the networkless qualification harness to anchor, catalog,
-and monitor adapters and add durable blocked-finality disposition and governed recovery
-before any external provider connection. The remaining blocked cluster then includes
+The exact next gate is to specify and prove durable blocked-finality disposition, exact
+reason, policy-authorized recovery decision, and recovery replay before any external
+provider connection. The remaining blocked cluster then includes
 qualifying independently administered providers without weakening retained recovery;
 closing the same-user pathname and coherent offline-rewrite boundary; production storage
 and power-fault qualification plus sensitive-evidence controls; and structured
@@ -670,11 +684,13 @@ completion for every event. A separate versioned, networkless trusted-time and r
 qualification harness now proves exact fixture trust-root, policy, profile, source-roster,
 request, signature, interval, freshness, unanimous-floor, retry, corpus-manifest, and
 provider-evidence mapping behavior. It is not wired to lifecycle finality, whose provider
-assertions remain unsigned and code-derived.
+assertions remain unsigned and code-derived. A second networkless harness proves
+byte-bound anchor registration, RFC 9162 inclusion and consistency verification against the
+published reference tree, catalog rollback and equivocation refusal, unanimous monitor
+agreement, and sealed head-floor mapping. It is likewise not wired to lifecycle finality.
 
-The exact next gate extends the networkless harness to anchor, catalog, and monitor adapters
-and adds durable blocked-finality disposition and governed recovery before any external
-provider connection. Independently administered providers are qualified and integrated only
+The exact next gate adds durable blocked-finality disposition and governed recovery before
+any external provider connection. Independently administered providers are qualified and integrated only
 later, without weakening the retained state machine. Foundation integrity is accepted only
 when retained evidence also shows:
 

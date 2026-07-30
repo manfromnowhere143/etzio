@@ -15,6 +15,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0010: Transactional canonical evidence vault](0010-transactional-evidence-vault.md)
 - [ADR-0011: Crash-safe modeled integrity finality](0011-crash-safe-modeled-integrity-finality.md)
 - [ADR-0012: Networkless trusted-time and revocation adapter qualification](0012-networkless-time-revocation-adapter-qualification.md)
+- [ADR-0013: Networkless anchor, catalog, and monitor adapter qualification](0013-networkless-head-authority-adapter-qualification.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -28,3 +29,10 @@ ADR-0012 specifies the repository-owned Ed25519 fixture authentication contract 
 deterministic qualification harness for trusted-time and revocation adapters. It does not
 connect or qualify a native provider, alter lifecycle finality, or qualify anchor, catalog,
 or monitor authority.
+
+ADR-0013 extends that boundary to the remaining two integrity evidence kinds. It adds
+RFC 9162 inclusion and consistency verification, byte-bound anchor registration leaves,
+and unanimous monitor agreement over one catalog head, mapping sealed results to the
+existing `head_anchor_receipt` references and `HeadCheckpointFloorV1` values. It does not
+connect or qualify a native provider, prove independent operators or external durability,
+alter lifecycle finality, or add durable blocked-finality recovery.
