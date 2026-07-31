@@ -114,8 +114,20 @@ nor record identity, so the two Side-A couplings the audit flagged — the
 `RevocationFloorV1.snapshot_id == metadata.evidence_id` identity and the
 `fixture.revocation-metadata` vs `fixture.revocation` source rename — are
 deferred to the storage-wiring tranche that reconciles the modeled service, not
-to acceptance. The head-floor phase, with its genesis-identity provenance, is
-the remaining acceptance primitive.
+to acceptance. ### Also this tranche: the head-floor phase acceptance primitive
+
+`accept_qualified_head_floor_evidence_v1` completes the acceptance-primitive layer. It
+reauthenticates the catalog bundle from its retained requests and signed packages — which
+reruns the RFC 9162 consistency check and the unanimous monitor agreement — and accepts a
+finalization's claimed `HeadCheckpointFloorV1` only when it equals the freshly derived floor
+exactly, with BLOBs that are the exact signed catalog and monitor packages.
+
+All three phases the seam audit identified — anchor, revocation, and head floor — now have a
+networkless qualified-signed acceptance primitive. Each freshly reauthenticates and refuses
+unsigned content, forgery, scope mismatch, and non-covering evidence. None touches record
+identity, the store profile, or the modeled service; the one remaining step is the
+schema-touching storage-wiring tranche that selects the mode at enrollment and resolves the
+Side-A revocation snapshot-identity coupling and source rename.
 
 ## Claim boundary
 

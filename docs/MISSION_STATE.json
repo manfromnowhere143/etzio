@@ -31,8 +31,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "qualified_evidence_lifecycle_wiring",
-    "next_session_pickup": "implement the head-floor acceptance primitive (genesis-identity provenance) to complete the acceptance-primitive layer, then wire the ADR-0018 qualified-signed mode into CheckpointCandidateRecordV1 and PendingIntegrityTransitionV1 identity and SQLite storage behind a profile-selected mode, preserving every ADR-0012 integration requirement and adding crash-recovery known-bads; the revocation-phase Side-A snapshot-identity coupling and fixture.revocation-metadata source rename are resolved in that storage tranche; a real provider still requires its own admitted grant",
+    "next_gate": "qualified_evidence_storage_wiring",
+    "next_session_pickup": "wire the ADR-0018 qualified_signed_fixture acceptance mode into CheckpointCandidateRecordV1 and PendingIntegrityTransitionV1 (and the finalization floor) identity and SQLite storage behind a profile-selected mode; the three acceptance primitives (anchor revocation head-floor) are complete and ready to wire. Preserve every ADR-0012 integration requirement, add crash-recovery known-bads, and resolve the Side-A revocation snapshot-identity coupling and fixture.revocation-metadata source rename. A real provider still requires its own admitted grant",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -141,6 +141,7 @@
     "two profile-selected provider-evidence acceptance modes: the exact ADR-0011 modeled-unsigned gate and a qualified-signed-fixture gate that are mutually exclusive by construction",
     "networkless qualified-signed anchor-evidence acceptance that freshly reauthenticates a retained qualified anchor bundle and accepts a checkpoint claim only as the exact signed packages refusing forgery scope mismatch and unsigned content",
     "networkless qualified-signed revocation-evidence acceptance that reauthenticates every time and revocation bundle through the integrity-inputs mapping and accepts a decision's time hull policy evidence views and floors only as the exact freshly derived values with signed-package coverage",
+    "networkless qualified-signed head-floor-evidence acceptance that reauthenticates the catalog bundle rerunning the RFC 9162 consistency check and unanimous monitor agreement and accepts a finalization's external head floor only as the exact freshly derived floor with signed catalog and monitor package coverage",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -179,8 +180,8 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 1129,
+    "validation_status": "local_release_suites_pending_github_reproduction",
+    "test_count": 1143,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -196,7 +197,7 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "specifies two profile-selected provider-evidence acceptance modes and implements the networkless anchor-phase and revocation-phase qualified-signed acceptance primitives that freshly reauthenticate retained qualified bundles; it changes no record identity store profile or lifecycle command and establishes no lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
+    "claim_boundary": "specifies two profile-selected provider-evidence acceptance modes and implements the complete networkless qualified-signed acceptance-primitive layer for the anchor revocation and head-floor phases that freshly reauthenticate retained qualified bundles; it changes no record identity store profile or lifecycle command and establishes no lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
     "blocked_finality_focused_tests": 61,
@@ -205,11 +206,7 @@
     "sqlite_schema_version": 3,
     "blocked_finality_lifecycle_tests": 11,
     "blocked_finality_crash_recovery_tests": 13,
-    "qualified_evidence_acceptance_tests": 33,
-    "github_validated_commit": "b1a055e8affb61f86823ae77e24a92b2f3444eda",
-    "github_actions_run_id": 30631891947,
-    "github_pull_request": 21,
-    "gitguardian_passed": true
+    "qualified_evidence_acceptance_tests": 47
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",

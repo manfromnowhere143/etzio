@@ -21,13 +21,16 @@ from typing import Final, TypeVar
 from etzio.integrity_v1 import (
     HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
     EvidenceReferenceV1,
+    HeadCheckpointFloorV1,
     RevocationFloorV1,
     RevocationViewV1,
 )
 from etzio.kernel.head_authority_adapters_v1 import (
     HeadAuthorityTrustProfileV1,
     QualifiedAnchorBundleV1,
+    QualifiedHeadCatalogBundleV1,
     reauthenticate_anchor_bundle_v1,
+    reauthenticate_head_catalog_bundle_v1,
 )
 from etzio.kernel.integrity_adapters_v1 import (
     IntegrityAdapterTrustProfileV1,
@@ -456,13 +459,135 @@ def accept_qualified_revocation_evidence_v1(
     )
 
 
+@dataclass(frozen=True, slots=True, init=False)
+class QualifiedHeadFloorEvidenceAcceptanceV1:
+    """Sealed acceptance of a finalization's external head floor from a bundle."""
+
+    mode: str
+    external_floor: HeadCheckpointFloorV1
+    evidence_blobs: tuple[ProviderEvidenceBlobV1, ...]
+    _seal: object
+
+    def __init__(self, *_args: object, **_kwargs: object) -> None:
+        _reject(
+            "unauthenticated_acceptance_construction",
+            "qualified head-floor-evidence acceptance construction is private",
+        )
+
+    def __post_init__(self) -> None:
+        if (
+            type(self) is not QualifiedHeadFloorEvidenceAcceptanceV1
+            or self._seal is not _ACCEPTANCE_SEAL
+        ):
+            _reject(
+                "unauthenticated_acceptance_construction",
+                "qualified head-floor-evidence acceptance construction is private",
+            )
+
+    @property
+    def acceptance_id(self) -> str:
+        return content_id("qualified_head_floor_evidence_acceptance", self.to_body())
+
+    def to_body(self) -> dict[str, object]:
+        return {
+            "evidence_blobs": [
+                blob.reference.to_body() for blob in self.evidence_blobs
+            ],
+            "external_floor": self.external_floor.to_body(),
+            "mode": self.mode,
+        }
+
+
+def accept_qualified_head_floor_evidence_v1(
+    *,
+    head_profile: HeadAuthorityTrustProfileV1,
+    time_profile: IntegrityAdapterTrustProfileV1,
+    time_bundle: QualifiedTimeBundleV1,
+    catalog_bundle: QualifiedHeadCatalogBundleV1,
+    claimed_external_floor: HeadCheckpointFloorV1,
+    claimed_evidence_blobs: tuple[ProviderEvidenceBlobV1, ...],
+) -> QualifiedHeadFloorEvidenceAcceptanceV1:
+    """Accept a finalization's external head floor from a reauthenticated catalog bundle.
+
+    The catalog bundle is reauthenticated from its retained requests and signed packages,
+    which reruns the RFC 9162 consistency check and the unanimous monitor agreement.  The
+    finalization's claimed head floor must equal the freshly derived floor exactly, and the
+    claimed BLOBs must be the exact signed packages.
+    """
+
+    if type(catalog_bundle) is not QualifiedHeadCatalogBundleV1:
+        _reject(
+            "invalid_qualified_catalog_bundle",
+            "acceptance requires an exact sealed QualifiedHeadCatalogBundleV1",
+        )
+    if type(claimed_external_floor) is not HeadCheckpointFloorV1:
+        _reject(
+            "invalid_claimed_head_floor",
+            "claimed external head floor must be an exact HeadCheckpointFloorV1",
+        )
+    claimed_blobs = _validated_claimed_blobs(claimed_evidence_blobs)
+
+    fresh = reauthenticate_head_catalog_bundle_v1(
+        profile=head_profile,
+        time_profile=time_profile,
+        time_bundle=time_bundle,
+        bundle=catalog_bundle,
+    )
+    if claimed_external_floor.to_body() != fresh.external_floor.to_body():
+        _reject(
+            "qualified_head_floor_mismatch",
+            "the claimed head floor is not the freshly reauthenticated head floor",
+        )
+
+    retained = {blob.reference.evidence_id: blob for blob in fresh.evidence_blobs}
+    if len(retained) != len(fresh.evidence_blobs):
+        _reject(
+            "qualified_head_floor_mismatch",
+            "the reauthenticated catalog bundle repeats one evidence identity",
+        )
+    claimed_by_id = {blob.reference.evidence_id: blob for blob in claimed_blobs}
+    if set(claimed_by_id) != set(retained):
+        _reject(
+            "qualified_head_floor_blob_coverage_mismatch",
+            "the claimed evidence blobs do not exactly cover the retained signed packages",
+        )
+    for evidence_id, retained_blob in retained.items():
+        if claimed_by_id[evidence_id].content != retained_blob.content:
+            _reject(
+                "qualified_head_floor_blob_coverage_mismatch",
+                "a claimed evidence blob is not the exact retained signed package",
+            )
+
+    ordered_blobs = tuple(
+        retained[blob.reference.evidence_id]
+        for blob in sorted(
+            fresh.evidence_blobs,
+            key=lambda value: (
+                value.evidence_kind,
+                value.source_id,
+                value.evidence_id,
+            ),
+        )
+    )
+    return _construct_sealed_result(
+        QualifiedHeadFloorEvidenceAcceptanceV1,
+        values={
+            "mode": QUALIFIED_EVIDENCE_MODE_QUALIFIED_SIGNED_V1,
+            "external_floor": fresh.external_floor,
+            "evidence_blobs": ordered_blobs,
+        },
+    )
+
+
 __all__ = (
     "QUALIFIED_EVIDENCE_MODES_V1",
     "QUALIFIED_EVIDENCE_MODE_MODELED_UNSIGNED_V1",
     "QUALIFIED_EVIDENCE_MODE_QUALIFIED_SIGNED_V1",
     "QualifiedAnchorEvidenceAcceptanceV1",
     "QualifiedEvidenceError",
+    "QualifiedHeadFloorEvidenceAcceptanceV1",
     "QualifiedRevocationEvidenceAcceptanceV1",
     "accept_qualified_anchor_evidence_v1",
+    "accept_qualified_head_floor_evidence_v1",
     "accept_qualified_revocation_evidence_v1",
 )
