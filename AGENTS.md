@@ -129,18 +129,26 @@ transition, any observation or decision after a seal, and a decision that does n
 latest retained observation. None of the new relations participate in the unresolved-transition
 barrier or the instance-global sequence, so retaining a block can never release finality.
 
+An opt-in governed binding now makes that storage live. When the classifier reports a
+deterministic block, a durable observation is retained from outside the classifier, so a
+store failure keeps its own domain instead of becoming an adapter refusal. Once an
+observation exists, recovery requires a retained decision authorizing a retry for the exact
+latest observation; elapsed time and repetition are not authority. An authorized retry does
+not promise success, so a still-refusing adapter accumulates attempts under increasing
+ordinals. A sealing decision never authorizes a retry and makes load, recover, and append
+refuse, while leaving every retained byte readable.
+
 The three qualification harnesses are contract proof only and are not consumed by modeled
-finality or lifecycle commands. Modeled finality still uses unsigned, deterministic,
+finality unless the governed binding is configured. Modeled finality still uses unsigned, deterministic,
 code-derived provider assertions. No real or native provider is connected, and no external
 durability, trustworthy UTC, current real-world revocation, independent administration,
 real non-equivocation, execution, or finding claim follows.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. integrate the persisted blocked-finality contract into the lifecycle: produce an
-   observation where a deterministic block is classified, consume an authorized retry, and
-   refuse every consequential command on a sealed instance, before connecting any external
-   provider;
+1. prove injected-interruption crash recovery across observation and decision retention,
+   then qualify independently administered trusted-time, revocation, anchor, catalog, and
+   monitor adapters before connecting any external provider;
 2. only then qualify independently administered providers and integrate accepted adapter
    outputs without weakening the retained recovery state machine;
 3. prove external latest-head authority survives local loss, then close the documented

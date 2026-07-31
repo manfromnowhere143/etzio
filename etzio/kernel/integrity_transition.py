@@ -110,6 +110,12 @@ __all__: Final = (
     "validate_finalized_integrity_transition",
     "validate_pending_transition",
 )
+_GOVERNED_BLOCKED_FINALITY_EXPORTS_V1: Final = (
+    "GovernedBlockedFinalityBindingV1",
+    "IntegrityInstanceSealedError",
+    "IntegrityRecoveryNotAuthorizedError",
+)
+__all__ = __all__ + _GOVERNED_BLOCKED_FINALITY_EXPORTS_V1
 
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$", re.ASCII)
 _KEY_ID = re.compile(r"^ed25519:sha256:[0-9a-f]{64}$", re.ASCII)
@@ -130,6 +136,14 @@ class IntegrityFinalityPendingError(IntegrityTransitionError):
 
 class IntegrityFinalityBlockedError(IntegrityTransitionError):
     """Finality cannot advance without resolving contradictory retained material."""
+
+
+class IntegrityInstanceSealedError(IntegrityTransitionError):
+    """A terminal governed seal forbids every further consequential command."""
+
+
+class IntegrityRecoveryNotAuthorizedError(IntegrityTransitionError):
+    """A durable block requires an authorized governed retry before advancing."""
 
 
 def _reject(reason_code: str, message: str) -> None:
@@ -3780,6 +3794,58 @@ def _require_service_port(value: object) -> _ModeledIntegrityServicePort:
     return value  # type: ignore[return-value]
 
 
+@dataclass(frozen=True, slots=True)
+class GovernedBlockedFinalityBindingV1:
+    """Opt-in governed blocked-finality wiring for the modeled facade.
+
+    ``time_source`` must return a freshly qualified ADR-0012 time bundle.  A local clock
+    never records when finality stopped.
+    """
+
+    profile: object
+    time_source: object
+
+    def __post_init__(self) -> None:
+        from .blocked_finality_v1 import BlockedFinalityRecoveryProfileV1
+
+        if type(self.profile) is not BlockedFinalityRecoveryProfileV1:
+            _reject(
+                "invalid_governed_blocked_finality_binding",
+                "governed blocked finality requires an exact recovery profile",
+            )
+        if not callable(self.time_source):
+            _reject(
+                "invalid_governed_blocked_finality_binding",
+                "governed blocked finality requires a callable qualified-time source",
+            )
+
+    def qualified_time(self) -> object:
+        """Return one freshly qualified time bundle for a durable observation."""
+
+        from etzio.kernel.integrity_adapters_v1 import QualifiedTimeBundleV1
+
+        bundle = self.time_source()
+        if type(bundle) is not QualifiedTimeBundleV1:
+            _reject(
+                "invalid_governed_blocked_finality_binding",
+                "the qualified-time source did not return a sealed time bundle",
+            )
+        return bundle
+
+
+def _snapshot_governed_blocked_finality(
+    value: object,
+) -> GovernedBlockedFinalityBindingV1 | None:
+    if value is None:
+        return None
+    if type(value) is not GovernedBlockedFinalityBindingV1:
+        _reject(
+            "invalid_governed_blocked_finality_binding",
+            "an exact GovernedBlockedFinalityBindingV1 is required",
+        )
+    return value  # type: ignore[return-value]
+
+
 class ModeledIntegrityFinalizingEventStoreV1:
     """Explicit modeled-finality facade over the SQLite event-store port.
 
@@ -3795,13 +3861,21 @@ class ModeledIntegrityFinalizingEventStoreV1:
     the load-triggered recovery path does not recurse.
     """
 
+    # Governed blocked finality is opt-in.  The class default keeps every existing
+    # construction ungoverned, including deliberate ``__init__`` bypasses that exercise
+    # ``_advance_finality`` in isolation.
+    _blocked_finality: object | None = None
+
     def __init__(
         self,
         store: object,
         services: object,
+        *,
+        blocked_finality: object | None = None,
     ) -> None:
         self._store = _require_store_port(store)
         self._services = _require_service_port(services)
+        self._blocked_finality = _snapshot_governed_blocked_finality(blocked_finality)
         self.service_instance_id = _require_identity(
             services.service_instance_id,
             "service_instance_id",
@@ -3818,10 +3892,123 @@ class ModeledIntegrityFinalizingEventStoreV1:
             validation_policy=self.validation_policy,
             authority_binding=self.authority_binding,
         )
+        if self._blocked_finality is not None:
+            self._store.enroll_blocked_finality_recovery(
+                self._blocked_finality.profile
+            )
 
     def load(self, mission_id: str) -> tuple[EventV1, ...]:
+        self._require_unsealed_instance()
         self.recover_pending_transition()
         return self._store.load(mission_id)
+
+    def _require_unsealed_instance(self) -> None:
+        """Refuse every consequential command once a governed seal is retained."""
+
+        if self._blocked_finality is None:
+            return
+        if self._store.instance_is_sealed():
+            raise IntegrityInstanceSealedError(
+                "modeled_integrity_instance_sealed",
+                "a governed seal forbids every further consequential command",
+            )
+
+    def _require_recovery_authorization(
+        self,
+        lineage: IntegrityLineageV1,
+    ) -> None:
+        """Require an authorized governed retry once a block is durably retained.
+
+        Without this gate a deterministic block would be retried without bound.  The
+        authorization must answer the exact latest retained observation.
+        """
+
+        from .blocked_finality_v1 import (
+            RETRY_AUTHORIZED_DISPOSITION_V1,
+            GovernedRecoveryDecisionV1,
+        )
+
+        if self._blocked_finality is None:
+            return
+        observations = self._store.load_blocked_finality_observations(
+            lineage.pending.event_digest
+        )
+        if not observations:
+            return
+        latest = observations[-1]
+        signed = self._store.load_governed_recovery_decision(latest.observation_id)
+        if signed is None:
+            raise IntegrityRecoveryNotAuthorizedError(
+                "modeled_integrity_recovery_unauthorized",
+                "a retained blocked observation has no governed recovery decision",
+            )
+        decision = GovernedRecoveryDecisionV1.from_canonical_bytes(signed.decision_bytes)
+        if decision.disposition != RETRY_AUTHORIZED_DISPOSITION_V1:
+            raise IntegrityRecoveryNotAuthorizedError(
+                "modeled_integrity_recovery_unauthorized",
+                "the retained governed decision does not authorize a retry",
+            )
+
+    def _retain_blocked_observation(
+        self,
+        lineage: IntegrityLineageV1,
+        blocked: IntegrityFinalityBlockedError,
+    ) -> None:
+        """Retain one durable observation of an exact deterministic block.
+
+        This runs outside every blocked classifier.  A store failure here keeps its own
+        domain and propagates: recording that finality is blocked must never itself be
+        reclassified as a deterministic adapter refusal.
+        """
+
+        from .blocked_finality_v1 import (
+            BLOCKED_REASON_CODES_V1,
+            BlockedFinalityObservationV1,
+        )
+
+        binding = self._blocked_finality
+        if binding is None:
+            return
+        phase = lineage.phase
+        if phase == "finalized":
+            return
+        if phase == "checkpoint_candidate_retained":
+            phase_record_id = lineage.checkpoint_candidate.record_id
+            operation = "observe_current_floor"
+        elif phase == "anchor_statement_ready":
+            phase_record_id = lineage.anchor_statement.record_id
+            operation = "prepare_checkpoint_candidate"
+        else:
+            phase_record_id = lineage.pending.record_id
+            operation = "prepare_anchor_statement"
+        reason_code = blocked.reason_code
+        if reason_code not in BLOCKED_REASON_CODES_V1:
+            # An unclassifiable refusal is retained as a contract failure rather than
+            # widening the closed taxonomy with provider-controlled text.
+            reason_code = "modeled_integrity_adapter_contract_failure"
+        retained = self._store.load_blocked_finality_observations(
+            lineage.pending.event_digest
+        )
+        decision = lineage.pending.decision
+        observation = BlockedFinalityObservationV1.record(
+            profile=binding.profile,
+            mission_id=lineage.pending.mission_id,
+            authority_id=decision.authority_id,
+            target_id=decision.target_id,
+            event_digest=lineage.pending.event_digest,
+            event_seq=lineage.pending.event_seq,
+            instance_sequence=lineage.pending.instance_sequence,
+            pending_record_id=lineage.pending.record_id,
+            unresolved_phase=phase,
+            unresolved_phase_record_id=phase_record_id,
+            blocked_operation=operation,
+            blocked_reason_code=reason_code,
+            attempt_ordinal=(
+                retained[-1].attempt_ordinal + 1 if retained else 1
+            ),
+            time_bundle=binding.qualified_time(),
+        )
+        self._store.retain_blocked_finality_observation(observation)
 
     def load_event_artifacts(
         self,
@@ -4093,6 +4280,20 @@ class ModeledIntegrityFinalizingEventStoreV1:
     ) -> IntegrityLineageV1:
         """Share deterministic local-integrity normalization across append and replay."""
 
+        self._require_unsealed_instance()
+        self._require_recovery_authorization(lineage)
+        try:
+            return self._classified_advance_finality(lineage)
+        except IntegrityFinalityBlockedError as blocked:
+            # Retention runs outside the classifier below, so a store failure keeps its
+            # own domain instead of becoming a deterministic adapter refusal.
+            self._retain_blocked_observation(lineage, blocked)
+            raise
+
+    def _classified_advance_finality(
+        self,
+        lineage: IntegrityLineageV1,
+    ) -> IntegrityLineageV1:
         try:
             return self._recover_lineage(lineage)
         except IntegrityFinalityPendingError:

@@ -5486,6 +5486,23 @@ class SQLiteEventStore:
             for row in rows
         )
 
+    def load_governed_recovery_decision(self, observation_id: str) -> object | None:
+        """Return the retained decision answering one observation, if present."""
+
+        from .blocked_finality_v1 import SignedGovernedRecoveryDecisionV1
+
+        if type(observation_id) is not str or _DIGEST_RE.fullmatch(observation_id) is None:
+            raise EventStoreError("observation_id must be a full lowercase sha256 digest")
+        self._validate_integrity_state_locked()
+        row = self._connection.execute(
+            "SELECT record FROM integrity_recovery_decisions "
+            "WHERE blocked_observation_id = ?",
+            (observation_id,),
+        ).fetchone()
+        if row is None:
+            return None
+        return SignedGovernedRecoveryDecisionV1.from_canonical_bytes(bytes(row[0]))
+
     def instance_is_sealed(self) -> bool:
         """Return whether a terminal sealing decision is retained."""
 
