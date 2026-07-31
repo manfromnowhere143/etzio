@@ -17,6 +17,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0012: Networkless trusted-time and revocation adapter qualification](0012-networkless-time-revocation-adapter-qualification.md)
 - [ADR-0013: Networkless anchor, catalog, and monitor adapter qualification](0013-networkless-head-authority-adapter-qualification.md)
 - [ADR-0014: Durable blocked-finality disposition and governed recovery](0014-durable-blocked-finality-and-governed-recovery.md)
+- [ADR-0015: Schema-version-3 durable blocked-finality storage](0015-durable-blocked-finality-storage-v3.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -42,3 +43,8 @@ ADR-0014 specifies the durable blocked-finality observation, the role-separated 
 governed recovery decision, and the exactly two admissible dispositions. It changes no
 SQLite schema, store method, or lifecycle command; persistence, crash recovery, and the
 enrolled recovery authority remain a separate storage tranche.
+
+ADR-0015 persists the ADR-0014 contract as three append-only schema-version-3 relations
+with a forward migration from the exact version-2 layout. It is layout-only: no recovery
+path yet produces an observation or consumes a decision, and no relation participates in
+the database-global barrier.

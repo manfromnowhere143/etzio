@@ -41,7 +41,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0011](decisions/0011-crash-safe-modeled-integrity-finality.md), and
 [ADR-0012](decisions/0012-networkless-time-revocation-adapter-qualification.md), and
 [ADR-0013](decisions/0013-networkless-head-authority-adapter-qualification.md), and
-[ADR-0014](decisions/0014-durable-blocked-finality-and-governed-recovery.md).
+[ADR-0014](decisions/0014-durable-blocked-finality-and-governed-recovery.md), and
+[ADR-0015](decisions/0015-durable-blocked-finality-storage-v3.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -52,9 +53,9 @@ memory. A green check validates only what it names.
 - Engine: **Etzio**
 - Canonical branch: `main`
 - Current foundation-integrity branch:
-  `agent/durable-blocked-finality-contract-v1`
-- Stacked on: `agent/head-authority-adapter-qualification-v1`
-- Branch base: `3579cb4`
+  `agent/blocked-finality-storage-v3`
+- Stacked on: `agent/durable-blocked-finality-contract-v1`
+- Branch base: `d296527`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -471,11 +472,47 @@ fixture assertions.
   seal terminality, barrier invariants, manifest substitution, and absence of any ambient
   clock or network dependency.
 
-This establishes the acceptance contract only. Nothing is persisted: no SQLite table,
-schema version, migration, store method, or enrolled recovery authority changes in this
-tranche, so crash recovery of the retained blocked record remains unproved. The fixture
-keys are repository-owned and prove no independently custodied operator authority, dual
-control, audit delivery, or migration of a sealed instance.
+This establishes the acceptance contract. Its storage follows below.
+
+### Implemented schema-version-3 blocked-finality storage
+
+- [ADR-0015](decisions/0015-durable-blocked-finality-storage-v3.md) raises
+  `user_version` to 3 while the exact `application_id` stays `0x45545A31`;
+- three append-only relations are added: singleton `integrity_recovery_profile`,
+  `integrity_blocked_observations` keyed by `(event_digest, attempt_ordinal)` with a
+  unique `observation_id`, and `integrity_recovery_decisions` keyed by `decision_id` with
+  a unique `blocked_observation_id`. All three refuse update and delete by trigger;
+- the recovery authority is enrolled as its own record rather than by extending
+  `ModeledIntegrityAuthorityBindingV1`, so no existing `binding_id`, retained enrollment
+  wire, or binding known-bad changes;
+- there is no seal relation. A sealed instance is exactly the existence of a decision row
+  whose `disposition` is `instance_sealed`, so the two cannot disagree;
+- database triggers refuse an observation on a finalized transition, any observation or
+  decision once a seal exists, and a decision whose `blocked_observation_id` is not the
+  highest-ordinal retained observation for that transition;
+- none of the new relations participate in the unresolved-transition barrier or the
+  instance-global sequence. The barrier still joins `integrity_pending_transitions`
+  against `integrity_finalizations` only, and the sequence remains `count(*)` over
+  `integrity_finalizations`, so retaining a block cannot release finality;
+- `_migrate_integrity_v2_to_blocked_v3` verifies the exact retained version-2 contract
+  digest before adding the new objects in one `BEGIN IMMEDIATE` script, revalidates, and
+  commits; a drifted version-2 layout fails closed. The migration adds relations only and
+  backfills nothing, because no retained byte records why an earlier attempt failed;
+- `_logical_evidence_storage_used_locked` charges the new record and wire bytes, and
+  `_INTEGRITY_FINALITY_CAPACITY_RESERVE_BYTES_V1` widens to six record ceilings plus
+  transition evidence because the reserve is taken once before the pending row is
+  inserted; and
+- the durable write path is deliberately outside `_call_modeled_integrity_adapter` and
+  `_advance_finality`. Both funnels convert an unexpected exception into
+  `IntegrityFinalityBlockedError`, so routing persistence through them would record that
+  finality is blocked because recording that finality is blocked failed. `StoreBusyError`,
+  `StoreCapacityError`, `StoreOperationalError`, and `EventStoreCorruptionError` keep
+  their exact domains.
+
+Storage is layout only. No recovery path yet produces an observation or consumes a
+decision, so lifecycle integration and crash recovery of a live block remain unproved.
+The fixture keys are repository-owned and prove no independently custodied operator
+authority, dual control, audit delivery, or migration of a sealed instance.
 
 ### Implemented for modeled verification admission and recovery
 
@@ -506,14 +543,17 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
-## Current blocked-finality contract release evidence
+## Current blocked-finality storage release evidence
 
-On the durable blocked-finality and governed-recovery candidate, the canonical release
+On the schema-version-3 durable blocked-finality storage candidate, the canonical release
 command passed under both declared local runtimes:
 
-- 1049 tests passed;
-- the focused blocked-finality file passed all 61 tests and the deterministic report
-  retained all eight ordered cases;
+- 1072 tests passed;
+- the focused storage file passed all 23 tests, including the exact version-2 forward
+  migration, drifted-layout refusal, append-only and terminality triggers, and the proof
+  that retaining a block leaves the unresolved-transition barrier held;
+- the inherited focused blocked-finality contract file passed all 61 tests and the
+  deterministic report retained all eight ordered cases;
 - the inherited focused head-authority qualification file passed all 78 tests;
 - the deterministic head-authority report retained all nine ordered cases;
 - the Merkle core reproduced the published RFC 6962/9162 reference tree heads for sizes
@@ -530,8 +570,8 @@ command passed under both declared local runtimes:
   retained-evidence checks passed; and
 - `git diff --check` passed.
 
-The CPython 3.11 test suite completed in 469.07 seconds and the CPython 3.14 suite
-completed in 482.06 seconds; the complete release entrypoints took 472 and 484 seconds.
+The CPython 3.11 test suite completed in 477.59 seconds and the CPython 3.14 suite
+completed in 488.43 seconds; the complete release entrypoints took 480 and 492 seconds.
 Each complete release entrypoint also ran the modeled demonstrations and the governed
 vulnerable and clean fixture scans. The working-tree status was unchanged by validation.
 
@@ -542,17 +582,15 @@ The retained SQLite source identities were:
 - CPython 3.14.2 / SQLite 3.51.2:
   `2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075`.
 
-Private GitHub Actions run
-[`30592555479`](https://github.com/manfromnowhere143/etzio/actions/runs/30592555479)
-reproduced repository policy, both declared runtime suites, package build,
-outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on exact
+GitHub Actions reproduction for this tranche is pending; resolve the current run,
+pull-request, and GitGuardian state from GitHub rather than from this packet.
+
+The inherited blocked-finality contract tranche was reproduced by private run
+[`30592555479`](https://github.com/manfromnowhere143/etzio/actions/runs/30592555479) on
 implementation commit
-[`a7bde73a1a79bc874d8c0f15db0780a58e24d056`](https://github.com/manfromnowhere143/etzio/commit/a7bde73a1a79bc874d8c0f15db0780a58e24d056);
-GitGuardian also passed. The 3.11.15 foundation job took 14 minutes 33 seconds and the
-3.14.2 job took 15 minutes 2 seconds, both inside the 30-minute release budget. Draft
-[#14](https://github.com/manfromnowhere143/etzio/pull/14) is stacked on the head-authority
-qualification branch. This evidence-only handoff and mission-state update follows the
-validated implementation commit.
+[`a7bde73a1a79bc874d8c0f15db0780a58e24d056`](https://github.com/manfromnowhere143/etzio/commit/a7bde73a1a79bc874d8c0f15db0780a58e24d056),
+with draft [#14](https://github.com/manfromnowhere143/etzio/pull/14) stacked on the
+head-authority qualification branch; GitGuardian also passed.
 
 The inherited head-authority tranche was reproduced by private run
 [`30588650930`](https://github.com/manfromnowhere143/etzio/actions/runs/30588650930) on
@@ -881,9 +919,9 @@ Known-bads now cover:
    externally authenticated and durable anchor/catalog/witness survives local database
    loss or proves non-equivocation.
 3. The durable blocked disposition, exact reason, and governed recovery decision are now
-   specified and deterministically proved, but nothing is persisted. Typed blocked results
-   remain attempt-local in the implemented store, which has no blocked table, no
-   schema-version-3 migration, and no enrolled recovery authority.
+   specified, deterministically proved, and persisted under schema version 3. No recovery
+   path yet produces an observation or consumes a decision, so typed blocked results
+   remain attempt-local in the live lifecycle.
 4. SQLite retains a documented same-user pathname race, and a coherent offline rewrite
    remains undetectable without an authenticated external latest-head catalog.
 5. Production storage still needs an accepted SQLite/VFS/filesystem/device profile,
@@ -902,8 +940,16 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup:** the blocked-finality acceptance contract is specified and
-proved. Persist it as the next dependency-complete tranche. The retained bytes make the
+**Exact next-session pickup:** the blocked-finality contract is specified, proved, and
+persisted. Integrate it into the lifecycle as the next dependency-complete tranche:
+produce a durable observation at the exact point `_call_modeled_integrity_adapter`
+(`integrity_transition.py`) or `_advance_finality` classifies a deterministic block,
+consume an authorized retry to resume from the retained phase, and refuse every
+consequential command on a sealed instance. Keep the durable write path outside both
+classifiers, or a store failure becomes an adapter refusal. Add crash-recovery known-bads
+for interruption immediately before and after retaining an observation and a decision.
+
+The superseded storage scoping note follows for provenance only. The retained bytes make the
 cost explicit: `_validate_schema` compares object sets for equality and therefore fails
 closed on extra objects, so a new append-only blocked table needs new DDL in
 `_integrity_schema_sql`, new `required_objects` entries for the table and its append-only

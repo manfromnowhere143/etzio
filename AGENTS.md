@@ -121,7 +121,15 @@ instance sealing. Neither finalizes, deletes, rewrites, mints a checkpoint, or r
 database-global barrier. Sixty-one focused tests and known-bads cover phase, ordinal,
 binding, separation-of-duty, staleness, seal-terminality, and barrier invariants.
 
-All three qualification harnesses are contract proof only and are not consumed by modeled
+Schema version 3 now persists that contract as three append-only relations: a singleton
+enrolled recovery profile, per-transition blocked observations keyed by attempt ordinal, and
+governed recovery decisions. A forward migration from the exact version-2 layout adds
+relations only and backfills nothing. Database triggers refuse an observation on a finalized
+transition, any observation or decision after a seal, and a decision that does not answer the
+latest retained observation. None of the new relations participate in the unresolved-transition
+barrier or the instance-global sequence, so retaining a block can never release finality.
+
+The three qualification harnesses are contract proof only and are not consumed by modeled
 finality or lifecycle commands. Modeled finality still uses unsigned, deterministic,
 code-derived provider assertions. No real or native provider is connected, and no external
 durability, trustworthy UTC, current real-world revocation, independent administration,
@@ -129,9 +137,10 @@ real non-equivocation, execution, or finding claim follows.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. persist the specified blocked-finality observation and governed recovery decision under
-   a schema-version-3 migration, enrolled recovery authority, and crash-recovery
-   known-bads before connecting any external provider;
+1. integrate the persisted blocked-finality contract into the lifecycle: produce an
+   observation where a deterministic block is classified, consume an authorized retry, and
+   refuse every consequential command on a sealed instance, before connecting any external
+   provider;
 2. only then qualify independently administered providers and integrate accepted adapter
    outputs without weakening the retained recovery state machine;
 3. prove external latest-head authority survives local loss, then close the documented
