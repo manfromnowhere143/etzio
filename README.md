@@ -77,12 +77,18 @@ That yields six operating laws:
 - **Today:** the supported fixture CLI reaches stable candidates and `mission_closed` on
   the permanent SQLite legacy profile. Separate kernel APIs retain modeled verification
   lifecycle statements; an optional empty-store facade exercises modeled finality.
-- **Signed-fixture qualification:** two separate deterministic, networkless harnesses prove
+- **Signed-fixture qualification:** three separate deterministic, networkless harnesses prove
   exact request/profile/root/policy authentication, complete-roster conservative time
   fusion, full-hull revocation validity/freshness/floor checks, RFC 9162 inclusion and
   consistency verification, unanimous monitor agreement on one catalog head, and sealed
-  mapping for repository-owned signed fixtures. Neither is connected to modeled finality or
+  mapping for repository-owned signed fixtures. None is connected to modeled finality or
   lifecycle admission.
+- **Governed blocked finality:** a refused finality attempt is now a durable, reasoned,
+  content-addressed observation persisted under SQLite schema version 3. Recovery past a
+  block requires a signed decision from a principal and key separated from both the
+  integrity-decision and head-checkpoint authorities. Exactly two dispositions exist —
+  authorized retry and terminal instance sealing — and neither finalizes, deletes,
+  rewrites, mints a checkpoint, or releases the database-global barrier.
 - **Modeled evidence:** receipt outputs and integrity-provider assertions are authenticated
   or code-derived fixture statements. The modeled-finality provider assertions remain
   unsigned and code-derived; the separately qualified signed packages do not make them
@@ -317,7 +323,15 @@ flowchart TB
         HN["Contract boundary<br/>not consumed by pending transition<br/>or any lifecycle command"]
     end
 
-    NEXT["Exact next gate<br/>persist the blocked-finality contract<br/>schema v3 + enrolled recovery authority"]
+    subgraph BLOCKED["Implemented governed blocked finality · schema v3 · opt-in"]
+        direction LR
+        BO["Durable observation<br/>retained outside every blocked classifier"]
+        BG["Authorized-retry gate<br/>time and repetition are not authority"]
+        BS["Terminal seal<br/>refuses load · recover · append"]
+        BB["Barrier untouched<br/>retaining a block never releases finality"]
+    end
+
+    NEXT["Exact next gate<br/>injected-interruption crash recovery<br/>across observation and decision retention"]
     EXT["Future full adapter set<br/>independently administered, authenticated,<br/>durable, monitored, and qualified"]
 
     E --> D --> P1 --> RH --> P2 --> P3 --> P4 --> OK
@@ -373,6 +387,26 @@ from that sealed mapping into the current pending-transition or lifecycle path. 
 
 The original in-process behavior model remains available as `python -m etzio.cli`, but its
 toy findings and verifier labels are not security evidence.
+
+## Retained evidence
+
+Every number below is reproduced by the canonical release command on both declared
+runtimes and by private GitHub Actions on the exact commit. None of it is a capability
+claim: the entire suite runs against repository-owned deterministic fixtures.
+
+| Retained | Value |
+|---|---|
+| Full suite | 1083 tests, green on CPython 3.11.15 / SQLite 3.53.1 and CPython 3.14.2 / SQLite 3.51.2 |
+| Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
+| SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` 3 |
+| Accepted decisions | 16 architecture decision records |
+| Adversarial focus files | 81 time/revocation, 78 head-authority, 61 blocked-finality contract, 23 storage, 11 lifecycle |
+| Merkle core | reproduces the published RFC 6962/9162 reference tree for sizes 0–8, and all 36 reference inclusion plus 36 reference consistency proofs |
+| Governed fixture scans | vulnerable fixture closes with 7 candidates, clean fixture with 0, neither mints a finding |
+
+The Merkle verifiers are validated against the published RFC reference vectors rather than
+against Etzio's own prover, because a broken verifier and a broken prover agree with each
+other.
 
 ## Reproduce
 
@@ -439,14 +473,18 @@ published reference tree, catalog rollback and equivocation refusal, and unanimo
 agreement; it qualifies no real transparency log and proves no independent observer. The V1
 blocked-finality contract makes a refused finality attempt a durable, reasoned observation
 and requires a role-separated signed decision to change its disposition; neither admissible
-disposition finalizes, deletes, rewrites, or releases the barrier, and nothing is persisted
-yet. The transactional SQLite vault closes the ordinary
+disposition finalizes, deletes, rewrites, or releases the barrier. That contract is now
+persisted under schema version 3 and wired into the modeled lifecycle behind an opt-in
+governed binding: a block is retained from outside every blocked classifier, so a store
+failure keeps its own domain instead of becoming an adapter refusal; recovery past a block
+requires an authorized decision answering the exact latest observation; and a seal is
+terminal across load, recover, and append while leaving every retained byte readable. The transactional SQLite vault closes the ordinary
 filesystem-staging/SQLite retention split for all four implemented byte-claiming event
 boundaries at the logical transaction layer. Completing the foundation-integrity boundary
 still requires:
 
-1. persist the specified blocked-finality observation and governed recovery decision under
-   a schema-version-3 migration, enrolled recovery authority, and crash-recovery known-bads;
+1. prove injected-interruption crash recovery across durable blocked-observation and
+   governed-decision retention;
 2. qualify independently administered trusted-time, revocation, anchor, catalog, and
    monitor providers, then connect an explicitly admitted profile without weakening the
    retained recovery state machine;
@@ -477,6 +515,8 @@ are measurements, never authority.
 - [Networkless time/revocation adapter qualification decision](docs/decisions/0012-networkless-time-revocation-adapter-qualification.md)
 - [Networkless head-authority adapter qualification decision](docs/decisions/0013-networkless-head-authority-adapter-qualification.md)
 - [Durable blocked-finality and governed recovery decision](docs/decisions/0014-durable-blocked-finality-and-governed-recovery.md)
+- [Schema-version-3 blocked-finality storage decision](docs/decisions/0015-durable-blocked-finality-storage-v3.md)
+- [Governed blocked-finality lifecycle decision](docs/decisions/0016-governed-blocked-finality-lifecycle.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 

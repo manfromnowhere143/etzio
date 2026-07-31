@@ -4,7 +4,7 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/time-revocation-adapter-qualification-v1",
+  "active_branch": "main",
   "foundation_base": {
     "commit": "4919a0c09f99f545336fc6482a2d52f8fd7c03e1",
     "tree": "73ae7dcf5fae6d889dcb1d4d63b0345ae6798361"
@@ -22,7 +22,9 @@
     "verified": "2026-07-29",
     "merge_policy": "squash_only_delete_branch",
     "actions_default_token": "read_only",
-    "branch_protection": "unavailable_on_current_private_repository_plan"
+    "branch_protection": "unavailable_on_current_private_repository_plan",
+    "merged_to_main": "2026-07-31",
+    "merge_history_policy": "linear_fast_forward_preserving_per_tranche_commits"
   },
   "mission": {
     "purpose": "evidence-native operating system for authorized vulnerability research across target categories",

@@ -53,10 +53,15 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch:
-  `agent/governed-blocked-finality-lifecycle-v1`
-- Stacked on: `agent/blocked-finality-storage-v3`
-- Branch base: `0646ccd`
+- Current working branch: `main`
+- The complete fifteen-tranche stack (PRs #2 through #16) was merged into `main` on
+  2026-07-31 by fast-forward, not squash. The stack was strictly linear and `main` was a
+  pure ancestor, so fast-forwarding preserved every per-tranche commit message and
+  authorship. Squashing would have collapsed each tranche and, because each branch still
+  contained its predecessors' commits, produced replay conflicts against an already-squashed
+  `main`. PR #3 is labelled closed rather than merged for that reason; its head commit
+  `fbfa6ed` is an ancestor of `main` and a comment on the PR records this.
+- `main` was verified green after the merge: 1083 tests under CPython 3.11.15.
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
