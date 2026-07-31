@@ -601,13 +601,16 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
-## Current blocked-finality crash-recovery release evidence
+## Current qualified-evidence acceptance release evidence
 
-On the blocked-finality crash-recovery candidate, the canonical release command passed
-under both declared local runtimes:
+On the qualified signed anchor-evidence acceptance candidate, the canonical release command
+passed under both declared local runtimes:
 
 - 1112 tests passed;
-- the focused crash-recovery file passed all 13 tests, covering interruption on both sides
+- the focused qualified-evidence file passed all 16 tests, including the mutual-exclusion
+  proof that unsigned modeled content is refused in qualified mode, fresh-reauthentication
+  forgery refusal, and exact signed-package coverage;
+- the inherited focused crash-recovery file passed all 13 tests, covering interruption on both sides
   of both retention points, ordinal integrity across repeated interrupted retries, barrier
   retention, store-domain preservation, reopened-database replay, and non-consequential
   status inspection;
@@ -636,8 +639,8 @@ under both declared local runtimes:
   retained-evidence checks passed; and
 - `git diff --check` passed.
 
-The CPython 3.11 test suite completed in 509.93 seconds and the CPython 3.14 suite
-completed in 523.70 seconds; the complete release entrypoints took 514 and 527 seconds.
+The CPython 3.11 test suite completed in 498.09 seconds and the CPython 3.14 suite
+completed in 514.60 seconds; the complete release entrypoints took 501 and 518 seconds.
 Each complete release entrypoint also ran the modeled demonstrations and the governed
 vulnerable and clean fixture scans. The working-tree status was unchanged by validation.
 
