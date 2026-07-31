@@ -56,7 +56,7 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/qualified-consumption-design-v1`, stacked on `main` (documentation design record)
+- Current foundation-integrity branch: `agent/qualified-acceptance-enrollment-v1`, stacked on `main`
 - The complete fifteen-tranche stack (PRs #2 through #16) was merged into `main` on
   2026-07-31 by fast-forward, not squash. The stack was strictly linear and `main` was a
   pure ancestor, so fast-forwarding preserved every per-tranche commit message and
@@ -602,6 +602,22 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
+## Current schema-v4 qualified-acceptance enrollment
+
+[ADR-0019](decisions/0019-qualified-evidence-lifecycle-consumption.md) step 1 is
+implemented. SQLite `user_version` is now 4. A new append-only singleton
+`integrity_acceptance_profile` table pins the qualified time-adapter and head-authority
+trust profiles under a `qualified_signed_fixture` acceptance mode; absence of a row is the
+`modeled_unsigned_code_derived` default. A `user_version` 3-to-4 migration adds the table
+only and backfills nothing. `enroll_qualified_acceptance` is empty-history only, requires an
+enrolled modeled profile, is idempotent and permanent, charges its bytes to logical storage,
+and preserves store-domain error classification; four SQL triggers enforce immutability,
+the modeled-profile requirement, and the empty-history requirement as defense in depth.
+`resolve_acceptance_mode` and `load_qualified_acceptance_profiles` read it back. Nothing
+consumes the mode yet, mirroring ADR-0015 before ADR-0016. Fifteen known-bads plus the
+updated store-schema suite cover the migration, drift refusal, no-backfill, enrollment
+exactness, requirements, immutability, forged-mode refusal, and capacity.
+
 ## Current qualified-consumption design record
 
 [ADR-0019](decisions/0019-qualified-evidence-lifecycle-consumption.md) is a documentation
@@ -610,17 +626,20 @@ unchanged. Local repository policy, mission-state JSON, and relative Markdown li
 the dual-runtime suite is unchanged and reproduced by CI. This adds no capability or
 authority and does not supersede implementation evidence.
 
-## Current qualified-head-floor acceptance release evidence
+## Current schema-v4 qualified-acceptance enrollment release evidence
 
-On the qualified signed head-floor-evidence acceptance candidate, which completes the
-acceptance-primitive layer, the canonical release command passed under both declared local
-runtimes:
+On the schema-version-4 qualified-acceptance enrollment candidate, the canonical release
+command passed under both declared local runtimes:
 
-- 1143 tests passed;
-- the three focused qualified-evidence files passed all 47 tests (16 anchor, 17 revocation,
-  14 head-floor), including the mutual-exclusion proof that unsigned modeled content is
-  refused in qualified mode, fresh-reauthentication forgery refusal, and exact
-  signed-package coverage;
+- 1158 tests passed;
+- the focused enrollment file passed all 15 tests, including the version-3-to-4 forward
+  migration, drifted-layout refusal, no-backfill, empty-history and modeled-profile
+  requirements, replacement refusal, immutability, forged-mode refusal, and capacity;
+- the updated store-schema suite passed all 51 tests across the v1, v2, and v3 migration
+  paths through v4;
+- CPython 3.11.15 and 3.14.2 both loaded `application_id` `ETZ1` at `user_version` 4;
+- the three inherited qualified-evidence acceptance files passed all 47 tests (16 anchor,
+  17 revocation, 14 head-floor);
 - the inherited focused crash-recovery file passed all 13 tests, covering interruption on both sides
   of both retention points, ordinal integrity across repeated interrupted retries, barrier
   retention, store-domain preservation, reopened-database replay, and non-consequential
@@ -650,8 +669,11 @@ runtimes:
   retained-evidence checks passed; and
 - `git diff --check` passed.
 
-The CPython 3.11 test suite completed in 488.01 seconds and the CPython 3.14 suite
-completed in 498.34 seconds; the complete release entrypoints took 491 and 502 seconds.
+The CPython 3.11 test suite completed in 492.90 seconds and the CPython 3.14 suite
+completed in 502.67 seconds; the complete release entrypoints took 495 and 506 seconds. The
+fail-closed retained-evidence gate correctly refused an earlier run whose collected count
+(1158) led the not-yet-updated retained count (1143); the count was reconciled before this
+validated run.
 Each complete release entrypoint also ran the modeled demonstrations and the governed
 vulnerable and clean fixture scans. The working-tree status was unchanged by validation.
 

@@ -67,7 +67,8 @@ _DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
 _SQLITE_HEADER_MAGIC: Final = b"SQLite format 3\x00"
 _SQLITE_HEADER_SIZE: Final = 100
 _SQLITE_APPLICATION_ID: Final = 0x45545A31  # ASCII "ETZ1".
-_SQLITE_SCHEMA_VERSION: Final = 3
+_SQLITE_SCHEMA_VERSION: Final = 4
+_SQLITE_LEGACY_BLOCKED_SCHEMA_VERSION: Final = 3
 _SQLITE_LEGACY_INTEGRITY_SCHEMA_VERSION: Final = 2
 _SQLITE_LEGACY_VAULT_SCHEMA_VERSION: Final = 1
 _INTEGRITY_IDENTITY_RE: Final = re.compile(
@@ -75,7 +76,7 @@ _INTEGRITY_IDENTITY_RE: Final = re.compile(
     re.ASCII,
 )
 _SET_SQLITE_APPLICATION_ID: Final = "PRAGMA application_id = 1163156017"
-_SET_SQLITE_SCHEMA_VERSION: Final = "PRAGMA user_version = 3"
+_SET_SQLITE_SCHEMA_VERSION: Final = "PRAGMA user_version = 4"
 _SQLITE_LEGACY_VAULT_SCHEMA_CONTRACT_SHA256: Final = (
     "9d29c7abe7aef05db290cef46687eb19833c073d256558ff5ec555bbe9a04b90"
 )
@@ -83,13 +84,19 @@ _SQLITE_LEGACY_VAULT_SCHEMA_CONTRACT_SHA256: Final = (
 _SQLITE_LEGACY_INTEGRITY_V2_SCHEMA_CONTRACT_SHA256: Final = (
     "8fca39b7027ae6df3f6044d064a7c9346bc0d617c174839197ba334355db34f2"
 )
+# The exact schema-version-3 contract this release migrates forward from.
+_SQLITE_LEGACY_INTEGRITY_V3_SCHEMA_CONTRACT_SHA256: Final = (
+    "b058187a96486d979ae6988e86a0118f2c846c3624abadadb903fe54d4ce10ae"
+)
 # Recomputed from SQLite's retained canonical schema SQL after every intentional
 # schema change.  The temporary sentinel makes an incomplete migration fail closed.
 _SQLITE_SCHEMA_CONTRACT_SHA256: Final = (
-    "b058187a96486d979ae6988e86a0118f2c846c3624abadadb903fe54d4ce10ae"
+    "96a1ce21d28ece41299055f4d2f5f13809a0a121eff92fc47add8210f0f1e4b3"
 )
 _LEGACY_STORE_PROFILE_V1: Final = "legacy_fixture_v1"
 _MODELED_INTEGRITY_STORE_PROFILE_V1: Final = "modeled_integrity_fixture_v1"
+_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1: Final = "modeled_unsigned_code_derived"
+_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1: Final = "qualified_signed_fixture"
 _INTEGRITY_PHASES_V1: Final = frozenset(
     {"pending", "anchor_statement", "checkpoint_candidate", "finalization"}
 )
@@ -630,6 +637,12 @@ class SQLiteEventStore:
         expected = (_SQLITE_APPLICATION_ID, _SQLITE_SCHEMA_VERSION)
         if identity == expected:
             self._validate_schema()
+            return
+        if identity == (
+            _SQLITE_APPLICATION_ID,
+            _SQLITE_LEGACY_BLOCKED_SCHEMA_VERSION,
+        ):
+            self._migrate_blocked_v3_to_qualified_v4()
             return
         if identity == (
             _SQLITE_APPLICATION_ID,
@@ -1223,6 +1236,108 @@ class SQLiteEventStore:
             END;
         """
 
+
+    @staticmethod
+    def _qualified_acceptance_schema_sql() -> str:
+        digest_check = """
+            length({column}) = 71
+            AND substr({column}, 1, 7) = 'sha256:'
+            AND substr({column}, 8) NOT GLOB '*[^0-9a-f]*'
+        """
+
+        def checked(column: str) -> str:
+            return digest_check.format(column=column)
+
+        return f"""
+            CREATE TABLE IF NOT EXISTS integrity_acceptance_profile (
+                singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                acceptance_mode TEXT NOT NULL CHECK (
+                    acceptance_mode IN ('{_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1}')
+                ),
+                qualified_time_profile_id TEXT NOT NULL CHECK (
+                    {checked('qualified_time_profile_id')}
+                ),
+                qualified_time_profile_wire BLOB NOT NULL CHECK (
+                    typeof(qualified_time_profile_wire) = 'blob'
+                    AND length(qualified_time_profile_wire)
+                        BETWEEN 1 AND {_MAX_INTEGRITY_RECORD_BYTES_V1}
+                ),
+                qualified_head_profile_id TEXT NOT NULL CHECK (
+                    {checked('qualified_head_profile_id')}
+                ),
+                qualified_head_profile_wire BLOB NOT NULL CHECK (
+                    typeof(qualified_head_profile_wire) = 'blob'
+                    AND length(qualified_head_profile_wire)
+                        BETWEEN 1 AND {_MAX_INTEGRITY_RECORD_BYTES_V1}
+                )
+            ) STRICT;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_acceptance_profile_reject_update
+            BEFORE UPDATE ON integrity_acceptance_profile
+            BEGIN
+                SELECT RAISE(ABORT, 'the integrity acceptance profile is immutable');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_acceptance_profile_reject_delete
+            BEFORE DELETE ON integrity_acceptance_profile
+            BEGIN
+                SELECT RAISE(ABORT, 'the integrity acceptance profile is immutable');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_acceptance_require_modeled_profile
+            BEFORE INSERT ON integrity_acceptance_profile
+            WHEN NOT EXISTS (
+                SELECT 1 FROM store_profile
+                WHERE profile = '{_MODELED_INTEGRITY_STORE_PROFILE_V1}'
+            )
+            BEGIN
+                SELECT RAISE(ABORT, 'qualified acceptance requires an enrolled modeled profile');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS integrity_acceptance_require_empty_history
+            BEFORE INSERT ON integrity_acceptance_profile
+            WHEN EXISTS (SELECT 1 FROM events)
+            BEGIN
+                SELECT RAISE(ABORT, 'qualified acceptance must be enrolled before any event');
+            END;
+        """
+
+    def _migrate_blocked_v3_to_qualified_v4(self) -> None:
+        schema_rows = self._connection.execute(
+            """
+            SELECT type, name, sql
+            FROM sqlite_schema
+            WHERE name NOT LIKE 'sqlite_%'
+            ORDER BY type ASC, name ASC
+            """
+        ).fetchall()
+        schema_contract = "\n".join(
+            f"{object_type}\0{name}\0{sql}"
+            for object_type, name, sql in schema_rows
+        ).encode("utf-8")
+        if (
+            hashlib.sha256(schema_contract).hexdigest()
+            != _SQLITE_LEGACY_INTEGRITY_V3_SCHEMA_CONTRACT_SHA256
+        ):
+            raise EventStoreCorruptionError(
+                "legacy blocked-finality schema differs from its exact migration contract"
+            )
+        try:
+            self._connection.executescript(
+                f"""
+                BEGIN IMMEDIATE;
+                {self._qualified_acceptance_schema_sql()}
+                {_SET_SQLITE_SCHEMA_VERSION};
+                """
+            )
+            self._validate_schema()
+            self._require_writer_transaction()
+            self._connection.execute("COMMIT")
+        except BaseException:
+            if self._connection.in_transaction:
+                self._connection.execute("ROLLBACK")
+            raise
+
     def _migrate_vault_v1_to_integrity_v2(self) -> None:
         schema_rows = self._connection.execute(
             """
@@ -1249,6 +1364,7 @@ class SQLiteEventStore:
                 BEGIN IMMEDIATE;
                 {self._integrity_schema_sql()}
                 {self._blocked_finality_schema_sql()}
+                {self._qualified_acceptance_schema_sql()}
                 {_SET_SQLITE_SCHEMA_VERSION};
                 """
             )
@@ -1285,6 +1401,7 @@ class SQLiteEventStore:
                 f"""
                 BEGIN IMMEDIATE;
                 {self._blocked_finality_schema_sql()}
+                {self._qualified_acceptance_schema_sql()}
                 {_SET_SQLITE_SCHEMA_VERSION};
                 """
             )
@@ -1718,6 +1835,8 @@ class SQLiteEventStore:
 
             {self._blocked_finality_schema_sql()}
 
+            {self._qualified_acceptance_schema_sql()}
+
             """
             )
             self._require_writer_transaction()
@@ -1777,6 +1896,7 @@ class SQLiteEventStore:
             ("table", "event_artifact_roles"),
             ("table", "events"),
             ("table", "evidence_artifacts"),
+            ("table", "integrity_acceptance_profile"),
             ("table", "integrity_anchor_statements"),
             ("table", "integrity_blocked_observations"),
             ("table", "integrity_checkpoint_candidates"),
@@ -1806,6 +1926,10 @@ class SQLiteEventStore:
             ("trigger", "events_validate_insert"),
             ("trigger", "evidence_artifacts_reject_delete"),
             ("trigger", "evidence_artifacts_reject_update"),
+            ("trigger", "integrity_acceptance_profile_reject_delete"),
+            ("trigger", "integrity_acceptance_profile_reject_update"),
+            ("trigger", "integrity_acceptance_require_empty_history"),
+            ("trigger", "integrity_acceptance_require_modeled_profile"),
             ("trigger", "integrity_anchor_reject_delete"),
             ("trigger", "integrity_anchor_reject_update"),
             ("trigger", "integrity_blocked_reject_after_seal"),
@@ -4161,6 +4285,19 @@ class SQLiteEventStore:
                 + (
                     SELECT COALESCE(
                         sum(
+                            length(acceptance_mode)
+                            + length(qualified_time_profile_id)
+                            + length(qualified_time_profile_wire)
+                            + length(qualified_head_profile_id)
+                            + length(qualified_head_profile_wire)
+                        ),
+                        0
+                    )
+                    FROM integrity_acceptance_profile
+                )
+                + (
+                    SELECT COALESCE(
+                        sum(
                             CASE
                                 WHEN profile = ?
                                 THEN
@@ -5485,6 +5622,135 @@ class SQLiteEventStore:
             BlockedFinalityObservationV1.from_canonical_bytes(bytes(row[0]))
             for row in rows
         )
+
+    def enroll_qualified_acceptance(
+        self,
+        *,
+        qualified_time_profile: object,
+        qualified_head_profile: object,
+    ) -> str:
+        """Pin the qualified time and head-authority adapter roots, once, permanently.
+
+        Enrollment is empty-history only and requires an enrolled modeled profile.  It
+        selects the qualified_signed_fixture acceptance mode; nothing consumes it yet.
+        Store-domain failures keep their exact classification.
+        """
+
+        from etzio.kernel.head_authority_adapters_v1 import HeadAuthorityTrustProfileV1
+        from etzio.kernel.integrity_adapters_v1 import IntegrityAdapterTrustProfileV1
+
+        if type(qualified_time_profile) is not IntegrityAdapterTrustProfileV1:
+            raise EventStoreError(
+                "qualified acceptance requires an exact IntegrityAdapterTrustProfileV1"
+            )
+        if type(qualified_head_profile) is not HeadAuthorityTrustProfileV1:
+            raise EventStoreError(
+                "qualified acceptance requires an exact HeadAuthorityTrustProfileV1"
+            )
+        time_wire = qualified_time_profile.to_canonical_bytes()
+        time_id = qualified_time_profile.profile_id
+        head_wire = qualified_head_profile.to_canonical_bytes()
+        head_id = qualified_head_profile.profile_id
+        for wire in (time_wire, head_wire):
+            if len(wire) > _MAX_INTEGRITY_RECORD_BYTES_V1:
+                raise StoreCapacityError(
+                    "a qualified acceptance profile exceeds its record ceiling"
+                )
+        try:
+            self._connection.execute("BEGIN IMMEDIATE")
+            self._require_writer_transaction()
+            self._validate_integrity_state_locked()
+            retained = self._connection.execute(
+                "SELECT qualified_time_profile_id, qualified_time_profile_wire, "
+                "qualified_head_profile_id, qualified_head_profile_wire "
+                "FROM integrity_acceptance_profile WHERE singleton = 1"
+            ).fetchone()
+            if retained is not None:
+                if (
+                    retained[0] != time_id
+                    or bytes(retained[1]) != time_wire
+                    or retained[2] != head_id
+                    or bytes(retained[3]) != head_wire
+                ):
+                    raise IntegrityTransitionConflictError(
+                        "a different qualified acceptance profile is already enrolled"
+                    )
+                self._connection.execute("COMMIT")
+                return _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1
+            used = self._logical_evidence_storage_used_locked()
+            additional = (
+                len(_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1)
+                + len(time_id)
+                + len(time_wire)
+                + len(head_id)
+                + len(head_wire)
+            )
+            if used + additional > self._max_vault_bytes:
+                raise EvidenceVaultCapacityError(
+                    "qualified acceptance enrollment exceeds logical database capacity"
+                )
+            self._connection.execute(
+                "INSERT INTO integrity_acceptance_profile "
+                "(singleton, acceptance_mode, qualified_time_profile_id, "
+                "qualified_time_profile_wire, qualified_head_profile_id, "
+                "qualified_head_profile_wire) VALUES (1, ?, ?, ?, ?, ?)",
+                (
+                    _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1,
+                    time_id,
+                    time_wire,
+                    head_id,
+                    head_wire,
+                ),
+            )
+            self._require_writer_transaction()
+            self._connection.execute("COMMIT")
+            return _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1
+        except sqlite3.DatabaseError as error:
+            self._rollback_quietly()
+            raise _sqlite_store_failure("qualified acceptance enrollment", error) from error
+        except BaseException:
+            self._rollback_quietly()
+            raise
+
+    def resolve_acceptance_mode(self) -> str:
+        """Return the enrolled provider-evidence acceptance mode.
+
+        Absence of a qualified acceptance row is the modeled-unsigned default.
+        """
+
+        self._validate_integrity_state_locked()
+        row = self._connection.execute(
+            "SELECT acceptance_mode FROM integrity_acceptance_profile WHERE singleton = 1"
+        ).fetchone()
+        if row is None:
+            return _ACCEPTANCE_MODE_MODELED_UNSIGNED_V1
+        if row[0] != _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
+            raise EventStoreCorruptionError(
+                "the retained acceptance mode is not a supported value"
+            )
+        return _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1
+
+    def load_qualified_acceptance_profiles(self) -> tuple[object, object] | None:
+        """Return the exact retained qualified time and head-authority profiles, if any."""
+
+        from etzio.kernel.head_authority_adapters_v1 import HeadAuthorityTrustProfileV1
+        from etzio.kernel.integrity_adapters_v1 import IntegrityAdapterTrustProfileV1
+
+        self._validate_integrity_state_locked()
+        row = self._connection.execute(
+            "SELECT qualified_time_profile_id, qualified_time_profile_wire, "
+            "qualified_head_profile_id, qualified_head_profile_wire "
+            "FROM integrity_acceptance_profile WHERE singleton = 1"
+        ).fetchone()
+        if row is None:
+            return None
+        time_profile = IntegrityAdapterTrustProfileV1.from_canonical_bytes(bytes(row[1]))
+        head_profile = HeadAuthorityTrustProfileV1.from_canonical_bytes(bytes(row[3]))
+        if time_profile.profile_id != row[0] or head_profile.profile_id != row[2]:
+            raise EventStoreCorruptionError(
+                "a retained qualified acceptance profile does not match its identity"
+            )
+        return (time_profile, head_profile)
 
     def load_governed_recovery_decision(self, observation_id: str) -> object | None:
         """Return the retained decision answering one observation, if present."""

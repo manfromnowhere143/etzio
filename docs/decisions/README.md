@@ -68,8 +68,9 @@ checkpoint's, decision's, or finalization's claimed evidence only as the exact s
 packages. They change no record identity, store profile, or lifecycle command; the one
 remaining step is the schema-touching storage-wiring tranche.
 
-ADR-0019 is the design record for wiring the ADR-0018 acceptance primitives into the modeled
-finality lifecycle: a schema-version-4 profile-selected acceptance mode that pins the
-qualified adapter roots, a service that produces signed-package evidence, and record
-validators that re-derive requests and reauthenticate from retained scope. It changes no
-code; it specifies the five-tranche implementation sequence.
+ADR-0019 designs the wiring of the ADR-0018 acceptance primitives into the modeled finality
+lifecycle: a schema-version-4 profile-selected acceptance mode that pins the qualified adapter
+roots, a service that produces signed-package evidence, and record validators that re-derive
+requests and reauthenticate from retained scope, sequenced into five dependency-complete
+tranches. Step 1 (the schema-version-4 append-only `integrity_acceptance_profile` table and
+its empty-history-only qualified enrollment) is implemented; record consumption follows.

@@ -31,8 +31,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "qualified_evidence_schema_v4_enrollment",
-    "next_session_pickup": "implement ADR-0019 step 1: schema-version-4 store profile with an acceptance_mode of modeled_unsigned_code_derived or qualified_signed_fixture and, for qualified mode, retained qualified time-adapter and head-authority profile wires; add the user_version 3-to-4 migration (columns only, no backfill), empty-history-only permanent qualified enrollment, capacity accounting, schema-contract-digest and required_objects updates, the test_integrity_store_v2 downgrade-helper updates, and known-bads; nothing consumes the mode yet, mirroring ADR-0015 before ADR-0016. A real provider still requires its own admitted grant",
+    "next_gate": "qualified_evidence_anchor_phase_consumption",
+    "next_session_pickup": "implement ADR-0019 step 2: CheckpointCandidateRecordV1 in qualified_signed_fixture mode consumes accept_qualified_anchor_evidence_v1, re-deriving the anchor requests from retained scope and reauthenticating from the retained signed packages; branch the record validator on the enrolled acceptance mode (resolve_acceptance_mode / load_qualified_acceptance_profiles), preserve the modeled-unsigned path unchanged, and add known-bads. The schema-v4 acceptance profile and its enrollment are complete. A real provider still requires its own admitted grant",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -142,6 +142,8 @@
     "networkless qualified-signed anchor-evidence acceptance that freshly reauthenticates a retained qualified anchor bundle and accepts a checkpoint claim only as the exact signed packages refusing forgery scope mismatch and unsigned content",
     "networkless qualified-signed revocation-evidence acceptance that reauthenticates every time and revocation bundle through the integrity-inputs mapping and accepts a decision's time hull policy evidence views and floors only as the exact freshly derived values with signed-package coverage",
     "networkless qualified-signed head-floor-evidence acceptance that reauthenticates the catalog bundle rerunning the RFC 9162 consistency check and unanimous monitor agreement and accepts a finalization's external head floor only as the exact freshly derived floor with signed catalog and monitor package coverage",
+    "schema-version-4 SQLite layout adding an append-only singleton integrity_acceptance_profile table that pins the qualified time-adapter and head-authority trust profiles under a qualified_signed_fixture acceptance mode with a user_version 3-to-4 forward migration adding the table only",
+    "empty-history-only permanent qualified acceptance enrollment requiring an enrolled modeled profile with idempotent exact reconciliation replacement refusal capacity accounting SQL-trigger defense in depth and a modeled-unsigned default when no acceptance row exists",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -180,8 +182,8 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "documentation_design_record_local_checks_passed",
-    "test_count": 1143,
+    "validation_status": "local_release_suites_pending_github_reproduction",
+    "test_count": 1158,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -197,16 +199,17 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "adds the ADR-0019 design record specifying qualified evidence lifecycle consumption through a schema-version-4 profile-selected acceptance mode re-derived-request reauthentication and a five-tranche implementation sequence; it changes no code schema or test and establishes no lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
+    "claim_boundary": "adds a schema-version-4 store layout that pins the qualified time-adapter and head-authority trust profiles behind an empty-history-only permanent qualified acceptance enrollment and a modeled-unsigned default; nothing consumes the mode yet mirroring ADR-0015 before ADR-0016 and it establishes no lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
     "blocked_finality_focused_tests": 61,
     "blocked_finality_qualification_cases": 8,
     "blocked_finality_storage_tests": 23,
-    "sqlite_schema_version": 3,
+    "sqlite_schema_version": 4,
     "blocked_finality_lifecycle_tests": 11,
     "blocked_finality_crash_recovery_tests": 13,
-    "qualified_evidence_acceptance_tests": 47
+    "qualified_evidence_acceptance_tests": 47,
+    "qualified_acceptance_enrollment_tests": 15
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",

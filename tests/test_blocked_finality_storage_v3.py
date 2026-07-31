@@ -134,7 +134,7 @@ def test_fresh_store_creates_the_complete_version_three_layout(tmp_path: Path) -
     connection = sqlite3.connect(path)
     try:
         assert connection.execute("PRAGMA application_id").fetchone() == (_APPLICATION_ID,)
-        assert connection.execute("PRAGMA user_version").fetchone() == (3,)
+        assert connection.execute("PRAGMA user_version").fetchone() == (4,)
         tables = {
             row[0]
             for row in connection.execute(
@@ -164,7 +164,7 @@ def test_exact_version_two_layout_migrates_forward(tmp_path: Path) -> None:
         pass
     connection = sqlite3.connect(path)
     try:
-        assert connection.execute("PRAGMA user_version").fetchone() == (3,)
+        assert connection.execute("PRAGMA user_version").fetchone() == (4,)
         assert connection.execute(
             "SELECT count(*) FROM integrity_blocked_observations"
         ).fetchone() == (0,)

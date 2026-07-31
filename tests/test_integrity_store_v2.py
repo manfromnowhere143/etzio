@@ -26,7 +26,8 @@ from etzio.kernel.store import (
 from etzio.protocol import canonical_dumps, content_id
 
 _APPLICATION_ID = 0x45545A31
-_SCHEMA_VERSION = 3
+_SCHEMA_VERSION = 4
+_LEGACY_BLOCKED_SCHEMA_VERSION = 3
 _LEGACY_INTEGRITY_SCHEMA_VERSION = 2
 _LEGACY_PROFILE = "legacy_fixture_v1"
 _INTEGRITY_PROFILE = "modeled_integrity_fixture_v1"
@@ -363,6 +364,27 @@ def _finalize_one_transition(
     return store.load_integrity_lineage(event.event_digest)
 
 
+_V4_ONLY_TRIGGERS = (
+    "integrity_acceptance_profile_reject_delete",
+    "integrity_acceptance_profile_reject_update",
+    "integrity_acceptance_require_empty_history",
+    "integrity_acceptance_require_modeled_profile",
+)
+_V4_ONLY_TABLES_IN_DROP_ORDER = ("integrity_acceptance_profile",)
+
+
+def _downgrade_exact_empty_integrity_schema_to_v3(path: Path) -> None:
+    connection = sqlite3.connect(path, isolation_level=None)
+    try:
+        for name in _V4_ONLY_TRIGGERS:
+            connection.execute(f'DROP TRIGGER "{name}"')
+        for name in _V4_ONLY_TABLES_IN_DROP_ORDER:
+            connection.execute(f'DROP TABLE "{name}"')
+        connection.execute(f"PRAGMA user_version = {_LEGACY_BLOCKED_SCHEMA_VERSION}")
+    finally:
+        connection.close()
+
+
 _V3_ONLY_TRIGGERS = (
     "integrity_blocked_reject_after_seal",
     "integrity_blocked_reject_delete",
@@ -384,6 +406,7 @@ _V3_ONLY_TABLES_IN_DROP_ORDER = (
 
 
 def _downgrade_exact_empty_integrity_schema_to_v2(path: Path) -> None:
+    _downgrade_exact_empty_integrity_schema_to_v3(path)
     connection = sqlite3.connect(path, isolation_level=None)
     try:
         for name in _V3_ONLY_TRIGGERS:
@@ -470,7 +493,7 @@ def _schema_inventory(
         connection.close()
 
 
-def test_fresh_store_defaults_to_schema_v3_legacy_profile(
+def test_fresh_store_defaults_to_schema_v4_legacy_profile(
     tmp_path: Path,
 ) -> None:
     path = _state_path(tmp_path)
