@@ -45,7 +45,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0015](decisions/0015-durable-blocked-finality-storage-v3.md), and
 [ADR-0016](decisions/0016-governed-blocked-finality-lifecycle.md), and
 [ADR-0017](decisions/0017-blocked-finality-crash-recovery.md), and
-[ADR-0018](decisions/0018-qualified-evidence-consumption.md).
+[ADR-0018](decisions/0018-qualified-evidence-consumption.md), and
+[ADR-0019](decisions/0019-qualified-evidence-lifecycle-consumption.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -55,7 +56,7 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/qualified-headfloor-acceptance-v1`, stacked on `main`
+- Current foundation-integrity branch: `agent/qualified-consumption-design-v1`, stacked on `main` (documentation design record)
 - The complete fifteen-tranche stack (PRs #2 through #16) was merged into `main` on
   2026-07-31 by fast-forward, not squash. The stack was strictly linear and `main` was a
   pure ancestor, so fast-forwarding preserved every per-tranche commit message and
@@ -601,6 +602,14 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
+## Current qualified-consumption design record
+
+[ADR-0019](decisions/0019-qualified-evidence-lifecycle-consumption.md) is a documentation
+design record. It changes no code, schema, or test; the retained full-suite count is
+unchanged. Local repository policy, mission-state JSON, and relative Markdown links passed;
+the dual-runtime suite is unchanged and reproduced by CI. This adds no capability or
+authority and does not supersede implementation evidence.
+
 ## Current qualified-head-floor acceptance release evidence
 
 On the qualified signed head-floor-evidence acceptance candidate, which completes the
@@ -1047,10 +1056,18 @@ unsigned code-derived content while a qualified BLOB carries the signed package.
 tranche specified two profile-selected acceptance modes and implemented the networkless
 anchor-phase acceptance primitive in `etzio/kernel/qualified_evidence_v1.py`.
 
-The acceptance-primitive layer is complete (anchor, revocation, head-floor). The one
-remaining step is a storage-wiring tranche that wires the `qualified_signed_fixture` mode
-into `CheckpointCandidateRecordV1`, `PendingIntegrityTransitionV1`, and the finalization
-floor identity and SQLite storage behind a profile-selected mode.
+The acceptance-primitive layer is complete (anchor, revocation, head-floor).
+[ADR-0019](decisions/0019-qualified-evidence-lifecycle-consumption.md) now specifies the
+full lifecycle-consumption architecture: a schema-version-4 profile-selected acceptance
+mode that pins the qualified adapter roots at enrollment, a modeled service that produces
+signed-package evidence in qualified mode, and record validators that re-derive the
+qualification requests from retained scope (each `request_id` is `content_id` over that
+scope) and reauthenticate from the retained signed packages. The design resolves the
+Side-A revocation `snapshot_id == metadata.evidence_id` coupling and the
+`fixture.revocation-metadata` source rename, and sequences the work into five
+dependency-complete tranches: (1) schema-v4 enrollment; (2) anchor-phase consumption;
+(3) revocation-phase consumption; (4) head-floor-phase consumption; (5) qualified-path
+crash recovery. Step 1 is the exact next pickup.
 That is schema-touching: it changes the record bodies and `record_id`s, needs a store
 profile that selects the mode at enrollment, must preserve every ADR-0012 integration
 requirement plus its own crash-recovery known-bads, and is where the Side-A revocation

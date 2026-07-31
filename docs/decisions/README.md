@@ -21,6 +21,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0016: Governed blocked-finality lifecycle integration](0016-governed-blocked-finality-lifecycle.md)
 - [ADR-0017: Blocked-finality crash recovery and status inspection](0017-blocked-finality-crash-recovery.md)
 - [ADR-0018: Qualified signed evidence consumption](0018-qualified-evidence-consumption.md)
+- [ADR-0019: Qualified evidence lifecycle consumption](0019-qualified-evidence-lifecycle-consumption.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -66,3 +67,9 @@ revocation, and head-floor — which freshly reauthenticates a qualified bundle 
 checkpoint's, decision's, or finalization's claimed evidence only as the exact signed
 packages. They change no record identity, store profile, or lifecycle command; the one
 remaining step is the schema-touching storage-wiring tranche.
+
+ADR-0019 is the design record for wiring the ADR-0018 acceptance primitives into the modeled
+finality lifecycle: a schema-version-4 profile-selected acceptance mode that pins the
+qualified adapter roots, a service that produces signed-package evidence, and record
+validators that re-derive requests and reauthenticate from retained scope. It changes no
+code; it specifies the five-tranche implementation sequence.

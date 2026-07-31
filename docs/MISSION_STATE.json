@@ -31,8 +31,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "qualified_evidence_storage_wiring",
-    "next_session_pickup": "wire the ADR-0018 qualified_signed_fixture acceptance mode into CheckpointCandidateRecordV1 and PendingIntegrityTransitionV1 (and the finalization floor) identity and SQLite storage behind a profile-selected mode; the three acceptance primitives (anchor revocation head-floor) are complete and ready to wire. Preserve every ADR-0012 integration requirement, add crash-recovery known-bads, and resolve the Side-A revocation snapshot-identity coupling and fixture.revocation-metadata source rename. A real provider still requires its own admitted grant",
+    "next_gate": "qualified_evidence_schema_v4_enrollment",
+    "next_session_pickup": "implement ADR-0019 step 1: schema-version-4 store profile with an acceptance_mode of modeled_unsigned_code_derived or qualified_signed_fixture and, for qualified mode, retained qualified time-adapter and head-authority profile wires; add the user_version 3-to-4 migration (columns only, no backfill), empty-history-only permanent qualified enrollment, capacity accounting, schema-contract-digest and required_objects updates, the test_integrity_store_v2 downgrade-helper updates, and known-bads; nothing consumes the mode yet, mirroring ADR-0015 before ADR-0016. A real provider still requires its own admitted grant",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -180,7 +180,7 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
+    "validation_status": "documentation_design_record_local_checks_passed",
     "test_count": 1143,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -197,7 +197,7 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "specifies two profile-selected provider-evidence acceptance modes and implements the complete networkless qualified-signed acceptance-primitive layer for the anchor revocation and head-floor phases that freshly reauthenticate retained qualified bundles; it changes no record identity store profile or lifecycle command and establishes no lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
+    "claim_boundary": "adds the ADR-0019 design record specifying qualified evidence lifecycle consumption through a schema-version-4 profile-selected acceptance mode re-derived-request reauthentication and a five-tranche implementation sequence; it changes no code schema or test and establishes no lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
     "blocked_finality_focused_tests": 61,
@@ -206,11 +206,7 @@
     "sqlite_schema_version": 3,
     "blocked_finality_lifecycle_tests": 11,
     "blocked_finality_crash_recovery_tests": 13,
-    "qualified_evidence_acceptance_tests": 47,
-    "github_validated_commit": "3f428a5a4b832f5b6162adc931c15b404f597355",
-    "github_actions_run_id": 30650996204,
-    "github_pull_request": 22,
-    "gitguardian_passed": true
+    "qualified_evidence_acceptance_tests": 47
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -275,7 +271,8 @@
     "docs/decisions/0015-durable-blocked-finality-storage-v3.md",
     "docs/decisions/0016-governed-blocked-finality-lifecycle.md",
     "docs/decisions/0017-blocked-finality-crash-recovery.md",
-    "docs/decisions/0018-qualified-evidence-consumption.md"
+    "docs/decisions/0018-qualified-evidence-consumption.md",
+    "docs/decisions/0019-qualified-evidence-lifecycle-consumption.md"
   ],
   "closed_integrity_gates": [
     {
