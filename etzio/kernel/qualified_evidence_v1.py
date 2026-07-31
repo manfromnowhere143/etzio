@@ -1,0 +1,259 @@
+"""Networkless acceptance of qualified signed evidence for the modeled lifecycle.
+
+ADR-0011 accepts provider evidence only as unsigned code-derived content byte-compared
+against `_modeled_provider_content`.  ADR-0012 and ADR-0013 qualify signed fixture
+packages but stop before consumption.  This module is the first consumer: it accepts a
+checkpoint's claimed anchor statement and evidence from a freshly reauthenticated qualified
+anchor bundle, under a distinct `qualified_signed_fixture` mode.
+
+Acceptance reauthenticates from the retained bundles rather than trusting a sealed inputs
+object, and requires the claimed evidence to be the exact signed packages.  It changes no
+protocol kind, store profile, record identity, or lifecycle command, and it uses no
+network, credential, ambient clock, or third-party service.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+from typing import Final, TypeVar
+
+from etzio.integrity_v1 import (
+    HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
+    EvidenceReferenceV1,
+)
+from etzio.kernel.head_authority_adapters_v1 import (
+    HeadAuthorityTrustProfileV1,
+    QualifiedAnchorBundleV1,
+    reauthenticate_anchor_bundle_v1,
+)
+from etzio.kernel.integrity_adapters_v1 import (
+    IntegrityAdapterTrustProfileV1,
+    QualifiedTimeBundleV1,
+)
+from etzio.kernel.integrity_transition import ProviderEvidenceBlobV1
+from etzio.protocol import content_id
+
+QUALIFIED_EVIDENCE_MODE_MODELED_UNSIGNED_V1: Final = "modeled_unsigned_code_derived"
+QUALIFIED_EVIDENCE_MODE_QUALIFIED_SIGNED_V1: Final = "qualified_signed_fixture"
+QUALIFIED_EVIDENCE_MODES_V1: Final = frozenset(
+    {
+        QUALIFIED_EVIDENCE_MODE_MODELED_UNSIGNED_V1,
+        QUALIFIED_EVIDENCE_MODE_QUALIFIED_SIGNED_V1,
+    }
+)
+
+_ACCEPTANCE_SEAL: Final = object()
+_SealedResultT = TypeVar("_SealedResultT")
+
+
+class QualifiedEvidenceError(ValueError):
+    """One deterministic refusal to accept qualified signed evidence."""
+
+    def __init__(self, reason_code: str, message: str) -> None:
+        super().__init__(message)
+        self.reason_code = reason_code
+
+
+def _reject(reason_code: str, message: str) -> None:
+    raise QualifiedEvidenceError(reason_code, message)
+
+
+def _construct_sealed_result(
+    cls: type[_SealedResultT],
+    *,
+    values: Mapping[str, object],
+) -> _SealedResultT:
+    fields = getattr(cls, "__dataclass_fields__", None)
+    if type(fields) is not dict or set(values) != set(fields) - {"_seal"}:
+        _reject(
+            "internal_sealed_result_error",
+            "sealed acceptance factory received incomplete internal values",
+        )
+    instance = object.__new__(cls)
+    for field, value in values.items():
+        object.__setattr__(instance, field, value)
+    object.__setattr__(instance, "_seal", _ACCEPTANCE_SEAL)
+    instance.__post_init__()  # type: ignore[attr-defined]
+    return instance
+
+
+@dataclass(frozen=True, slots=True, init=False)
+class QualifiedAnchorEvidenceAcceptanceV1:
+    """Sealed acceptance of a checkpoint's anchor evidence from a qualified bundle."""
+
+    mode: str
+    anchor_statement_id: str
+    anchor_evidence: tuple[EvidenceReferenceV1, ...]
+    evidence_blobs: tuple[ProviderEvidenceBlobV1, ...]
+    _seal: object
+
+    def __init__(self, *_args: object, **_kwargs: object) -> None:
+        _reject(
+            "unauthenticated_acceptance_construction",
+            "qualified anchor-evidence acceptance construction is private",
+        )
+
+    def __post_init__(self) -> None:
+        if (
+            type(self) is not QualifiedAnchorEvidenceAcceptanceV1
+            or self._seal is not _ACCEPTANCE_SEAL
+        ):
+            _reject(
+                "unauthenticated_acceptance_construction",
+                "qualified anchor-evidence acceptance construction is private",
+            )
+
+    @property
+    def acceptance_id(self) -> str:
+        return content_id("qualified_anchor_evidence_acceptance", self.to_body())
+
+    def to_body(self) -> dict[str, object]:
+        return {
+            "anchor_evidence": [
+                reference.to_body() for reference in self.anchor_evidence
+            ],
+            "anchor_statement_id": self.anchor_statement_id,
+            "evidence_blobs": [
+                blob.reference.to_body() for blob in self.evidence_blobs
+            ],
+            "mode": self.mode,
+        }
+
+
+def _validated_claimed_references(value: object) -> tuple[EvidenceReferenceV1, ...]:
+    if type(value) is not tuple or len(value) < 2:
+        _reject(
+            "invalid_claimed_anchor_evidence",
+            "claimed anchor evidence must be a bounded quorum of references",
+        )
+    for reference in value:
+        if (
+            type(reference) is not EvidenceReferenceV1
+            or reference.evidence_kind != HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND
+        ):
+            _reject(
+                "invalid_claimed_anchor_evidence",
+                "claimed anchor evidence must be exact head-anchor-receipt references",
+            )
+    ordered = tuple(sorted(value, key=lambda ref: (ref.source_id, ref.evidence_id)))
+    if len({(ref.source_id, ref.evidence_id) for ref in ordered}) != len(ordered):
+        _reject(
+            "invalid_claimed_anchor_evidence",
+            "claimed anchor evidence cannot repeat one reference",
+        )
+    return ordered
+
+
+def _validated_claimed_blobs(value: object) -> tuple[ProviderEvidenceBlobV1, ...]:
+    if type(value) is not tuple or not value:
+        _reject(
+            "invalid_claimed_anchor_blobs",
+            "claimed anchor evidence blobs must be a nonempty tuple",
+        )
+    for blob in value:
+        if type(blob) is not ProviderEvidenceBlobV1:
+            _reject(
+                "invalid_claimed_anchor_blobs",
+                "claimed anchor evidence blobs must be exact ProviderEvidenceBlobV1 values",
+            )
+    return value  # type: ignore[return-value]
+
+
+def accept_qualified_anchor_evidence_v1(
+    *,
+    head_profile: HeadAuthorityTrustProfileV1,
+    time_profile: IntegrityAdapterTrustProfileV1,
+    time_bundle: QualifiedTimeBundleV1,
+    anchor_bundle: QualifiedAnchorBundleV1,
+    claimed_anchor_statement_id: str,
+    claimed_anchor_evidence: tuple[EvidenceReferenceV1, ...],
+    claimed_evidence_blobs: tuple[ProviderEvidenceBlobV1, ...],
+) -> QualifiedAnchorEvidenceAcceptanceV1:
+    """Accept a checkpoint's anchor evidence from a freshly reauthenticated bundle.
+
+    The sealed anchor bundle is not trusted directly.  It is reauthenticated from its
+    retained requests and signed packages, and the checkpoint's claimed statement,
+    references, and BLOB bytes must match the freshly derived result exactly.  A BLOB
+    carrying unsigned modeled content is refused because its bytes are not the signed
+    package.
+    """
+
+    if type(anchor_bundle) is not QualifiedAnchorBundleV1:
+        _reject(
+            "invalid_qualified_anchor_bundle",
+            "acceptance requires an exact sealed QualifiedAnchorBundleV1",
+        )
+    # Fresh reauthentication from the retained request and signed-package bytes.
+    fresh = reauthenticate_anchor_bundle_v1(
+        profile=head_profile,
+        time_profile=time_profile,
+        time_bundle=time_bundle,
+        bundle=anchor_bundle,
+    )
+
+    claimed_references = _validated_claimed_references(claimed_anchor_evidence)
+    claimed_blobs = _validated_claimed_blobs(claimed_evidence_blobs)
+
+    if claimed_anchor_statement_id != fresh.anchor_statement_id:
+        _reject(
+            "qualified_anchor_statement_mismatch",
+            "the claimed anchor statement is not the freshly reauthenticated statement",
+        )
+    if claimed_references != fresh.evidence:
+        _reject(
+            "qualified_anchor_evidence_mismatch",
+            "the claimed anchor references are not the freshly reauthenticated references",
+        )
+
+    retained = {
+        blob.reference.evidence_id: blob for blob in fresh.evidence_blobs
+    }
+    if len(retained) != len(fresh.evidence_blobs):
+        _reject(
+            "qualified_anchor_evidence_mismatch",
+            "the reauthenticated anchor bundle repeats one evidence identity",
+        )
+    claimed_by_id = {blob.reference.evidence_id: blob for blob in claimed_blobs}
+    if set(claimed_by_id) != set(retained):
+        _reject(
+            "qualified_anchor_blob_coverage_mismatch",
+            "the claimed evidence blobs do not exactly cover the retained signed packages",
+        )
+    for evidence_id, retained_blob in retained.items():
+        claimed_blob = claimed_by_id[evidence_id]
+        # The claimed BLOB must be the exact signed package.  Unsigned modeled content
+        # hashes to a different identity and is rejected here.
+        if claimed_blob.content != retained_blob.content:
+            _reject(
+                "qualified_anchor_blob_coverage_mismatch",
+                "a claimed evidence blob is not the exact retained signed package",
+            )
+        if claimed_blob.evidence_kind != HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND:
+            _reject(
+                "qualified_anchor_blob_coverage_mismatch",
+                "a claimed evidence blob is not a head-anchor-receipt package",
+            )
+
+    ordered_blobs = tuple(
+        retained[reference.evidence_id] for reference in claimed_references
+    )
+    return _construct_sealed_result(
+        QualifiedAnchorEvidenceAcceptanceV1,
+        values={
+            "mode": QUALIFIED_EVIDENCE_MODE_QUALIFIED_SIGNED_V1,
+            "anchor_statement_id": fresh.anchor_statement_id,
+            "anchor_evidence": fresh.evidence,
+            "evidence_blobs": ordered_blobs,
+        },
+    )
+
+
+__all__ = (
+    "QUALIFIED_EVIDENCE_MODES_V1",
+    "QUALIFIED_EVIDENCE_MODE_MODELED_UNSIGNED_V1",
+    "QUALIFIED_EVIDENCE_MODE_QUALIFIED_SIGNED_V1",
+    "QualifiedAnchorEvidenceAcceptanceV1",
+    "QualifiedEvidenceError",
+    "accept_qualified_anchor_evidence_v1",
+)

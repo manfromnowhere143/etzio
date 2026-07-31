@@ -4,7 +4,7 @@ The names exported here are the original in-memory behavior model. The governed
 protocol-v1 fixture path lives in ``fixture_scan``, ``verification_lease``, ``events_v1``,
 ``artifact_resolution``, ``receipt_admission``, ``verification_recovery``, ``reducer``,
 ``integrity_transition``, ``integrity_adapters_v1``, ``head_authority_adapters_v1``,
-``blocked_finality_v1``, and ``store``; they are intentionally imported explicitly so
+``blocked_finality_v1``, ``qualified_evidence_v1``, and ``store``; they are intentionally imported explicitly so
 modeled, qualified-fixture, and durable objects cannot be confused. Receipt admission,
 modeled integrity finality, networkless time, revocation, anchor, catalog, and monitor
 adapter qualification, blocked-finality recovery, and lease recovery remain

@@ -31,8 +31,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "independently_administered_provider_qualification",
-    "next_session_pickup": "qualify and connect independently administered trusted-time revocation anchor catalog and monitor adapters inside the retained lifecycle contract, replacing the unsigned code-derived modeled-finality provider assertions with authenticated external evidence; preserve the four immutable phases the database-global barrier byte-identical at-least-once retry global and mission continuity store-error classification and the governed blocked-finality guarantees",
+    "next_gate": "qualified_evidence_lifecycle_wiring",
+    "next_session_pickup": "wire the ADR-0018 qualified-signed acceptance mode into CheckpointCandidateRecordV1 identity and SQLite storage behind a profile-selected mode, preserving every ADR-0012 integration requirement and adding crash-recovery known-bads; then extend acceptance to the revocation floor phase (resolving the snapshot-identity coupling and the fixture.revocation-metadata source rename) and the head-floor phase; a real provider still requires its own admitted grant",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -138,6 +138,8 @@
     "store-domain failures during blocked retention preserved without reclassification as adapter refusals",
     "unauthorized-recovery refusal carrying the retained attempt ordinal unresolved phase refused operation and reason code",
     "non-consequential blocked-finality status inspection that cannot append authorize resolve or return command success",
+    "two profile-selected provider-evidence acceptance modes: the exact ADR-0011 modeled-unsigned gate and a qualified-signed-fixture gate that are mutually exclusive by construction",
+    "networkless qualified-signed anchor-evidence acceptance that freshly reauthenticates a retained qualified anchor bundle and accepts a checkpoint claim only as the exact signed packages refusing forgery scope mismatch and unsigned content",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -176,8 +178,8 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 1096,
+    "validation_status": "local_release_suites_pending_github_reproduction",
+    "test_count": 1112,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -193,7 +195,7 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "proves injected-interruption recovery on both sides of blocked-observation and governed-decision retention under the documented SQLite rollback-journal assumptions adds a retained-reason unauthorized-recovery refusal and a non-consequential status interface; it is not power-loss device or production-storage qualification and establishes no independently custodied recovery authority dual control audit delivery execution truth finding validity isolation live authorization learning or superiority claim",
+    "claim_boundary": "specifies two profile-selected provider-evidence acceptance modes and implements the networkless anchor-phase qualified-signed acceptance primitive that freshly reauthenticates a retained qualified anchor bundle; it changes no record identity store profile or lifecycle command and establishes no lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
     "blocked_finality_focused_tests": 61,
@@ -202,10 +204,7 @@
     "sqlite_schema_version": 3,
     "blocked_finality_lifecycle_tests": 11,
     "blocked_finality_crash_recovery_tests": 13,
-    "github_validated_commit": "7882a8cd447d8a9364725298a0dd853bbe3b5942",
-    "github_actions_run_id": 30621809292,
-    "github_pull_request": 18,
-    "gitguardian_passed": true
+    "qualified_evidence_acceptance_tests": 16
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -269,7 +268,8 @@
     "docs/decisions/0014-durable-blocked-finality-and-governed-recovery.md",
     "docs/decisions/0015-durable-blocked-finality-storage-v3.md",
     "docs/decisions/0016-governed-blocked-finality-lifecycle.md",
-    "docs/decisions/0017-blocked-finality-crash-recovery.md"
+    "docs/decisions/0017-blocked-finality-crash-recovery.md",
+    "docs/decisions/0018-qualified-evidence-consumption.md"
   ],
   "closed_integrity_gates": [
     {

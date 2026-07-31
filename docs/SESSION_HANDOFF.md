@@ -44,7 +44,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0014](decisions/0014-durable-blocked-finality-and-governed-recovery.md), and
 [ADR-0015](decisions/0015-durable-blocked-finality-storage-v3.md), and
 [ADR-0016](decisions/0016-governed-blocked-finality-lifecycle.md), and
-[ADR-0017](decisions/0017-blocked-finality-crash-recovery.md).
+[ADR-0017](decisions/0017-blocked-finality-crash-recovery.md), and
+[ADR-0018](decisions/0018-qualified-evidence-consumption.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -54,7 +55,7 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/blocked-finality-crash-recovery-v1`, stacked on `main`
+- Current foundation-integrity branch: `agent/qualified-evidence-acceptance-v1`, stacked on `main`
 - The complete fifteen-tranche stack (PRs #2 through #16) was merged into `main` on
   2026-07-31 by fast-forward, not squash. The stack was strictly linear and `main` was a
   pure ancestor, so fast-forwarding preserved every per-tranche commit message and
@@ -605,7 +606,7 @@ digests, and event chain are not evidence of the protocol-v1 architecture.
 On the blocked-finality crash-recovery candidate, the canonical release command passed
 under both declared local runtimes:
 
-- 1096 tests passed;
+- 1112 tests passed;
 - the focused crash-recovery file passed all 13 tests, covering interruption on both sides
   of both retention points, ordinal integrity across repeated interrupted retries, barrier
   retention, store-domain preservation, reopened-database replay, and non-consequential
@@ -1033,17 +1034,23 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup:** the blocked-finality gate is closed end to end —
-specified, proved, persisted, live, and crash-recovered. The next dependency-complete
-tranche is provider qualification: qualify and connect independently administered
-trusted-time, revocation, anchor, catalog, and monitor adapters inside the retained
-lifecycle contract, replacing the unsigned code-derived modeled-finality assertions with
-authenticated external evidence. Begin from the three networkless harnesses
-(`integrity_adapters_v1`, `head_authority_adapters_v1`, `blocked_finality_v1`), which
-already define the acceptance boundary each provider must clear. Preserve the four
-immutable phases, the database-global barrier, byte-identical at-least-once retry, global
-and mission continuity, store-error classification, and every governed blocked-finality
-guarantee. A real provider still requires its own admitted grant.
+**Exact next-session pickup:** ADR-0018 began qualified signed evidence consumption. A
+seam audit established that the qualification harnesses already produce the exact
+provider-neutral types the lifecycle consumes (`RevocationFloorV1`, `HeadCheckpointFloorV1`,
+`EvidenceReferenceV1`); the only gap is that the modeled gate demands byte-equality against
+unsigned code-derived content while a qualified BLOB carries the signed package. This
+tranche specified two profile-selected acceptance modes and implemented the networkless
+anchor-phase acceptance primitive in `etzio/kernel/qualified_evidence_v1.py`.
+
+The next dependency-complete tranche wires the `qualified_signed_fixture` mode into
+`CheckpointCandidateRecordV1` identity and SQLite storage behind a profile-selected mode.
+That is schema-touching: it changes the record body and `record_id`, needs a store profile
+that selects the mode at enrollment, and must preserve every ADR-0012 integration
+requirement plus its own crash-recovery known-bads. Then extend acceptance to the
+revocation floor phase — which drags in the `RevocationFloorV1.snapshot_id ==
+metadata.evidence_id` coupling and the `fixture.revocation-metadata` vs `fixture.revocation`
+source rename — and the head-floor phase with its genesis-identity provenance. A real
+provider still requires its own admitted grant.
 
 The superseded storage scoping note follows for provenance only. The retained bytes make the
 cost explicit: `_validate_schema` compares object sets for equality and therefore fails
