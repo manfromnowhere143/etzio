@@ -20,6 +20,12 @@ Bounty revenue is one useful external measure of economic value. It is neither t
 authority nor the only product goal. Defensive discovery, enterprise assurance, benchmark
 progress, negative results, and transferable research knowledge are also first-class.
 
+Public repository visibility is authorized as of 2026-08-01. It is source visibility, not an
+open-source license (see LICENSE.md) and not any other grant: deployment, live-target
+interaction, credential use, paid compute, disclosure, submission, and publication of results
+remain separate, currently unheld authorizations. Making the repository public grants no new
+capability and relaxes no operating law below.
+
 ## Operating laws
 
 ### 1. Authority precedes existence

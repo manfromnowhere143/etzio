@@ -17,14 +17,16 @@
   },
   "remote": {
     "target": "https://github.com/manfromnowhere143/etzio.git",
-    "visibility": "private",
+    "visibility": "public",
     "default_branch": "main",
     "verified": "2026-07-29",
     "merge_policy": "squash_only_delete_branch",
     "actions_default_token": "read_only",
     "branch_protection": "unavailable_on_current_private_repository_plan",
     "merged_to_main": "2026-07-31",
-    "merge_history_policy": "linear_fast_forward_preserving_per_tranche_commits"
+    "merge_history_policy": "linear_fast_forward_preserving_per_tranche_commits",
+    "public_since": "2026-08-01",
+    "license": "proprietary_all_rights_reserved_public_source"
   },
   "mission": {
     "purpose": "evidence-native operating system for authorized vulnerability research across target categories",
@@ -40,7 +42,7 @@
     "private_repository_operate": true,
     "push_private_branch": true,
     "repository_owned_fixtures": true,
-    "public_visibility": false,
+    "public_visibility": true,
     "deployment": false,
     "live_target": false,
     "untrusted_exploit_execution": false,

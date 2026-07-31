@@ -1,10 +1,49 @@
 # Etzio
 
-**An evidence-native operating system for authorized vulnerability research.**
+**An evidence-native engine for authorized vulnerability research: a candidate becomes a
+finding only when a separately authorized verifier reproduces a material effect from
+retained bytes and the kernel accepts the receipt — proof by reproduction, not by
+confidence.**
 
-The target operating chain is architectural. The retained fixture slice currently reaches
-stable candidates through a narrower path; everything after the marked boundary is
-aspirational, and modeled verification-statement retention is a separate kernel path:
+> **Honest status — 2026-08-01. Phase: foundation integrity. This is the courtroom, not
+> yet the detective.**
+>
+> Etzio has built an evidence and adjudication kernel to a high standard. It has *not* built
+> the part that finds vulnerabilities. The entire detection surface today is **six Python
+> rule classes over two repository fixtures** — `7` planted candidates on the vulnerable
+> fixture, `0` on the clean one, and **never a finding**. The kernel can prove a claim; it
+> cannot yet make one worth proving.
+>
+> Nothing here touches the outside world. No live target, exploit execution, isolation host,
+> benchmark corpus, external provider, credential, network egress, spend, or disclosure is
+> authorized or reachable — the only execution surface is repository-owned deterministic
+> fixtures. No trustworthy UTC, current real-world revocation, external durability,
+> non-equivocation, independent verification, finding, live-target authority, or superiority
+> claim follows from anything in this repository.
+>
+> What *is* implemented, end to end on those fixtures: a canonical protocol-v1 envelope with
+> semantic wire schemas; Ed25519-signed authority admission; content-addressed immutable
+> targets; a bounded, byte-bound Python analyzer under a lease; lifecycle-checked append-only
+> SQLite with deterministic replay; a transactional evidence vault; kernel-issued modeled
+> verification leases, typed input resolution, and single-use signed-receipt admission;
+> crash-safe modeled integrity finality across four immutable phases behind one
+> database-global barrier; three networkless qualification harnesses (trusted-time and
+> revocation; RFC 9162 anchor, catalog, and monitor head-authority; and a qualified-evidence
+> acceptance layer); durable governed blocked-finality — specified, persisted, wired into the
+> lifecycle, and crash-recovered; and a schema-version-4 store that pins the qualified
+> adapter roots. The Merkle proofs are checked against the published **RFC 6962/9162
+> reference vectors**, not against Etzio's own prover. `1158` tests pass on CPython 3.11.15
+> and 3.14.2; `19` accepted architecture decisions stand behind them; every consequential
+> gate carries a known-bad that proves it refuses.
+>
+> Winning bounties is a future measured outcome, never present authority. See
+> [Open gates and next mission](#open-gates-and-next-mission).
+
+## The system in one view
+
+Authority → immutable target → falsifiable hypothesis → content-bound candidate → isolated
+exploit artifact → independent reproduction → kernel adjudication → evidence-bound
+disclosure → governed offline learning. **Nothing jumps the chain.**
 
 ```text
 authority → immutable target → hypotheses → candidates
@@ -13,47 +52,12 @@ authority → immutable target → hypotheses → candidates
                                                  → adjudication → disclosure draft → learning
 ```
 
-The mission spans vulnerability classes, languages, and target categories. Blockchain,
-Solidity, EVM, and later L1/client research are the first benchmark and economic wedge—not
-the architectural ceiling. Domain knowledge belongs in versioned packs; policy and
-scientific authority remain in the kernel.
-
-> **Status — architecture foundation, 2026-07-29.**
-> One repository-fixture candidate-generation path is implemented end to end. It admits a
-> signed authority record, resolves immutable content-addressed bytes, executes a narrow
-> Python analyzer under a bounded lease, and commits lifecycle-checked events to SQLite. A
-> verification-intent mission can also retain a kernel-issued, authority-bound
-> modeled-fixture verification lease for a retained candidate, resolve every target and
-> predeclared verification-input byte under an exact content-identity type, and admit one
-> authenticated modeled receipt while consuming its lease in the same SQLite transaction.
-> A versioned SQLite evidence vault retains the exact BLOBs, code-derived role mappings,
-> and canonical event in one transaction at all four implemented byte-claiming boundaries;
-> the filesystem evidence store is staging and cache only. The receipt signs the retained
-> resolution and four exact
-> typed output digest/size pairs. Explicit expiry, modeled cancellation, atomic
-> reassignment, and receipt-coverage closure recover verification-intent missions without
-> rewriting history. A separate empty-history-only schema-v2 profile now commits every
-> event with a signed integrity decision and exercises a recoverable modeled anchor,
-> checkpoint, and exact-current-head sequence under the documented SQLite assumptions
-> before its fixture command returns. Its clocks, revocation sources, anchor, catalog, and
-> monitor remain deterministic repository-owned fixtures whose provider assertions are
-> unsigned and code-derived—not external authority. Separately, a versioned networkless
-> qualification contract authenticates repository-owned Ed25519-signed time and revocation
-> fixture packages under one exact profile, trust root, validation/provider policy, and
-> fixed all-source roster. It retains the overlapping time sources' conservative outer
-> hull, evaluates revocation validity, staleness, and floor agreement against that complete
-> hull, and freshly reauthenticates exact signed bytes before producing a sealed
-> provider-neutral mapping. A second versioned networkless contract closes the remaining
-> two evidence kinds: it authenticates repository-owned Ed25519-signed anchor, catalog, and
-> monitor packages, recomputes RFC 9162 inclusion proofs against a byte-bound Etzio
-> anchor-registration leaf, recomputes RFC 9162 consistency proofs from the exact retained
-> predecessor root, refuses an unchanged tree size whose root changed, and requires
-> unanimous monitor agreement on one catalog head before mapping a sealed
-> `HeadCheckpointFloorV1`. Modeled finality and lifecycle commands do not consume that
-> mapping. No real provider or native RFC 3161, PKIX, TUF, COSE, SCITT, or transparency
-> client is qualified. Etzio does not establish trustworthy UTC, current real revocation,
-> external durability or independence, execute an exploit, adjudicate a finding, access a
-> live target, or learn. No production-readiness or superiority claim is made.
+This is the intended operating chain, not a runtime screenshot. Everything left of the
+boundary is implemented on repository fixtures; everything right of it is a design target
+gated behind isolation, benchmark, and exact-authority acceptance. The mission spans
+vulnerability classes, languages, and target categories; blockchain, Solidity, and EVM
+research are the first benchmark and economic wedge — not the architectural ceiling. Domain
+knowledge belongs in versioned packs; policy and scientific authority stay in the kernel.
 
 ## Why Etzio
 
@@ -331,7 +335,7 @@ flowchart TB
         BB["Barrier untouched<br/>retaining a block never releases finality"]
     end
 
-    NEXT["Exact next gate<br/>injected-interruption crash recovery<br/>across observation and decision retention"]
+    NEXT["Exact next gate<br/>consume qualified signed evidence in the records<br/>schema-selected acceptance mode"]
     EXT["Future full adapter set<br/>independently administered, authenticated,<br/>durable, monitored, and qualified"]
 
     E --> D --> P1 --> RH --> P2 --> P3 --> P4 --> OK
@@ -364,13 +368,17 @@ flowchart TB
 
 From phase 1 until phase 4, one unresolved transition blocks later appends and generic raw
 replay across all missions; facade recovery revalidates and resumes the same retained
-bytes. A typed blocked result is attempt-local: the immutable phase remains unresolved,
-but the classification and reason are not durably retained. See the canonical
-[integrity-evidence architecture](docs/ARCHITECTURE.md#integrity-evidence-contract) and
-[ADR-0011](docs/decisions/0011-crash-safe-modeled-integrity-finality.md#four-immutable-local-phases).
-The separate signed-fixture lane ends at `QualifiedIntegrityInputsV1`; no arrow crosses
-from that sealed mapping into the current pending-transition or lifecycle path. See
-[ADR-0012](docs/decisions/0012-networkless-time-revocation-adapter-qualification.md).
+bytes. A blocked finality attempt is now a durable, reasoned, content-addressed
+observation, and recovery past a block requires a role-separated signed decision — retry or
+terminal seal — that never finalizes, rewrites, or releases the barrier. See the canonical
+[integrity-evidence architecture](docs/ARCHITECTURE.md#integrity-evidence-contract),
+[ADR-0011](docs/decisions/0011-crash-safe-modeled-integrity-finality.md#four-immutable-local-phases),
+and [ADR-0014 through ADR-0017](docs/decisions/README.md). The separate signed-fixture lanes
+end at `QualifiedIntegrityInputsV1` and `QualifiedHeadAuthorityInputsV1`; a complete
+networkless acceptance layer can now derive the exact evidence a record binds from a freshly
+reauthenticated bundle, but no lifecycle record consumes it yet. The remaining step is a
+schema-selected consumption mode, designed in
+[ADR-0019](docs/decisions/0019-qualified-evidence-lifecycle-consumption.md).
 
 | Plane | Unit | Responsibility | Repository status |
 |---|---|---|---|
@@ -396,17 +404,18 @@ claim: the entire suite runs against repository-owned deterministic fixtures.
 
 | Retained | Value |
 |---|---|
-| Full suite | 1083 tests, green on CPython 3.11.15 / SQLite 3.53.1 and CPython 3.14.2 / SQLite 3.51.2 |
+| Full suite | `1158` tests, green on CPython 3.11.15 / SQLite 3.53.1 and CPython 3.14.2 / SQLite 3.51.2 |
 | Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
-| SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` 3 |
-| Accepted decisions | 16 architecture decision records |
-| Adversarial focus files | 81 time/revocation, 78 head-authority, 61 blocked-finality contract, 23 storage, 11 lifecycle |
-| Merkle core | reproduces the published RFC 6962/9162 reference tree for sizes 0–8, and all 36 reference inclusion plus 36 reference consistency proofs |
-| Governed fixture scans | vulnerable fixture closes with 7 candidates, clean fixture with 0, neither mints a finding |
+| SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` `4` |
+| Accepted decisions | `19` architecture decision records, each with a known-bad where it names a gate |
+| Merkle core | reproduces the published RFC 6962/9162 reference tree for sizes `0`–`8`, and all `36` reference inclusion plus `36` reference consistency proofs |
+| Qualified-evidence acceptance | `47` known-bads across the anchor, revocation, and head-floor phases; unsigned content is refused in signed mode |
+| Governed fixture scans | vulnerable fixture closes with `7` candidates, clean fixture with `0`, neither mints a finding |
 
 The Merkle verifiers are validated against the published RFC reference vectors rather than
 against Etzio's own prover, because a broken verifier and a broken prover agree with each
-other.
+other. A green check is evidence about this repository snapshot; it is never a security,
+provider, or finding claim.
 
 ## Reproduce
 
@@ -453,54 +462,32 @@ can enroll in modeled integrity finality.
 
 ## Open gates and next mission
 
-The next mission is not more detector breadth. Kernel-issued modeled-fixture assignments,
-typed input resolutions, atomic modeled-receipt admission, explicit lease recovery, and
-the typed integrity-evidence contract are retained. The schema-v2 deterministic fixture
-profile pins its exact policy, trust store, adapter profile, decision and checkpoint
-principals, and service scope. Under the repository's documented SQLite/runtime
-assumptions, it exercises and tests same-transaction pending retention, byte-exact
-two-stage recovery, signed checkpoint persistence, multi-mission global and mission
-continuity, and exact-current-head command completion from event zero; it blocks generic
-replay while any modeled transition is unresolved. Its provider assertions are canonical,
-code-derived fixture claims—not authenticated external observations. Separately, the V1
-networkless time/revocation qualification harness now proves exact signed-fixture
-authentication, all-source outer-hull time semantics, full-hull revocation
-validity/freshness/floors, and sealed provider-neutral mapping. It is not consumed by the
-modeled pending-transition or lifecycle path and qualifies no real provider or native
-RFC 3161/TUF client. The V1 networkless head-authority harness additionally proves
-byte-bound anchor registration, RFC 9162 inclusion and consistency verification against the
-published reference tree, catalog rollback and equivocation refusal, and unanimous monitor
-agreement; it qualifies no real transparency log and proves no independent observer. The V1
-blocked-finality contract makes a refused finality attempt a durable, reasoned observation
-and requires a role-separated signed decision to change its disposition; neither admissible
-disposition finalizes, deletes, rewrites, or releases the barrier. That contract is now
-persisted under schema version 3 and wired into the modeled lifecycle behind an opt-in
-governed binding: a block is retained from outside every blocked classifier, so a store
-failure keeps its own domain instead of becoming an adapter refusal; recovery past a block
-requires an authorized decision answering the exact latest observation; and a seal is
-terminal across load, recover, and append while leaving every retained byte readable. The transactional SQLite vault closes the ordinary
-filesystem-staging/SQLite retention split for all four implemented byte-claiming event
-boundaries at the logical transaction layer. Completing the foundation-integrity boundary
-still requires:
+The next mission is not more detector breadth. The evidence foundation is deep: the typed
+integrity-evidence contract, crash-safe modeled finality across four immutable phases, three
+networkless qualification harnesses, durable governed blocked-finality — specified,
+persisted, wired into the lifecycle, and crash-recovered — and a schema-version-4 store that
+pins the qualified adapter roots. The qualified-evidence acceptance layer can already derive
+the exact evidence any finality record binds from a freshly reauthenticated signed bundle.
 
-1. prove injected-interruption crash recovery across durable blocked-observation and
-   governed-decision retention;
-2. qualify independently administered trusted-time, revocation, anchor, catalog, and
-   monitor providers, then connect an explicitly admitted profile without weakening the
-   retained recovery state machine;
-3. prove external latest-head authority survives local loss, then close the documented
-   same-user SQLite pathname and coherent offline-rewrite boundary;
-4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
-   quotas, backup/restore, and process-kill and power-fault recovery; sensitive evidence
-   also requires access-control, encryption, and retention policy;
-5. replace opaque modeled outputs with structured, independently produced execution
-   evidence; and
-6. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
+What remains before a finding pipeline can exist:
 
-Only then should Etzio run the benchmark-first EVM pack. After the integrity, isolation,
-benchmark, and exact-`TargetContract` gates close, a strictly authorized bounty-research
-lane may run in parallel with continued engine development. Accepted outcomes and income
-are measurements, never authority.
+1. wire the qualified-signed acceptance mode into the finality records so the lifecycle
+   consumes authenticated evidence instead of unsigned code-derived assertions
+   ([ADR-0019](docs/decisions/0019-qualified-evidence-lifecycle-consumption.md));
+2. qualify independently administered trusted-time, revocation, anchor, catalog, and monitor
+   providers, and prove external latest-head authority survives local database loss;
+3. close the documented same-user SQLite pathname and coherent offline-rewrite boundary, and
+   accept a concrete VFS, device, quota, backup, process-kill, and power-fault storage
+   profile with sensitive-evidence access control, encryption, and retention;
+4. replace opaque modeled outputs with structured, independently produced execution evidence;
+   and
+5. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
+
+Only then does the benchmark-first EVM pack run, and only after the integrity, isolation,
+benchmark, and exact-`TargetContract` gates close may a strictly authorized bounty-research
+lane run in parallel with continued engine development. Accepted outcomes and income are
+measurements, never authority. Autonomy over a live target expands after one full chain of
+custody survives independent reproduction, isolation, and adjudication — not before.
 
 ## Project record
 
@@ -511,13 +498,15 @@ are measurements, never authority.
 - [Roadmap](docs/ROADMAP.md)
 - [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
 - [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
-- [Architecture decisions](docs/decisions/README.md)
-- [Networkless time/revocation adapter qualification decision](docs/decisions/0012-networkless-time-revocation-adapter-qualification.md)
-- [Networkless head-authority adapter qualification decision](docs/decisions/0013-networkless-head-authority-adapter-qualification.md)
-- [Durable blocked-finality and governed recovery decision](docs/decisions/0014-durable-blocked-finality-and-governed-recovery.md)
-- [Schema-version-3 blocked-finality storage decision](docs/decisions/0015-durable-blocked-finality-storage-v3.md)
-- [Governed blocked-finality lifecycle decision](docs/decisions/0016-governed-blocked-finality-lifecycle.md)
+- [Architecture decisions (ADR-0001 through ADR-0019)](docs/decisions/README.md)
+- [Presentation standard](docs/PRESENTATION.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
+- [Citation](CITATION.cff)
 
-Etzio is private and solely authored by [Daniel Wahnich](AUTHORS.md).
+Etzio is a public, solely authored research repository by
+[Daniel Wahnich](AUTHORS.md). Public visibility is authorized; deployment, live-target work,
+credential use, spending, disclosure, and submission remain separate, currently unheld
+grants. It is independent from Odeya, Sentinel, Aweb, Maestro, Telos, Inbar, and every other
+project in the estate — it may study reusable engineering patterns, never their runtime code,
+stores, identities, or authority.

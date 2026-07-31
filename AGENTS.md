@@ -191,5 +191,7 @@ Daniel Wahnich <cogitoergosum143@gmail.com>
 
 Do not add `Co-Authored-By` trailers. Automated systems may assist with authorized changes,
 validation, and publication, but they may not appear as an author or co-author. The
-authorized remote is the private repository `manfromnowhere143/etzio`. Public visibility,
-deployment, live-target work, disclosure, and spending require separate explicit authority.
+authorized remote is the public repository `manfromnowhere143/etzio`; public visibility was
+authorized on 2026-08-01 and is source visibility only, not an open-source license (see
+LICENSE.md). Deployment, live-target work, credential use, disclosure, submission, and
+spending still require separate explicit authority.

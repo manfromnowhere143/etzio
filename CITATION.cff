@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "Cite this software only with the exact revision and retained evidence used."
+title: "Etzio: An Evidence-Native Engine for Authorized Vulnerability Research"
+type: software
+authors:
+  - family-names: Wahnich
+    given-names: Daniel
+version: 0.0.1
+date-released: 2026-08-01
+url: "https://github.com/manfromnowhere143/etzio"
+repository-code: "https://github.com/manfromnowhere143/etzio"
+abstract: >-
+  Etzio is an evidence-native engine for authorized vulnerability research. A candidate
+  becomes a finding only when a separately authorized verifier reproduces a material effect
+  from retained bytes and the kernel accepts the receipt. The current execution surface is
+  repository-owned deterministic fixtures; no live-target, execution, external-provider, or
+  finding capability is established. See LICENSE.md — this repository is public source under a
+  proprietary license, not an open-source grant.
+keywords:
+  - authorized vulnerability research
+  - evidence-native systems
+  - independent reproduction
+  - content-addressed evidence
+  - deterministic replay
+  - RFC 9162

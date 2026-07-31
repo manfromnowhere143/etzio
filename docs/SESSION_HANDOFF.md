@@ -71,6 +71,13 @@ memory. A green check validates only what it names.
 Resolve the current branch head, pull request, workflow state, visibility, and default branch
 from Git and GitHub. Do not infer them from this dated packet.
 
+The repository is **public** as of 2026-08-01 (source visibility, not an open-source
+license; see LICENSE.md). Public visibility was explicitly authorized by the founder; every
+other grant — deployment, live-target, credential, spend, disclosure, submission — remains
+unheld. Public repositories run GitHub Actions free and unmetered. The presentation standard
+is now recorded in [`docs/PRESENTATION.md`](PRESENTATION.md); the README, charter, and this
+handoff follow it.
+
 The private remote and `main` default branch were verified on 2026-07-29. Read-only Actions
 permissions, SHA-pinned actions, squash-only merging, and automatic branch deletion were
 configured. GitHub branch protection/rulesets were unavailable for this private repository
