@@ -136,7 +136,11 @@ observation exists, recovery requires a retained decision authorizing a retry fo
 latest observation; elapsed time and repetition are not authority. An authorized retry does
 not promise success, so a still-refusing adapter accumulates attempts under increasing
 ordinals. A sealing decision never authorizes a retry and makes load, recover, and append
-refuse, while leaving every retained byte readable.
+refuse, while leaving every retained byte readable. Injected-interruption known-bads prove
+that death on either side of observation and decision retention never duplicates, reuses,
+or skips an attempt ordinal, never releases the barrier, and never reclassifies a store
+failure; the unauthorized-recovery refusal carries the retained reason, and a
+non-consequential status interface exposes the blocked state without resolving it.
 
 The three qualification harnesses are contract proof only and are not consumed by modeled
 finality unless the governed binding is configured. Modeled finality still uses unsigned, deterministic,
@@ -146,9 +150,9 @@ real non-equivocation, execution, or finding claim follows.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. prove injected-interruption crash recovery across observation and decision retention,
-   then qualify independently administered trusted-time, revocation, anchor, catalog, and
-   monitor adapters before connecting any external provider;
+1. qualify independently administered trusted-time, revocation, anchor, catalog, and
+   monitor adapters and connect an explicitly admitted profile without weakening the
+   retained recovery state machine;
 2. only then qualify independently administered providers and integrate accepted adapter
    outputs without weakening the retained recovery state machine;
 3. prove external latest-head authority survives local loss, then close the documented

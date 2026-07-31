@@ -43,7 +43,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0013](decisions/0013-networkless-head-authority-adapter-qualification.md), and
 [ADR-0014](decisions/0014-durable-blocked-finality-and-governed-recovery.md), and
 [ADR-0015](decisions/0015-durable-blocked-finality-storage-v3.md), and
-[ADR-0016](decisions/0016-governed-blocked-finality-lifecycle.md).
+[ADR-0016](decisions/0016-governed-blocked-finality-lifecycle.md), and
+[ADR-0017](decisions/0017-blocked-finality-crash-recovery.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -53,7 +54,7 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current working branch: `main`
+- Current foundation-integrity branch: `agent/blocked-finality-crash-recovery-v1`, stacked on `main`
 - The complete fifteen-tranche stack (PRs #2 through #16) was merged into `main` on
   2026-07-31 by fast-forward, not squash. The stack was strictly linear and `main` was a
   pure ancestor, so fast-forwarding preserved every per-tranche commit message and
@@ -539,10 +540,36 @@ This establishes the acceptance contract. Its storage follows below.
   and `append` all raise `IntegrityInstanceSealedError`. Sealing fences off new work and
   never destroys retained evidence.
 
-Crash recovery of an interruption *during* observation or decision retention has no
-injected-interruption known-bad yet. The enrolled recovery key is repository-owned and
-proves no independently custodied operator authority, dual control, audit delivery, or
-migration of a sealed instance.
+### Implemented blocked-finality crash recovery and status inspection
+
+- [ADR-0017](decisions/0017-blocked-finality-crash-recovery.md) proves interruption on both
+  sides of both retention points with a caller-side failure that is deliberately neither a
+  store nor an adapter condition;
+- death before observation retention leaves no row and the next attempt is ordinal 1, not
+  2, because an unrecorded block did not happen;
+- death after observation retention leaves exactly one row and replay is gated by the
+  authorization check rather than duplicating it;
+- repeated death across successive authorized retries yields ordinals `[1, 2, 3]` with
+  three distinct observation identities, never reusing or skipping one;
+- an interrupted observation leaves the barrier held and `integrity_finalizations` empty;
+- death after decision retention reconciles on identical signed bytes, death before it
+  leaves recovery unauthorized, and death after a sealing decision keeps the instance
+  sealed;
+- a reopened database sees exactly the retained observations, reason, and decision;
+- an injected `StoreBusyError` during retention propagates as `StoreBusyError`, so
+  recording that finality is blocked never becomes a deterministic adapter refusal;
+- `IntegrityRecoveryNotAuthorizedError` now carries the retained attempt ordinal,
+  unresolved phase, refused operation, and reason code, so a caller that lost the original
+  error still learns why it is blocked; and
+- `blocked_finality_status()` is a non-consequential inspection interface that cannot
+  append, authorize, resolve, or return command success, proved by a known-bad asserting it
+  retains and finalizes nothing.
+
+Logical crash recovery is claimed only under the documented SQLite rollback-journal
+assumptions and deterministic injected failures. It is not power-loss, device, or
+production-storage qualification. The enrolled recovery key is repository-owned and proves
+no independently custodied operator authority, dual control, audit delivery, or migration
+of a sealed instance.
 
 ### Implemented for modeled verification admission and recovery
 
@@ -573,13 +600,17 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
-## Current governed blocked-finality lifecycle release evidence
+## Current blocked-finality crash-recovery release evidence
 
-On the governed blocked-finality lifecycle candidate, the canonical release command passed
+On the blocked-finality crash-recovery candidate, the canonical release command passed
 under both declared local runtimes:
 
-- 1083 tests passed;
-- the focused lifecycle file passed all 11 tests, covering durable observation of a
+- 1096 tests passed;
+- the focused crash-recovery file passed all 13 tests, covering interruption on both sides
+  of both retention points, ordinal integrity across repeated interrupted retries, barrier
+  retention, store-domain preservation, reopened-database replay, and non-consequential
+  status inspection;
+- the inherited focused lifecycle file passed all 11 tests, covering durable observation of a
   deterministic block, unclassifiable-reason fallback, the authorized-retry gate,
   accumulating attempt ordinals, seal terminality across load, recover, and append, and
   the ungoverned default;
@@ -604,8 +635,8 @@ under both declared local runtimes:
   retained-evidence checks passed; and
 - `git diff --check` passed.
 
-The CPython 3.11 test suite completed in 479.01 seconds and the CPython 3.14 suite
-completed in 495.66 seconds; the complete release entrypoints took 481 and 498 seconds.
+The CPython 3.11 test suite completed in 509.93 seconds and the CPython 3.14 suite
+completed in 523.70 seconds; the complete release entrypoints took 514 and 527 seconds.
 Each complete release entrypoint also ran the modeled demonstrations and the governed
 vulnerable and clean fixture scans. The working-tree status was unchanged by validation.
 
@@ -616,10 +647,11 @@ The retained SQLite source identities were:
 - CPython 3.14.2 / SQLite 3.51.2:
   `2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075`.
 
-Private GitHub Actions run
-[`30614243915`](https://github.com/manfromnowhere143/etzio/actions/runs/30614243915)
-reproduced repository policy, both declared runtime suites, package build,
-outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on exact
+GitHub Actions reproduction for this tranche is pending; resolve the current run,
+pull-request, and GitGuardian state from GitHub rather than from this packet.
+
+The inherited governed-lifecycle tranche was reproduced by private run
+[`30614243915`](https://github.com/manfromnowhere143/etzio/actions/runs/30614243915) on
 implementation commit
 [`092a89989ddf2b0e231bae91406bcde89f1c9f9d`](https://github.com/manfromnowhere143/etzio/commit/092a89989ddf2b0e231bae91406bcde89f1c9f9d);
 GitGuardian also passed. The 3.11.15 foundation job took 14 minutes 42 seconds and the
@@ -993,14 +1025,17 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup:** the blocked-finality contract is specified, proved,
-persisted, and live. Prove injected-interruption crash recovery across durable
-blocked-observation and governed-decision retention as the next dependency-complete
-tranche: interrupt immediately before and after each retention, and after the caller
-response is lost, then assert exact replay without duplicate observations or ordinals.
-Preserve the opt-in binding, the retention path outside both blocked classifiers, the
-authorized-retry gate, and seal terminality. Only then qualify and connect independently
-administered trusted-time, revocation, anchor, catalog, and monitor adapters.
+**Exact next-session pickup:** the blocked-finality gate is closed end to end —
+specified, proved, persisted, live, and crash-recovered. The next dependency-complete
+tranche is provider qualification: qualify and connect independently administered
+trusted-time, revocation, anchor, catalog, and monitor adapters inside the retained
+lifecycle contract, replacing the unsigned code-derived modeled-finality assertions with
+authenticated external evidence. Begin from the three networkless harnesses
+(`integrity_adapters_v1`, `head_authority_adapters_v1`, `blocked_finality_v1`), which
+already define the acceptance boundary each provider must clear. Preserve the four
+immutable phases, the database-global barrier, byte-identical at-least-once retry, global
+and mission continuity, store-error classification, and every governed blocked-finality
+guarantee. A real provider still requires its own admitted grant.
 
 The superseded storage scoping note follows for provenance only. The retained bytes make the
 cost explicit: `_validate_schema` compares object sets for equality and therefore fails

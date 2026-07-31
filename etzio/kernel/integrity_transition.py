@@ -3937,17 +3937,70 @@ class ModeledIntegrityFinalizingEventStoreV1:
             return
         latest = observations[-1]
         signed = self._store.load_governed_recovery_decision(latest.observation_id)
+        retained_context = (
+            f"attempt {latest.attempt_ordinal} was blocked at "
+            f"{latest.unresolved_phase} during {latest.blocked_operation} "
+            f"with reason {latest.blocked_reason_code}"
+        )
         if signed is None:
             raise IntegrityRecoveryNotAuthorizedError(
                 "modeled_integrity_recovery_unauthorized",
-                "a retained blocked observation has no governed recovery decision",
+                "a retained blocked observation has no governed recovery decision: "
+                f"{retained_context}",
             )
         decision = GovernedRecoveryDecisionV1.from_canonical_bytes(signed.decision_bytes)
         if decision.disposition != RETRY_AUTHORIZED_DISPOSITION_V1:
             raise IntegrityRecoveryNotAuthorizedError(
                 "modeled_integrity_recovery_unauthorized",
-                "the retained governed decision does not authorize a retry",
+                "the retained governed decision does not authorize a retry: "
+                f"{retained_context}",
             )
+
+    def blocked_finality_status(self) -> dict[str, object] | None:
+        """Return a non-consequential view of the retained blocked state.
+
+        This inspection interface cannot append, authorize, resolve, or return command
+        success, and it never projects the pending event as a finalized head.
+        """
+
+        if self._blocked_finality is None:
+            return None
+        lineage = self._store.load_unresolved_integrity_transition()
+        if lineage is None:
+            return None
+        observations = self._store.load_blocked_finality_observations(
+            lineage.pending.event_digest
+        )
+        latest = observations[-1] if observations else None
+        signed = (
+            self._store.load_governed_recovery_decision(latest.observation_id)
+            if latest is not None
+            else None
+        )
+        disposition: str | None = None
+        if signed is not None:
+            from .blocked_finality_v1 import GovernedRecoveryDecisionV1
+
+            disposition = GovernedRecoveryDecisionV1.from_canonical_bytes(
+                signed.decision_bytes
+            ).disposition
+        return {
+            "attempt_count": len(observations),
+            "event_digest": lineage.pending.event_digest,
+            "instance_sealed": self._store.instance_is_sealed(),
+            "latest_attempt_ordinal": (
+                latest.attempt_ordinal if latest is not None else None
+            ),
+            "latest_blocked_operation": (
+                latest.blocked_operation if latest is not None else None
+            ),
+            "latest_blocked_reason_code": (
+                latest.blocked_reason_code if latest is not None else None
+            ),
+            "latest_disposition": disposition,
+            "mission_id": lineage.pending.mission_id,
+            "unresolved_phase": lineage.phase,
+        }
 
     def _retain_blocked_observation(
         self,

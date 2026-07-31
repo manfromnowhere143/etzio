@@ -19,6 +19,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0014: Durable blocked-finality disposition and governed recovery](0014-durable-blocked-finality-and-governed-recovery.md)
 - [ADR-0015: Schema-version-3 durable blocked-finality storage](0015-durable-blocked-finality-storage-v3.md)
 - [ADR-0016: Governed blocked-finality lifecycle integration](0016-governed-blocked-finality-lifecycle.md)
+- [ADR-0017: Blocked-finality crash recovery and status inspection](0017-blocked-finality-crash-recovery.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -53,3 +54,7 @@ the database-global barrier.
 ADR-0016 makes the persisted contract live: an opt-in governed binding retains a durable
 observation when a deterministic block is classified, requires an authorized retry before
 recovery may advance, and refuses every consequential command on a sealed instance.
+
+ADR-0017 proves injected-interruption recovery on both sides of observation and decision
+retention, makes the unauthorized-recovery refusal carry the retained reason, and adds a
+non-consequential status interface.
