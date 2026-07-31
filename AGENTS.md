@@ -109,7 +109,19 @@ freshly reauthenticates sealed mappings into provider-neutral anchor references 
 RFC reference tree, tampered, truncated, padded, forged, and forked proofs, rollback,
 equivocation, split view, substitution, staleness, and sealed-boundary abuse.
 
-Both qualification harnesses are contract proof only and are not consumed by modeled
+A third versioned, networkless contract now makes a blocked finality attempt durable. One
+closed observation names the exact transition, highest retained immutable phase, refused
+operation, deterministic reason, and attempt ordinal, timed only by a qualified hull. It
+resolves nothing. A role-separated Ed25519 governed recovery decision, whose key and
+principal must both differ from the enrolled integrity-decision and head-checkpoint
+authorities, is the only thing able to change a disposition, and it restates the complete
+observation binding so a signature cannot be moved onto another block. Exactly two
+dispositions are admissible: authorized retry from the exact retained phase, and terminal
+instance sealing. Neither finalizes, deletes, rewrites, mints a checkpoint, or releases the
+database-global barrier. Sixty-one focused tests and known-bads cover phase, ordinal,
+binding, separation-of-duty, staleness, seal-terminality, and barrier invariants.
+
+All three qualification harnesses are contract proof only and are not consumed by modeled
 finality or lifecycle commands. Modeled finality still uses unsigned, deterministic,
 code-derived provider assertions. No real or native provider is connected, and no external
 durability, trustworthy UTC, current real-world revocation, independent administration,
@@ -117,8 +129,9 @@ real non-equivocation, execution, or finding claim follows.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
-1. specify and prove durable blocked-finality disposition, exact reason, policy-authorized
-   recovery decision, and recovery replay before connecting any external provider;
+1. persist the specified blocked-finality observation and governed recovery decision under
+   a schema-version-3 migration, enrolled recovery authority, and crash-recovery
+   known-bads before connecting any external provider;
 2. only then qualify independently administered providers and integrate accepted adapter
    outputs without weakening the retained recovery state machine;
 3. prove external latest-head authority survives local loss, then close the documented

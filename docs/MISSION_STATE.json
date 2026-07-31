@@ -29,8 +29,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "durable_blocked_finality_disposition_and_governed_recovery",
-    "next_session_pickup": "specify and prove a durable blocked-finality disposition, exact reason, policy-authorized recovery decision, atomic persistence point, crash recovery, and database-global barrier interaction; the networkless time, revocation, anchor, catalog, and monitor qualification boundaries are complete and remain unconsumed by lifecycle finality; do not connect any real provider until the durable blocked-state contract and its known-bads pass",
+    "next_gate": "durable_blocked_finality_persistence_schema_v3",
+    "next_session_pickup": "persist the specified ADR-0014 blocked-finality observation and governed recovery decision: a schema-version-3 migration adding an append-only blocked table, an enrolled recovery key and principal in the modeled authority binding, blocked-record bytes charged in the logical evidence accounting, a widened worst-case finality reserve, and crash-recovery known-bads; the durable write path must not be funnelled through the adapter or recovery blocked classifiers; do not connect any real provider",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -115,6 +115,13 @@
     "unanimous monitor agreement on one catalog log origin tree size and root hash with split-view refusal and witnessed-source binding",
     "full-hull head freshness plus privately sealed freshly reauthenticated anchor catalog and provider-neutral head-authority mapping to exact anchor references and one HeadCheckpointFloorV1",
     "content-addressed deterministic head-authority qualification corpus with a sealed nine-case report and adversarial conformance known-bads validated against the published RFC 6962 and RFC 9162 reference tree",
+    "versioned networkless durable blocked-finality contract with one closed append-only observation naming the exact transition highest retained immutable phase refused operation deterministic reason and attempt ordinal",
+    "blocked observations timed only by a freshly qualified time hull carrying no resolution or status field and refusing the resolved finalized phase",
+    "strictly increasing blocked attempt ordinals with exact-duplicate reconciliation ordinal-regression refusal and same-ordinal equivocation refusal",
+    "role-separated Ed25519 governed recovery decision whose key and principal both differ from the enrolled integrity-decision and head-checkpoint authorities under a dedicated signature domain",
+    "governed recovery decisions restating the complete observation binding so a signature cannot be moved onto another block phase operation reason or attempt",
+    "exactly two admissible dispositions authorized retry from the exact retained phase and terminal instance sealing with a retained always-false barrier_released field and no checkpoint deletion rewrite or barrier release",
+    "content-addressed deterministic blocked-finality qualification corpus with a sealed eight-case report and adversarial conformance known-bads",
     "nonterminal awaiting_verification lifecycle state",
     "recoverable governed clean and vulnerable fixture scans",
     "fixture-only supported CLI that emits candidates and never findings"
@@ -124,13 +131,14 @@
     "modeled target and eight-case verdict corpus",
     "repository-owned deterministic modeled-finality time revocation anchor catalog and monitor sources",
     "repository-owned signed trusted-time revocation anchor catalog and monitor qualification packages without external provider acquisition native-format validation independent observers or lifecycle authority",
+    "repository-owned blocked-finality observations and governed recovery decisions without durable persistence enrolled recovery authority or crash recovery",
     "unsigned canonical code-derived provider assertions without independently authenticated external observations",
     "process-local modeled anchor and catalog state without external durability or independent administration",
     "opaque modeled output semantics without a structured execution run identity",
     "MARCELLUS, CATO, CAMILLUS, FABRICIUS, and MINERVA behavior"
   ],
   "blocking_integrity_work": [
-    "durable blocked-finality qualification followed by independently administered trusted-time revocation anchor catalog and monitor adapters replacing deterministic fixture assertions inside the retained lifecycle contract",
+    "persistence of the specified blocked-finality observation and governed recovery decision under a schema-version-3 migration and enrolled recovery authority, followed by independently administered trusted-time revocation anchor catalog and monitor adapters replacing deterministic fixture assertions inside the retained lifecycle contract",
     "externally durable authenticated latest-head authority and witnessing that survives local database loss",
     "durable blocked disposition reason and governed recovery decision",
     "structured independently produced execution effect measured-environment and termination evidence",
@@ -141,7 +149,7 @@
   "not_implemented": [
     "qualified externally administered integrity-finality adapter profile",
     "durable externally authenticated latest-head catalog surviving local database loss",
-    "durable blocked finality disposition and recovery decision",
+    "durable persistence and crash recovery of the specified blocked-finality disposition and governed recovery decision",
     "offline conversion tooling for persistent-WAL event databases",
     "offline backfill tooling for nonempty pre-vault event databases",
     "isolated exploit construction",
@@ -154,8 +162,8 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_and_github_release_suites_passed",
-    "test_count": 988,
+    "validation_status": "local_release_suites_pending_github_reproduction",
+    "test_count": 1049,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -171,13 +179,11 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "adds a versioned deterministic networkless contract and qualification harness for repository-owned signed anchor catalog and monitor fixture packages with byte-bound anchor registration leaves RFC 9162 inclusion and consistency verification equal-size root-change refusal unanimous monitor agreement full-hull freshness and sealed provider-neutral mapping to anchor references and one HeadCheckpointFloorV1; it is not consumed by modeled lifecycle finality and establishes no native RFC 9162 RFC 9942 RFC 9943 SCITT or Rekor qualification trustworthy UTC real publication time independent observers or administration external durability availability real non-equivocation survival of local loss same-user or offline-rewrite safety physical-storage or power-loss qualification execution truth finding validity isolation live authorization learning or superiority claim",
+    "claim_boundary": "adds a versioned deterministic networkless contract and qualification harness for a durable blocked-finality observation and role-separated governed recovery decision with exactly two admissible dispositions that never finalize delete rewrite mint a checkpoint or release the database-global barrier; it changes no SQLite schema store method or lifecycle command and establishes no durable persistence crash recovery enrolled recovery authority independently custodied operator authority dual control audit delivery migration of a sealed instance execution truth finding validity isolation live authorization learning or superiority claim",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
-    "github_validated_commit": "377ed659da407dc87e4d3ae20cc00792914b5b44",
-    "github_actions_run_id": 30588650930,
-    "github_pull_request": 13,
-    "gitguardian_passed": true
+    "blocked_finality_focused_tests": 61,
+    "blocked_finality_qualification_cases": 8
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -209,7 +215,7 @@
     },
     {
       "capability": "durable finality-block adjudication and recovery",
-      "blocker": "a versioned blocked disposition reason policy-authorized recovery decision and known-bads"
+      "blocker": "persistence of the specified contract under a schema-version-3 migration enrolled recovery authority and crash-recovery known-bads"
     },
     {
       "capability": "isolated MARCELLUS and CATO execution",
@@ -241,6 +247,7 @@
     "docs/decisions/0010-transactional-evidence-vault.md",
     "docs/decisions/0011-crash-safe-modeled-integrity-finality.md",
     "docs/decisions/0012-networkless-time-revocation-adapter-qualification.md",
-    "docs/decisions/0013-networkless-head-authority-adapter-qualification.md"
+    "docs/decisions/0013-networkless-head-authority-adapter-qualification.md",
+    "docs/decisions/0014-durable-blocked-finality-and-governed-recovery.md"
   ]
 }

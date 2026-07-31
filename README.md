@@ -317,7 +317,7 @@ flowchart TB
         HN["Contract boundary<br/>not consumed by pending transition<br/>or any lifecycle command"]
     end
 
-    NEXT["Exact next gate<br/>durable blocked-finality disposition<br/>+ governed recovery decision"]
+    NEXT["Exact next gate<br/>persist the blocked-finality contract<br/>schema v3 + enrolled recovery authority"]
     EXT["Future full adapter set<br/>independently administered, authenticated,<br/>durable, monitored, and qualified"]
 
     E --> D --> P1 --> RH --> P2 --> P3 --> P4 --> OK
@@ -436,13 +436,17 @@ modeled pending-transition or lifecycle path and qualifies no real provider or n
 RFC 3161/TUF client. The V1 networkless head-authority harness additionally proves
 byte-bound anchor registration, RFC 9162 inclusion and consistency verification against the
 published reference tree, catalog rollback and equivocation refusal, and unanimous monitor
-agreement; it qualifies no real transparency log and proves no independent observer. The transactional SQLite vault closes the ordinary
+agreement; it qualifies no real transparency log and proves no independent observer. The V1
+blocked-finality contract makes a refused finality attempt a durable, reasoned observation
+and requires a role-separated signed decision to change its disposition; neither admissible
+disposition finalizes, deletes, rewrites, or releases the barrier, and nothing is persisted
+yet. The transactional SQLite vault closes the ordinary
 filesystem-staging/SQLite retention split for all four implemented byte-claiming event
 boundaries at the logical transaction layer. Completing the foundation-integrity boundary
 still requires:
 
-1. specify and prove durable blocked-finality disposition, exact reason, policy-authorized
-   recovery decision, and recovery replay;
+1. persist the specified blocked-finality observation and governed recovery decision under
+   a schema-version-3 migration, enrolled recovery authority, and crash-recovery known-bads;
 2. qualify independently administered trusted-time, revocation, anchor, catalog, and
    monitor providers, then connect an explicitly admitted profile without weakening the
    retained recovery state machine;
@@ -472,6 +476,7 @@ are measurements, never authority.
 - [Architecture decisions](docs/decisions/README.md)
 - [Networkless time/revocation adapter qualification decision](docs/decisions/0012-networkless-time-revocation-adapter-qualification.md)
 - [Networkless head-authority adapter qualification decision](docs/decisions/0013-networkless-head-authority-adapter-qualification.md)
+- [Durable blocked-finality and governed recovery decision](docs/decisions/0014-durable-blocked-finality-and-governed-recovery.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
 

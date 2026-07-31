@@ -40,7 +40,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0010](decisions/0010-transactional-evidence-vault.md), and
 [ADR-0011](decisions/0011-crash-safe-modeled-integrity-finality.md), and
 [ADR-0012](decisions/0012-networkless-time-revocation-adapter-qualification.md), and
-[ADR-0013](decisions/0013-networkless-head-authority-adapter-qualification.md).
+[ADR-0013](decisions/0013-networkless-head-authority-adapter-qualification.md), and
+[ADR-0014](decisions/0014-durable-blocked-finality-and-governed-recovery.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -51,9 +52,9 @@ memory. A green check validates only what it names.
 - Engine: **Etzio**
 - Canonical branch: `main`
 - Current foundation-integrity branch:
-  `agent/head-authority-adapter-qualification-v1`
-- Stacked on: `agent/time-revocation-adapter-qualification-v1`
-- Branch base: `7a5ab21`
+  `agent/durable-blocked-finality-contract-v1`
+- Stacked on: `agent/head-authority-adapter-qualification-v1`
+- Branch base: `3579cb4`
 - Canonical remote: private `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
@@ -424,6 +425,58 @@ database loss, lifecycle finality, execution, finding, or live-target authority 
 The existing modeled finality facade still consumes its separate unsigned code-derived
 fixture assertions.
 
+### Implemented durable blocked-finality and governed-recovery contract
+
+- [ADR-0014](decisions/0014-durable-blocked-finality-and-governed-recovery.md) and
+  `etzio/kernel/blocked_finality_v1.py` define a separate version-1, repository-owned,
+  networkless contract; it changes no SQLite schema, store method, lifecycle command,
+  provider call, or finality phase;
+- one closed canonical `BlockedFinalityObservationV1` names the exact service instance,
+  environment, mission, authority, target, event, mission and instance-global sequences,
+  pending record, highest retained immutable phase and its exact record identity, refused
+  operation, deterministic reason code, and attempt ordinal;
+- `unresolved_phase` admits exactly `local_pending`, `anchor_statement_ready`, and
+  `checkpoint_candidate_retained`. The fourth lineage phase `finalized` is deliberately
+  inadmissible, because a finalized transition is resolved;
+- `blocked_reason_code` is a closed set taken from the reason codes the implemented
+  recovery path actually produces, and a known-bad asserts each one still appears in
+  `etzio/kernel/integrity_transition.py`. Retryable uncertainty and every
+  `EventStoreError` classification keep their existing domains and produce no observation;
+- observations carry no resolution, status, or disposition field, are timed only by a
+  freshly qualified ADR-0012 time hull, and are append-only under strictly increasing
+  attempt ordinals. An exact duplicate reconciles, a gap-filling lower ordinal is a
+  regression, and one ordinal carrying two different bodies is equivocation;
+- `BlockedFinalityRecoveryProfileV1` copies the enrolled
+  `ModeledIntegrityAuthorityBindingV1` and adds a recovery key and principal that must
+  both differ from the decision and checkpoint authorities. A distinct key under the same
+  principal is refused as rotation rather than separation of duty;
+- the recovery authority is deliberately outside the enrolled integrity trust store, whose
+  `INTEGRITY_ROLES_V1` admits exactly the decision and checkpoint roles; a recovery key
+  that is also an enrolled integrity key is refused;
+- `GovernedRecoveryDecisionV1` is signed under the dedicated domain
+  `etzio.blocked-finality.governed-recovery.signature.v1`, distinct from every integrity,
+  adapter, and head-authority domain, and restates the complete observation binding so a
+  signature cannot be moved onto another block, phase, operation, reason, or attempt;
+- exactly two dispositions are admissible. `retry_authorized` resumes from the exact
+  retained phase and holds the barrier; `instance_sealed` is terminal, holds the barrier,
+  offers no resume phase, and admits no further observation or decision. There is no
+  `force_finalize`, `discard_transition`, `rewind_phase`, or `release_barrier`;
+- `BlockedFinalityResolutionV1` retains `barrier_released` as an explicit always-false
+  field so the central safety invariant is testable rather than implicit, and a decision
+  answering a stale phase or a non-latest observation is refused; and
+- 61 focused adversarial tests cover the blockable phase set, observation identity binding,
+  operation and reason taxonomies, ordinal reconciliation, regression, and equivocation,
+  cross-transition contamination, separation of duty by key and by principal, rotation
+  refusal, signature-domain separation, invalid signatures, foreign scopes, stale phases,
+  seal terminality, barrier invariants, manifest substitution, and absence of any ambient
+  clock or network dependency.
+
+This establishes the acceptance contract only. Nothing is persisted: no SQLite table,
+schema version, migration, store method, or enrolled recovery authority changes in this
+tranche, so crash recovery of the retained blocked record remains unproved. The fixture
+keys are repository-owned and prove no independently custodied operator authority, dual
+control, audit delivery, or migration of a sealed instance.
+
 ### Implemented for modeled verification admission and recovery
 
 - canonical one-attestation signed verifier receipts;
@@ -453,13 +506,15 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
-## Current head-authority qualification release evidence
+## Current blocked-finality contract release evidence
 
-On the networkless anchor, catalog, and monitor qualification candidate, the canonical
-release command passed under both declared local runtimes:
+On the durable blocked-finality and governed-recovery candidate, the canonical release
+command passed under both declared local runtimes:
 
-- 988 tests passed;
-- the focused head-authority qualification file passed all 78 tests;
+- 1049 tests passed;
+- the focused blocked-finality file passed all 61 tests and the deterministic report
+  retained all eight ordered cases;
+- the inherited focused head-authority qualification file passed all 78 tests;
 - the deterministic head-authority report retained all nine ordered cases;
 - the Merkle core reproduced the published RFC 6962/9162 reference tree heads for sizes
   zero through eight and verified all 36 reference inclusion proofs and all 36 reference
@@ -475,8 +530,8 @@ release command passed under both declared local runtimes:
   retained-evidence checks passed; and
 - `git diff --check` passed.
 
-The CPython 3.11 test suite completed in 468.78 seconds and the CPython 3.14 suite
-completed in 482.84 seconds; the complete release entrypoints took 472 and 486 seconds.
+The CPython 3.11 test suite completed in 469.07 seconds and the CPython 3.14 suite
+completed in 482.06 seconds; the complete release entrypoints took 472 and 484 seconds.
 Each complete release entrypoint also ran the modeled demonstrations and the governed
 vulnerable and clean fixture scans. The working-tree status was unchanged by validation.
 
@@ -487,17 +542,15 @@ The retained SQLite source identities were:
 - CPython 3.14.2 / SQLite 3.51.2:
   `2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075`.
 
-Private GitHub Actions run
-[`30588650930`](https://github.com/manfromnowhere143/etzio/actions/runs/30588650930)
-reproduced repository policy, both declared runtime suites, package build,
-outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on exact
+GitHub Actions reproduction for this tranche is pending; resolve the current run,
+pull-request, and GitGuardian state from GitHub rather than from this packet.
+
+The inherited head-authority tranche was reproduced by private run
+[`30588650930`](https://github.com/manfromnowhere143/etzio/actions/runs/30588650930) on
 implementation commit
-[`377ed659da407dc87e4d3ae20cc00792914b5b44`](https://github.com/manfromnowhere143/etzio/commit/377ed659da407dc87e4d3ae20cc00792914b5b44);
-GitGuardian also passed. The 3.11.15 foundation job took 14 minutes 21 seconds and the
-3.14.2 job took 13 minutes 0 seconds, both inside the 30-minute release budget. Draft
-[#13](https://github.com/manfromnowhere143/etzio/pull/13) is stacked on the
-time-revocation qualification branch. This evidence-only handoff and mission-state update
-follows the validated implementation commit.
+[`377ed659da407dc87e4d3ae20cc00792914b5b44`](https://github.com/manfromnowhere143/etzio/commit/377ed659da407dc87e4d3ae20cc00792914b5b44),
+with draft [#13](https://github.com/manfromnowhere143/etzio/pull/13) stacked on the
+time-revocation qualification branch; GitGuardian also passed.
 
 The inherited trusted-time/revocation tranche was reproduced by private run
 [`30491151887`](https://github.com/manfromnowhere143/etzio/actions/runs/30491151887) on
@@ -631,6 +684,22 @@ evidence remains fixture-scoped.
 
 Known-bads now cover:
 
+- blocked observations naming the resolved finalized phase or an unknown phase; observation
+  identity substitution across ordinal, operation, reason, phase, phase record, pending
+  record, and event; unsupported operations and reason codes; resolution, status, or
+  disposition fields on an observation; a mission head above the global head; nonpositive
+  attempt ordinals; exact-duplicate reconciliation, gap-filling ordinal regression,
+  same-ordinal equivocation, and cross-transition contamination; substituted authority
+  binding identity; a recovery key or principal equal to the decision or checkpoint
+  authority; a rotated key under the same principal; a recovery key smuggled into the
+  enrolled trust store; a wrong recovery role or small-order key; decision identity
+  substitution across disposition, ordinal, phase, and reason; unsupported dispositions;
+  undomained and invalid signatures; foreign profile scope; foreign algorithm; a signer
+  answering another principal's decision; decisions for a non-latest or foreign
+  observation; decisions answering a stale phase; every action after a seal; empty retained
+  history; direct construction of every sealed result; corpus-manifest, reason, and phase
+  substitution; a recovery signer that is not the retained key; and absence of any ambient
+  clock or network dependency;
 - head-authority profile/root/policy/service/environment/source/role/log-origin/key/
   principal/codec substitution; rosters missing a required anchor, catalog, or monitor;
   anchor sources sharing one log origin; monitors witnessing a foreign log origin or
@@ -802,8 +871,10 @@ Known-bads now cover:
 2. Modeled commands persist and require exact-current checkpoint lineages, but no qualified
    externally authenticated and durable anchor/catalog/witness survives local database
    loss or proves non-equivocation.
-3. Typed blocked results are attempt-local; no durable blocked disposition, reason, or
-   governed recovery decision exists beyond the unresolved immutable phase.
+3. The durable blocked disposition, exact reason, and governed recovery decision are now
+   specified and deterministically proved, but nothing is persisted. Typed blocked results
+   remain attempt-local in the implemented store, which has no blocked table, no
+   schema-version-3 migration, and no enrolled recovery authority.
 4. SQLite retains a documented same-user pathname race, and a coherent offline rewrite
    remains undetectable without an authenticated external latest-head catalog.
 5. Production storage still needs an accepted SQLite/VFS/filesystem/device profile,
@@ -822,25 +893,35 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup:** the networkless anchor, catalog, and monitor qualification
-boundary is complete. Specify and prove a durable blocked-finality disposition, exact
-reason, policy-authorized recovery decision, atomic persistence point, crash recovery, and
-database-global barrier interaction as the next dependency-complete tranche. Keep
-acquisition repository-owned and deterministic; add known-bads for blocked-state mutation,
-unauthorized recovery, duplicate or conflicting disposition, and recovery replay after
-interruption at every immutable phase. Do not connect a real provider, alter the retained
-lifecycle state machine, add finder breadth, or add execution capability.
+**Exact next-session pickup:** the blocked-finality acceptance contract is specified and
+proved. Persist it as the next dependency-complete tranche. The retained bytes make the
+cost explicit: `_validate_schema` compares object sets for equality and therefore fails
+closed on extra objects, so a new append-only blocked table needs new DDL in
+`_integrity_schema_sql`, new `required_objects` entries for the table and its append-only
+triggers, a recomputed `_SQLITE_SCHEMA_CONTRACT_SHA256`, and a `user_version` 3 migration
+from the exact version-2 layout. The same tranche must add the recovery key and principal
+to `ModeledIntegrityAuthorityBindingV1`, which changes its `binding_id`; charge the new
+record's bytes in `_logical_evidence_storage_used_locked`; and widen
+`_INTEGRITY_FINALITY_CAPACITY_RESERVE_BYTES_V1`, since the current 80 MiB reserve is
+exactly four 16 MiB phase records plus 16 MiB of transition evidence and is taken once
+before the pending row is inserted. The durable write path must not be funnelled through
+`_call_modeled_integrity_adapter` or `_advance_finality`, or a failure to persist the
+blocked record would be reclassified as an adapter contract failure. Add known-bads for
+blocked-state mutation, unauthorized recovery, duplicate or conflicting disposition, and
+recovery replay after interruption at every immutable phase. Do not connect a real
+provider, alter the retained lifecycle state machine, add finder breadth, or add execution
+capability.
 
 Concrete continuation map:
 
-1. begin from ADR-0013, `etzio/kernel/head_authority_adapters_v1.py`, and
-   `tests/test_head_authority_qualification_v1.py`; preserve authentication before claim
-   parsing, complete fixed source sets, exact raw-package retention, private sealed
-   results, content-bound corpus inputs, recomputed RFC 9162 proofs, and fresh
-   reauthentication before mapping;
-2. specify the durable blocked-finality disposition, admissible terminal and retry states,
-   policy authority, and recovery replay contract in a new decision before changing
-   lifecycle behavior;
+1. begin from ADR-0014, `etzio/kernel/blocked_finality_v1.py`, and
+   `tests/test_blocked_finality_qualification_v1.py`; preserve the append-only observation,
+   the inadmissible finalized phase, the closed reason and operation taxonomies, separation
+   of duty by key and principal, the restated observation binding, the two admissible
+   dispositions, and the always-false `barrier_released` invariant;
+2. specify the storage layout, migration, enrolled recovery authority, capacity
+   accounting, and crash-recovery contract in a new decision before changing lifecycle
+   behavior;
 3. keep `RepositoryOwnedDeterministicModeledIntegrityServiceV1`,
    `PendingIntegrityTransitionV1`, and the SQLite finality records unchanged while proving
    the new networkless adapter boundary; their current validators intentionally accept
@@ -853,7 +934,7 @@ Concrete continuation map:
    blocked recovery without weakening the four immutable phases, byte-identical
    at-least-once writes, global/mission continuity, or store-error classifications.
 
-Only after the durable blocked-state proof passes, qualify and connect independently
+Only after the durable blocked-state persistence passes, qualify and connect independently
 administered trusted-time, revocation, anchor, catalog, and monitor adapters inside the
 retained state machine. Preserve exact
 fixture-proved pending retention, byte-identical at-least-once retries, global/mission

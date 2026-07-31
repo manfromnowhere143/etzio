@@ -16,6 +16,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0011: Crash-safe modeled integrity finality](0011-crash-safe-modeled-integrity-finality.md)
 - [ADR-0012: Networkless trusted-time and revocation adapter qualification](0012-networkless-time-revocation-adapter-qualification.md)
 - [ADR-0013: Networkless anchor, catalog, and monitor adapter qualification](0013-networkless-head-authority-adapter-qualification.md)
+- [ADR-0014: Durable blocked-finality disposition and governed recovery](0014-durable-blocked-finality-and-governed-recovery.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -36,3 +37,8 @@ and unanimous monitor agreement over one catalog head, mapping sealed results to
 existing `head_anchor_receipt` references and `HeadCheckpointFloorV1` values. It does not
 connect or qualify a native provider, prove independent operators or external durability,
 alter lifecycle finality, or add durable blocked-finality recovery.
+
+ADR-0014 specifies the durable blocked-finality observation, the role-separated signed
+governed recovery decision, and the exactly two admissible dispositions. It changes no
+SQLite schema, store method, or lifecycle command; persistence, crash recovery, and the
+enrolled recovery authority remain a separate storage tranche.

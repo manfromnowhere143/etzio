@@ -166,7 +166,16 @@ Implemented in this phase:
   full-hull freshness, sealed mapping to provider-neutral anchor references and one
   `HeadCheckpointFloorV1`, and seventy-eight focused tests and known-bads covering the
   published RFC reference tree, tampered, truncated, padded, forged, and forked proofs,
-  rollback, equivocation, split view, substitution, staleness, and sealed-boundary abuse.
+  rollback, equivocation, split view, substitution, staleness, and sealed-boundary abuse;
+  and
+- a separate versioned, networkless durable blocked-finality contract with one closed
+  append-only observation naming the exact transition, highest retained immutable phase,
+  refused operation, deterministic reason, and attempt ordinal; a role-separated signed
+  governed recovery decision restating the complete observation binding; exactly two
+  admissible dispositions that never finalize, delete, rewrite, mint a checkpoint, or
+  release the database-global barrier; and sixty-one focused tests and known-bads covering
+  phase, ordinal, binding, separation-of-duty, staleness, seal-terminality, and barrier
+  invariants.
 
 Current canonical command writers use receipt-coverage status for every verification-intent
 closure. Replay also accepts the exact pre-recovery zero-candidate `completed` shape as a
@@ -175,8 +184,9 @@ claim.
 
 Remaining required:
 
-1. specify and prove durable blocked-finality disposition, exact reason, policy-authorized
-   recovery decision, and recovery replay before connecting any external provider;
+1. persist the specified blocked-finality observation and governed recovery decision under
+   a schema-version-3 migration, enrolled recovery authority, capacity accounting, and
+   crash-recovery known-bads before connecting any external provider;
 2. only then qualify independently administered providers and integrate accepted adapter
    outputs without weakening the retained finality state machine;
 3. prove external latest-head authority survives local loss, then close the documented

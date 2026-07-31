@@ -95,8 +95,17 @@ does not rest on agreement with Etzio's own prover.
 This remains a common contract and harness, not RFC 9162, RFC 9942, RFC 9943, SCITT, or
 Rekor conformance; no native wire format, certificate path, or provider client is parsed.
 Unanimous fixture monitors prove the acceptance rule for split-view detection, not the
-existence of independent observers. The next gate adds durable blocked-finality disposition
-and governed recovery before any external provider connection.
+existence of independent observers.
+
+ADR-0014 specifies the durable blocked-finality half of the same gate. A refused finality
+attempt becomes a closed, reasoned, content-addressed observation that resolves nothing, and
+only a role-separated signed governed recovery decision may change its disposition. Exactly
+two dispositions are admissible—authorized retry and terminal instance sealing—and neither
+finalizes, deletes, rewrites, mints a checkpoint, or releases the database-global barrier.
+Separation of duty is enforced by key and principal, so the authority whose decisions caused
+a block cannot authorize its own escape from it. Nothing is persisted yet; the next gate
+adds the schema-version-3 migration, enrolled recovery authority, and crash-recovery
+known-bads before any external provider connection.
 
 ## Required benchmark portfolio
 

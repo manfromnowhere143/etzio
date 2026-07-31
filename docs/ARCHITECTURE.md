@@ -301,9 +301,18 @@ durability, independent administration, or non-equivocation. Modeled-finality fl
 provider-evidence assertions remain exact unsigned code-derived fixture claims. The legacy
 SQLite `SignedCheckpoint` remains opaque and untrusted.
 
-The exact next gate is to specify and prove durable blocked-finality disposition, exact
-reason, policy-authorized recovery decision, and recovery replay before any external
-provider connection. The remaining blocked cluster then includes
+ADR-0014 closes the specification half of the durable blocked-finality gate. A refused
+finality attempt becomes one closed append-only observation naming the exact transition,
+highest retained immutable phase, refused operation, deterministic reason, and attempt
+ordinal, timed only by a qualified hull. It resolves nothing. A role-separated signed
+governed recovery decision, restating the complete observation binding, is the only thing
+able to change a disposition, and exactly two are admissible: authorized retry from the
+exact retained phase, and terminal instance sealing. `barrier_released` is a retained field
+that no admissible disposition sets.
+
+The exact next gate is to persist that contract: a schema-version-3 migration adding an
+append-only blocked table, an enrolled recovery authority, capacity accounting, and
+crash-recovery known-bads, before any external provider connection. The remaining blocked cluster then includes
 qualifying independently administered providers without weakening retained recovery;
 closing the same-user pathname and coherent offline-rewrite boundary; production storage
 and power-fault qualification plus sensitive-evidence controls; and structured
@@ -689,8 +698,10 @@ byte-bound anchor registration, RFC 9162 inclusion and consistency verification 
 published reference tree, catalog rollback and equivocation refusal, unanimous monitor
 agreement, and sealed head-floor mapping. It is likewise not wired to lifecycle finality.
 
-The exact next gate adds durable blocked-finality disposition and governed recovery before
-any external provider connection. Independently administered providers are qualified and integrated only
+A third networkless contract specifies the durable blocked-finality observation and its
+role-separated governed recovery decision. The exact next gate persists that contract under
+a schema-version-3 migration and enrolled recovery authority before any external provider
+connection. Independently administered providers are qualified and integrated only
 later, without weakening the retained state machine. Foundation integrity is accepted only
 when retained evidence also shows:
 
