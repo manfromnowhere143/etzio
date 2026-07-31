@@ -1,6 +1,6 @@
 {
   "schema_version": "etzio.mission_state.v2",
-  "updated": "2026-07-31",
+  "updated": "2026-08-01",
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",

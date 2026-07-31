@@ -1,10 +1,30 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-07-31, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-08-01, Asia/Jerusalem.
 
-This file describes Etzio only. It is not authority to access a live target, execute an
-exploit, use research credentials, spend, disclose, publish, deploy, or change repository
-visibility. Revalidate every statement from checked-out bytes and retained evidence.
+This file describes Etzio only. The repository is public (source visibility, not an
+open-source license; `LICENSE.md` remains proprietary). This file is not authority to access
+a live target, execute an exploit, use research credentials, spend, disclose, publish
+results, or deploy. Revalidate every statement from checked-out bytes and retained evidence.
+
+**Standards.** Read [`docs/PRESENTATION.md`](PRESENTATION.md) before writing any prose: lead
+with status, keep `implemented`/`modeled`/`proposed`/`blocked` exact, a candidate is not a
+finding, exact nouns over adjectives, every gate names a known-bad, and never overclaim.
+Engineering discipline: contract or ADR before behavior; adversarial known-bad for every
+consequential gate; `make verify` green on **both** declared runtimes (CPython 3.11.15 and
+3.14.2) before a tranche is done; smallest dependency-complete proof tranche. Git: Daniel is
+the **sole author** — never add `Co-Authored-By` or any AI/Claude attribution to commits, PR
+bodies, or code; merge the linear stack to `main` by **fast-forward, not squash**;
+auto-delete merged branches; record CI and GitGuardian evidence honestly and never claim a
+CI run passed when it did not.
+
+**Founder intent (not derivable from the repo).** Bounty/audit income is a real survival
+priority for the founder, not a hobby. The foundation is deep and world-class; the *finder*
+is deliberately tiny (six rule classes, two fixtures, zero findings). Foundation progress
+does not by itself move toward income — say so honestly. The faster honest path to money is a
+real EVM/Solidity finder plus human-in-the-loop audit-contest work, but that consciously
+reverses ADR-0001 (foundation before breadth) and needs an explicit founder decision. Give
+real odds, never hope.
 
 ## Mandatory recovery
 
@@ -56,10 +76,18 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/qualified-acceptance-enrollment-v1`, stacked on `main`
-- The complete fifteen-tranche stack (PRs #2 through #16) was merged into `main` on
-  2026-07-31 by fast-forward, not squash. The stack was strictly linear and `main` was a
-  pure ancestor, so fast-forwarding preserved every per-tranche commit message and
+- Current working branch: `main` — all tranches through the schema-version-4 store and the
+  flagship presentation overhaul are consolidated here by fast-forward.
+- The repository is **public** as of 2026-08-01 (founder-authorized; source visibility, not
+  an open-source license). Public repositories run GitHub Actions free and unmetered.
+- **CI note for a future session:** on 2026-08-01 the account's Actions were billing-blocked
+  by heavy same-day usage; runs failed at startup even after going public. The schema-v4 and
+  presentation tranches are green on both local runtimes (`1158` tests) but their CI
+  reproduction was **deferred** — `current_evidence.validation_status` reads
+  `local_release_suites_pending_github_reproduction`. Do not read that as a failure; re-run
+  CI once billing clears and update the evidence to reflect the reproduced commit.
+- Every tranche stack has been merged into `main` by fast-forward, not squash. Each stack was
+  strictly linear and `main` was a pure ancestor, so fast-forwarding preserved every
   authorship. Squashing would have collapsed each tranche and, because each branch still
   contained its predecessors' commits, produced replay conflicts against an already-squashed
   `main`. PR #3 is labelled closed rather than merged for that reason; its head commit
