@@ -611,8 +611,17 @@ The retained SQLite source identities were:
 - CPython 3.14.2 / SQLite 3.51.2:
   `2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075`.
 
-GitHub Actions reproduction for this tranche is pending; resolve the current run,
-pull-request, and GitGuardian state from GitHub rather than from this packet.
+Private GitHub Actions run
+[`30614243915`](https://github.com/manfromnowhere143/etzio/actions/runs/30614243915)
+reproduced repository policy, both declared runtime suites, package build,
+outside-checkout wheel smoke, clean-tree proof, and retained foundation evidence on exact
+implementation commit
+[`092a89989ddf2b0e231bae91406bcde89f1c9f9d`](https://github.com/manfromnowhere143/etzio/commit/092a89989ddf2b0e231bae91406bcde89f1c9f9d);
+GitGuardian also passed. The 3.11.15 foundation job took 14 minutes 42 seconds and the
+3.14.2 job took 15 minutes 34 seconds, both inside the 30-minute release budget. Draft
+[#16](https://github.com/manfromnowhere143/etzio/pull/16) is stacked on the
+blocked-finality storage branch. This evidence-only handoff and mission-state update
+follows the validated implementation commit.
 
 The inherited storage tranche was reproduced by private run
 [`30597483642`](https://github.com/manfromnowhere143/etzio/actions/runs/30597483642) on
