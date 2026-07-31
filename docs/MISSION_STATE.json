@@ -156,7 +156,6 @@
   "blocking_integrity_work": [
     "independently administered trusted-time revocation anchor catalog and monitor adapters replacing deterministic fixture assertions inside the retained lifecycle contract",
     "externally durable authenticated latest-head authority and witnessing that survives local database loss",
-    "durable blocked disposition reason and governed recovery decision",
     "structured independently produced execution effect measured-environment and termination evidence",
     "closure of the documented SQLite same-user pathname and coherent offline-rewrite boundary",
     "qualification of an accepted SQLite VFS filesystem and device profile physical and journal quotas backup and restore process-kill and power-fault recovery plus sensitive-evidence access-control encryption and retention policy",
@@ -237,10 +236,6 @@
       "blocker": "qualified independently administered providers trust roots retention policy and explicit operational authority"
     },
     {
-      "capability": "durable finality-block adjudication and recovery",
-      "blocker": "persistence of the specified contract under a schema-version-3 migration enrolled recovery authority and crash-recovery known-bads"
-    },
-    {
       "capability": "isolated MARCELLUS and CATO execution",
       "blocker": "separately authorized Linux/KVM host and accepted isolation profile"
     },
@@ -275,5 +270,18 @@
     "docs/decisions/0015-durable-blocked-finality-storage-v3.md",
     "docs/decisions/0016-governed-blocked-finality-lifecycle.md",
     "docs/decisions/0017-blocked-finality-crash-recovery.md"
+  ],
+  "closed_integrity_gates": [
+    {
+      "gate": "durable blocked-finality disposition and governed recovery",
+      "closed": "2026-07-31",
+      "decisions": [
+        "docs/decisions/0014-durable-blocked-finality-and-governed-recovery.md",
+        "docs/decisions/0015-durable-blocked-finality-storage-v3.md",
+        "docs/decisions/0016-governed-blocked-finality-lifecycle.md",
+        "docs/decisions/0017-blocked-finality-crash-recovery.md"
+      ],
+      "claim_boundary": "specified, persisted under schema version 3, wired into the modeled lifecycle behind an opt-in governed binding, and proved under injected interruption; the enrolled recovery key remains repository-owned and this is not power-loss or production-storage qualification"
+    }
   ]
 }
