@@ -21,6 +21,8 @@ from typing import Final, TypeVar
 from etzio.integrity_v1 import (
     HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
     EvidenceReferenceV1,
+    RevocationFloorV1,
+    RevocationViewV1,
 )
 from etzio.kernel.head_authority_adapters_v1 import (
     HeadAuthorityTrustProfileV1,
@@ -29,7 +31,9 @@ from etzio.kernel.head_authority_adapters_v1 import (
 )
 from etzio.kernel.integrity_adapters_v1 import (
     IntegrityAdapterTrustProfileV1,
+    QualifiedRevocationBundleV1,
     QualifiedTimeBundleV1,
+    map_qualified_integrity_inputs_v1,
 )
 from etzio.kernel.integrity_transition import ProviderEvidenceBlobV1
 from etzio.protocol import content_id
@@ -145,6 +149,22 @@ def _validated_claimed_references(value: object) -> tuple[EvidenceReferenceV1, .
     return ordered
 
 
+def _validated_claimed_reference_tuple(
+    value: object,
+    *,
+    field: str,
+) -> tuple[EvidenceReferenceV1, ...]:
+    if type(value) is not tuple or not value:
+        _reject("invalid_claimed_time_evidence", f"{field} must be a nonempty tuple")
+    for reference in value:
+        if type(reference) is not EvidenceReferenceV1:
+            _reject(
+                "invalid_claimed_time_evidence",
+                f"{field} must be exact EvidenceReferenceV1 values",
+            )
+    return value  # type: ignore[return-value]
+
+
 def _validated_claimed_blobs(value: object) -> tuple[ProviderEvidenceBlobV1, ...]:
     if type(value) is not tuple or not value:
         _reject(
@@ -249,11 +269,200 @@ def accept_qualified_anchor_evidence_v1(
     )
 
 
+@dataclass(frozen=True, slots=True, init=False)
+class QualifiedRevocationEvidenceAcceptanceV1:
+    """Sealed acceptance of a decision's time and revocation inputs from a bundle."""
+
+    mode: str
+    time_lower_bound: int
+    time_upper_bound: int
+    time_policy_id: str
+    time_evidence: tuple[EvidenceReferenceV1, ...]
+    revocation_views: tuple[RevocationViewV1, ...]
+    external_floors: tuple[RevocationFloorV1, ...]
+    evidence_blobs: tuple[ProviderEvidenceBlobV1, ...]
+    _seal: object
+
+    def __init__(self, *_args: object, **_kwargs: object) -> None:
+        _reject(
+            "unauthenticated_acceptance_construction",
+            "qualified revocation-evidence acceptance construction is private",
+        )
+
+    def __post_init__(self) -> None:
+        if (
+            type(self) is not QualifiedRevocationEvidenceAcceptanceV1
+            or self._seal is not _ACCEPTANCE_SEAL
+        ):
+            _reject(
+                "unauthenticated_acceptance_construction",
+                "qualified revocation-evidence acceptance construction is private",
+            )
+
+    @property
+    def acceptance_id(self) -> str:
+        return content_id("qualified_revocation_evidence_acceptance", self.to_body())
+
+    def to_body(self) -> dict[str, object]:
+        return {
+            "evidence_blobs": [
+                blob.reference.to_body() for blob in self.evidence_blobs
+            ],
+            "external_floors": [floor.to_body() for floor in self.external_floors],
+            "mode": self.mode,
+            "revocation_views": [view.to_body() for view in self.revocation_views],
+            "time_evidence": [
+                reference.to_body() for reference in self.time_evidence
+            ],
+            "time_lower_bound": self.time_lower_bound,
+            "time_policy_id": self.time_policy_id,
+            "time_upper_bound": self.time_upper_bound,
+        }
+
+
+def _validated_view_tuple(value: object) -> tuple[RevocationViewV1, ...]:
+    if type(value) is not tuple or not value:
+        _reject(
+            "invalid_claimed_revocation_views",
+            "claimed revocation views must be a nonempty tuple",
+        )
+    for view in value:
+        if type(view) is not RevocationViewV1:
+            _reject(
+                "invalid_claimed_revocation_views",
+                "claimed revocation views must be exact RevocationViewV1 values",
+            )
+    return value  # type: ignore[return-value]
+
+
+def _validated_floor_tuple(value: object) -> tuple[RevocationFloorV1, ...]:
+    if type(value) is not tuple or not value:
+        _reject(
+            "invalid_claimed_revocation_floors",
+            "claimed revocation floors must be a nonempty tuple",
+        )
+    for floor in value:
+        if type(floor) is not RevocationFloorV1:
+            _reject(
+                "invalid_claimed_revocation_floors",
+                "claimed revocation floors must be exact RevocationFloorV1 values",
+            )
+    return value  # type: ignore[return-value]
+
+
+def accept_qualified_revocation_evidence_v1(
+    *,
+    profile: IntegrityAdapterTrustProfileV1,
+    time_bundle: QualifiedTimeBundleV1,
+    revocation_bundles: Mapping[str, QualifiedRevocationBundleV1],
+    claimed_time_lower_bound: int,
+    claimed_time_upper_bound: int,
+    claimed_time_policy_id: str,
+    claimed_time_evidence: tuple[EvidenceReferenceV1, ...],
+    claimed_revocation_views: tuple[RevocationViewV1, ...],
+    claimed_external_floors: tuple[RevocationFloorV1, ...],
+    claimed_evidence_blobs: tuple[ProviderEvidenceBlobV1, ...],
+) -> QualifiedRevocationEvidenceAcceptanceV1:
+    """Accept a decision's time and revocation inputs from a reauthenticated mapping.
+
+    ``map_qualified_integrity_inputs_v1`` reauthenticates the time and revocation bundles
+    from their retained request and signed-package bytes.  The decision's claimed time
+    hull, policy, evidence, views, and floors must match the freshly derived mapping
+    exactly, and the claimed BLOBs must be the exact signed packages.
+    """
+
+    # Fresh reauthentication of every time and revocation bundle from retained bytes.
+    fresh = map_qualified_integrity_inputs_v1(
+        profile=profile,
+        time_bundle=time_bundle,
+        revocation_bundles=revocation_bundles,
+    )
+
+    claimed_views = _validated_view_tuple(claimed_revocation_views)
+    claimed_floors = _validated_floor_tuple(claimed_external_floors)
+    claimed_time_refs = _validated_claimed_reference_tuple(
+        claimed_time_evidence,
+        field="claimed time evidence",
+    )
+    claimed_blobs = _validated_claimed_blobs(claimed_evidence_blobs)
+
+    if (
+        claimed_time_lower_bound != fresh.time_lower_bound
+        or claimed_time_upper_bound != fresh.time_upper_bound
+        or claimed_time_policy_id != fresh.time_policy_id
+    ):
+        _reject(
+            "qualified_time_binding_mismatch",
+            "the claimed time hull or policy is not the freshly reauthenticated hull",
+        )
+    if claimed_time_refs != fresh.time_evidence:
+        _reject(
+            "qualified_time_evidence_mismatch",
+            "the claimed time evidence is not the freshly reauthenticated evidence",
+        )
+    if claimed_views != fresh.revocation_views:
+        _reject(
+            "qualified_revocation_view_mismatch",
+            "the claimed revocation views are not the freshly reauthenticated views",
+        )
+    if claimed_floors != fresh.external_floors:
+        _reject(
+            "qualified_revocation_floor_mismatch",
+            "the claimed revocation floors are not the freshly reauthenticated floors",
+        )
+
+    retained = {blob.reference.evidence_id: blob for blob in fresh.evidence_blobs}
+    if len(retained) != len(fresh.evidence_blobs):
+        _reject(
+            "qualified_revocation_view_mismatch",
+            "the reauthenticated mapping repeats one evidence identity",
+        )
+    claimed_by_id = {blob.reference.evidence_id: blob for blob in claimed_blobs}
+    if set(claimed_by_id) != set(retained):
+        _reject(
+            "qualified_revocation_blob_coverage_mismatch",
+            "the claimed evidence blobs do not exactly cover the retained signed packages",
+        )
+    for evidence_id, retained_blob in retained.items():
+        if claimed_by_id[evidence_id].content != retained_blob.content:
+            _reject(
+                "qualified_revocation_blob_coverage_mismatch",
+                "a claimed evidence blob is not the exact retained signed package",
+            )
+
+    ordered_blobs = tuple(
+        retained[blob.reference.evidence_id]
+        for blob in sorted(
+            fresh.evidence_blobs,
+            key=lambda value: (
+                value.evidence_kind,
+                value.source_id,
+                value.evidence_id,
+            ),
+        )
+    )
+    return _construct_sealed_result(
+        QualifiedRevocationEvidenceAcceptanceV1,
+        values={
+            "mode": QUALIFIED_EVIDENCE_MODE_QUALIFIED_SIGNED_V1,
+            "time_lower_bound": fresh.time_lower_bound,
+            "time_upper_bound": fresh.time_upper_bound,
+            "time_policy_id": fresh.time_policy_id,
+            "time_evidence": fresh.time_evidence,
+            "revocation_views": fresh.revocation_views,
+            "external_floors": fresh.external_floors,
+            "evidence_blobs": ordered_blobs,
+        },
+    )
+
+
 __all__ = (
     "QUALIFIED_EVIDENCE_MODES_V1",
     "QUALIFIED_EVIDENCE_MODE_MODELED_UNSIGNED_V1",
     "QUALIFIED_EVIDENCE_MODE_QUALIFIED_SIGNED_V1",
     "QualifiedAnchorEvidenceAcceptanceV1",
     "QualifiedEvidenceError",
+    "QualifiedRevocationEvidenceAcceptanceV1",
     "accept_qualified_anchor_evidence_v1",
+    "accept_qualified_revocation_evidence_v1",
 )

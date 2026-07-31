@@ -55,7 +55,7 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/qualified-evidence-acceptance-v1`, stacked on `main`
+- Current foundation-integrity branch: `agent/qualified-revocation-acceptance-v1`, stacked on `main`
 - The complete fifteen-tranche stack (PRs #2 through #16) was merged into `main` on
   2026-07-31 by fast-forward, not squash. The stack was strictly linear and `main` was a
   pure ancestor, so fast-forwarding preserved every per-tranche commit message and
@@ -601,15 +601,16 @@ The original in-memory `MasterLoop`, ten unit stubs, `BenchmarkTarget`, and eigh
 verdict/FPR corpus remain regression models. Their findings, verifier labels, environment
 digests, and event chain are not evidence of the protocol-v1 architecture.
 
-## Current qualified-evidence acceptance release evidence
+## Current qualified-revocation acceptance release evidence
 
-On the qualified signed anchor-evidence acceptance candidate, the canonical release command
-passed under both declared local runtimes:
+On the qualified signed revocation-evidence acceptance candidate, the canonical release
+command passed under both declared local runtimes:
 
-- 1112 tests passed;
-- the focused qualified-evidence file passed all 16 tests, including the mutual-exclusion
-  proof that unsigned modeled content is refused in qualified mode, fresh-reauthentication
-  forgery refusal, and exact signed-package coverage;
+- 1129 tests passed;
+- the two focused qualified-evidence files passed all 33 tests (16 anchor, 17 revocation),
+  including the mutual-exclusion proof that unsigned modeled content is refused in qualified
+  mode, fresh-reauthentication forgery refusal across the full time-plus-revocation mapping,
+  and exact signed-package coverage;
 - the inherited focused crash-recovery file passed all 13 tests, covering interruption on both sides
   of both retention points, ordinal integrity across repeated interrupted retries, barrier
   retention, store-domain preservation, reopened-database replay, and non-consequential
@@ -639,8 +640,8 @@ passed under both declared local runtimes:
   retained-evidence checks passed; and
 - `git diff --check` passed.
 
-The CPython 3.11 test suite completed in 498.09 seconds and the CPython 3.14 suite
-completed in 514.60 seconds; the complete release entrypoints took 501 and 518 seconds.
+The CPython 3.11 test suite completed in 493.76 seconds and the CPython 3.14 suite
+completed in 500.91 seconds; the complete release entrypoints took 498 and 504 seconds.
 Each complete release entrypoint also ran the modeled demonstrations and the governed
 vulnerable and clean fixture scans. The working-tree status was unchanged by validation.
 
@@ -1045,15 +1046,16 @@ unsigned code-derived content while a qualified BLOB carries the signed package.
 tranche specified two profile-selected acceptance modes and implemented the networkless
 anchor-phase acceptance primitive in `etzio/kernel/qualified_evidence_v1.py`.
 
-The next dependency-complete tranche wires the `qualified_signed_fixture` mode into
-`CheckpointCandidateRecordV1` identity and SQLite storage behind a profile-selected mode.
-That is schema-touching: it changes the record body and `record_id`, needs a store profile
-that selects the mode at enrollment, and must preserve every ADR-0012 integration
-requirement plus its own crash-recovery known-bads. Then extend acceptance to the
-revocation floor phase — which drags in the `RevocationFloorV1.snapshot_id ==
-metadata.evidence_id` coupling and the `fixture.revocation-metadata` vs `fixture.revocation`
-source rename — and the head-floor phase with its genesis-identity provenance. A real
-provider still requires its own admitted grant.
+The remaining acceptance primitive is the head-floor phase (genesis-identity provenance).
+After that completes the acceptance-primitive layer, one storage-wiring tranche wires the
+`qualified_signed_fixture` mode into `CheckpointCandidateRecordV1` and
+`PendingIntegrityTransitionV1` identity and SQLite storage behind a profile-selected mode.
+That is schema-touching: it changes the record bodies and `record_id`s, needs a store
+profile that selects the mode at enrollment, must preserve every ADR-0012 integration
+requirement plus its own crash-recovery known-bads, and is where the Side-A revocation
+`snapshot_id == metadata.evidence_id` coupling and the `fixture.revocation-metadata` vs
+`fixture.revocation` source rename are resolved. A real provider still requires its own
+admitted grant.
 
 The superseded storage scoping note follows for provenance only. The retained bytes make the
 cost explicit: `_validate_schema` compares object sets for equality and therefore fails

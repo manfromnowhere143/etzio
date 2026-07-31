@@ -99,10 +99,23 @@ provider calls outside SQLite transactions, exact global and mission
 continuity, generic pending-replay refusal, and store-domain error
 classification.
 
-The revocation and head-floor phases follow after the anchor phase, because
-each drags in its own coupling — the revocation snapshot identity and the
-`fixture.revocation-metadata` vs `fixture.revocation` source rename for
-revocation, and the genesis-identity provenance for the head floor.
+### Also this tranche: the revocation phase acceptance primitive
+
+`accept_qualified_revocation_evidence_v1` extends the same discipline to a
+decision's time and revocation inputs. It re-runs
+`map_qualified_integrity_inputs_v1`, which reauthenticates every time and
+revocation bundle from retained bytes, and accepts a decision's claimed time
+hull, policy, time evidence, revocation views, and external floors only when
+they equal the freshly derived mapping exactly, with BLOBs that are the exact
+signed packages.
+
+The acceptance primitive is networkless and touches neither the modeled service
+nor record identity, so the two Side-A couplings the audit flagged — the
+`RevocationFloorV1.snapshot_id == metadata.evidence_id` identity and the
+`fixture.revocation-metadata` vs `fixture.revocation` source rename — are
+deferred to the storage-wiring tranche that reconciles the modeled service, not
+to acceptance. The head-floor phase, with its genesis-identity provenance, is
+the remaining acceptance primitive.
 
 ## Claim boundary
 

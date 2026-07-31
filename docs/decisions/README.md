@@ -61,7 +61,8 @@ retention, makes the unauthorized-recovery refusal carry the retained reason, an
 non-consequential status interface.
 
 ADR-0018 begins qualified signed evidence consumption. It specifies the two profile-selected
-acceptance modes and implements the anchor-phase acceptance primitive, which freshly
-reauthenticates a qualified anchor bundle and accepts a checkpoint's claimed anchor evidence
-only as the exact signed packages. It changes no record identity, store profile, or lifecycle
-command; wiring the mode into the checkpoint record and storage is a later tranche.
+acceptance modes and implements the anchor-phase and revocation-phase acceptance primitives,
+which freshly reauthenticate a qualified bundle and accept a checkpoint's or decision's
+claimed evidence only as the exact signed packages. They change no record identity, store
+profile, or lifecycle command; wiring the mode into the records and storage is a later
+tranche.
