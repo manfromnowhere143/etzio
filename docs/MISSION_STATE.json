@@ -179,7 +179,7 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_release_suites_pending_github_reproduction",
+    "validation_status": "local_and_github_release_suites_passed",
     "test_count": 1129,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -205,7 +205,11 @@
     "sqlite_schema_version": 3,
     "blocked_finality_lifecycle_tests": 11,
     "blocked_finality_crash_recovery_tests": 13,
-    "qualified_evidence_acceptance_tests": 33
+    "qualified_evidence_acceptance_tests": 33,
+    "github_validated_commit": "b1a055e8affb61f86823ae77e24a92b2f3444eda",
+    "github_actions_run_id": 30631891947,
+    "github_pull_request": 21,
+    "gitguardian_passed": true
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
