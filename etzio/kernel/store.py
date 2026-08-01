@@ -5752,6 +5752,45 @@ class SQLiteEventStore:
             )
         return (time_profile, head_profile)
 
+    def verify_qualified_anchor_evidence(
+        self,
+        *,
+        anchor_bundle: object,
+        time_bundle: object,
+        claimed_anchor_statement_id: str,
+        claimed_anchor_evidence: object,
+        claimed_evidence_blobs: object,
+    ) -> object:
+        """Consume a checkpoint's anchor evidence against the enrolled qualified roots.
+
+        This is the first lifecycle consumption of qualified signed evidence: the enrolled
+        schema-version-4 time and head-authority profiles drive the ADR-0018 acceptance
+        primitive, which reauthenticates the retained bundle from its signed packages before
+        accepting the claim. A store with no qualified acceptance profile refuses; it never
+        silently falls back to the unsigned modeled gate.
+        """
+
+        from etzio.kernel.qualified_evidence_v1 import (
+            accept_qualified_anchor_evidence_v1,
+        )
+
+        profiles = self.load_qualified_acceptance_profiles()
+        if profiles is None:
+            raise IntegrityFinalityRequiredError(
+                "qualified anchor consumption requires an enrolled qualified acceptance "
+                "profile"
+            )
+        time_profile, head_profile = profiles
+        return accept_qualified_anchor_evidence_v1(
+            head_profile=head_profile,
+            time_profile=time_profile,
+            time_bundle=time_bundle,  # type: ignore[arg-type]
+            anchor_bundle=anchor_bundle,  # type: ignore[arg-type]
+            claimed_anchor_statement_id=claimed_anchor_statement_id,
+            claimed_anchor_evidence=claimed_anchor_evidence,  # type: ignore[arg-type]
+            claimed_evidence_blobs=claimed_evidence_blobs,  # type: ignore[arg-type]
+        )
+
     def load_governed_recovery_decision(self, observation_id: str) -> object | None:
         """Return the retained decision answering one observation, if present."""
 

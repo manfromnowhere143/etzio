@@ -76,8 +76,7 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current working branch: `main` — all tranches through the schema-version-4 store and the
-  flagship presentation overhaul are consolidated here by fast-forward.
+- Current foundation-integrity branch: `agent/qualified-anchor-consumption-v1`, stacked on `main` (all prior tranches consolidated on `main` by fast-forward).
 - The repository is **public** as of 2026-08-01 (founder-authorized; source visibility, not
   an open-source license). Public repositories run GitHub Actions free and unmetered.
 - **CI note for a future session:** on 2026-08-01 the account's Actions were billing-blocked
@@ -666,7 +665,7 @@ authority and does not supersede implementation evidence.
 On the schema-version-4 qualified-acceptance enrollment candidate, the canonical release
 command passed under both declared local runtimes:
 
-- 1158 tests passed;
+- 1165 tests passed;
 - the focused enrollment file passed all 15 tests, including the version-3-to-4 forward
   migration, drifted-layout refusal, no-backfill, empty-history and modeled-profile
   requirements, replacement refusal, immutability, forged-mode refusal, and capacity;

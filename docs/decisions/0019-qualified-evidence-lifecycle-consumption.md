@@ -98,17 +98,46 @@ real cryptography over the kernel's own records; qualified mode adds
 authenticated provider evidence, it does not remove the decision/checkpoint
 signatures.
 
+## Layering correction: verification lives at the store, not the record
+
+Implementing step 2 surfaced a constraint the original design glossed. A record's
+`__post_init__` is context-free — it holds only its own bytes. It therefore *cannot*
+reauthenticate qualified evidence, because reauthentication needs the enrolled trust roots
+(the qualified time and head-authority profiles), and those live in the store's
+schema-version-4 `integrity_acceptance_profile`, never in the record.
+
+Consumption is therefore split:
+
+- the **store** owns reauthentication. `verify_qualified_anchor_evidence` loads the enrolled
+  qualified profiles and drives `accept_qualified_anchor_evidence_v1`, which reauthenticates
+  the retained bundle from its signed packages before accepting the checkpoint's claimed
+  anchor statement, references, and BLOBs. A store with no qualified acceptance profile
+  refuses with `IntegrityFinalityRequiredError` — it never silently falls back to the
+  unsigned modeled gate; and
+- the **record**, in a later slice, carries `acceptance_mode` and, in qualified mode, does
+  only the content-agnostic coverage and kind checks, trusting the store to have
+  reauthenticated. The record retains the sealed qualified bundles its phase needs so the
+  store can rebuild and reauthenticate them.
+
+Step 2 implements the store side: the first lifecycle consumption of qualified signed
+evidence, driven by the enrolled roots, gated by qualified enrollment, with adversarial
+refusals for a modeled-only store, a legacy store, a foreign-root bundle, a tampered claim,
+and unsigned content.
+
 ## Implementation sequence
 
 Each step is its own dependency-complete tranche with `make verify` green on
 both runtimes and CI reproduction:
 
-1. **Schema-v4 enrollment.** Add `acceptance_mode` and the qualified-profile
-   wires, the 3→4 migration, empty-history qualified enrollment, capacity
-   accounting, and known-bads. Nothing consumes the mode yet — this mirrors
-   ADR-0015 preceding ADR-0016.
-2. **Anchor-phase consumption.** `CheckpointCandidateRecordV1` in qualified
-   mode uses `accept_qualified_anchor_evidence_v1`.
+1. **Schema-v4 enrollment.** *(Implemented.)* Add the qualified-profile store
+   relation, the 3→4 migration, empty-history qualified enrollment, capacity
+   accounting, and known-bads. Mirrors ADR-0015 preceding ADR-0016.
+2. **Anchor-phase store consumption.** *(Implemented.)* The store's
+   `verify_qualified_anchor_evidence` drives `accept_qualified_anchor_evidence_v1`
+   from the enrolled roots; a non-qualified store refuses.
+3. **Anchor-phase record wiring.** `CheckpointCandidateRecordV1` carries
+   `acceptance_mode`, retains the sealed qualified bundles in qualified mode, and
+   its retention path calls the store verification.
 3. **Revocation-phase consumption.** `PendingIntegrityTransitionV1` in
    qualified mode uses `accept_qualified_revocation_evidence_v1`, resolving the
    snapshot-identity coupling and the source rename.
