@@ -76,7 +76,8 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current foundation-integrity branch: `agent/qualified-anchor-consumption-v1`, stacked on `main` (all prior tranches consolidated on `main` by fast-forward).
+- Current working branch: `main`. Every tranche through ADR-0019 step 2 (store-layer
+  qualified anchor consumption) is consolidated on `main` by fast-forward; no branch is open.
 - The repository is **public** as of 2026-08-01 (founder-authorized; source visibility, not
   an open-source license). Public repositories run GitHub Actions free and unmetered.
 - **CI note for a future session:** on 2026-08-01 the account's Actions were billing-blocked
@@ -1104,34 +1105,13 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup:** ADR-0018 began qualified signed evidence consumption. A
-seam audit established that the qualification harnesses already produce the exact
-provider-neutral types the lifecycle consumes (`RevocationFloorV1`, `HeadCheckpointFloorV1`,
-`EvidenceReferenceV1`); the only gap is that the modeled gate demands byte-equality against
-unsigned code-derived content while a qualified BLOB carries the signed package. This
-tranche specified two profile-selected acceptance modes and implemented the networkless
-anchor-phase acceptance primitive in `etzio/kernel/qualified_evidence_v1.py`.
+**Exact next-session pickup: ADR-0019 step 3 — wire the checkpoint record.** The qualified-evidence bridge is well advanced. Done and on `main`: the complete acceptance-primitive layer (anchor, revocation, head-floor) in `etzio/kernel/qualified_evidence_v1.py`; ADR-0019 designed and then refined with a layering correction; schema-version-4 store enrollment that pins the qualified time and head-authority roots (`enroll_qualified_acceptance` / `resolve_acceptance_mode` / `load_qualified_acceptance_profiles`); and the first store-layer consumption, `SQLiteEventStore.verify_qualified_anchor_evidence`, which loads the enrolled roots and drives `accept_qualified_anchor_evidence_v1` (a modeled-only or legacy store refuses, never falling back to the unsigned gate).
 
-The acceptance-primitive layer is complete (anchor, revocation, head-floor).
-[ADR-0019](decisions/0019-qualified-evidence-lifecycle-consumption.md) now specifies the
-full lifecycle-consumption architecture: a schema-version-4 profile-selected acceptance
-mode that pins the qualified adapter roots at enrollment, a modeled service that produces
-signed-package evidence in qualified mode, and record validators that re-derive the
-qualification requests from retained scope (each `request_id` is `content_id` over that
-scope) and reauthenticate from the retained signed packages. The design resolves the
-Side-A revocation `snapshot_id == metadata.evidence_id` coupling and the
-`fixture.revocation-metadata` source rename, and sequences the work into five
-dependency-complete tranches: (1) schema-v4 enrollment; (2) anchor-phase consumption;
-(3) revocation-phase consumption; (4) head-floor-phase consumption; (5) qualified-path
-crash recovery. Step 1 is the exact next pickup.
-That is schema-touching: it changes the record bodies and `record_id`s, needs a store
-profile that selects the mode at enrollment, must preserve every ADR-0012 integration
-requirement plus its own crash-recovery known-bads, and is where the Side-A revocation
-`snapshot_id == metadata.evidence_id` coupling and the `fixture.revocation-metadata` vs
-`fixture.revocation` source rename are resolved. A real provider still requires its own
-admitted grant.
+**The layering correction is load-bearing — do not re-litigate it.** A record's `__post_init__` is context-free and cannot reauthenticate signed evidence, because the trust roots live in the schema-v4 store, not the record. So reauthentication stays at the store layer; the record's job in qualified mode is content-agnostic coverage plus kind checks, and the record retains the sealed qualified bundles its phase needs so the store can rebuild and reauthenticate them.
 
-The superseded storage scoping note follows for provenance only. The retained bytes make the
+Step 3: give `CheckpointCandidateRecordV1` an `acceptance_mode` field (this changes its body and `record_id` and its SQLite retention — a schema-touching ripple), retain the sealed qualified anchor and time bundles in qualified mode, and have its retention path call `verify_qualified_anchor_evidence`. Keep the modeled-unsigned record path exactly as it is, and cross-check the record's declared mode against the enrolled acceptance profile at retention. Add known-bads. Then repeat for the pending (revocation) and finalization (head-floor) records, then a qualified-mode modeled service that produces signed evidence from the harnesses, then qualified-path crash recovery. Preserve every ADR-0012 integration requirement. A real provider still requires its own admitted grant.
+
+The superseded pickup notes below are retained for provenance only. The retained bytes make the
 cost explicit: `_validate_schema` compares object sets for equality and therefore fails
 closed on extra objects, so a new append-only blocked table needs new DDL in
 `_integrity_schema_sql`, new `required_objects` entries for the table and its append-only
