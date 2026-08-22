@@ -186,8 +186,8 @@
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
     "validation_status": "local_and_github_release_suites_passed",
-    "github_validated_commit": "2abbdaab",
-    "github_actions_run_id": 32565456787,
+    "github_validated_commit": "3deecbc",
+    "github_actions_run_id": 32568227017,
     "test_count": 1188,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -219,7 +219,7 @@
     "qualified_anchor_record_wiring_tests": 7,
     "qualified_pending_record_wiring_tests": 12,
     "qualified_finality_lineage_tests": 4,
-    "ci_note": "CI is reproduced green. The CI / Foundation workflow had been disabled_manually and, when re-enabled on 2026-08-22, its first two runs failed at startup with the account-level annotation 'The job was not started because your account is locked due to a billing issue.' The founder resolved the GitHub payment authorization the same day, and the founder resolved the GitHub payment authorization the same day. Subsequent pushes reproduced Foundation/Python 3.11.15, Foundation/Python 3.14.2, and Repository policy all green -- first 0f291c2 (run 32555163537) and, after the step-4 coherent-pending positive, 2abbdaa (run 32565456787), validating the current tree at 1184 tests on both local runtimes."
+    "ci_note": "CI is reproduced green. The CI / Foundation workflow had been disabled_manually and, when re-enabled on 2026-08-22, its first two runs failed at startup with the account-level annotation 'The job was not started because your account is locked due to a billing issue.' The founder resolved the GitHub payment authorization the same day, and the founder resolved the GitHub payment authorization the same day. Subsequent pushes reproduced Foundation/Python 3.11.15, Foundation/Python 3.14.2, and Repository policy all green -- first 0f291c2 (run 32555163537) and, after the step-4 coherent-pending positive 2abbdaa (run 32565456787), and after the coherent qualified finality lineage 3deecbc (run 32568227017), validating the current tree at 1188 tests on both local runtimes."
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",

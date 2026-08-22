@@ -794,11 +794,14 @@ same day. Subsequent pushes then reproduced `Foundation / Python 3.11.15`,
 `Foundation / Python 3.14.2`, and `Repository policy` all green — first
 [`0f291c2`](https://github.com/manfromnowhere143/etzio/commit/0f291c2) in run
 [`32555163537`](https://github.com/manfromnowhere143/etzio/actions/runs/32555163537), and,
-after the step-4 coherent-pending positive,
+after the step-4 coherent-pending positive
 [`2abbdaa`](https://github.com/manfromnowhere143/etzio/commit/2abbdaa) in run
-[`32565456787`](https://github.com/manfromnowhere143/etzio/actions/runs/32565456787).
+[`32565456787`](https://github.com/manfromnowhere143/etzio/actions/runs/32565456787), and
+after the coherent qualified finality lineage
+[`3deecbc`](https://github.com/manfromnowhere143/etzio/commit/3deecbc) in run
+[`32568227017`](https://github.com/manfromnowhere143/etzio/actions/runs/32568227017).
 `current_evidence.validation_status` is `local_and_github_release_suites_passed` on
-`2abbdaa`; both declared local runtimes are green at `1184` tests.
+`3deecbc`; both declared local runtimes are green at `1188` tests.
 
 ## Current schema-v4 qualified-acceptance enrollment release evidence
 
