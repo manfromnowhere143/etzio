@@ -33,8 +33,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "qualified_evidence_pending_revocation_record_wiring",
-    "next_session_pickup": "implement ADR-0019 step 4: mirror step 3 for PendingIntegrityTransitionV1 -- add acceptance_mode, carry the sealed qualified revocation and time bundles transiently in qualified mode, branch the provider-evidence gate (modeled-unsigned unchanged; qualified = content-agnostic coverage plus kind), and have append_pending_integrity_event cross-check the declared mode against the enrolled profile and, in qualified mode, call a new store.verify_qualified_revocation_evidence driving accept_qualified_revocation_evidence_v1; resolve the RevocationFloorV1.snapshot_id coupling and the fixture.revocation to fixture.revocation-metadata source rename. Then step 5 for FinalizedIntegrityTransitionV1 (head-floor), then step 6 -- a qualified-mode modeled service that emits a coherent qualified lineage so a full qualified finality vertical and qualified-path crash recovery can be proved end to end. Mirror etzio/kernel/integrity_transition.py (CheckpointCandidateRecordV1, _validate_qualified_checkpoint_provider_evidence, _validated_transient_*_bundle), etzio/kernel/store.py (retain_integrity_checkpoint_candidate), and tests/test_qualified_anchor_record_wiring_v1.py. Step 3 (anchor-phase record wiring), the store-layer anchor consumption, and schema-v4 enrollment are complete. A real provider still requires its own admitted grant",
+    "next_gate": "qualified_evidence_finalization_record_wiring_then_service",
+    "next_session_pickup": "implement ADR-0019 step 5: mirror steps 3-4 for FinalizedIntegrityTransitionV1 -- add acceptance_mode, carry the sealed qualified head-floor and time bundles transiently, branch the provider-evidence gate, and have finalize_integrity_transition cross-check the declared mode and, in qualified mode, call a new store.verify_qualified_head_floor_evidence driving accept_qualified_head_floor_evidence_v1. Then step 6: a qualified-mode RepositoryOwnedDeterministicModeledIntegrityServiceV1 that builds a coherent qualified decision, anchor, and checkpoint from the harnesses (align the modeled service service_instance_id/environment_id/validation_policy to hfx.time_fixture.profile so harness floors' service/environment/policy match the decision), enabling a full qualified finality vertical, qualified-path crash recovery, and the restored end-to-end checkpoint proofs deferred from step 3. Coupling discovered in step 4: once the pending phase enforces qualified-mode consistency at append, a coherent qualified lineage can only be built by the step-6 service, so each phase tranche proves its own wiring (mode cross-check, bundle-presence, live reauthentication refusal) and the end-to-end positives are the service's job. Mirror etzio/kernel/integrity_transition.py, etzio/kernel/store.py, and tests/test_qualified_pending_record_wiring_v1.py. Steps 3-4 (anchor and pending record wiring), the store-layer anchor consumption, and schema-v4 enrollment are complete. A real provider still requires its own admitted grant",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -186,7 +186,7 @@
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
     "validation_status": "local_release_suites_pending_github_reproduction",
-    "test_count": 1175,
+    "test_count": 1182,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -202,7 +202,7 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "wires the anchor-phase finality record (CheckpointCandidateRecordV1) to the qualified signed-evidence acceptance mode: an acceptance_mode content field, transient non-serialized sealed anchor and time bundles, a mode-branching record gate, and a checkpoint-retention path that cross-checks the declared mode against the enrolled schema-version-4 profile and calls verify_qualified_anchor_evidence; the pending, finalization, and qualified-mode-service slices remain later steps, the positive end-to-end qualified lineage is not yet proved, and it establishes no full lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
+    "claim_boundary": "wires the anchor-phase (CheckpointCandidateRecordV1) and pending-phase (PendingIntegrityTransitionV1) finality records to the qualified signed-evidence acceptance mode: an acceptance_mode content field, transient non-serialized sealed bundles, mode-branching record gates, and retention/append paths that cross-check the declared mode against the enrolled schema-version-4 profile and call verify_qualified_anchor_evidence / verify_qualified_revocation_evidence; the finalization and qualified-mode-service slices remain later steps, the positive end-to-end qualified lineage is not yet proved (each phase proves its own wiring and a live reauthentication refusal), and it establishes no full lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
     "blocked_finality_focused_tests": 61,
@@ -214,7 +214,8 @@
     "qualified_evidence_acceptance_tests": 47,
     "qualified_acceptance_enrollment_tests": 15,
     "qualified_anchor_consumption_tests": 7,
-    "qualified_anchor_record_wiring_tests": 10,
+    "qualified_anchor_record_wiring_tests": 7,
+    "qualified_pending_record_wiring_tests": 10,
     "ci_note": "CI reproduction is blocked by an account-level billing lock, not merely pending. On 2026-08-22 the CI / Foundation workflow was re-enabled and a workflow_dispatch run (32553463236) on main (099e521, carrying step-3 commit 5f08ef1) failed at startup on all three jobs with the annotation 'The job was not started because your account is locked due to a billing issue.' This blocks every Actions run regardless of the repo being public and Actions nominally free; it is the same unresolved 2026-08-01 root cause and only the founder can clear it. The workflow is left enabled so CI runs on the next push once billing is cleared. This is a genuine null CI result, not a pass; every tranche is verified green on both local runtimes at 1175 tests."
   },
   "documentation_release_evidence": {

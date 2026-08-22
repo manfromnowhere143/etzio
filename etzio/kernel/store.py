@@ -5152,6 +5152,45 @@ class SQLiteEventStore:
     ) -> EventV1:
         """Atomically retain one event, its claimed BLOBs, and its pending dossier."""
 
+        from .integrity_transition import PendingIntegrityTransitionV1
+
+        # ADR-0019 step 4: the pending record's declared acceptance mode must match the
+        # enrolled acceptance profile exactly, and in qualified mode the sealed time and
+        # revocation bundles must accompany the freshly submitted record so the store can
+        # reauthenticate the decision's time and revocation inputs under the enrolled roots.
+        # The acceptance profile is immutable once enrolled, so reading it here (before the
+        # append transaction) is race-free.
+        if type(pending) is not PendingIntegrityTransitionV1:
+            raise EventStoreError(
+                "integrity pending append requires an exact PendingIntegrityTransitionV1"
+            )
+        enrolled_mode = self.resolve_acceptance_mode()
+        if pending.acceptance_mode != enrolled_mode:
+            raise EventStoreError(
+                "pending transition acceptance mode "
+                f"({pending.acceptance_mode}) differs from the enrolled acceptance "
+                f"profile ({enrolled_mode})"
+            )
+        if enrolled_mode == _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
+            from .qualified_evidence_v1 import QualifiedEvidenceError
+
+            if pending.time_bundle is None or pending.revocation_bundles is None:
+                raise EventStoreError(
+                    "a qualified pending transition requires its sealed qualified time and "
+                    "revocation bundles for store-side reauthentication"
+                )
+            try:
+                self.verify_qualified_revocation_evidence(
+                    pending_record=pending,
+                    time_bundle=pending.time_bundle,
+                    revocation_bundles=pending.revocation_bundles,
+                )
+            except QualifiedEvidenceError as exc:
+                raise EventStoreError(
+                    "qualified pending revocation evidence failed reauthentication "
+                    f"({exc.reason_code}): {exc}"
+                ) from exc
+
         self._validate_append_request(event, expected_head)
         is_protected = event.kind in PROTECTED_EVIDENCE_EVENT_KINDS_V1
         if is_protected:
@@ -5789,6 +5828,72 @@ class SQLiteEventStore:
             claimed_anchor_statement_id=claimed_anchor_statement_id,
             claimed_anchor_evidence=claimed_anchor_evidence,  # type: ignore[arg-type]
             claimed_evidence_blobs=claimed_evidence_blobs,  # type: ignore[arg-type]
+        )
+
+    def verify_qualified_revocation_evidence(
+        self,
+        *,
+        pending_record: object,
+        time_bundle: object,
+        revocation_bundles: object,
+    ) -> object:
+        """Consume a pending decision's time and revocation evidence against enrolled roots.
+
+        The pending/revocation analogue of ``verify_qualified_anchor_evidence`` (ADR-0019
+        step 4): the enrolled schema-version-4 time-adapter profile drives
+        ``accept_qualified_revocation_evidence_v1``, which reauthenticates the retained time
+        and revocation bundles from their signed packages before accepting the decision's
+        claimed time hull, evidence, views, and floors.  Only the decision's time,
+        revocation-metadata, and revocation-floor blobs are consumed here; the predecessor
+        head-floor evidence a pending record also carries is the finalization phase's concern
+        (ADR-0019 step 5).  A store with no qualified acceptance profile refuses.
+        """
+
+        from .integrity_transition import PendingIntegrityTransitionV1
+        from .qualified_evidence_v1 import accept_qualified_revocation_evidence_v1
+
+        if type(pending_record) is not PendingIntegrityTransitionV1:
+            raise EventStoreError(
+                "qualified revocation consumption requires an exact "
+                "PendingIntegrityTransitionV1"
+            )
+        profiles = self.load_qualified_acceptance_profiles()
+        if profiles is None:
+            raise IntegrityFinalityRequiredError(
+                "qualified revocation consumption requires an enrolled qualified "
+                "acceptance profile"
+            )
+        time_profile, _head_profile = profiles
+        decision = pending_record.decision
+        floors = pending_record.revocation_floors
+        # Partition the decision's time+revocation evidence out of the record's full
+        # provider evidence by exact evidence identity, leaving the predecessor head-floor
+        # blobs for the finalization phase.  Evidence identities are content digests, so this
+        # partition is exact and collision-free.
+        revocation_ids: set[str] = set()
+        for reference in decision.time_evidence:
+            revocation_ids.add(reference.evidence_id)
+        for view in decision.revocation_views:
+            revocation_ids.add(view.evidence.evidence_id)
+        for floor in floors:
+            for reference in floor.evidence:
+                revocation_ids.add(reference.evidence_id)
+        subset = tuple(
+            blob
+            for blob in pending_record.provider_evidence
+            if blob.evidence_id in revocation_ids
+        )
+        return accept_qualified_revocation_evidence_v1(
+            profile=time_profile,  # type: ignore[arg-type]
+            time_bundle=time_bundle,  # type: ignore[arg-type]
+            revocation_bundles=revocation_bundles,  # type: ignore[arg-type]
+            claimed_time_lower_bound=decision.time_lower_bound,
+            claimed_time_upper_bound=decision.time_upper_bound,
+            claimed_time_policy_id=decision.time_policy_id,
+            claimed_time_evidence=decision.time_evidence,
+            claimed_revocation_views=decision.revocation_views,
+            claimed_external_floors=floors,
+            claimed_evidence_blobs=subset,
         )
 
     def load_governed_recovery_decision(self, observation_id: str) -> object | None:

@@ -156,9 +156,25 @@ both runtimes and CI reproduction:
    `verify_qualified_anchor_evidence` to reauthenticate the checkpoint's claimed
    anchor statement, references, and signed-package blobs under the enrolled
    roots. It never falls back to the modeled gate.
-4. **Revocation-phase consumption.** `PendingIntegrityTransitionV1` in
-   qualified mode uses `accept_qualified_revocation_evidence_v1`, resolving the
-   snapshot-identity coupling and the source rename.
+4. **Revocation-phase consumption.** *(Implemented.)* `PendingIntegrityTransitionV1`
+   carries `acceptance_mode` and, in qualified mode, transient sealed time and
+   revocation bundles (same non-serialized, equality-excluded discipline as the
+   checkpoint record). Its `__post_init__` branches on the mode: the modeled-unsigned
+   gate is unchanged; the qualified gate is content-agnostic coverage plus an
+   evidence-kind check (trusted-time, revocation-metadata, or external-floor).
+   `append_pending_integrity_event` cross-checks the declared mode against the enrolled
+   acceptance profile before any append work and, in qualified mode, requires the sealed
+   bundles and calls `store.verify_qualified_revocation_evidence`, which drives
+   `accept_qualified_revocation_evidence_v1` over the decision's time,
+   revocation-metadata, and revocation-floor evidence (partitioned out of the record's
+   full provider evidence by exact evidence identity; the predecessor head-floor evidence
+   a pending also carries is the finalization phase's concern). Because the append verify
+   runs before the append transaction, this needs no lineage. The snapshot-identity
+   coupling and the `fixture.revocation` → `fixture.revocation-metadata` source rename are
+   resolved automatically because qualified mode consumes the primitive instead of the
+   modeled gate. A coherent qualified decision whose inputs the bundles authenticate (the
+   positive) is produced by the step-6 service; step 4 proves the wiring and a live
+   reauthentication refusal.
 5. **Head-floor-phase consumption.** `FinalizedIntegrityTransitionV1` in
    qualified mode uses `accept_qualified_head_floor_evidence_v1`.
 6. **Qualified-mode modeled service and crash recovery.** A qualified-mode

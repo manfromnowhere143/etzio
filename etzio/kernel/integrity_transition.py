@@ -19,7 +19,7 @@ import binascii
 import hashlib
 import re
 import threading
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from typing import Final, Literal, Protocol, TypeVar
 
@@ -812,12 +812,24 @@ class PendingIntegrityTransitionV1:
     revocation_floors: tuple[RevocationFloorV1, ...]
     prior_head_floor: HeadCheckpointFloorV1
     provider_evidence: tuple[ProviderEvidenceBlobV1, ...]
+    acceptance_mode: str = INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1
+    # Transient, sealed, non-serializable qualified bundles carried alongside a freshly
+    # submitted qualified-mode record so the store can reauthenticate the decision's time and
+    # revocation inputs under the enrolled roots.  Excluded from equality and never in
+    # ``to_body``, ``record_id``, or canonical bytes (see ADR-0019 step 3 for the rationale).
+    time_bundle: object | None = field(default=None, compare=False)
+    revocation_bundles: object | None = field(default=None, compare=False)
 
     def __post_init__(self) -> None:
         _require_digest(self.event_digest, "event_digest")
         _require_digest(self.mission_id, "mission_id")
         _require_nonnegative_int(self.event_seq, "event_seq")
         _require_nonnegative_int(self.instance_sequence, "instance_sequence")
+        if self.acceptance_mode not in INTEGRITY_ACCEPTANCE_MODES_V1:
+            _reject(
+                "invalid_pending_acceptance_mode",
+                "pending transition acceptance mode is not a supported value",
+            )
         signed = _snapshot_signed_decision(self.signed_decision)
         decision = _decision_from_signed(signed)
         trust_store = _snapshot_trust_store(self.decision_trust_store)
@@ -902,12 +914,24 @@ class PendingIntegrityTransitionV1:
             blobs,
             label="pending_transition",
         )
-        _validate_modeled_pending_provider_evidence(
-            decision=decision,
-            revocation_floors=canonical_floors,
-            prior_head_floor=head_floor,
-            blobs=blobs,
-        )
+        if self.acceptance_mode == INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1:
+            if self.time_bundle is not None or self.revocation_bundles is not None:
+                _reject(
+                    "invalid_pending_acceptance_mode",
+                    "a modeled-unsigned pending transition carries no qualified bundles",
+                )
+            _validate_modeled_pending_provider_evidence(
+                decision=decision,
+                revocation_floors=canonical_floors,
+                prior_head_floor=head_floor,
+                blobs=blobs,
+            )
+        else:
+            _validate_qualified_pending_provider_evidence(blobs)
+            if self.time_bundle is not None:
+                _validated_transient_time_bundle(self.time_bundle)
+            if self.revocation_bundles is not None:
+                _validated_transient_revocation_bundles(self.revocation_bundles)
         object.__setattr__(self, "signed_decision", signed)
         object.__setattr__(self, "decision_trust_store", trust_store)
         object.__setattr__(self, "validation_policy", policy)
@@ -925,6 +949,7 @@ class PendingIntegrityTransitionV1:
 
     def to_body(self) -> dict[str, object]:
         return {
+            "acceptance_mode": self.acceptance_mode,
             "decision_trust_store": _trust_store_body(self.decision_trust_store),
             "event_digest": self.event_digest,
             "event_seq": self.event_seq,
@@ -951,6 +976,7 @@ class PendingIntegrityTransitionV1:
             _record_body(data, "pending_integrity_transition"),
             frozenset(
                 {
+                    "acceptance_mode",
                     "decision_trust_store",
                     "event_digest",
                     "event_seq",
@@ -989,6 +1015,7 @@ class PendingIntegrityTransitionV1:
             revocation_floors=tuple(_revocation_floor_from_body(value) for value in floors),
             prior_head_floor=_head_floor_from_body(body["prior_head_floor"]),
             provider_evidence=_evidence_blobs_from_body(body["provider_evidence"]),
+            acceptance_mode=body["acceptance_mode"],  # type: ignore[arg-type]
         )
 
 
@@ -1502,6 +1529,7 @@ def _snapshot_pending_record(
         revocation_floors=value.revocation_floors,
         prior_head_floor=value.prior_head_floor,
         provider_evidence=value.provider_evidence,
+        acceptance_mode=value.acceptance_mode,
     )
 
 
@@ -2531,8 +2559,69 @@ def _validated_transient_time_bundle(value: object) -> object:
     if type(value) is not QualifiedTimeBundleV1:
         _reject(
             "invalid_qualified_time_bundle",
-            "a qualified checkpoint time bundle must be an exact QualifiedTimeBundleV1",
+            "a qualified time bundle must be an exact QualifiedTimeBundleV1",
         )
+    return value
+
+
+_QUALIFIED_PENDING_EVIDENCE_KINDS_V1: Final = frozenset(
+    {
+        TRUSTED_TIME_EVIDENCE_KIND,
+        REVOCATION_METADATA_EVIDENCE_KIND,
+        EXTERNAL_FLOOR_EVIDENCE_KIND,
+    }
+)
+
+
+def _validate_qualified_pending_provider_evidence(
+    blobs: tuple[ProviderEvidenceBlobV1, ...],
+) -> None:
+    """Content-agnostic decision-evidence gate for a qualified pending transition.
+
+    In qualified mode the record does not reauthenticate signed evidence — the store does,
+    under the enrolled roots (ADR-0019 layering correction).  The record proves only that
+    every retained blob is one of the decision's evidence kinds (trusted time, revocation
+    metadata, or external floor); ``_require_exact_evidence_coverage`` has already bound the
+    blobs to the decision's exact time, revocation-view, revocation-floor, and predecessor
+    head-floor references by identity.
+    """
+
+    if len(blobs) < 2:
+        _reject(
+            "invalid_qualified_pending_evidence",
+            "a qualified pending transition requires a bounded decision-evidence quorum",
+        )
+    for blob in blobs:
+        if blob.evidence_kind not in _QUALIFIED_PENDING_EVIDENCE_KINDS_V1:
+            _reject(
+                "invalid_qualified_pending_evidence",
+                "qualified pending evidence must be trusted-time, revocation-metadata, or "
+                "external-floor packages",
+            )
+
+
+def _validated_transient_revocation_bundles(value: object) -> object:
+    """Structurally confirm a transient qualified revocation-bundle mapping.
+
+    Like the other transient bundles it is sealed and non-serializable, carried alongside the
+    record so the store can reauthenticate the decision's revocation inputs under the enrolled
+    roots; it never enters the record's canonical bytes or ``record_id``.
+    """
+
+    from etzio.kernel.integrity_adapters_v1 import QualifiedRevocationBundleV1
+
+    if not isinstance(value, Mapping) or not value:
+        _reject(
+            "invalid_qualified_revocation_bundles",
+            "qualified revocation bundles must be a nonempty mapping by namespace",
+        )
+    for namespace, bundle in value.items():
+        if type(namespace) is not str or type(bundle) is not QualifiedRevocationBundleV1:
+            _reject(
+                "invalid_qualified_revocation_bundles",
+                "each qualified revocation bundle must be an exact "
+                "QualifiedRevocationBundleV1 keyed by namespace",
+            )
     return value
 
 

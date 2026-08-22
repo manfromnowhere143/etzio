@@ -5,12 +5,17 @@ transient sealed anchor/time bundles.  The store's checkpoint-retention path cro
 declared mode against the enrolled acceptance profile and, in qualified mode, reauthenticates
 the anchor evidence under the enrolled roots before persisting.
 
-Boundary: these prove the field, the mode-branching record gate, the store cross-check, the
-qualified bundle-presence gate, and that the retention path calls
-``verify_qualified_anchor_evidence`` live and refuses non-authenticating evidence.  A fully
-coherent qualified lineage whose checkpoint statement the qualified bundle authenticates is
-produced by the later qualified-mode modeled service (ADR-0019 step 4+); the positive
-store-side acceptance primitive itself is proved in ``test_qualified_anchor_consumption_v1``.
+Boundary: these prove the field, the mode-branching record gate (modeled-unsigned unchanged;
+qualified content-agnostic), the canonical round-trip that drops the transient bundles, and
+the store's checkpoint mode cross-check.  The qualified checkpoint-retention path on a
+*qualified store* (its sealed bundle-presence gate and the live
+``verify_qualified_anchor_evidence`` reauthentication) requires a coherent qualified
+pending+anchor lineage, which — now that ADR-0019 step 4 makes the pending phase enforce
+qualified-mode consistency — can only be built by the qualified-mode modeled service
+(ADR-0019 step 6); those end-to-end proofs live with that tranche.  The identical
+store-verify-wiring pattern is proved live for the pending phase in
+``test_qualified_pending_record_wiring_v1``, and the store's positive anchor acceptance is
+proved in ``test_qualified_anchor_consumption_v1``.
 """
 
 from __future__ import annotations
@@ -51,23 +56,8 @@ def _modeled_store(tmp_path: Path, name: str = "state"):
     return store, service
 
 
-def _qualified_store(tmp_path: Path, hfx, name: str = "state"):
-    policy = _policy()
-    store = SQLiteEventStore(_state_path(tmp_path, name))
-    service = _enroll(store, policy)
-    store.enroll_qualified_acceptance(
-        qualified_time_profile=hfx.time_fixture.profile,
-        qualified_head_profile=hfx.profile,
-    )
-    return store, service
-
-
 def _drive_to_anchor(store, service, label: str):
-    """Retain a modeled pending + anchor lineage; return (pending, anchor).
-
-    Pending/anchor retention does not yet cross-check the acceptance mode (ADR-0019 steps
-    4-5), so a modeled anchor lineage is legitimately retained on a qualified store here.
-    """
+    """Retain a modeled pending + anchor lineage on a modeled store; return (pending, anchor)."""
 
     event = _refusal_event(label)
     pending = _append_pending(store, event, service)
@@ -89,10 +79,8 @@ def _qualified_candidate(service, pending, anchor, ab, tb):
     """A checkpoint candidate in qualified mode carrying the sealed qualified bundles.
 
     The signed checkpoint is consistent with the modeled lineage; the record is flipped into
-    qualified mode and the sealed anchor/time bundles are attached so the store reauthenticates
-    them under the enrolled roots.  A fully coherent lineage whose checkpoint statement the
-    bundle authenticates is the later qualified-mode service (ADR-0019 step 4+); here the
-    bundle authenticates to a different statement, which is exactly what the store must catch.
+    qualified mode with the sealed anchor/time bundles attached.  Used for record-level and
+    mode-cross-check assertions; the coherent end-to-end lineage is the step-6 service.
     """
 
     base = _modeled_candidate(service, pending, anchor)
@@ -126,7 +114,7 @@ def test_acceptance_mode_changes_record_id_and_survives_round_trip(tmp_path: Pat
     hfx = _head_fixture()
     tb = _time_bundle(hfx)
     ab = _anchor_bundle(hfx, tb)
-    store, service = _qualified_store(tmp_path, hfx)
+    store, service = _modeled_store(tmp_path)
     with store:
         pending, anchor = _drive_to_anchor(store, service, "record-id")
         modeled = _modeled_candidate(service, pending, anchor)
@@ -172,7 +160,7 @@ def test_a_modeled_record_may_not_carry_qualified_bundles(tmp_path: Path) -> Non
     hfx = _head_fixture()
     tb = _time_bundle(hfx)
     ab = _anchor_bundle(hfx, tb)
-    store, service = _qualified_store(tmp_path, hfx)
+    store, service = _modeled_store(tmp_path)
     with store:
         pending, anchor = _drive_to_anchor(store, service, "modeled-bundles")
         modeled = _modeled_candidate(service, pending, anchor)
@@ -208,81 +196,35 @@ def test_the_modeled_provider_gate_is_unchanged(tmp_path: Path) -> None:
 
 
 def test_a_modeled_store_refuses_a_qualified_record(tmp_path: Path) -> None:
-    hfx = _head_fixture()
-    tb = _time_bundle(hfx)
-    ab = _anchor_bundle(hfx, tb)
-    q_store, q_service = _qualified_store(tmp_path, hfx, name="qualified")
-    with q_store:
-        pending, anchor = _drive_to_anchor(q_store, q_service, "xstore")
-        qualified = _qualified_candidate(q_service, pending, anchor, ab, tb)
+    """A qualified checkpoint record on a modeled store is refused by the mode cross-check.
 
-    m_store, _ = _modeled_store(tmp_path, name="modeled")
-    with m_store:
-        with pytest.raises(EventStoreError) as exc:
-            m_store.retain_integrity_checkpoint_candidate(qualified)
-        assert "acceptance mode" in str(exc.value)
-
-
-def test_a_qualified_store_refuses_a_modeled_record(tmp_path: Path) -> None:
-    hfx = _head_fixture()
-    m_store, m_service = _modeled_store(tmp_path, name="modeled")
-    with m_store:
-        pending, anchor = _drive_to_anchor(m_store, m_service, "xstore2")
-        modeled = _modeled_candidate(m_service, pending, anchor)
-
-    q_store, _ = _qualified_store(tmp_path, hfx, name="qualified")
-    with q_store:
-        with pytest.raises(EventStoreError) as exc:
-            q_store.retain_integrity_checkpoint_candidate(modeled)
-        assert "acceptance mode" in str(exc.value)
-
-
-def test_a_qualified_record_without_bundles_is_refused(tmp_path: Path) -> None:
-    hfx = _head_fixture()
-    tb = _time_bundle(hfx)
-    ab = _anchor_bundle(hfx, tb)
-    store, service = _qualified_store(tmp_path, hfx)
-    with store:
-        pending, anchor = _drive_to_anchor(store, service, "no-bundles")
-        qualified = _qualified_candidate(service, pending, anchor, ab, tb)
-        # A record reloaded from bytes carries no transient bundles.
-        stripped = CheckpointCandidateRecordV1.from_canonical_bytes(
-            qualified.to_canonical_bytes()
-        )
-        assert stripped.anchor_bundle is None
-        with pytest.raises(EventStoreError) as exc:
-            store.retain_integrity_checkpoint_candidate(stripped)
-        assert "sealed qualified" in str(exc.value)
-
-
-# ---------------------------------------------------------------------------
-# The retention path calls verify_qualified_anchor_evidence live
-# ---------------------------------------------------------------------------
-
-
-def test_retention_reauthenticates_and_refuses_a_mismatched_statement(
-    tmp_path: Path,
-) -> None:
-    """The qualified retention path drives store reauthentication under the enrolled roots.
-
-    The checkpoint's claimed anchor statement is the modeled lineage's statement, which the
-    qualified bundle does not authenticate, so the freshly reauthenticated statement does not
-    match and retention is refused.  This proves the verification is live, not dead code.
+    The cross-check fires before any lineage work, so the qualified candidate is built from a
+    modeled lineage and submitted to a modeled store; the enrolled mode is modeled-unsigned
+    and the declared mode is qualified.
     """
 
     hfx = _head_fixture()
     tb = _time_bundle(hfx)
     ab = _anchor_bundle(hfx, tb)
-    store, service = _qualified_store(tmp_path, hfx)
+    store, service = _modeled_store(tmp_path)
     with store:
-        pending, anchor = _drive_to_anchor(store, service, "verify-live")
+        pending, anchor = _drive_to_anchor(store, service, "xstore")
         qualified = _qualified_candidate(service, pending, anchor, ab, tb)
-        # Sanity: the modeled lineage statement is not the qualified bundle's statement.
-        assert qualified.checkpoint.anchor_statement_id != ab.anchor_statement_id
         with pytest.raises(EventStoreError) as exc:
             store.retain_integrity_checkpoint_candidate(qualified)
-        assert "reauthentication" in str(exc.value)
-        # Nothing was persisted: the lineage remains at the anchor phase.
-        lineage = store.load_integrity_lineage(pending.event_digest)
-        assert lineage is not None
-        assert lineage.checkpoint_candidate is None
+        assert "acceptance mode" in str(exc.value)
+
+
+# ---------------------------------------------------------------------------
+# Deferred to the qualified-mode service tranche (ADR-0019 step 6)
+# ---------------------------------------------------------------------------
+#
+# The qualified checkpoint-retention path (store cross-check on a qualified store, the sealed
+# bundle-presence gate, and the live ``verify_qualified_anchor_evidence`` reauthentication)
+# requires a *coherent qualified pending+anchor lineage* on a qualified store.  Since ADR-0019
+# step 4 (this repository state) makes the pending phase itself enforce qualified-mode
+# consistency at ``append_pending_integrity_event``, such a lineage can only be built once the
+# qualified-mode modeled service (step 6) emits coherent qualified decisions and anchors.
+# Those end-to-end checkpoint-retention proofs live with that service tranche; the identical
+# store-verify-wiring pattern is proved live for the pending phase in
+# ``test_qualified_pending_record_wiring_v1``.
