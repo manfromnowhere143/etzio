@@ -185,7 +185,9 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_release_suites_pending_github_reproduction",
+    "validation_status": "local_and_github_release_suites_passed",
+    "github_validated_commit": "0f291c26c083ffd0ac8dca1a8143a69c7bb2a5d8",
+    "github_actions_run_id": 32555163537,
     "test_count": 1182,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -216,7 +218,7 @@
     "qualified_anchor_consumption_tests": 7,
     "qualified_anchor_record_wiring_tests": 7,
     "qualified_pending_record_wiring_tests": 10,
-    "ci_note": "CI reproduction is blocked by an account-level billing lock, not merely pending. On 2026-08-22 the CI / Foundation workflow was re-enabled and a workflow_dispatch run (32553463236) on main (099e521, carrying step-3 commit 5f08ef1) failed at startup on all three jobs with the annotation 'The job was not started because your account is locked due to a billing issue.' This blocks every Actions run regardless of the repo being public and Actions nominally free; it is the same unresolved 2026-08-01 root cause and only the founder can clear it. The workflow is left enabled so CI runs on the next push once billing is cleared. This is a genuine null CI result, not a pass; every tranche is verified green on both local runtimes at 1175 tests."
+    "ci_note": "CI is reproduced green. The CI / Foundation workflow had been disabled_manually and, when re-enabled on 2026-08-22, its first two runs failed at startup with the account-level annotation 'The job was not started because your account is locked due to a billing issue.' The founder resolved the GitHub payment authorization the same day, and the push of implementation commit 0f291c2 reproduced Foundation/Python 3.11.15, Foundation/Python 3.14.2, and Repository policy all green in private run 32555163537; that commit carries both the step-3 and step-4 record wiring, validating the current tree at 1182 tests on both local runtimes."
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
