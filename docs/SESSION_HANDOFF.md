@@ -711,10 +711,16 @@ command passed under both declared local runtimes:
 - exact schema, semantic dispatch, repository policy, Ruff, fixture runs, retained-evidence
   checks, and `git diff --check` passed.
 
-CI reproduction on this exact commit is **pending** (the account Actions billing block noted
-below); `current_evidence.validation_status` stays
-`local_release_suites_pending_github_reproduction`. Re-run CI once billing clears and record
-the reproduced run honestly.
+CI reproduction on this exact commit is **pending**. The `CI / Foundation` workflow is
+currently `disabled_manually` on the remote (verified 2026-08-22 via
+`gh api repos/manfromnowhere143/etzio/actions/workflows`), a state left over from the
+2026-08-01 billing incident; the push of implementation commit
+[`5f08ef1`](https://github.com/manfromnowhere143/etzio/commit/5f08ef1) therefore triggered
+no run. `current_evidence.validation_status` stays
+`local_release_suites_pending_github_reproduction`. The repository is now public, so Actions
+runs free and unmetered; re-enable the workflow (`gh workflow enable "CI / Foundation"`),
+re-run on `5f08ef1`, and record the reproduced run honestly. This is a founder-set config, so
+re-enabling is left to the founder.
 
 ## Current schema-v4 qualified-acceptance enrollment release evidence
 

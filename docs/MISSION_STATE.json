@@ -215,7 +215,7 @@
     "qualified_acceptance_enrollment_tests": 15,
     "qualified_anchor_consumption_tests": 7,
     "qualified_anchor_record_wiring_tests": 10,
-    "ci_note": "GitHub Actions workflow temporarily disabled on 2026-08-01 due to an account Actions billing block; re-enable and reproduce on the exact commit once the spending limit clears. Every tranche is verified on both local runtimes."
+    "ci_note": "The CI / Foundation workflow is disabled_manually on the remote (verified 2026-08-22), a state left from the 2026-08-01 billing incident; the push of implementation commit 5f08ef1 triggered no run. The repository is now public so Actions is free and unmetered; re-enable with 'gh workflow enable' and reproduce on the exact commit. This is a founder-set config, so re-enabling is left to the founder. Every tranche is verified on both local runtimes."
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
