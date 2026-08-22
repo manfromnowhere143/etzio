@@ -97,6 +97,21 @@ _LEGACY_STORE_PROFILE_V1: Final = "legacy_fixture_v1"
 _MODELED_INTEGRITY_STORE_PROFILE_V1: Final = "modeled_integrity_fixture_v1"
 _ACCEPTANCE_MODE_MODELED_UNSIGNED_V1: Final = "modeled_unsigned_code_derived"
 _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1: Final = "qualified_signed_fixture"
+
+
+def _qualified_evidence_refusals() -> tuple[type[BaseException], ...]:
+    """The qualification-layer refusal family surfaced by the qualified accept primitives.
+
+    All three carry a ``reason_code`` and mean the same thing at the store boundary: the
+    qualified evidence did not authenticate.  Imported lazily to avoid an import cycle
+    (``integrity_adapters`` imports from ``integrity_transition``, which imports this module).
+    """
+
+    from .head_authority_adapters_v1 import HeadAuthorityAdapterError
+    from .integrity_adapters_v1 import IntegrityAdapterError
+    from .qualified_evidence_v1 import QualifiedEvidenceError
+
+    return (QualifiedEvidenceError, IntegrityAdapterError, HeadAuthorityAdapterError)
 _INTEGRITY_PHASES_V1: Final = frozenset(
     {"pending", "anchor_statement", "checkpoint_candidate", "finalization"}
 )
@@ -5172,23 +5187,22 @@ class SQLiteEventStore:
                 f"profile ({enrolled_mode})"
             )
         if enrolled_mode == _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
-            from .qualified_evidence_v1 import QualifiedEvidenceError
-
             if pending.time_bundle is None or pending.revocation_bundles is None:
                 raise EventStoreError(
                     "a qualified pending transition requires its sealed qualified time and "
                     "revocation bundles for store-side reauthentication"
                 )
+            _QUALIFIED_EVIDENCE_REFUSALS_V1 = _qualified_evidence_refusals()
             try:
                 self.verify_qualified_revocation_evidence(
                     pending_record=pending,
                     time_bundle=pending.time_bundle,
                     revocation_bundles=pending.revocation_bundles,
                 )
-            except QualifiedEvidenceError as exc:
+            except _QUALIFIED_EVIDENCE_REFUSALS_V1 as exc:
                 raise EventStoreError(
                     "qualified pending revocation evidence failed reauthentication "
-                    f"({exc.reason_code}): {exc}"
+                    f"({getattr(exc, 'reason_code', 'unknown')}): {exc}"
                 ) from exc
 
         self._validate_append_request(event, expected_head)
@@ -6155,13 +6169,12 @@ class SQLiteEventStore:
                 # sealed bundles are non-serializable, so this fresh-insert path requires the
                 # freshly submitted record to carry them; an idempotent retry of an already
                 # retained candidate returns above without reaching this reauthentication.
-                from .qualified_evidence_v1 import QualifiedEvidenceError
-
                 if record.anchor_bundle is None or record.time_bundle is None:
                     raise EventStoreError(
                         "a qualified checkpoint candidate requires its sealed qualified "
                         "anchor and time bundles for store-side reauthentication"
                     )
+                _QUALIFIED_EVIDENCE_REFUSALS_V1 = _qualified_evidence_refusals()
                 try:
                     self.verify_qualified_anchor_evidence(
                         anchor_bundle=record.anchor_bundle,
@@ -6170,10 +6183,10 @@ class SQLiteEventStore:
                         claimed_anchor_evidence=checkpoint.anchor_evidence,
                         claimed_evidence_blobs=candidate.provider_evidence,
                     )
-                except QualifiedEvidenceError as exc:
+                except _QUALIFIED_EVIDENCE_REFUSALS_V1 as exc:
                     raise EventStoreError(
                         "qualified checkpoint anchor evidence failed reauthentication "
-                        f"({exc.reason_code}): {exc}"
+                        f"({getattr(exc, 'reason_code', 'unknown')}): {exc}"
                     ) from exc
             attestation_id = signed_head_checkpoint_attestation_id(
                 candidate.signed_checkpoint

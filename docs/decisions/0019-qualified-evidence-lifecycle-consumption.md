@@ -155,7 +155,14 @@ both runtimes and CI reproduction:
    mode, and — after lineage validation — calls
    `verify_qualified_anchor_evidence` to reauthenticate the checkpoint's claimed
    anchor statement, references, and signed-package blobs under the enrolled
-   roots. It never falls back to the modeled gate.
+   roots. It never falls back to the modeled gate. The qualified checkpoint
+   positive is proved end to end in `tests/test_qualified_finality_lineage_v1.py`
+   on a coherent pending+anchor+checkpoint lineage: `prepare_checkpoint_candidate`
+   gained optional `acceptance_mode`/`anchor_bundle`/`time_bundle` parameters
+   (modeled path byte-identical), and the qualified anchor bundle is scoped to the
+   modeled anchor's derived statement identity — the anchor adapters build Merkle
+   leaves dynamically and recompute a genuine RFC 9162 inclusion proof, so the
+   bundle authenticates the exact leaf the lineage claims.
 4. **Revocation-phase consumption.** *(Implemented.)* `PendingIntegrityTransitionV1`
    carries `acceptance_mode` and, in qualified mode, transient sealed time and
    revocation bundles (same non-serialized, equality-excluded discipline as the

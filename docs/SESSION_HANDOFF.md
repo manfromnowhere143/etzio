@@ -688,12 +688,11 @@ never falls back to the modeled gate. Seven focused known-bads cover the field, 
 mode-branching record gate, the canonical round-trip that drops transient bundles, the
 modeled gate left unchanged, an unsupported mode, a modeled record forbidden from carrying
 bundles, and the store checkpoint mode cross-check. The qualified checkpoint-retention path
-on a *qualified store* (its sealed bundle-presence gate and the live
-`verify_qualified_anchor_evidence` reauthentication) requires a coherent qualified
-pending+anchor lineage; because ADR-0019 step 4 now makes the pending phase enforce
-qualified-mode consistency at append, that lineage can only be built by the qualified-mode
-modeled service (step 6), so those end-to-end checkpoint proofs live with that tranche. The
-identical store-verify-wiring pattern is proved live for the pending phase in step 4.
+on a *qualified store* — its sealed bundle-presence gate and the live
+`verify_qualified_anchor_evidence` reauthentication (positive and negative) — is now proved
+end to end on a coherent qualified pending+anchor+checkpoint lineage in
+`tests/test_qualified_finality_lineage_v1.py` (see that tranche below); it needed a coherent
+qualified pending, which ADR-0019 step 4 established.
 
 The finalization (head-floor) record phase and the qualified-mode modeled service (which
 emits a coherent qualified lineage) remain ADR-0019 steps 5–6. Step 2 already proves the
@@ -727,12 +726,38 @@ unchanged. Local repository policy, mission-state JSON, and relative Markdown li
 the dual-runtime suite is unchanged and reproduced by CI. This adds no capability or
 authority and does not supersede implementation evidence.
 
+## Current qualified finality lineage release evidence
+
+On the coherent qualified finality lineage candidate (ADR-0019 steps 3–4 positives), the
+canonical release command passed under both declared local runtimes:
+
+- 1188 tests passed;
+- the focused finality-lineage file passed all 4 tests: a coherent qualified checkpoint is
+  retained end to end (a qualified pending whose decision the enrolled bundles authenticate,
+  a modeled anchor, and a qualified checkpoint whose anchor evidence the enrolled roots
+  reauthenticate), a qualified checkpoint replays idempotently from bytes, a qualified
+  checkpoint reloaded without its sealed bundles is refused, and a checkpoint carrying a
+  foreign-root anchor bundle fails reauthentication and retains nothing. The qualified anchor
+  bundle is scoped to the modeled anchor's derived statement identity — the repository-owned
+  anchor adapters build their Merkle leaves dynamically and recompute a genuine RFC 9162
+  inclusion proof, so the bundle authenticates the exact leaf the lineage claims;
+- `prepare_checkpoint_candidate` gained optional `acceptance_mode`/`anchor_bundle`/
+  `time_bundle` parameters so the modeled-unsigned path stays byte-identical while the
+  qualified path builds a qualified record directly (the seed of the step-6 service);
+- the store's checkpoint and pending qualified-verify paths now surface the full
+  qualification-layer refusal family (`QualifiedEvidenceError`, `IntegrityAdapterError`,
+  `HeadAuthorityAdapterError`) as a uniform store-domain refusal;
+- CPython 3.11.15 / SQLite 3.53.1 / `DELETE`/`EXTRA` and CPython 3.14.2 / SQLite 3.51.2 /
+  `DELETE`/`EXTRA`, both hash-locked environments passed `pip check`; and
+- exact schema, semantic dispatch, repository policy, Ruff, fixture runs, retained-evidence
+  checks, and `git diff --check` passed. CI reproduces on push (billing resolved 2026-08-22).
+
 ## Current qualified pending-record wiring release evidence
 
 On the ADR-0019 step-4 qualified pending-record wiring candidate, the canonical release
 command passed under both declared local runtimes:
 
-- 1184 tests passed;
+- 1184 tests passed on the step-4 pending-record candidate;
 - the focused pending-record-wiring file passed all 12 tests: 10 known-bads (default mode and
   absent bundles; the mode changing `record_id` while the canonical round-trip drops the
   transient bundles; `from_canonical_bytes` requiring the field; an unsupported mode refused; a
@@ -750,9 +775,8 @@ command passed under both declared local runtimes:
   the round-trip dropping transient bundles, `from_canonical_bytes` requiring the field, an
   unsupported mode, a modeled record forbidden from carrying bundles, the modeled gate left
   unchanged, and the store checkpoint mode cross-check) — its qualified-store checkpoint
-  end-to-end proofs were moved to the step-6 service tranche because step 4 now makes the
-  pending phase enforce qualified-mode consistency, so a qualified checkpoint lineage can only
-  be built by that service;
+  end-to-end proofs are now in the finality-lineage file above, once step 4 established a
+  coherent qualified pending to build the lineage on;
 - CPython 3.11.15 / SQLite 3.53.1 / `DELETE`/`EXTRA` and CPython 3.14.2 / SQLite 3.51.2 /
   `DELETE`/`EXTRA`, both retaining their complete `sqlite_source_id()` and isolated versus
   repository-import-context agreement;
@@ -1220,13 +1244,13 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup: ADR-0019 step 5 — wire the finalization (head-floor) record, then step 6 — the qualified-mode service.** The qualified-evidence bridge is well advanced. Done and on `main`: the complete acceptance-primitive layer (anchor, revocation, head-floor) in `etzio/kernel/qualified_evidence_v1.py`; ADR-0019 designed and refined with a layering correction; schema-version-4 store enrollment (`enroll_qualified_acceptance` / `resolve_acceptance_mode` / `load_qualified_acceptance_profiles`); the store-layer anchor consumption `verify_qualified_anchor_evidence`; **step 3 — anchor-phase record wiring** (`CheckpointCandidateRecordV1.acceptance_mode`, transient sealed bundles, mode-branching `__post_init__`, and `retain_integrity_checkpoint_candidate` cross-checking the mode and calling `verify_qualified_anchor_evidence`); and **step 4 — pending-phase record wiring** (`PendingIntegrityTransitionV1.acceptance_mode`, transient sealed time+revocation bundles, mode-branching gate, and `append_pending_integrity_event` cross-checking the mode and calling the new `store.verify_qualified_revocation_evidence` driving `accept_qualified_revocation_evidence_v1`).
+**Exact next-session pickup: ADR-0019 step 5 — wire the finalization (head-floor) record, then step 6 — the qualified-mode service.** The qualified-evidence bridge is well advanced. Done and on `main`: the complete acceptance-primitive layer (anchor, revocation, head-floor) in `etzio/kernel/qualified_evidence_v1.py`; ADR-0019 designed and refined with a layering correction; schema-version-4 store enrollment (`enroll_qualified_acceptance` / `resolve_acceptance_mode` / `load_qualified_acceptance_profiles`); the store-layer anchor consumption `verify_qualified_anchor_evidence`; **step 3 — anchor-phase record wiring** (`CheckpointCandidateRecordV1.acceptance_mode`, transient sealed bundles, mode-branching `__post_init__`, and `retain_integrity_checkpoint_candidate` cross-checking the mode and calling `verify_qualified_anchor_evidence`); **step 4 — pending-phase record wiring** (`PendingIntegrityTransitionV1.acceptance_mode`, transient sealed time+revocation bundles, mode-branching gate, and `append_pending_integrity_event` cross-checking the mode and calling the new `store.verify_qualified_revocation_evidence` driving `accept_qualified_revocation_evidence_v1`); and the **coherent qualified finality lineage** end-to-end positives — a qualified pending appends and is retained, and a qualified checkpoint (built on a modeled anchor with a qualified anchor bundle scoped to its derived statement via dynamic Merkle leaves) is retained, with `prepare_checkpoint_candidate` gaining optional qualified-mode parameters and the store surfacing the full qualification-layer refusal family uniformly.
 
 **The layering correction is load-bearing — do not re-litigate it.** A record's `__post_init__` is context-free and cannot reauthenticate signed evidence, because the trust roots live in the schema-v4 store, not the record. So reauthentication stays at the store layer; the record's job in qualified mode is content-agnostic coverage plus kind checks. The sealed bundles are non-serializable, so they ride as transient, equality-excluded fields (never in `record_id`/canonical bytes), and the store reads them from the freshly submitted record — `_snapshot_integrity_record` round-trips through canonical bytes and would otherwise drop them.
 
 **A coupling discovered in step 4 governs the remaining sequencing.** Once the pending phase enforces qualified-mode consistency at `append_pending_integrity_event`, a *coherent qualified lineage* (a qualified pending whose decision the bundles authenticate, plus a qualified anchor) can no longer be assembled from modeled records on a qualified store. Each phase tranche therefore proves its own wiring — the mode cross-check, the sealed bundle-presence gate, and a live reauthentication *refusal* — without a full lineage (the pending append-verify runs before any lineage, so step 4 is fully proven; the checkpoint verify runs after the lineage, so step 3's qualified-store checkpoint end-to-end proofs moved to step 6). The end-to-end *positives* for all phases are the step-6 qualified-mode service's job.
 
-Step 5: mirror steps 3–4 for `FinalizedIntegrityTransitionV1` — add `acceptance_mode`, carry the sealed qualified head-floor and time bundles transiently, branch its provider-evidence gate, and have `finalize_integrity_transition` cross-check the mode and, in qualified mode, call a new `store.verify_qualified_head_floor_evidence` driving `accept_qualified_head_floor_evidence_v1`. Step 6: a qualified-mode `RepositoryOwnedDeterministicModeledIntegrityServiceV1` that builds a coherent qualified decision, anchor, and checkpoint from the harnesses (align the modeled service's `service_instance_id`/`environment_id`/`validation_policy` to `hfx.time_fixture.profile` so the harness floors' service/environment/policy match the decision), enabling a full qualified finality vertical, qualified-path crash recovery, and the restored end-to-end checkpoint proofs. Preserve every ADR-0012 integration requirement and every store-error classification. A real provider still requires its own admitted grant. Code to mirror: `etzio/kernel/integrity_transition.py` (`PendingIntegrityTransitionV1`/`CheckpointCandidateRecordV1`, `_validate_qualified_*_provider_evidence`, `_validated_transient_*_bundle`), `etzio/kernel/store.py` (`append_pending_integrity_event` / `verify_qualified_revocation_evidence` / `retain_integrity_checkpoint_candidate`), and `tests/test_qualified_pending_record_wiring_v1.py`.
+Step 5: mirror steps 3–4 for `FinalizedIntegrityTransitionV1` — add `acceptance_mode`, carry the sealed qualified head-floor and time bundles transiently, branch its provider-evidence gate, and have `finalize_integrity_transition` cross-check the mode and, in qualified mode, call a new `store.verify_qualified_head_floor_evidence` driving `accept_qualified_head_floor_evidence_v1`. Step 6: a qualified-mode `RepositoryOwnedDeterministicModeledIntegrityServiceV1` that builds a coherent qualified decision, anchor, and checkpoint from the harnesses (align the modeled service's `service_instance_id`/`environment_id`/`validation_policy` to `hfx.time_fixture.profile` so the harness floors' service/environment/policy match the decision), enabling a full qualified finality vertical (through finalization) and qualified-path crash recovery — the anchor+checkpoint construction proved in `tests/test_qualified_finality_lineage_v1.py` is the template, and `prepare_checkpoint_candidate` already accepts qualified-mode parameters. Preserve every ADR-0012 integration requirement and every store-error classification. A real provider still requires its own admitted grant. Code to mirror: `etzio/kernel/integrity_transition.py` (`PendingIntegrityTransitionV1`/`CheckpointCandidateRecordV1`, `_validate_qualified_*_provider_evidence`, `_validated_transient_*_bundle`), `etzio/kernel/store.py` (`append_pending_integrity_event` / `verify_qualified_revocation_evidence` / `retain_integrity_checkpoint_candidate`), and `tests/test_qualified_pending_record_wiring_v1.py`.
 
 The superseded pickup notes below are retained for provenance only. The retained bytes make the
 cost explicit: `_validate_schema` compares object sets for equality and therefore fails

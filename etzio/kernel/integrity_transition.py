@@ -3319,8 +3319,17 @@ class RepositoryOwnedDeterministicModeledIntegrityServiceV1:
         anchor: AnchorStatementRecordV1,
         *,
         anchor_receipts: tuple[ProviderEvidenceBlobV1, ...],
+        acceptance_mode: str = INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1,
+        anchor_bundle: object | None = None,
+        time_bundle: object | None = None,
     ) -> CheckpointCandidateRecordV1:
-        """Create one deterministic signed checkpoint from retained receipts."""
+        """Create one deterministic signed checkpoint from retained receipts.
+
+        In the default modeled-unsigned mode the receipts are the exact code-derived fixture
+        assertions.  In qualified mode the receipts are the qualified anchor bundle's signed
+        packages and the sealed ``anchor_bundle`` and ``time_bundle`` are carried on the
+        record so the store can reauthenticate them under the enrolled roots (ADR-0019).
+        """
 
         validate_anchor_statement_record(pending, anchor)
         receipts = _validated_evidence_blobs(anchor_receipts)
@@ -3366,6 +3375,9 @@ class RepositoryOwnedDeterministicModeledIntegrityServiceV1:
             signed_checkpoint=self._checkpoint_signer.sign_checkpoint(checkpoint),
             checkpoint_trust_store=self.trust_store,
             provider_evidence=receipts,
+            acceptance_mode=acceptance_mode,
+            anchor_bundle=anchor_bundle,
+            time_bundle=time_bundle,
         )
 
     def prime_catalog(

@@ -10,10 +10,13 @@ Boundary: because the pending append-verify runs before the append transaction (
 required), this file proves the field, the mode-branching record gate, the canonical
 round-trip that drops the transient bundles, the store cross-check in both directions, the
 sealed bundle-presence gate, and a *live* reauthentication that refuses a pending whose
-decision the qualified bundles do not authenticate.  A coherent qualified decision whose time
-and revocation inputs the bundles do authenticate (the positive) is produced by the
-qualified-mode modeled service (ADR-0019 step 6); the store's positive revocation acceptance
-primitive itself is proved in ``test_qualified_revocation_acceptance_v1``.
+decision the qualified bundles do not authenticate.  The positive is proved here too: a
+coherent qualified pending whose time and revocation inputs the enrolled bundles authenticate
+appends, is retained, and reconciles idempotently — built by a profile-aligned modeled service
+with the qualified inputs swapped into the decision (the seed of the ADR-0019 step-6 service).
+The store's positive revocation acceptance primitive is proved in
+``test_qualified_revocation_acceptance_v1``; the full pending+anchor+checkpoint lineage in
+``test_qualified_finality_lineage_v1``.
 """
 
 from __future__ import annotations
