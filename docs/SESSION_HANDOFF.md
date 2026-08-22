@@ -766,14 +766,15 @@ CI reproduction on this exact commit **passed**. The `CI / Foundation` workflow 
 push of [`f390d28`](https://github.com/manfromnowhere143/etzio/commit/f390d28)) failed at
 startup with the account-level annotation "The job was not started because your account is
 locked due to a billing issue." The founder resolved the GitHub payment authorization the
-same day, and the push of implementation commit
-[`0f291c2`](https://github.com/manfromnowhere143/etzio/commit/0f291c2) then reproduced
-`Foundation / Python 3.11.15`, `Foundation / Python 3.14.2`, and `Repository policy` all
-green in private run
-[`32555163537`](https://github.com/manfromnowhere143/etzio/actions/runs/32555163537). That
-commit carries both the step-3 and step-4 record wiring, so this validates the current tree.
+same day. Subsequent pushes then reproduced `Foundation / Python 3.11.15`,
+`Foundation / Python 3.14.2`, and `Repository policy` all green — first
+[`0f291c2`](https://github.com/manfromnowhere143/etzio/commit/0f291c2) in run
+[`32555163537`](https://github.com/manfromnowhere143/etzio/actions/runs/32555163537), and,
+after the step-4 coherent-pending positive,
+[`2abbdaa`](https://github.com/manfromnowhere143/etzio/commit/2abbdaa) in run
+[`32565456787`](https://github.com/manfromnowhere143/etzio/actions/runs/32565456787).
 `current_evidence.validation_status` is `local_and_github_release_suites_passed` on
-`0f291c2`; both declared local runtimes are green at `1182` tests.
+`2abbdaa`; both declared local runtimes are green at `1184` tests.
 
 ## Current schema-v4 qualified-acceptance enrollment release evidence
 
