@@ -32,7 +32,7 @@ confidence.**
 > acceptance layer); durable governed blocked-finality — specified, persisted, wired into the
 > lifecycle, and crash-recovered; and a schema-version-4 store that pins the qualified
 > adapter roots. The Merkle proofs are checked against the published **RFC 6962/9162
-> reference vectors**, not against Etzio's own prover. `1158` tests pass on CPython 3.11.15
+> reference vectors**, not against Etzio's own prover. `1175` tests pass on CPython 3.11.15
 > and 3.14.2; `19` accepted architecture decisions stand behind them; every consequential
 > gate carries a known-bad that proves it refuses.
 >
@@ -404,7 +404,7 @@ claim: the entire suite runs against repository-owned deterministic fixtures.
 
 | Retained | Value |
 |---|---|
-| Full suite | `1158` tests, green on CPython 3.11.15 / SQLite 3.53.1 and CPython 3.14.2 / SQLite 3.51.2 |
+| Full suite | `1175` tests, green on CPython 3.11.15 / SQLite 3.53.1 and CPython 3.14.2 / SQLite 3.51.2 |
 | Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
 | SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` `4` |
 | Accepted decisions | `19` architecture decision records, each with a known-bad where it names a gate |
@@ -471,9 +471,12 @@ the exact evidence any finality record binds from a freshly reauthenticated sign
 
 What remains before a finding pipeline can exist:
 
-1. wire the qualified-signed acceptance mode into the finality records so the lifecycle
-   consumes authenticated evidence instead of unsigned code-derived assertions
-   ([ADR-0019](docs/decisions/0019-qualified-evidence-lifecycle-consumption.md));
+1. finish wiring the qualified-signed acceptance mode into the finality records so the
+   lifecycle consumes authenticated evidence instead of unsigned code-derived assertions
+   ([ADR-0019](docs/decisions/0019-qualified-evidence-lifecycle-consumption.md)) — the
+   anchor-phase checkpoint record and its store reauthentication are wired (step 3); the
+   pending (revocation) and finalization (head-floor) records and a qualified-mode service
+   that emits a coherent qualified lineage remain;
 2. qualify independently administered trusted-time, revocation, anchor, catalog, and monitor
    providers, and prove external latest-head authority survives local database loss;
 3. close the documented same-user SQLite pathname and coherent offline-rewrite boundary, and

@@ -20,7 +20,7 @@ import hashlib
 import re
 import threading
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Final, Literal, Protocol, TypeVar
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
@@ -80,10 +80,26 @@ MAX_PROVIDER_EVIDENCE_TOTAL_BYTES_V1: Final = 8 << 20
 MAX_PROVIDER_EVIDENCE_BLOBS_V1: Final = 64
 _MODELED_PROVIDER_SUFFIXES_V1: Final = ("a", "b")
 
+# Provider-evidence acceptance mode for finality records (ADR-0019).  The string
+# values are the contract shared with ``etzio.kernel.store`` and
+# ``etzio.kernel.qualified_evidence_v1``; ``integrity_transition`` is the lower module
+# and therefore owns the canonical constants rather than importing them upward.
+INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1: Final = "modeled_unsigned_code_derived"
+INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1: Final = "qualified_signed_fixture"
+INTEGRITY_ACCEPTANCE_MODES_V1: Final = frozenset(
+    {
+        INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1,
+        INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1,
+    }
+)
+
 __all__: Final = (
     "AnchorStatementRecordV1",
     "CheckpointCandidateRecordV1",
     "FinalizedIntegrityTransitionV1",
+    "INTEGRITY_ACCEPTANCE_MODES_V1",
+    "INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1",
+    "INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1",
     "INTEGRITY_TRANSITION_RECORD_VERSION_V1",
     "IntegrityFinalityBlockedError",
     "IntegrityFinalityPendingError",
@@ -1270,6 +1286,14 @@ class CheckpointCandidateRecordV1:
     signed_checkpoint: SignedHeadCheckpointV1
     checkpoint_trust_store: IntegrityTrustStore
     provider_evidence: tuple[ProviderEvidenceBlobV1, ...]
+    acceptance_mode: str = INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1
+    # Transient, sealed, non-serializable qualified bundles carried alongside a freshly
+    # submitted qualified-mode record so the store can reauthenticate them under the
+    # enrolled roots.  They are excluded from equality and never enter ``to_body``,
+    # ``record_id``, or canonical bytes, so a record reloaded from bytes (bundles absent)
+    # still equals its freshly submitted original.
+    anchor_bundle: object | None = field(default=None, compare=False)
+    time_bundle: object | None = field(default=None, compare=False)
 
     def __post_init__(self) -> None:
         _require_digest(self.pending_record_id, "pending_record_id")
@@ -1278,6 +1302,11 @@ class CheckpointCandidateRecordV1:
             "anchor_statement_record_id",
         )
         _require_digest(self.event_digest, "event_digest")
+        if self.acceptance_mode not in INTEGRITY_ACCEPTANCE_MODES_V1:
+            _reject(
+                "invalid_checkpoint_acceptance_mode",
+                "checkpoint candidate acceptance mode is not a supported value",
+            )
         signed = _snapshot_signed_checkpoint(self.signed_checkpoint)
         checkpoint = _checkpoint_from_signed(signed)
         trust_store = _snapshot_trust_store(self.checkpoint_trust_store)
@@ -1292,10 +1321,22 @@ class CheckpointCandidateRecordV1:
             blobs,
             label="checkpoint_candidate",
         )
-        _validate_modeled_checkpoint_provider_evidence(
-            checkpoint=checkpoint,
-            blobs=blobs,
-        )
+        if self.acceptance_mode == INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1:
+            if self.anchor_bundle is not None or self.time_bundle is not None:
+                _reject(
+                    "invalid_checkpoint_acceptance_mode",
+                    "a modeled-unsigned checkpoint candidate carries no qualified bundles",
+                )
+            _validate_modeled_checkpoint_provider_evidence(
+                checkpoint=checkpoint,
+                blobs=blobs,
+            )
+        else:
+            _validate_qualified_checkpoint_provider_evidence(blobs)
+            if self.anchor_bundle is not None:
+                _validated_transient_anchor_bundle(self.anchor_bundle)
+            if self.time_bundle is not None:
+                _validated_transient_time_bundle(self.time_bundle)
         object.__setattr__(self, "signed_checkpoint", signed)
         object.__setattr__(self, "checkpoint_trust_store", trust_store)
         object.__setattr__(self, "provider_evidence", blobs)
@@ -1310,6 +1351,7 @@ class CheckpointCandidateRecordV1:
 
     def to_body(self) -> dict[str, object]:
         return {
+            "acceptance_mode": self.acceptance_mode,
             "anchor_statement_record_id": self.anchor_statement_record_id,
             "checkpoint_trust_store": _trust_store_body(self.checkpoint_trust_store),
             "event_digest": self.event_digest,
@@ -1332,6 +1374,7 @@ class CheckpointCandidateRecordV1:
             _record_body(data, "checkpoint_candidate"),
             frozenset(
                 {
+                    "acceptance_mode",
                     "anchor_statement_record_id",
                     "checkpoint_trust_store",
                     "event_digest",
@@ -1349,6 +1392,8 @@ class CheckpointCandidateRecordV1:
             "signed_checkpoint",
             maximum=1 << 20,
         )
+        # A record reloaded from bytes carries no transient bundles; reauthentication under
+        # the enrolled roots already happened at first retention.
         return cls(
             pending_record_id=body["pending_record_id"],  # type: ignore[arg-type]
             anchor_statement_record_id=body["anchor_statement_record_id"],  # type: ignore[arg-type]
@@ -1356,6 +1401,7 @@ class CheckpointCandidateRecordV1:
             signed_checkpoint=SignedHeadCheckpointV1.from_bytes(signed_wire),
             checkpoint_trust_store=_trust_store_from_body(body["checkpoint_trust_store"]),
             provider_evidence=_evidence_blobs_from_body(body["provider_evidence"]),
+            acceptance_mode=body["acceptance_mode"],  # type: ignore[arg-type]
         )
 
 
@@ -1500,6 +1546,7 @@ def _snapshot_candidate_record(
         signed_checkpoint=value.signed_checkpoint,
         checkpoint_trust_store=value.checkpoint_trust_store,
         provider_evidence=value.provider_evidence,
+        acceptance_mode=value.acceptance_mode,
     )
 
 
@@ -2430,6 +2477,63 @@ def _validate_modeled_checkpoint_provider_evidence(
             "modeled_provider_evidence_reference_mismatch",
             "anchor receipt references differ from the exact modeled fixture assertions",
         )
+
+
+def _validate_qualified_checkpoint_provider_evidence(
+    blobs: tuple[ProviderEvidenceBlobV1, ...],
+) -> None:
+    """Content-agnostic anchor-evidence gate for a qualified checkpoint candidate.
+
+    In qualified mode the record does not reauthenticate signed evidence — that is the
+    store's job under the enrolled schema-version-4 roots (ADR-0019 layering correction),
+    because reauthentication needs trust roots the context-free record does not hold.  The
+    record proves only that every retained blob is a head-anchor-receipt package forming a
+    bounded quorum; ``_require_exact_evidence_coverage`` has already bound the blobs to the
+    checkpoint's anchor references by exact identity.
+    """
+
+    if len(blobs) < 2:
+        _reject(
+            "invalid_qualified_checkpoint_evidence",
+            "a qualified checkpoint requires a bounded anchor-receipt quorum",
+        )
+    for blob in blobs:
+        if blob.evidence_kind != HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND:
+            _reject(
+                "invalid_qualified_checkpoint_evidence",
+                "qualified checkpoint evidence must be head-anchor-receipt packages",
+            )
+
+
+def _validated_transient_anchor_bundle(value: object) -> object:
+    """Structurally confirm a transient qualified anchor bundle without authenticating it.
+
+    The bundle is a sealed, non-serializable runtime object carried alongside the record so
+    the store can reauthenticate it under the enrolled roots.  It never enters the record's
+    canonical bytes or ``record_id``.
+    """
+
+    from etzio.kernel.head_authority_adapters_v1 import QualifiedAnchorBundleV1
+
+    if type(value) is not QualifiedAnchorBundleV1:
+        _reject(
+            "invalid_qualified_anchor_bundle",
+            "a qualified checkpoint anchor bundle must be an exact QualifiedAnchorBundleV1",
+        )
+    return value
+
+
+def _validated_transient_time_bundle(value: object) -> object:
+    """Structurally confirm a transient qualified time bundle without authenticating it."""
+
+    from etzio.kernel.integrity_adapters_v1 import QualifiedTimeBundleV1
+
+    if type(value) is not QualifiedTimeBundleV1:
+        _reject(
+            "invalid_qualified_time_bundle",
+            "a qualified checkpoint time bundle must be an exact QualifiedTimeBundleV1",
+        )
+    return value
 
 
 def _validate_modeled_finalization_provider_evidence(

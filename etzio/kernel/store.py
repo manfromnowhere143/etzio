@@ -5974,6 +5974,18 @@ class SQLiteEventStore:
             self._connection.execute("BEGIN IMMEDIATE")
             self._require_writer_transaction()
             self._validate_integrity_state_locked()
+            # ADR-0019 step 3: the record's declared acceptance mode must match the
+            # enrolled acceptance profile exactly.  A qualified record on a modeled/legacy
+            # store and a modeled record on a qualified store are both refused before any
+            # lineage work.  In qualified mode the sealed bundles must accompany the freshly
+            # submitted record so the store can reauthenticate them under the enrolled roots.
+            enrolled_mode = self.resolve_acceptance_mode()
+            if candidate.acceptance_mode != enrolled_mode:
+                raise EventStoreError(
+                    "checkpoint candidate acceptance mode "
+                    f"({candidate.acceptance_mode}) differs from the enrolled acceptance "
+                    f"profile ({enrolled_mode})"
+                )
             lineage = self._load_integrity_lineage_locked(
                 candidate.event_digest
             )
@@ -6030,6 +6042,34 @@ class SQLiteEventStore:
                     f"checkpoint candidate validation failed ({reason_code}): {exc}"
                 ) from exc
             checkpoint = candidate.checkpoint
+            if enrolled_mode == _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
+                # ADR-0019 step 3: reauthenticate the checkpoint's claimed anchor statement,
+                # references, and signed-package blobs from the record's retained sealed
+                # bundles under the enrolled roots.  Unsigned or non-authenticating evidence
+                # is refused here; the store never falls back to the modeled gate.  The
+                # sealed bundles are non-serializable, so this fresh-insert path requires the
+                # freshly submitted record to carry them; an idempotent retry of an already
+                # retained candidate returns above without reaching this reauthentication.
+                from .qualified_evidence_v1 import QualifiedEvidenceError
+
+                if record.anchor_bundle is None or record.time_bundle is None:
+                    raise EventStoreError(
+                        "a qualified checkpoint candidate requires its sealed qualified "
+                        "anchor and time bundles for store-side reauthentication"
+                    )
+                try:
+                    self.verify_qualified_anchor_evidence(
+                        anchor_bundle=record.anchor_bundle,
+                        time_bundle=record.time_bundle,
+                        claimed_anchor_statement_id=checkpoint.anchor_statement_id,
+                        claimed_anchor_evidence=checkpoint.anchor_evidence,
+                        claimed_evidence_blobs=candidate.provider_evidence,
+                    )
+                except QualifiedEvidenceError as exc:
+                    raise EventStoreError(
+                        "qualified checkpoint anchor evidence failed reauthentication "
+                        f"({exc.reason_code}): {exc}"
+                    ) from exc
             attestation_id = signed_head_checkpoint_attestation_id(
                 candidate.signed_checkpoint
             )

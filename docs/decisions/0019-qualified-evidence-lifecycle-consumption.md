@@ -114,15 +114,21 @@ Consumption is therefore split:
   anchor statement, references, and BLOBs. A store with no qualified acceptance profile
   refuses with `IntegrityFinalityRequiredError` — it never silently falls back to the
   unsigned modeled gate; and
-- the **record**, in a later slice, carries `acceptance_mode` and, in qualified mode, does
-  only the content-agnostic coverage and kind checks, trusting the store to have
+- the **record** (step 3, now implemented) carries `acceptance_mode` and, in qualified mode,
+  does only the content-agnostic coverage and kind checks, trusting the store to have
   reauthenticated. The record retains the sealed qualified bundles its phase needs so the
-  store can rebuild and reauthenticate them.
+  store can rebuild and reauthenticate them; because those bundles are sealed and
+  non-serializable, they ride as transient, equality-excluded fields that never enter the
+  record's `record_id` or canonical bytes, and the store reads them from the freshly
+  submitted record rather than from any reloaded copy.
 
 Step 2 implements the store side: the first lifecycle consumption of qualified signed
 evidence, driven by the enrolled roots, gated by qualified enrollment, with adversarial
 refusals for a modeled-only store, a legacy store, a foreign-root bundle, a tampered claim,
-and unsigned content.
+and unsigned content. Step 3 wires the anchor-phase record into that store consumption; the
+positive end-to-end acceptance of a fully coherent qualified lineage arrives with the
+qualified-mode service (step 6), because the modeled service does not yet emit a checkpoint
+statement the qualified bundle authenticates.
 
 ## Implementation sequence
 
@@ -135,17 +141,32 @@ both runtimes and CI reproduction:
 2. **Anchor-phase store consumption.** *(Implemented.)* The store's
    `verify_qualified_anchor_evidence` drives `accept_qualified_anchor_evidence_v1`
    from the enrolled roots; a non-qualified store refuses.
-3. **Anchor-phase record wiring.** `CheckpointCandidateRecordV1` carries
-   `acceptance_mode`, retains the sealed qualified bundles in qualified mode, and
-   its retention path calls the store verification.
-3. **Revocation-phase consumption.** `PendingIntegrityTransitionV1` in
+3. **Anchor-phase record wiring.** *(Implemented.)* `CheckpointCandidateRecordV1`
+   carries `acceptance_mode` (a content field that changes its `record_id` and
+   canonical bytes) and, in qualified mode, carries the sealed qualified anchor
+   and time bundles as transient, non-serialized, equality-excluded fields —
+   they never enter `record_id` or canonical bytes, because the bundles are
+   sealed, non-serializable runtime objects. The record's `__post_init__`
+   branches on the mode: the modeled-unsigned gate is unchanged; the qualified
+   gate is content-agnostic coverage plus a head-anchor-receipt kind check,
+   trusting the store to reauthenticate. `retain_integrity_checkpoint_candidate`
+   cross-checks the record's declared mode against the enrolled acceptance
+   profile before any lineage work, requires the sealed bundles in qualified
+   mode, and — after lineage validation — calls
+   `verify_qualified_anchor_evidence` to reauthenticate the checkpoint's claimed
+   anchor statement, references, and signed-package blobs under the enrolled
+   roots. It never falls back to the modeled gate.
+4. **Revocation-phase consumption.** `PendingIntegrityTransitionV1` in
    qualified mode uses `accept_qualified_revocation_evidence_v1`, resolving the
    snapshot-identity coupling and the source rename.
-4. **Head-floor-phase consumption.** `FinalizedIntegrityTransitionV1` in
+5. **Head-floor-phase consumption.** `FinalizedIntegrityTransitionV1` in
    qualified mode uses `accept_qualified_head_floor_evidence_v1`.
-5. **Qualified-path crash recovery.** Injected-interruption known-bads across
-   the qualified finality vertical, plus a complete qualified-mode receipt
-   vertical mirroring the modeled one.
+6. **Qualified-mode modeled service and crash recovery.** A qualified-mode
+   `RepositoryOwnedDeterministicModeledIntegrityServiceV1` produces signed
+   evidence from the harnesses so a fully coherent qualified lineage — whose
+   checkpoint statement the qualified bundle authenticates — can finalize;
+   injected-interruption known-bads across the qualified finality vertical, plus
+   a complete qualified-mode receipt vertical mirroring the modeled one.
 
 ## Claim boundary
 
