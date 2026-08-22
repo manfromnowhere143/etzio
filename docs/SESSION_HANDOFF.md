@@ -732,14 +732,20 @@ authority and does not supersede implementation evidence.
 On the ADR-0019 step-4 qualified pending-record wiring candidate, the canonical release
 command passed under both declared local runtimes:
 
-- 1182 tests passed;
-- the focused pending-record-wiring file passed all 10 known-bads (default mode and absent
-  bundles; the mode changing `record_id` while the canonical round-trip drops the transient
-  bundles; `from_canonical_bytes` requiring the field; an unsupported mode refused; a modeled
-  record forbidden from carrying bundles; the modeled provider gate left unchanged; a modeled
-  store refusing a qualified pending; a qualified store refusing a modeled pending; a
+- 1184 tests passed;
+- the focused pending-record-wiring file passed all 12 tests: 10 known-bads (default mode and
+  absent bundles; the mode changing `record_id` while the canonical round-trip drops the
+  transient bundles; `from_canonical_bytes` requiring the field; an unsupported mode refused; a
+  modeled record forbidden from carrying bundles; the modeled provider gate left unchanged; a
+  modeled store refusing a qualified pending; a qualified store refusing a modeled pending; a
   qualified pending without its sealed bundles refused; and a live append reauthentication
-  that refuses a pending whose decision the qualified bundles do not authenticate);
+  that refuses a pending whose decision the qualified bundles do not authenticate), plus two
+  positives — a coherent qualified pending (whose decision the enrolled bundles authenticate)
+  appends, is retained, and replays identically, and an exact re-submission reconciles
+  idempotently. The coherent pending is built by a profile-aligned modeled service (its
+  service, environment, and policy taken from the qualified time roots) with the qualified
+  time hull, evidence, views, and floors swapped into the decision — the construction the
+  step-6 qualified-mode service will own;
 - the reworked anchor-record-wiring file passed all 7 known-bads (the field, the mode-branch,
   the round-trip dropping transient bundles, `from_canonical_bytes` requiring the field, an
   unsupported mode, a modeled record forbidden from carrying bundles, the modeled gate left

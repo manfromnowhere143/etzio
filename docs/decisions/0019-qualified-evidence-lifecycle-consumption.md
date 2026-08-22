@@ -172,9 +172,11 @@ both runtimes and CI reproduction:
    runs before the append transaction, this needs no lineage. The snapshot-identity
    coupling and the `fixture.revocation` → `fixture.revocation-metadata` source rename are
    resolved automatically because qualified mode consumes the primitive instead of the
-   modeled gate. A coherent qualified decision whose inputs the bundles authenticate (the
-   positive) is produced by the step-6 service; step 4 proves the wiring and a live
-   reauthentication refusal.
+   modeled gate. The positive is proved end to end: a coherent qualified pending — built by a
+   profile-aligned modeled service (its service, environment, and policy taken from the
+   qualified time roots) with the qualified time hull, evidence, views, and floors swapped
+   into the decision — appends, is retained, and replays idempotently. That construction is
+   the seed of the step-6 qualified-mode service.
 5. **Head-floor-phase consumption.** `FinalizedIntegrityTransitionV1` in
    qualified mode uses `accept_qualified_head_floor_evidence_v1`.
 6. **Qualified-mode modeled service and crash recovery.** A qualified-mode

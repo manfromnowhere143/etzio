@@ -32,7 +32,7 @@ confidence.**
 > acceptance layer); durable governed blocked-finality — specified, persisted, wired into the
 > lifecycle, and crash-recovered; and a schema-version-4 store that pins the qualified
 > adapter roots. The Merkle proofs are checked against the published **RFC 6962/9162
-> reference vectors**, not against Etzio's own prover. `1182` tests pass on CPython 3.11.15
+> reference vectors**, not against Etzio's own prover. `1184` tests pass on CPython 3.11.15
 > and 3.14.2; `19` accepted architecture decisions stand behind them; every consequential
 > gate carries a known-bad that proves it refuses.
 >
@@ -404,7 +404,7 @@ claim: the entire suite runs against repository-owned deterministic fixtures.
 
 | Retained | Value |
 |---|---|
-| Full suite | `1182` tests, green on CPython 3.11.15 / SQLite 3.53.1 and CPython 3.14.2 / SQLite 3.51.2 |
+| Full suite | `1184` tests, green on CPython 3.11.15 / SQLite 3.53.1 and CPython 3.14.2 / SQLite 3.51.2 |
 | Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
 | SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` `4` |
 | Accepted decisions | `19` architecture decision records, each with a known-bad where it names a gate |

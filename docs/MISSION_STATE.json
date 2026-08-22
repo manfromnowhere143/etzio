@@ -188,7 +188,7 @@
     "validation_status": "local_and_github_release_suites_passed",
     "github_validated_commit": "0f291c26c083ffd0ac8dca1a8143a69c7bb2a5d8",
     "github_actions_run_id": 32555163537,
-    "test_count": 1182,
+    "test_count": 1184,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -204,7 +204,7 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "wires the anchor-phase (CheckpointCandidateRecordV1) and pending-phase (PendingIntegrityTransitionV1) finality records to the qualified signed-evidence acceptance mode: an acceptance_mode content field, transient non-serialized sealed bundles, mode-branching record gates, and retention/append paths that cross-check the declared mode against the enrolled schema-version-4 profile and call verify_qualified_anchor_evidence / verify_qualified_revocation_evidence; the finalization and qualified-mode-service slices remain later steps, the positive end-to-end qualified lineage is not yet proved (each phase proves its own wiring and a live reauthentication refusal), and it establishes no full lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
+    "claim_boundary": "wires the anchor-phase (CheckpointCandidateRecordV1) and pending-phase (PendingIntegrityTransitionV1) finality records to the qualified signed-evidence acceptance mode: an acceptance_mode content field, transient non-serialized sealed bundles, mode-branching record gates, and retention/append paths that cross-check the declared mode against the enrolled schema-version-4 profile and call verify_qualified_anchor_evidence / verify_qualified_revocation_evidence; the pending phase's positive is now proved end to end (a coherent qualified pending, whose decision the enrolled bundles authenticate, appends and is retained), while the finalization and qualified-mode-service slices remain later steps and the checkpoint and full-vertical positives await the step-6 service; it establishes no full lifecycle consumption independently administered provider authority external observation execution truth finding validity isolation live authorization learning or superiority claim",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
     "blocked_finality_focused_tests": 61,
@@ -217,7 +217,7 @@
     "qualified_acceptance_enrollment_tests": 15,
     "qualified_anchor_consumption_tests": 7,
     "qualified_anchor_record_wiring_tests": 7,
-    "qualified_pending_record_wiring_tests": 10,
+    "qualified_pending_record_wiring_tests": 12,
     "ci_note": "CI is reproduced green. The CI / Foundation workflow had been disabled_manually and, when re-enabled on 2026-08-22, its first two runs failed at startup with the account-level annotation 'The job was not started because your account is locked due to a billing issue.' The founder resolved the GitHub payment authorization the same day, and the push of implementation commit 0f291c2 reproduced Foundation/Python 3.11.15, Foundation/Python 3.14.2, and Repository policy all green in private run 32555163537; that commit carries both the step-3 and step-4 record wiring, validating the current tree at 1182 tests on both local runtimes."
   },
   "documentation_release_evidence": {
