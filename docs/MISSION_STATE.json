@@ -215,7 +215,7 @@
     "qualified_acceptance_enrollment_tests": 15,
     "qualified_anchor_consumption_tests": 7,
     "qualified_anchor_record_wiring_tests": 10,
-    "ci_note": "The CI / Foundation workflow is disabled_manually on the remote (verified 2026-08-22), a state left from the 2026-08-01 billing incident; the push of implementation commit 5f08ef1 triggered no run. The repository is now public so Actions is free and unmetered; re-enable with 'gh workflow enable' and reproduce on the exact commit. This is a founder-set config, so re-enabling is left to the founder. Every tranche is verified on both local runtimes."
+    "ci_note": "CI reproduction is blocked by an account-level billing lock, not merely pending. On 2026-08-22 the CI / Foundation workflow was re-enabled and a workflow_dispatch run (32553463236) on main (099e521, carrying step-3 commit 5f08ef1) failed at startup on all three jobs with the annotation 'The job was not started because your account is locked due to a billing issue.' This blocks every Actions run regardless of the repo being public and Actions nominally free; it is the same unresolved 2026-08-01 root cause and only the founder can clear it. The workflow is left enabled so CI runs on the next push once billing is cleared. This is a genuine null CI result, not a pass; every tranche is verified green on both local runtimes at 1175 tests."
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",

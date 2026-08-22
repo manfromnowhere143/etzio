@@ -711,16 +711,23 @@ command passed under both declared local runtimes:
 - exact schema, semantic dispatch, repository policy, Ruff, fixture runs, retained-evidence
   checks, and `git diff --check` passed.
 
-CI reproduction on this exact commit is **pending**. The `CI / Foundation` workflow is
-currently `disabled_manually` on the remote (verified 2026-08-22 via
-`gh api repos/manfromnowhere143/etzio/actions/workflows`), a state left over from the
-2026-08-01 billing incident; the push of implementation commit
-[`5f08ef1`](https://github.com/manfromnowhere143/etzio/commit/5f08ef1) therefore triggered
-no run. `current_evidence.validation_status` stays
-`local_release_suites_pending_github_reproduction`. The repository is now public, so Actions
-runs free and unmetered; re-enable the workflow (`gh workflow enable "CI / Foundation"`),
-re-run on `5f08ef1`, and record the reproduced run honestly. This is a founder-set config, so
-re-enabling is left to the founder.
+CI reproduction on this exact commit is **blocked, not merely pending**. On 2026-08-22 the
+`CI / Foundation` workflow (previously `disabled_manually`) was re-enabled and a
+`workflow_dispatch` run was triggered on `main`
+([`099e521`](https://github.com/manfromnowhere143/etzio/commit/099e521), which carries the
+step-3 implementation commit
+[`5f08ef1`](https://github.com/manfromnowhere143/etzio/commit/5f08ef1)). All three jobs
+(`Python 3.11.15`, `Python 3.14.2`, `Repository policy`) failed at startup within seconds,
+running no steps, with the identical check-run annotation: **"The job was not started because
+your account is locked due to a billing issue."** (run
+[`32553463236`](https://github.com/manfromnowhere143/etzio/actions/runs/32553463236)). This
+is an **account-level** billing lock: it blocks every Actions run regardless of the
+repository being public and Actions being nominally free/unmetered, and it is the same root
+cause as the 2026-08-01 incident, still unresolved. The workflow is left **enabled** so CI
+runs automatically on the next push once the account billing lock is cleared — which only the
+founder can do. `current_evidence.validation_status` stays
+`local_release_suites_pending_github_reproduction`; both declared local runtimes are green at
+`1175` tests. This is a genuine null CI result — attempted and blocked — not a pass.
 
 ## Current schema-v4 qualified-acceptance enrollment release evidence
 
