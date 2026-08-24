@@ -825,9 +825,12 @@ after the step-4 coherent-pending positive
 [`32565456787`](https://github.com/manfromnowhere143/etzio/actions/runs/32565456787), and
 after the coherent qualified finality lineage
 [`3deecbc`](https://github.com/manfromnowhere143/etzio/commit/3deecbc) in run
-[`32568227017`](https://github.com/manfromnowhere143/etzio/actions/runs/32568227017).
+[`32568227017`](https://github.com/manfromnowhere143/etzio/actions/runs/32568227017), and
+after the step-5 finalization-record wiring
+[`195bb7a`](https://github.com/manfromnowhere143/etzio/commit/195bb7a) in run
+[`32720395293`](https://github.com/manfromnowhere143/etzio/actions/runs/32720395293).
 `current_evidence.validation_status` is `local_and_github_release_suites_passed` on
-`3deecbc`; both declared local runtimes are green at `1188` tests.
+`195bb7a`; both declared local runtimes are green at `1198` tests.
 
 ## Current schema-v4 qualified-acceptance enrollment release evidence
 
