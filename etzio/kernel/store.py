@@ -5910,6 +5910,47 @@ class SQLiteEventStore:
             claimed_evidence_blobs=subset,
         )
 
+    def verify_qualified_head_floor_evidence(
+        self,
+        *,
+        finalization_record: object,
+        catalog_bundle: object,
+        time_bundle: object,
+    ) -> object:
+        """Consume a finalization's external head floor against the enrolled roots.
+
+        The finalization/head-floor analogue of ``verify_qualified_anchor_evidence``
+        (ADR-0019 step 5): the enrolled schema-version-4 head-authority and time profiles
+        drive ``accept_qualified_head_floor_evidence_v1``, which reauthenticates the retained
+        head-catalog bundle from its signed packages -- rerunning the RFC 9162 consistency
+        check and unanimous monitor agreement -- before accepting the finalization's claimed
+        external head floor.  A store with no qualified acceptance profile refuses.
+        """
+
+        from .integrity_transition import FinalizedIntegrityTransitionV1
+        from .qualified_evidence_v1 import accept_qualified_head_floor_evidence_v1
+
+        if type(finalization_record) is not FinalizedIntegrityTransitionV1:
+            raise EventStoreError(
+                "qualified head-floor consumption requires an exact "
+                "FinalizedIntegrityTransitionV1"
+            )
+        profiles = self.load_qualified_acceptance_profiles()
+        if profiles is None:
+            raise IntegrityFinalityRequiredError(
+                "qualified head-floor consumption requires an enrolled qualified "
+                "acceptance profile"
+            )
+        time_profile, head_profile = profiles
+        return accept_qualified_head_floor_evidence_v1(
+            head_profile=head_profile,  # type: ignore[arg-type]
+            time_profile=time_profile,  # type: ignore[arg-type]
+            time_bundle=time_bundle,  # type: ignore[arg-type]
+            catalog_bundle=catalog_bundle,  # type: ignore[arg-type]
+            claimed_external_floor=finalization_record.external_head_floor,
+            claimed_evidence_blobs=finalization_record.provider_evidence,
+        )
+
     def load_governed_recovery_decision(self, observation_id: str) -> object | None:
         """Return the retained decision answering one observation, if present."""
 
@@ -6268,6 +6309,15 @@ class SQLiteEventStore:
             self._connection.execute("BEGIN IMMEDIATE")
             self._require_writer_transaction()
             self._validate_integrity_state_locked()
+            # ADR-0019 step 5: the finalization's declared acceptance mode must match the
+            # enrolled acceptance profile exactly, before any lineage work.
+            enrolled_mode = self.resolve_acceptance_mode()
+            if finalization.acceptance_mode != enrolled_mode:
+                raise EventStoreError(
+                    "finalization acceptance mode "
+                    f"({finalization.acceptance_mode}) differs from the enrolled acceptance "
+                    f"profile ({enrolled_mode})"
+                )
             unresolved = self._unresolved_integrity_digest_locked()
             lineage = self._load_integrity_lineage_locked(
                 finalization.event_digest
@@ -6312,6 +6362,30 @@ class SQLiteEventStore:
                 raise EventStoreError(
                     f"integrity finalization validation failed ({reason_code}): {exc}"
                 ) from exc
+            if enrolled_mode == _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
+                # ADR-0019 step 5: reauthenticate the finalization's claimed external head
+                # floor from the record's retained sealed head-catalog and time bundles under
+                # the enrolled roots.  The sealed bundles are non-serializable, so this
+                # fresh-insert path requires the freshly submitted record to carry them; an
+                # idempotent retry of an already finalized transition returns above without
+                # reaching this reauthentication.
+                if record.catalog_bundle is None or record.time_bundle is None:
+                    raise EventStoreError(
+                        "a qualified finalization requires its sealed qualified head-catalog "
+                        "and time bundles for store-side reauthentication"
+                    )
+                _QUALIFIED_EVIDENCE_REFUSALS_V1 = _qualified_evidence_refusals()
+                try:
+                    self.verify_qualified_head_floor_evidence(
+                        finalization_record=finalization,
+                        catalog_bundle=record.catalog_bundle,
+                        time_bundle=record.time_bundle,
+                    )
+                except _QUALIFIED_EVIDENCE_REFUSALS_V1 as exc:
+                    raise EventStoreError(
+                        "qualified finalization head-floor evidence failed reauthentication "
+                        f"({getattr(exc, 'reason_code', 'unknown')}): {exc}"
+                    ) from exc
             self._require_writer_transaction()
             self._connection.execute(
                 """

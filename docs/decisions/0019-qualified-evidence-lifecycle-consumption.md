@@ -184,8 +184,22 @@ both runtimes and CI reproduction:
    qualified time roots) with the qualified time hull, evidence, views, and floors swapped
    into the decision — appends, is retained, and replays idempotently. That construction is
    the seed of the step-6 qualified-mode service.
-5. **Head-floor-phase consumption.** `FinalizedIntegrityTransitionV1` in
-   qualified mode uses `accept_qualified_head_floor_evidence_v1`.
+5. **Head-floor-phase consumption.** *(Implemented.)* `FinalizedIntegrityTransitionV1`
+   carries `acceptance_mode` and, in qualified mode, transient sealed head-catalog
+   and time bundles (same discipline as the other records). Its `__post_init__`
+   branches: the modeled gate is unchanged; the qualified gate is content-agnostic
+   coverage plus an external-floor kind check. `finalize_integrity_transition`
+   cross-checks the declared mode against the enrolled profile before any lineage
+   work and, in qualified mode, requires the sealed bundles and calls the new
+   `store.verify_qualified_head_floor_evidence`, which drives
+   `accept_qualified_head_floor_evidence_v1` — rerunning the RFC 9162 consistency
+   check and unanimous monitor agreement — before committing finality. The record
+   and store-verify wiring, the mode cross-check both ways, the bundle-presence gate,
+   and a live foreign-head-floor reauthentication refusal are proved on the coherent
+   lineage. The end-to-end *positive* is deferred to the step-6 service: the fixed
+   fixture catalog head cannot be scoped to a produced checkpoint (unlike the anchor's
+   dynamic leaves), so a full facade-driven qualified vertical that emits a catalog
+   head matching its own checkpoint is required.
 6. **Qualified-mode modeled service and crash recovery.** A qualified-mode
    `RepositoryOwnedDeterministicModeledIntegrityServiceV1` produces signed
    evidence from the harnesses so a fully coherent qualified lineage — whose

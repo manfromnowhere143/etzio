@@ -21,6 +21,7 @@ from pathlib import Path
 
 import pytest
 from test_qualified_anchor_consumption_v1 import _head_fixture
+from test_qualified_head_floor_acceptance_v1 import _built as _head_floor_built
 from test_qualified_pending_record_wiring_v1 import (
     _aligned_qualified_store,
     _coherent_qualified_pending,
@@ -37,6 +38,7 @@ from etzio.kernel.integrity_adapters_v1 import (
 from etzio.kernel.integrity_transition import (
     INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1,
     CheckpointCandidateRecordV1,
+    FinalizedIntegrityTransitionV1,
 )
 from etzio.kernel.store import EventStoreError
 from etzio.protocol import content_id
@@ -134,6 +136,26 @@ def _qualified_checkpoint(service, hfx, pending, anchor, checkpoint_tb, anchor_b
     )
 
 
+def _retained_qualified_checkpoint(store, service, hfx):
+    """Drive and retain a full coherent qualified pending+anchor+checkpoint lineage."""
+
+    event, pending, anchor = _drive_pending_and_anchor(store, service, hfx)
+    checkpoint_tb = _checkpoint_time_bundle(hfx, pending)
+    anchor_bundle = _scoped_anchor_bundle(hfx, checkpoint_tb, pending, anchor)
+    candidate = _qualified_checkpoint(
+        service, hfx, pending, anchor, checkpoint_tb, anchor_bundle
+    )
+    assert store.retain_integrity_checkpoint_candidate(candidate) == candidate
+    return event, pending, candidate
+
+
+def _modeled_floor_over(service, pending, candidate):
+    """The modeled current floor over the retained checkpoint (matches the checkpoint)."""
+
+    service.publish_checkpoint(candidate)
+    return service.observe_current_floor(pending, candidate)
+
+
 # ---------------------------------------------------------------------------
 # The positive: a coherent qualified checkpoint is retained
 # ---------------------------------------------------------------------------
@@ -227,3 +249,58 @@ def test_checkpoint_retention_refuses_a_foreign_anchor_bundle(tmp_path: Path) ->
         assert getattr(exc.value, "args", ["", ""]) and "reauthentication" in str(exc.value)
         lineage = store.load_integrity_lineage(pending.event_digest)
         assert lineage is not None and lineage.checkpoint_candidate is None
+
+
+# ---------------------------------------------------------------------------
+# Finalization phase (ADR-0019 step 5) on the coherent lineage
+# ---------------------------------------------------------------------------
+
+
+def test_a_qualified_finalization_without_bundles_is_refused(tmp_path: Path) -> None:
+    hfx = _head_fixture()
+    store, service = _aligned_qualified_store(tmp_path, hfx)
+    with store:
+        event, pending, candidate = _retained_qualified_checkpoint(store, service, hfx)
+        floor, floor_evidence = _modeled_floor_over(service, pending, candidate)
+        final = FinalizedIntegrityTransitionV1(
+            pending_record_id=pending.record_id,
+            checkpoint_candidate_record_id=candidate.record_id,
+            event_digest=event.event_digest,
+            external_head_floor=floor,
+            provider_evidence=floor_evidence,
+            acceptance_mode=INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1,
+        )
+        with pytest.raises(EventStoreError) as exc:
+            store.finalize_integrity_transition(final)
+        assert "sealed qualified" in str(exc.value)
+
+
+def test_finalization_refuses_a_foreign_head_floor_bundle(tmp_path: Path) -> None:
+    """A finalization carrying a catalog bundle for a different head fails reauthentication.
+
+    The claimed external head floor is the modeled floor over the coherent checkpoint (which
+    validates against the lineage), but the retained catalog bundle reauthenticates to a
+    different head, so the store refuses and retains nothing.
+    """
+
+    hfx = _head_fixture()
+    store, service = _aligned_qualified_store(tmp_path, hfx)
+    with store:
+        event, pending, candidate = _retained_qualified_checkpoint(store, service, hfx)
+        floor, floor_evidence = _modeled_floor_over(service, pending, candidate)
+        _fx, foreign_tb, foreign_cb = _head_floor_built()
+        final = FinalizedIntegrityTransitionV1(
+            pending_record_id=pending.record_id,
+            checkpoint_candidate_record_id=candidate.record_id,
+            event_digest=event.event_digest,
+            external_head_floor=floor,
+            provider_evidence=floor_evidence,
+            acceptance_mode=INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1,
+            catalog_bundle=foreign_cb,
+            time_bundle=foreign_tb,
+        )
+        with pytest.raises(EventStoreError) as exc:
+            store.finalize_integrity_transition(final)
+        assert "reauthentication" in str(exc.value)
+        lineage = store.load_integrity_lineage(event.event_digest)
+        assert lineage is not None and lineage.finalization is None

@@ -1441,6 +1441,13 @@ class FinalizedIntegrityTransitionV1:
     event_digest: str
     external_head_floor: HeadCheckpointFloorV1
     provider_evidence: tuple[ProviderEvidenceBlobV1, ...]
+    acceptance_mode: str = INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1
+    # Transient, sealed, non-serializable qualified bundles carried alongside a freshly
+    # submitted qualified-mode record so the store can reauthenticate the external head floor
+    # under the enrolled roots.  Excluded from equality and never in ``to_body``,
+    # ``record_id``, or canonical bytes (see ADR-0019 step 3 for the rationale).
+    catalog_bundle: object | None = field(default=None, compare=False)
+    time_bundle: object | None = field(default=None, compare=False)
 
     def __post_init__(self) -> None:
         _require_digest(self.pending_record_id, "pending_record_id")
@@ -1449,6 +1456,11 @@ class FinalizedIntegrityTransitionV1:
             "checkpoint_candidate_record_id",
         )
         _require_digest(self.event_digest, "event_digest")
+        if self.acceptance_mode not in INTEGRITY_ACCEPTANCE_MODES_V1:
+            _reject(
+                "invalid_finalization_acceptance_mode",
+                "finalization acceptance mode is not a supported value",
+            )
         floor = _head_floor_from_body(_head_floor_body(self.external_head_floor))
         blobs = _validated_evidence_blobs(self.provider_evidence)
         _require_exact_evidence_coverage(
@@ -1456,10 +1468,22 @@ class FinalizedIntegrityTransitionV1:
             blobs,
             label="finalized_transition",
         )
-        _validate_modeled_finalization_provider_evidence(
-            floor=floor,
-            blobs=blobs,
-        )
+        if self.acceptance_mode == INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1:
+            if self.catalog_bundle is not None or self.time_bundle is not None:
+                _reject(
+                    "invalid_finalization_acceptance_mode",
+                    "a modeled-unsigned finalization carries no qualified bundles",
+                )
+            _validate_modeled_finalization_provider_evidence(
+                floor=floor,
+                blobs=blobs,
+            )
+        else:
+            _validate_qualified_finalization_provider_evidence(blobs)
+            if self.catalog_bundle is not None:
+                _validated_transient_catalog_bundle(self.catalog_bundle)
+            if self.time_bundle is not None:
+                _validated_transient_time_bundle(self.time_bundle)
         object.__setattr__(self, "external_head_floor", floor)
         object.__setattr__(self, "provider_evidence", blobs)
 
@@ -1469,6 +1493,7 @@ class FinalizedIntegrityTransitionV1:
 
     def to_body(self) -> dict[str, object]:
         return {
+            "acceptance_mode": self.acceptance_mode,
             "checkpoint_candidate_record_id": (self.checkpoint_candidate_record_id),
             "event_digest": self.event_digest,
             "external_head_floor": _head_floor_body(self.external_head_floor),
@@ -1490,6 +1515,7 @@ class FinalizedIntegrityTransitionV1:
             _record_body(data, "finalized_integrity_transition"),
             frozenset(
                 {
+                    "acceptance_mode",
                     "checkpoint_candidate_record_id",
                     "event_digest",
                     "external_head_floor",
@@ -1507,6 +1533,7 @@ class FinalizedIntegrityTransitionV1:
             event_digest=body["event_digest"],  # type: ignore[arg-type]
             external_head_floor=_head_floor_from_body(body["external_head_floor"]),
             provider_evidence=_evidence_blobs_from_body(body["provider_evidence"]),
+            acceptance_mode=body["acceptance_mode"],  # type: ignore[arg-type]
         )
 
 
@@ -1592,6 +1619,7 @@ def _snapshot_finalization_record(
         event_digest=value.event_digest,
         external_head_floor=value.external_head_floor,
         provider_evidence=value.provider_evidence,
+        acceptance_mode=value.acceptance_mode,
     )
 
 
@@ -2598,6 +2626,44 @@ def _validate_qualified_pending_provider_evidence(
                 "qualified pending evidence must be trusted-time, revocation-metadata, or "
                 "external-floor packages",
             )
+
+
+def _validate_qualified_finalization_provider_evidence(
+    blobs: tuple[ProviderEvidenceBlobV1, ...],
+) -> None:
+    """Content-agnostic head-floor gate for a qualified finalization.
+
+    In qualified mode the record does not reauthenticate — the store does, under the enrolled
+    roots (ADR-0019).  The record proves only that every retained blob is an external-floor
+    package; ``_require_exact_evidence_coverage`` has already bound the blobs to the external
+    head floor's evidence references by exact identity.
+    """
+
+    if not blobs:
+        _reject(
+            "invalid_qualified_finalization_evidence",
+            "a qualified finalization requires a bounded external-floor quorum",
+        )
+    for blob in blobs:
+        if blob.evidence_kind != EXTERNAL_FLOOR_EVIDENCE_KIND:
+            _reject(
+                "invalid_qualified_finalization_evidence",
+                "qualified finalization evidence must be external-floor packages",
+            )
+
+
+def _validated_transient_catalog_bundle(value: object) -> object:
+    """Structurally confirm a transient qualified head-catalog bundle without authenticating it."""
+
+    from etzio.kernel.head_authority_adapters_v1 import QualifiedHeadCatalogBundleV1
+
+    if type(value) is not QualifiedHeadCatalogBundleV1:
+        _reject(
+            "invalid_qualified_catalog_bundle",
+            "a qualified finalization catalog bundle must be an exact "
+            "QualifiedHeadCatalogBundleV1",
+        )
+    return value
 
 
 def _validated_transient_revocation_bundles(value: object) -> object:
