@@ -46,8 +46,10 @@ SHA-256 remains the request imprint and ESSCertIDv2 certificate hash.
 
 The root is self-issued and authenticates its own signature. It directly issues the exact
 intermediate, which directly issues the exact TSA. Keys and subjects are distinct across
-all roles. Root path length is absent or at least one; intermediate path length is absent
-or zero; the TSA is not a CA. Basic constraints and key usage are critical. CA key usage
+all roles. Subject separation uses the pinned ASN.1 library's RFC 5280 name comparison,
+including equivalent string encodings, case and space normalization; different DER alone
+does not establish different subjects. Root path length is absent or at least one;
+intermediate path length is absent or zero; the TSA is not a CA. Basic constraints and key usage are critical. CA key usage
 permits certificate and CRL signing only; TSA key usage permits digital signatures only.
 SKI is recomputed from each key and AKI binds the expected issuer. The TSA has a critical,
 sole timestamping EKU and the exact configured certificate policy. Supported optional

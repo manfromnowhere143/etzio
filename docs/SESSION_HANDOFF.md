@@ -17,10 +17,12 @@ revocation. The source ledger pins the public provider documents used to select 
 first offline wire target; no real service request or provider admission follows.
 
 Pre-change `make verify` passed `1509` tests on CPython 3.11.15 in `787.93` seconds.
-Full `make verify` passes `1747` tests (`238` new) on CPython 3.11.15 in `821.28`
-seconds and CPython 3.14.2 in `858.91` seconds, including policy, lint and fixture checks.
-All `381` focused timestamp tests pass. Source/wheel builds and installed-wheel replay
-of all `19` RSA cases outside the checkout pass. Exact-head GitHub validation is pending.
+The initial candidate `127e73a` passed `1747` tests locally, but pre-merge review then
+reproduced `3` equivalent-subject acceptances (string encoding, case and spacing). Role
+separation now uses the pinned ASN.1 library's RFC 5280 name comparison. The new collection
+target is `1750` (`241` new); revised local and GitHub validation are pending. The initial
+GitHub run `37941040050` was cancelled as superseded. Earlier local results remain in
+`docs/MISSION_STATE.json` and do not establish the corrected boundary.
 No claim of current UTC, legal qualification, independently administered providers,
 external durability, execution, findings or income follows. Next: retain a concrete bounded
 acquisition dossier, including terms, request semantics, revocation route, containment and
@@ -120,7 +122,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1747 tests expected;
+- 1750 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

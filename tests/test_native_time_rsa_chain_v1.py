@@ -478,6 +478,34 @@ def test_rsa_key_profile(material, mode):
     assert exc.value.reason_code == "algorithm_profile"
 
 
+@pytest.mark.parametrize("mode", ["encoding", "case", "spaces"])
+def test_semantically_equivalent_subjects_cannot_split_roles(material, mode):
+    root = asn1_x509.Certificate.load(der(material.root))
+    name = root.subject.copy()
+    value = name.chosen[0][0]["value"].native
+    if mode == "case":
+        value = value.upper()
+    elif mode == "spaces":
+        value = "  " + value.replace(" ", "   ") + "  "
+    name.chosen[0][0]["value"] = asn1_x509.DirectoryString(
+        name="printable_string" if mode == "encoding" else "utf8_string", value=value
+    )
+    assert name.dump() != root.subject.dump() and name == root.subject
+    issuer = asn1_x509.Certificate.load(der(material.issuer))
+    issuer["tbs_certificate"]["subject"] = name
+    issuer["signature_value"] = key("root").sign(issuer["tbs_certificate"].dump(), padding.PKCS1v15(), hashes.SHA384())
+    tsa = asn1_x509.Certificate.load(der(material.tsa))
+    tsa["tbs_certificate"]["issuer"] = name
+    tsa["signature_value"] = key("issuer").sign(tsa["tbs_certificate"].dump(), padding.PKCS1v15(), hashes.SHA384())
+    with pytest.raises(NativeTimeError) as exc:
+        _ = replace(
+            material,
+            issuer=x509.load_der_x509_certificate(issuer.dump()),
+            tsa=x509.load_der_x509_certificate(tsa.dump()),
+        ).profile
+    assert exc.value.reason_code == "certificate_profile"
+
+
 @pytest.fixture(scope="module")
 def material():
     return fixture()

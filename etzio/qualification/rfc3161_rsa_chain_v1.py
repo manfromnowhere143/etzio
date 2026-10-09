@@ -170,7 +170,7 @@ def _certificate_profile(profile) -> tuple[x509.Certificate, ...]:
     certs = tuple(_certificate(getattr(profile, role + "_certificate_der")) for role in ("root", "issuer", "tsa"))
     root, issuer, tsa = certs
     _require(
-        len({cert.subject.public_bytes() for cert in certs}) == 3
+        len({asn1_x509.Name.load(cert.subject.public_bytes()).hashable for cert in certs}) == 3
         and len({cert.public_key().public_numbers().n for cert in certs}) == 3,
         "certificate_profile",
         "three distinct subjects and keys required",

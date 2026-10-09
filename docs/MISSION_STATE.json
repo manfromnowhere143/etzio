@@ -195,18 +195,15 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_release_suites_passed_github_pending",
-    "test_count": 1747,
-    "validated_runtimes": [
-      "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
-      "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
-    ],
+    "validation_status": "revised_release_validation_pending",
+    "test_count": 1750,
+    "validated_runtimes": [],
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
     "sqlite_schema_version": 4,
     "native_time_focused_tests": 143,
-    "native_rsa_chain_focused_tests": 238,
+    "native_rsa_chain_focused_tests": 241,
     "native_time_oracle_cases": 14,
     "native_rsa_chain_oracle_cases": 19,
     "native_time_dependency_components": 21,
@@ -224,21 +221,8 @@
       "CPython 3.11.15": "2026-05-05 10:34:17 c88b22011a54b4f6fbd149e9f8e4de77658ce58143a1af0e3785e4e6475127e9",
       "CPython 3.14.2": "2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075"
     },
-    "local_release_results": {
-      "CPython 3.11.15": {
-        "passed": 1747,
-        "seconds": 821.28,
-        "log_sha256": "bac7b118ea1156866a1605b94d8c88bb8d0a88fe75d66a09f59485e5800c391f"
-      },
-      "CPython 3.14.2": {
-        "passed": 1747,
-        "seconds": 858.91,
-        "log_sha256": "a9d9d1419756e5e8bc931331a990943d0c749ab67d52badd134467912716fe0d"
-      }
-    },
     "ruff_clean": true,
-    "repository_policy_passed": true,
-    "package_and_installed_wheel_native_corpus_passed": true
+    "repository_policy_passed": true
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -716,5 +700,55 @@
       }
     },
     "ci_note": "PR 30 implementation commit 2b279a8 passed both Foundation runtimes, package/wheel checks, repository policy and GitGuardian in run 37921728342. This retained evidence names that exact implementation commit; CI SQLite identities are recorded separately from the local runtimes. The release evidence follow-up changes no runtime, test or dependency bytes; its own checks are visible on PR 30."
+  },
+  "rsa_chain_initial_candidate_evidence": {
+    "scope": "repository-owned deterministic fixtures only",
+    "validation_status": "superseded_before_merge",
+    "test_count": 1747,
+    "validated_runtimes": [
+      "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
+      "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
+    ],
+    "python_rule_classes": 6,
+    "planted_instances": 7,
+    "clean_fixtures": 1,
+    "sqlite_schema_version": 4,
+    "native_time_focused_tests": 143,
+    "native_rsa_chain_focused_tests": 238,
+    "native_time_oracle_cases": 14,
+    "native_rsa_chain_oracle_cases": 19,
+    "native_time_dependency_components": 21,
+    "prechange_baseline": {
+      "CPython 3.11.15": {
+        "passed": 1509,
+        "seconds": 787.93
+      }
+    },
+    "claim_boundary": "Separate offline RSA chain observations and documentary provider comparison only. No external provider, current UTC/revocation, independent administration, legal qualification, external durability, lifecycle admission, finding or income claim.",
+    "openssl_comparison": "tools/native-time-rsa/openssl-comparison.json",
+    "provider_source_ledger": "tools/native-time-rsa/provider-sources.json",
+    "sbom": "tools/native-time/sbom.cdx.json",
+    "sqlite_source_ids": {
+      "CPython 3.11.15": "2026-05-05 10:34:17 c88b22011a54b4f6fbd149e9f8e4de77658ce58143a1af0e3785e4e6475127e9",
+      "CPython 3.14.2": "2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075"
+    },
+    "local_release_results": {
+      "CPython 3.11.15": {
+        "passed": 1747,
+        "seconds": 821.28,
+        "log_sha256": "bac7b118ea1156866a1605b94d8c88bb8d0a88fe75d66a09f59485e5800c391f"
+      },
+      "CPython 3.14.2": {
+        "passed": 1747,
+        "seconds": 858.91,
+        "log_sha256": "a9d9d1419756e5e8bc931331a990943d0c749ab67d52badd134467912716fe0d"
+      }
+    },
+    "ruff_clean": true,
+    "repository_policy_passed": true,
+    "package_and_installed_wheel_native_corpus_passed": true,
+    "implementation_commit": "127e73a2254ed79a97142c205f3f03f76b925b5f",
+    "github_actions_run_id": 37941040050,
+    "correction": "Three signed pre-merge probes showed that equivalent subjects with different string encoding, case or spacing passed role separation. The final candidate compares RFC 5280 normalized names and adds three refusal tests. Initial GitHub run was cancelled as superseded."
   }
 }
