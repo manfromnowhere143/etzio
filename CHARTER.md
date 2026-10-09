@@ -21,10 +21,11 @@ authority nor the only product goal. Defensive discovery, enterprise assurance, 
 progress, negative results, and transferable research knowledge are also first-class.
 
 Public repository visibility is authorized as of 2026-08-01. It is source visibility, not an
-open-source license (see LICENSE.md) and not any other grant: deployment, live-target
-interaction, credential use, paid compute, disclosure, submission, and publication of results
-remain separate, currently unheld authorizations. Making the repository public grants no new
-capability and relaxes no operating law below.
+open-source license (see LICENSE.md). On 2026-10-09 the operator separately authorized
+available Google Cloud credentials and bounded resources for qualification preparation.
+Production deployment, live-target interaction, disclosure, submission and publication of
+findings remain separate, unheld authorizations. Neither public visibility nor cloud
+preparation admits a native provider or an execution profile.
 
 ## Operating laws
 

@@ -4,7 +4,7 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "main",
+  "active_branch": "codex/provider-host-qualification-preparation",
   "foundation_base": {
     "commit": "4919a0c09f99f545336fc6482a2d52f8fd7c03e1",
     "tree": "73ae7dcf5fae6d889dcb1d4d63b0345ae6798361"
@@ -34,7 +34,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "ADR-0021 offline RSA chain proof passed both local and GitHub runtimes. Prepare an exact bounded provider acquisition dossier resolving request semantics, complete revocation route, terms and independently administered custody. No provider is admitted; preserve native lifecycle retention, external latest-head local-loss, storage and isolation gates. In parallel, maintain docs/BOUNTY_READINESS.md; CoW contracts are the first proposed target dossier, not an admitted campaign.",
+    "next_session_pickup": "Read docs/QUALIFICATION_NEXT_STEPS.md. Cloud access is authorized for bounded benign qualification preparation; no hardware procurement is presently needed. Published Sectigo CA bytes falsify compatibility with the all-4096 profile; retain its refusal and obtain the complete TSA chain, revocation and applicable terms before a separately versioned profile/acquisition. Native lifecycle, independent latest-head local-loss, storage and execution gates remain open.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -49,7 +49,12 @@
     "research_credentials": false,
     "spend": false,
     "disclosure": false,
-    "publication": false
+    "publication": false,
+    "cloud_qualification_preparation": {
+      "authorized": "2026-10-09",
+      "scope": "Existing Google Cloud credentials and bounded disposable resources for benign host/OS/KVM qualification preparation. Preserve unrelated workloads and verify cleanup.",
+      "boundary": "This scoped exception does not admit native providers, target execution, production deployment, disclosures or bounty submissions; other authority booleans describe unscoped engine/research permissions."
+    }
   },
   "implemented": [
     "canonical protocol-v1 envelope and strict JSON",
@@ -819,5 +824,31 @@
     "accepted_findings": 0,
     "received_income": 0,
     "claim_boundary": "Public program-document research only; no target execution, live testing, account use or scoped campaign admission. Headline caps are not expected income."
+  },
+  "qualification_preparation": {
+    "status": "research_and_benign_host_preflight",
+    "date": "2026-10-09",
+    "packet": "docs/QUALIFICATION_NEXT_STEPS.md",
+    "provider_observations": "docs/evidence/provider-preparation-2026-10-09.json",
+    "source_ledger": "docs/evidence/qualification-sources-2026-10-09.json",
+    "runtime_changed": false,
+    "fixture_corpus_changed": false,
+    "provider_admitted": false,
+    "timestamp_protocol_requests": 0,
+    "host_profile_admitted": false,
+    "bounty_campaigns": 0,
+    "prechange_validation": {
+      "runtime": "CPython 3.11.15",
+      "passed": 1750,
+      "seconds": 817.0
+    },
+    "host_preflight": {
+      "status": "complete_resources_deleted",
+      "evidence": "docs/evidence/host-preflight-2026-10-09.json",
+      "kvm_api": 12,
+      "guest_payload_executed": false,
+      "cpu_mitigation_evidence": "open; guest reports MMIO stale data and TSX async abort diagnostics",
+      "cleanup": "VM, boot disk, firewall, subnet and VPC verified absent by exact-name API queries"
+    }
   }
 }

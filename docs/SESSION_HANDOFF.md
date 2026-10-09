@@ -2,6 +2,41 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
+## Provider and host preparation, 2026-10-09
+
+The operator explicitly authorized using available Google Cloud infrastructure for Etzio
+qualification and asked for guidance on host details. Cloud CLI access, billing and a
+supported N2 machine type are available; no hardware purchase is currently required.
+The [qualification packet](QUALIFICATION_NEXT_STEPS.md) specifies separate provider,
+local-loss, storage, isolation and EVM experiments. This preparation changes no engine
+runtime, fixture corpus or admission gate.
+
+Publisher-listed Sectigo certificate bytes correct an earlier documentary inference:
+the root is RSA-4096 but the intermediate is RSA-3072. The existing all-4096 codec
+refuses it. Root AKI, CA key usage and intermediate EKU also differ from the accepted
+profile, and the root CRL includes an unsupported noncritical extension `2.5.29.60`.
+Retained public certificate bytes match the publisher's HTTPS fingerprints; the intermediate
+and root-issued CRL signatures verify under the downloaded root. One signature-bit
+mutation refuses. This is passive artifact inspection, not independent trust or current
+service qualification. The TSA and intermediate-issued CRL remain missing; no timestamp
+protocol request has been sent. Preserve ADR-0021 and design a separate profile only
+after the complete service evidence is available.
+
+The pre-change baseline passed `1750` tests in `817.00` seconds on CPython 3.11.15.
+The completed host preflight used a dedicated, disposable N2 VM, no public IP or service
+account, a VPC deny-egress rule and an absolute automatic deletion deadline. Linux
+`7.0.0-1011-gcp` exposed KVM API `12`; an empty VM descriptor was created and closed with
+no guest payload. Guest MMIO-stale-data and TSX-async-abort mitigation diagnostics remain
+open profile issues. Exact-name cloud API queries confirmed the VM, boot disk, firewall,
+subnet and VPC were absent after cleanup. The result and collector are retained in
+`docs/evidence/host-preflight-2026-10-09.json`. No storage or isolation profile is accepted.
+Resolve publication and candidate validation from Git and its pull-request checks.
+
+Next: complete native TSA material/terms and contained acquisition, qualify exact native
+lifecycle reconstruction and independently administered latest-head recovery, then qualify
+storage and isolated execution before any historical benchmark or bounty campaign.
+Cloud permission persists; do not ask again for already authorized benign preparation.
+
 ## Current offline RSA chain tranche, 2026-10-09
 
 Release: [PR #31](https://github.com/manfromnowhere143/etzio/pull/31), corrected

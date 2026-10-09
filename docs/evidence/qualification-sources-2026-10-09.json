@@ -1,0 +1,73 @@
+{
+  "schema": "etzio.qualification-research-sources.v1",
+  "inspected": "2026-10-09",
+  "retention": "Source byte identities only; full copyrighted documents not redistributed. Public certificate/CRL bytes are separately retained.",
+  "pinned_sources": [
+    {
+      "file": "firecracker-host-fd9fc7a.md",
+      "url": "https://raw.githubusercontent.com/firecracker-microvm/firecracker/fd9fc7a9f164b73002d22065d17c150d8c262d91/docs/prod-host-setup.md",
+      "size": 21548,
+      "sha256": "19cf9cf9965fb4fdd36c0f55ceb7165e06efd8601629e956827069d9f1a3de16"
+    },
+    {
+      "file": "witness-readme-b4c9458.md",
+      "url": "https://raw.githubusercontent.com/transparency-dev/witness/b4c9458d9b14e5789285c5b68a7535d152c98de9/README.md",
+      "size": 5399,
+      "sha256": "d617d2a91e7673b79924bdfaa7ebc23bd4f77d3c55246b1f7154f527bd78e98b"
+    },
+    {
+      "file": "sqlite-testing.html",
+      "url": "https://sqlite.org/testing.html",
+      "size": 59623,
+      "sha256": "d1a8b5c43a42e573f7165483fdf02b91c605076b869a823d924241fb308feb97"
+    },
+    {
+      "file": "sqlite-atomiccommit.html",
+      "url": "https://sqlite.org/atomiccommit.html",
+      "size": 77968,
+      "sha256": "5a5be7b660217c9408c8a81eaf2faa2d08832ed3790f895a0a713916ad856ea1"
+    },
+    {
+      "file": "sectigo-certificate-list.html",
+      "url": "https://secure.sectigo.com/products/PubliclyDisclosedSubCACerts",
+      "resolved_url": "https://secure.sectigo.com/products/PubliclyDisclosedSubCACerts",
+      "size": 474593,
+      "sha256": "7db663dbca02c0458d8e797ffa31f33e25b727500e6a1e8eeacf114e430fca3f"
+    }
+  ],
+  "web_text_only_sources": [
+    {
+      "url": "https://www.sectigo.com/uploads/files/eIDAS/Sectigo_eIDAS_TSA_DS_v1.0.5.pdf",
+      "version": "1.0.5",
+      "byte_identity": "not retained; raw download returned HTTP 403"
+    },
+    {
+      "url": "https://www.sectigo.com/uploads/backgrounds/ET-Terms-of-Use-v1.1.pdf",
+      "version": "1.1",
+      "byte_identity": "not retained; raw download returned HTTP 403"
+    },
+    {
+      "url": "https://www.sectigo.com/uploads/backgrounds/United-Terms-and-Conditions-Online-Version-v1.1.pdf",
+      "version": "1.1",
+      "byte_identity": "not retained; raw download returned HTTP 403"
+    }
+  ],
+  "other_primary_sources": [
+    {
+      "url": "https://arxiv.org/abs/2603.10795v1",
+      "version": "v1; 2026-03-11"
+    },
+    {
+      "url": "https://docs.cloud.google.com/compute/docs/instances/nested-virtualization/overview",
+      "version": "web documentation inspected 2026-10-09; page updated 2026-10-08"
+    },
+    {
+      "url": "https://docs.cloud.google.com/compute/docs/instances/limit-vm-runtime",
+      "version": "web documentation inspected 2026-10-09"
+    },
+    {
+      "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
+      "version": "public price table inspected 2026-10-09; estimate only"
+    }
+  ]
+}

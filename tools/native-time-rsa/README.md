@@ -63,6 +63,17 @@ PKIX/ETSI conformance claim.
 
 ## Next falsifying experiment
 
+Correction, 2026-10-09: the service's RSA-4096 timestamp statement does not establish
+4096-bit keys throughout its hierarchy. The publisher-listed R45 root has a 4096-bit
+key, but its R35 intermediate has a 3072-bit key and is refused by this codec's algorithm
+gate. Root AKI, CA key usage and intermediate EKU also differ from the closed profile.
+The root-issued CRL route is now observed, but its noncritical `2.5.29.60` extension is
+outside this codec's closed CRL profile; the TSA certificate and its issuer's CRL
+remain missing. These read-only artifact observations do not establish the current
+endpoint chain. The original table is documentary selection history, superseded on these
+points by the [acquisition dossier](../../docs/QUALIFICATION_NEXT_STEPS.md) and its exact
+public bytes. Preserve the released codec; do not relax it to claim compatibility.
+
 Prepare a bounded acquisition dossier for one exact service: endpoint and method, request
 count, permitted digest/nonce metadata, price and terms, credential requirements, trust
 anchor provenance, full revocation route, rotation, resource containment, retained intent

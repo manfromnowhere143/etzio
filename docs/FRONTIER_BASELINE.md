@@ -61,6 +61,12 @@ uncertainty intervals are tested without admitting an external service.
 
 ### Finite next steps and decision criteria
 
+The [2026-10-09 qualification packet](QUALIFICATION_NEXT_STEPS.md) makes these experiments
+concrete, with pinned Firecracker/witness source revisions, storage fault models, native
+provider artifact diagnostics and a bounded cloud host preflight. It retains a correction:
+the publisher-listed Sectigo intermediate is RSA-3072, incompatible with ADR-0021's
+all-4096 profile. No comparative detection result or provider admission follows.
+
 The foundation exit gates are external latest-head authority after local loss, native
 provider qualification, a concrete storage profile, structured execution evidence and
 independent execution under an accepted isolation profile. The next design packet should

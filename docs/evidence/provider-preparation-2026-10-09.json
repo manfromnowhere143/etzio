@@ -1,0 +1,72 @@
+{
+  "schema": "etzio.provider-preparation.observations.v1",
+  "inspected": "2026-10-09",
+  "validated_against_runtime_commit": "f1061dc3d3a090df6db0635529c568a512a0a027",
+  "boundary": "Read-only public artifact diagnostics. No timestamp protocol request, enrollment, trustworthy UTC, current revocation or legal qualification. Not part of the deterministic fixture corpus.",
+  "retrieval": {
+    "publisher_listing": "https://secure.sectigo.com/products/PubliclyDisclosedSubCACerts",
+    "listing_sha256": "7db663dbca02c0458d8e797ffa31f33e25b727500e6a1e8eeacf114e430fca3f",
+    "listing_size": 474593,
+    "certificate_transport": "Web HTTPS certificate fetch timed out; curl and Python HTTPS requests failed TLS negotiation. Explicit HTTP retrieval required SHA-256 equality to the publisher HTTPS listing before inspection.",
+    "root_trust": "not independently admitted",
+    "crl_route": "explicit public GET of the distribution point in the matched intermediate; signature checked under downloaded root; no implicit fetching"
+  },
+  "artifacts": [
+    {
+      "role": "root_certificate",
+      "retrieval_url": "http://crt.sectigo.com/SectigoQualifiedTimeStampingRootR45.crt",
+      "size": 1420,
+      "sha256": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+      "der_base64": "MIIFiDCCA3CgAwIBAgIQeyTgGTPHlt/EBM4BFh9TczANBgkqhkiG9w0BAQwFADBeMQswCQYDVQQGEwJFUzEcMBoGA1UEChMTU2VjdGlnbyAoRXVyb3BlKSBTTDExMC8GA1UEAxMoU2VjdGlnbyBRdWFsaWZpZWQgVGltZSBTdGFtcGluZyBSb290IFI0NTAeFw0yMDEwMDUwMDAwMDBaFw00NTEwMDQyMzU5NTlaMF4xCzAJBgNVBAYTAkVTMRwwGgYDVQQKExNTZWN0aWdvIChFdXJvcGUpIFNMMTEwLwYDVQQDEyhTZWN0aWdvIFF1YWxpZmllZCBUaW1lIFN0YW1waW5nIFJvb3QgUjQ1MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAmxd6gVF16BNKraRrsc8dxZddzMAXlGxX8jMin2aivnwcsTL/bTZqgvXqxz98m8XaeSYJn3WOnebxiw7qdfDSFGR/Gm+i+/ExnnW2zEdYZNBPU9jl8Tq6e1y6fjOrNMfM8tDlgHG7AnLEcP9cIrk1eC6O2CmMzu/YMMwhzIFVdGx0/heH/cq9+GtV++L0oEE57277c2IjU9hArl3o4L3YsUmBwPXF+uILNRMsCMacB1kh0zMn8+wH7WKh8tL/78IhqTglWoIHPOEuGS74/r+5ixCjhsaBJmftiKjIkEC+mbdxOMwK6bB7PcGtsMY1IZxBr0bbJhX0OL675VCc3sH0CDMEaxWK82xg626ulHkO1i6u1js1dpHRBzSPwm8IbbI5HMHpxe9zLmTRTjMasOaa4jAXQIYdmTcTRCGGanTiS3JRWDz48mLhfAhLi2ktH7FF8ZnRazJJJrJaEZgq32Fn3uBYV6FzwYrBdwBgQfhMJmlC9uRH6O9IZarm4j2ntgobjKNCfuzu1D7nbYT5NSr79P2CKNkgdGErDOf5d+hnatg/5Ga/3Bj0Ft6wRNmcM1Soof+/Baum1iCAw1Yq2Nt8wDEn2gs3SZOSpgBTQyXvaNIkdnSo/aEkn52a3vdjJtqJkVcweWn+2ZXAfQsCA9VAeIbDC5beYlrdTAaVg0pHVwECAwEAAaNCMEAwHQYDVR0OBBYEFFmBqMOFZOfjRKRpUiaUU/Y7De7eMA4GA1UdDwEB/wQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBDAUAA4ICAQAQ5fIzOSb7rPwmDEVfsfqAeNeGDOJYnJBZ2/LwAskopaGtwaT26JbIKEVZNrmX/AhGuMRa9FhflWPyzqd+XTKaaNTHMO3SrqUGco89x8bF7gIfNtQOkahq9VFhb1Hde6Cg3AqA/BcjT9Nzpxf0tlDoU/v8x2qLHFcri+bOpHOwZoVqybhHv64qrcKy1uU52Wwu4x7efGivn6lAdKdgTh9UD4Pwbmno16DtDWpIAAr/UgujWAymZPPvU337tkGjcGdkMmw8fFsU+gyoArSMT68vNZVRyDdA1AYKpAHAjPm/UtMXmKisnqqZGFwIetffgtRuEO8ic06Kaz5avA1eaSdg2o8bdVWV8nbaytKpUccWxismeIIZD9yYRq/6Wr+sn/VfKhfnQoEQnlQvzddjePWT8XSKLDARz5FJ5zUkLsEB/6bCweHfI3vlLKRBO2yOOCq/Fp92ww97BERoDaPJpuONrAmef+irVDOwQ4K6jTUe+tiigKtktRYjnrKbsk0wA9e2zokx8ECjx+NPGIXRYCViJ2ZXfb/RMwmXpWW9HsqkkE4QYu4WkuLFnNyUxazfKzoh1tBM6nmQgDofehzXIYIKE57APNIH8khQFUiieadK8N1x6SDuR5K0jRf9Mu/ExJsHzqLvXGgomeMlPvjoNbzzx8+7rIlPbXGmg1td75VgUg=="
+    },
+    {
+      "role": "intermediate_certificate",
+      "retrieval_url": "http://crt.sectigo.com/SectigoQualifiedTimeStampingCAR35.crt",
+      "size": 1580,
+      "sha256": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+      "der_base64": "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"
+    },
+    {
+      "role": "root_issued_crl",
+      "retrieval_url": "http://crl.sectigo.com/SectigoQualifiedTimeStampingRootR45.crl",
+      "size": 759,
+      "sha256": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+      "der_base64": "MIIC8zCB3AIBATANBgkqhkiG9w0BAQwFADBeMQswCQYDVQQGEwJFUzEcMBoGA1UEChMTU2VjdGlnbyAoRXVyb3BlKSBTTDExMC8GA1UEAxMoU2VjdGlnbyBRdWFsaWZpZWQgVGltZSBTdGFtcGluZyBSb290IFI0NRcNMjYxMDA5MTQxOTQ2WhcNMjYxMDE2MTQxOTQ2WqBKMEgwHwYDVR0jBBgwFoAUWYGow4Vk5+NEpGlSJpRT9jsN7t4wCwYDVR0UBAQCAgj/MBgGA1UdPAQRGA8yMDIwMTAwNTAwMDAwMFowDQYJKoZIhvcNAQEMBQADggIBAFcIe6SAFxSDk/tQilYZSM5z/ci4zbLOeRIThJf0NdJ9urKOQCvojMZ+n3ZhU998q6aKSxAteSmbRMYGa22YGphOLbqnjN9IEDh138hZyF3QAdT5htPtvEuyDYRWcMQzDeFR2dycC6D6Ko1ULJ+dT/JlguwReJZdRpEx628nC2/na6O0f8/YcJAlpT/kxajx9xMA+c0WbmqfejSXofmoNtvs4woxGglgGZUdHLSB1lRqDSX0yelopUVOqWtjGR96lTh2A/hRfGkfJay9kxCBJQocj1KjD5nBq/XIaXOZhASTp5o2UhbeWSuKjZYDokXquRSCyaX0ucSS2uv2znowbElUmW92Z4d0w/m9+E8p75ZQZQdRelNk82ZTtiZjs1Iu5pTFv/uytzoSUgAg/wStoZ6wKtM9SbiBHqhK4pKZfkE5huQEn+muh6ZsHAz1Zy/zh6MRj1/IswsYlzYOI8YVL788TREOe48iO99VIxQO2KoJLySHgIdfwlhzt/NXKf4ODaECPBeH4mX1sJG1qEusY4vYTFsltEQEoymNpBHd30ncrtSipQyMzxHUNcpJL6A0FM0VyQxfILWhHB1fzjLdwQHh1QluFLhQ9E4Bf7T0HID14p9y4InT4Yqc1b18GovUIlhsGev3oeEgRiDZ2vNBu0bX+NTp3qcOBhBhjG7dmgRZ"
+    }
+  ],
+  "observations": {
+    "root_key_bits": 4096,
+    "intermediate_key_bits": 3072,
+    "certificate_signature_hashes": [
+      "sha384",
+      "sha384"
+    ],
+    "intermediate_signature_under_downloaded_root": "verified",
+    "root_crl_signature_under_downloaded_root": "verified",
+    "root_crl_this_update": "2026-10-09T14:19:46+00:00",
+    "root_crl_next_update": "2026-10-16T14:19:46+00:00",
+    "root_crl_revoked_entry_count": 0,
+    "existing_algorithm_gate_intermediate_refusal": "RSA-4096 with exponent 65537 required",
+    "other_profile_mismatches": [
+      "root lacks required AKI",
+      "root and intermediate key usage include digitalSignature",
+      "intermediate timestamp EKU outside permitted CA extensions",
+      "root-issued CRL includes noncritical 2.5.29.60 outside the permitted AKI/CRL-number set"
+    ],
+    "current_endpoint_chain": "not observed",
+    "tsa_certificate": "missing",
+    "intermediate_issued_crl": "missing",
+    "root_crl_extension_oids": [
+      "2.5.29.35",
+      "2.5.29.20",
+      "2.5.29.60"
+    ]
+  },
+  "adversarial_diagnostic": {
+    "mutation": "flip low bit of final byte of intermediate certificate signature",
+    "input_sha256": "e582d15117f3ff67637cbc088e74fa17adecf61181141574fefe4e64712782ff",
+    "signature_check_result": "InvalidSignature",
+    "scope": "one retained-artifact diagnostic, not a new fixture test or independent provider qualification"
+  },
+  "method": "cryptography X.509 parse and RSA PKCS1v15 signature checks; existing private _certificate algorithm gate only. No full-profile/provider validation. OpenSSL x509 textual inspection agrees on key sizes; cryptographic ancestry is shared."
+}

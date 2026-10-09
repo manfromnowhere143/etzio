@@ -14,10 +14,10 @@ confidence.**
 > fixture, `0` on the clean one, and **never a finding**. The kernel can prove a claim; it
 > cannot yet make one worth proving.
 >
-> Nothing here touches the outside world. No live target, exploit execution, isolation host,
-> benchmark corpus, external provider, credential, network egress, spend, or disclosure is
-> authorized or reachable — the only execution surface is repository-owned deterministic
-> fixtures. No trustworthy UTC, current real-world revocation, external durability,
+> The engine execution surface remains repository-owned deterministic fixtures. Separately,
+> public-source research and operator-authorized, bounded Google Cloud host preflight prepare
+> the next gates; no native provider, exploit execution, benchmark corpus, live target or
+> disclosure is admitted. No trustworthy UTC, current real-world revocation, external durability,
 > non-equivocation, independent verification, finding, live-target authority, or superiority
 > claim follows from anything in this repository.
 >
@@ -521,6 +521,7 @@ custody survives independent reproduction, isolation, and adjudication — not b
 - [Architecture](docs/ARCHITECTURE.md)
 - [Roadmap](docs/ROADMAP.md)
 - [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
+- [Provider and host qualification next steps](docs/QUALIFICATION_NEXT_STEPS.md)
 - [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
 - [Architecture decisions (ADR-0001 through ADR-0021)](docs/decisions/README.md)
 - [Presentation standard](docs/PRESENTATION.md)
@@ -529,8 +530,9 @@ custody survives independent reproduction, isolation, and adjudication — not b
 - [Citation](CITATION.cff)
 
 Etzio is a public, solely authored research repository by
-[Daniel Wahnich](AUTHORS.md). Public visibility is authorized; deployment, live-target work,
-credential use, spending, disclosure, and submission remain separate, currently unheld
-grants. It is independent from Odeya, Sentinel, Aweb, Maestro, Telos, Inbar, and every other
+[Daniel Wahnich](AUTHORS.md). Public visibility and bounded cloud qualification preparation
+are authorized. Production deployment, live-target work, disclosure and submission remain
+separate, unheld grants; cloud preparation admits none of them. It is independent from
+Odeya, Sentinel, Aweb, Maestro, Telos, Inbar, and every other
 project in the estate — it may study reusable engineering patterns, never their runtime code,
 stores, identities, or authority.

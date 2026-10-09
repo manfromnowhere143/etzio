@@ -57,6 +57,13 @@ Pinned historical benchmarks may be inspected read-only; executing their build s
 payloads remains blocked until the isolation gate. Winning bounties is a future measured
 outcome, not authority to touch a third-party system.
 
+Operator clarification, 2026-10-09: Daniel explicitly authorized using available Google
+Cloud infrastructure for Etzio qualification. Existing cloud credentials and bounded,
+disposable resources may be used for benign host/OS/KVM preflight without repeated
+permission. Preserve unrelated workloads, retain resource identities and costs, and verify
+cleanup. This preparation exception admits no native provider, exploit execution, bounty
+target or production execution profile. See `docs/QUALIFICATION_NEXT_STEPS.md`.
+
 ## Current mission order
 
 The first governed fixture vertical slice now has a canonical protocol envelope, signed

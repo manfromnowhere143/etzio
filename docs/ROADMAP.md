@@ -201,6 +201,11 @@ in a campaign.
 
 Remaining required:
 
+The [dated qualification packet](QUALIFICATION_NEXT_STEPS.md) now specifies falsifying
+experiments for each dependency and retains a concrete provider compatibility refusal.
+Cloud access is authorized for bounded benign preparation; this does not accept a Linux/KVM
+execution profile or change the phase ordering below.
+
 1. qualify independently administered time, revocation, anchor, catalog and monitor
    providers under an explicitly admitted profile, with provider-native refusal evidence;
 2. integrate their accepted outputs without weakening the retained finality and governed

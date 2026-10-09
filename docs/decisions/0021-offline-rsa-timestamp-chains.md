@@ -31,6 +31,13 @@ is sent, no external certificate is admitted, and no live-target or bounty autho
 
 ## Closed cryptographic and path profile
 
+Post-release observation, 2026-10-09: publisher-listed root/intermediate bytes and one
+root-issued CRL are now retained in the [acquisition dossier](../QUALIFICATION_NEXT_STEPS.md).
+The intermediate is RSA-3072 and the certificate extension profiles also differ. This
+falsifies documentary inference of compatibility with the finite profile below; it changes
+neither the accepted codec nor the release evidence. The current TSA chain and full
+revocation route remain unobserved. Any compatible profile requires a separate decision.
+
 The codec `etzio.rfc3161.rsa-chain.offline.v1` pins the same `21`-distribution optional
 closure as ADR-0020. Profile identity binds the codec, closure, source, exact timestamp
 policy, TSA certificate policy, all three complete DER certificates and accuracy/CRL-age
