@@ -1,0 +1,84 @@
+{
+  "schema": "etzio.provider-source-ledger.v1",
+  "inspected": "2026-10-09",
+  "boundary": "public documentary research, not observed provider behavior or service admission",
+  "sources": [
+    {
+      "file": "sectigo-qualified-tspps-1.1.4.pdf",
+      "requested_url": "https://www.sectigo.com/uploads/files/eIDAS/Sectigo_eIDAS_TSPPS_v1.1.4.pdf",
+      "resolved_url": "https://www.sectigo.com/uploads/files/eIDAS/Sectigo_eIDAS_TSPPS_v1.1.4.pdf",
+      "size": 701625,
+      "sha256": "f1a7f9e09b3139ba3c49382dbcc01889555e1511133c394231649944ed4ca2b6",
+      "inspected": "2026-10-09",
+      "document_version": "1.1.4; 2026-02-11",
+      "sections": "5.2, 6.2.1, 6.2.2, 6.2.5.2, Annexes B/C",
+      "retention": "byte identity retained; complete copyrighted source not redistributed"
+    },
+    {
+      "file": "digicert-europe-tspps.pdf",
+      "requested_url": "https://www.digicert.com/content/dam/digicert/pdfs/legal/digicerteurope-tspps.pdf",
+      "resolved_url": "https://www.digicert.com/content/dam/digicert/pdfs/legal/digicerteurope-tspps.pdf",
+      "size": 371151,
+      "sha256": "3eb6098378cc13266ba2e0a279d58fa89513fac4ff1ac9139526ca7a9584009d",
+      "inspected": "2026-10-09",
+      "document_version": "3.0; 2025-11-07",
+      "sections": "6.2.1, 6.2.2, 6.2.8, 7.2",
+      "retention": "byte identity retained; complete copyrighted source not redistributed"
+    },
+    {
+      "file": "etsi-en-319422-1.1.1.pdf",
+      "requested_url": "https://www.etsi.org/deliver/etsi_en/319400_319499/319422/01.01.01_60/en_319422v010101p.pdf",
+      "resolved_url": "https://www.etsi.org/deliver/etsi_en/319400_319499/319422/01.01.01_60/en_319422v010101p.pdf",
+      "size": 70119,
+      "sha256": "b8dce6e415c906877ce36fd3d91b41e0543eda332f400cb444116ec760b5a4bf",
+      "inspected": "2026-10-09",
+      "document_version": "V1.1.1; 2016-03",
+      "sections": "5.1.1\u20135.1.2, 9.1, Annex B",
+      "retention": "byte identity retained; complete copyrighted source not redistributed"
+    },
+    {
+      "file": "rfc4055.txt",
+      "requested_url": "https://www.rfc-editor.org/rfc/rfc4055.txt",
+      "resolved_url": "https://www.rfc-editor.org/rfc/rfc4055.txt",
+      "size": 57479,
+      "sha256": "b8a1ef3fb135c32aed4eee121264f3ec83a46def746c8fe68e05bd1b60324e9a",
+      "inspected": "2026-10-09",
+      "document_version": "RFC 4055; 2005-06",
+      "sections": "1.2, 5",
+      "retention": "byte identity retained; complete copyrighted source not redistributed"
+    },
+    {
+      "file": "rfc5754.txt",
+      "requested_url": "https://www.rfc-editor.org/rfc/rfc5754.txt",
+      "resolved_url": "https://www.rfc-editor.org/rfc/rfc5754.txt",
+      "size": 21543,
+      "sha256": "13d095299ffec21ba7726fa6626f9bc4f9e24654bb9a96d70bbc3c78ee51575e",
+      "inspected": "2026-10-09",
+      "document_version": "RFC 5754; 2010-01",
+      "sections": "2, 3.2",
+      "retention": "byte identity retained; complete copyrighted source not redistributed"
+    },
+    {
+      "file": "rfc3739.txt",
+      "requested_url": "https://www.rfc-editor.org/rfc/rfc3739.txt",
+      "resolved_url": "https://www.rfc-editor.org/rfc/rfc3739.txt",
+      "size": 67436,
+      "sha256": "1862b088f0f96eecdfc368aa54efa2656663077acdcbd1fc1a2b04baabc63d5d",
+      "inspected": "2026-10-09",
+      "document_version": "RFC 3739; 2004-03",
+      "sections": "3.2.6",
+      "retention": "byte identity retained; complete copyrighted source not redistributed"
+    },
+    {
+      "file": "digicert-public-tsa.html",
+      "requested_url": "https://knowledge.digicert.com/general-information/rfc3161-compliant-time-stamp-authority-server",
+      "resolved_url": "https://knowledge.digicert.com/general-information/rfc3161-compliant-time-stamp-authority-server",
+      "size": 54184,
+      "sha256": "697230010b61c5e0c84a9ef9b0c6dc86fdbc3e461dd3af465dff198ed1d9f0b2",
+      "inspected": "2026-10-09",
+      "document_version": "undated HTML; certificate rotation notice 2026-09-03",
+      "sections": "Description and certificate-chain links",
+      "retention": "byte identity retained; complete copyrighted source not redistributed"
+    }
+  ]
+}

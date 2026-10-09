@@ -44,6 +44,12 @@ certificate and CRL evidence, and retains an independent OpenSSL comparison. The
 repository-owned native-format fixtures. No conversion into a qualified kernel time bundle
 or provider acquisition path is implemented.
 
+ADR-0021 adds `etzio.qualification.rfc3161_rsa_chain_v1`: a separate RSA-4096/SHA-384
+root/intermediate/TSA path with exact certificate pins, both complete CRLs, and closed
+issuer qualified-statement parsing. Both exact uncertainty endpoints receive fresh PKIX
+contexts. The statement establishes neither legal qualification nor kernel authority.
+Provider selection evidence and unresolved acquisition requirements are retained separately.
+
 ## Target system
 
 ```text

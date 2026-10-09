@@ -2,7 +2,31 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
-## Current offline native-time tranche, 2026-10-09
+## Current offline RSA chain tranche, 2026-10-09
+
+Active branch: `feat/offline-rsa-time-20261009`, based on `35d8c18`.
+[ADR-0021](decisions/0021-offline-rsa-timestamp-chains.md) adds a separate finite
+RSA-4096/SHA-384 root/intermediate/TSA observation profile, two positional retained CRLs,
+whole-hull validity and closed parsing of the issuer's qualified-timestamp statement.
+The P-256 codec, corpus and optional dependency closure are unchanged.
+
+The [comparison dossier](../tools/native-time-rsa/README.md) retains `19` native/OpenSSL
+cases: `15` shared outcomes agree, and `4` deliberate Etzio accuracy, CRL-age and statement
+policy differences are recorded. Whole-chain checking rejects intermediate and TSA
+revocation. The source ledger pins the public provider documents used to select the
+first offline wire target; no real service request or provider admission follows.
+
+Pre-change `make verify` passed `1509` tests on CPython 3.11.15 in `787.93` seconds.
+Full `make verify` passes `1747` tests (`238` new) on CPython 3.11.15 in `821.28`
+seconds and CPython 3.14.2 in `858.91` seconds, including policy, lint and fixture checks.
+All `381` focused timestamp tests pass. Source/wheel builds and installed-wheel replay
+of all `19` RSA cases outside the checkout pass. Exact-head GitHub validation is pending.
+No claim of current UTC, legal qualification, independently administered providers,
+external durability, execution, findings or income follows. Next: retain a concrete bounded
+acquisition dossier, including terms, request semantics, revocation route, containment and
+custody. The lifecycle and external latest-head local-loss gates remain open.
+
+## Prior offline native-time tranche, 2026-10-09
 
 Canonical pickup: `main`. Release record: [PR #30](https://github.com/manfromnowhere143/etzio/pull/30),
 implementation `2b279a8`, based on qualified lifecycle release `77f39ab`.
@@ -96,7 +120,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1509 tests expected;
+- 1747 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

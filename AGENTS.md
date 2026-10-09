@@ -154,6 +154,11 @@ optional dependency closure, native certificate/CRL corpus and OpenSSL compariso
 has no acquisition client or conversion into kernel-accepted time evidence. The concrete
 provider-administration and local-loss experiment remains proposed.
 
+ADR-0021 adds a separate offline RSA-4096/SHA-384 root/intermediate/TSA profile, two
+retained CRLs, closed qualified-statement parsing and a whole-chain OpenSSL comparison.
+Its provider source ledger is documentary evidence only. No native acquisition, legal
+qualification, external trust enrollment or kernel time conversion is implemented.
+
 All providers remain repository-owned deterministic fixtures. No real or native provider
 is connected, and no external durability, trustworthy UTC, current real-world revocation,
 independent administration, real non-equivocation, execution, or finding claim follows.

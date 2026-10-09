@@ -1,0 +1,1009 @@
+{
+  "boundary": "local protocol/path comparison; not a qualified binary closure or independent administration",
+  "case_count": 19,
+  "corpus_sha256": "55d5b83c88a7e3870053e9258ceadf493d000db047aa2f331ad1783c76f39ef2",
+  "date": "2026-10-09",
+  "openssl_executable_sha256": "07f19671b4a4528b829f8b7b917df7c42163a79a9646785e85e278c1fdae4478",
+  "openssl_version": "OpenSSL 3.6.3 9 Jun 2026 (Library: OpenSSL 3.6.3 9 Jun 2026)",
+  "python": "CPython 3.11.15",
+  "results": [
+    {
+      "case_id": "valid",
+      "comparison": "shared_protocol_checks",
+      "native_result": "accepted",
+      "observation_id": "sha256:2879631d1d497b204cfeaf415ec04bd5ab174b7ae0e464d58a73d185d9780f2f",
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        }
+      ]
+    },
+    {
+      "case_id": "rsa_encryption_cms",
+      "comparison": "shared_protocol_checks",
+      "native_result": "accepted",
+      "observation_id": "sha256:8d217cfc516858ac51b43238336993e43a25efaf2e997bad66edd64484edac87",
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        }
+      ]
+    },
+    {
+      "case_id": "foreign_nonce",
+      "comparison": "shared_protocol_checks",
+      "native_result": "request_binding",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800068:time stamp routines:ts_check_nonces:nonce mismatch:crypto/ts/ts_rsp_verify.c:523:\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800068:time stamp routines:ts_check_nonces:nonce mismatch:crypto/ts/ts_rsp_verify.c:523:\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "missing_nonce",
+      "comparison": "shared_protocol_checks",
+      "native_result": "request_binding",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800069:time stamp routines:ts_check_nonces:nonce not returned:crypto/ts/ts_rsp_verify.c:517:\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800069:time stamp routines:ts_check_nonces:nonce not returned:crypto/ts/ts_rsp_verify.c:517:\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "foreign_policy",
+      "comparison": "shared_protocol_checks",
+      "native_result": "request_binding",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:1780006C:time stamp routines:ts_check_policy:policy mismatch:crypto/ts/ts_rsp_verify.c:410:\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:1780006C:time stamp routines:ts_check_policy:policy mismatch:crypto/ts/ts_rsp_verify.c:410:\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "foreign_imprint",
+      "comparison": "shared_protocol_checks",
+      "native_result": "request_binding",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800067:time stamp routines:ts_check_imprints:message imprint mismatch:crypto/ts/ts_rsp_verify.c:508:\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800067:time stamp routines:ts_check_imprints:message imprint mismatch:crypto/ts/ts_rsp_verify.c:508:\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "forged_cms",
+      "comparison": "shared_protocol_checks",
+      "native_result": "signature_or_path",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:030000EA:digital envelope routines:EVP_PKEY_verify:provider signature failure:crypto/evp/signature.c:1176:RSA verify:\nC0FA38EF01000000:error:10800069:PKCS7 routines:PKCS7_signatureVerify:signature failure:crypto/pkcs7/pk7_doit.c:1177:\nC0FA38EF01000000:error:1780006D:time stamp routines:TS_RESP_verify_signature:signature failure:crypto/ts/ts_rsp_verify.c:146:\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:030000EA:digital envelope routines:EVP_PKEY_verify:provider signature failure:crypto/evp/signature.c:1176:RSA verify:\nC0FA38EF01000000:error:10800069:PKCS7 routines:PKCS7_signatureVerify:signature failure:crypto/pkcs7/pk7_doit.c:1177:\nC0FA38EF01000000:error:1780006D:time stamp routines:TS_RESP_verify_signature:signature failure:crypto/ts/ts_rsp_verify.c:146:\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "revoked_root",
+      "comparison": "shared_protocol_checks",
+      "native_result": "revoked_intermediate",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:certificate revoked\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:certificate revoked\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "forged_root",
+      "comparison": "shared_protocol_checks",
+      "native_result": "crl_authentication",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL signature failure\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL signature failure\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "expired_root",
+      "comparison": "shared_protocol_checks",
+      "native_result": "crl_interval",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL has expired\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "future_root",
+      "comparison": "shared_protocol_checks",
+      "native_result": "crl_interval",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL is not yet valid\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL is not yet valid\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "stale_root",
+      "comparison": "etzio_bounds_crl_age_over_full_hull",
+      "native_result": "crl_interval",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        }
+      ]
+    },
+    {
+      "case_id": "revoked_issuer",
+      "comparison": "shared_protocol_checks",
+      "native_result": "revoked_tsa",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:certificate revoked\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:certificate revoked\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "forged_issuer",
+      "comparison": "shared_protocol_checks",
+      "native_result": "crl_authentication",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:02000084:rsa routines:rsa_ossl_public_decrypt:data too large for modulus:crypto/rsa/rsa_ossl.c:742:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL signature failure\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:02000084:rsa routines:rsa_ossl_public_decrypt:data too large for modulus:crypto/rsa/rsa_ossl.c:742:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL signature failure\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "expired_issuer",
+      "comparison": "shared_protocol_checks",
+      "native_result": "crl_interval",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL has expired\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "future_issuer",
+      "comparison": "shared_protocol_checks",
+      "native_result": "crl_interval",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL is not yet valid\n",
+          "stdout": "Verification: FAILED\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 1,
+          "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL is not yet valid\n",
+          "stdout": "Verification: FAILED\n"
+        }
+      ]
+    },
+    {
+      "case_id": "stale_issuer",
+      "comparison": "etzio_bounds_crl_age_over_full_hull",
+      "native_result": "crl_interval",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        }
+      ]
+    },
+    {
+      "case_id": "absent_accuracy",
+      "comparison": "etzio_finite_profile",
+      "native_result": "accuracy",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        }
+      ]
+    },
+    {
+      "case_id": "absent_qualified_statement",
+      "comparison": "etzio_finite_profile",
+      "native_result": "qualified_statement",
+      "observation_id": null,
+      "openssl": [
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547199"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        },
+        {
+          "command": [
+            "<pinned-openssl>",
+            "ts",
+            "-verify",
+            "-in",
+            "response.tsr",
+            "-queryfile",
+            "request.tsq",
+            "-CAfile",
+            "trust.pem",
+            "-CApath",
+            "empty-ca",
+            "-crl_check_all",
+            "-x509_strict",
+            "-attime",
+            "1791547201"
+          ],
+          "returncode": 0,
+          "stderr": "Using configuration from /dev/null\n",
+          "stdout": "Verification: OK\n"
+        }
+      ]
+    }
+  ],
+  "schema": "etzio.rfc3161.rsa-chain.openssl-comparison.v1",
+  "source_sha256": {
+    "etzio/qualification/rfc3161_rsa_chain_v1.py": "ef0c3ca490ad207acd2c66fa952bb41849ce1d09f60319bad44c0a827ea8256b",
+    "etzio/qualification/rfc3161_v1.py": "51991bb35e8b7d2b526d5fce4cd8b3e6d69cab87f501e4a0107e1ed635b7b985",
+    "scripts/qualify_native_time_rsa.py": "3fe5c2964213ade949771bbb98c8823870abc44d6e712d19819fb59fd423e90f",
+    "tests/native_time_fixtures.py": "7bdbd7853a2d53724fbe5a89f578aba3c68e8ca285f8e855f849611448f23f8b",
+    "tests/native_time_rsa_fixtures.py": "0e2bd322cbd061119c675a1e3503335be871d13705500020fda9ca393210ee2b",
+    "tools/ci/requirements-ci.lock": "4678f55a4776c6c888c94645155850f2cd58eccfc3a5aa37d6d8bcd50fbb3198",
+    "tools/native-time-rsa/fixture-keys.json": "e3d562e27b65905bda352f8ef0fcd445c2aee1cdc029c4d384908d38bb8898e4"
+  }
+}

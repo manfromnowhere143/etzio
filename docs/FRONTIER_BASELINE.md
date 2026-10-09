@@ -53,6 +53,12 @@ UTC, independent administration or the latest catalog head after local loss. The
 specifies the concrete external-administration and local-loss experiment before those
 claims can be accepted.
 
+[ADR-0021](decisions/0021-offline-rsa-timestamp-chains.md) adds the separate RSA chain
+profile and [dated provider comparison](../tools/native-time-rsa/README.md). Standards
+and provider documents are versioned source inputs; the native experiment remains
+repository-owned bytes. Intermediate revocation, qualified-statement shape and complete
+uncertainty intervals are tested without admitting an external service.
+
 ### Finite next steps and decision criteria
 
 The foundation exit gates are external latest-head authority after local loss, native

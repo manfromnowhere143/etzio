@@ -187,6 +187,12 @@ exact optional dependency closure, signed certificate/CRL corpus and OpenSSL com
 Actual TSA suitability, independent administration, live freshness and native lifecycle
 retention remain open; the offline observation is not an enrolled time source.
 
+ADR-0021 extends offline proof to a three-certificate RSA/SHA-384 hierarchy and both
+revocation roles, retaining a `19`-case OpenSSL comparison and provider source identities.
+The next bounded experiment must resolve actual service semantics, complete revocation,
+terms and containment under an explicit acquisition grant. No provider is yet selected
+for authority enrollment; documentary wire selection does not close these gates.
+
 Remaining required:
 
 1. qualify independently administered time, revocation, anchor, catalog and monitor
