@@ -1,11 +1,75 @@
 # 2026 Vulnerability-Research Frontier Baseline
 
-Snapshot date: **2026-07-29**. This is a design baseline, not an Etzio performance claim.
+Original comparison snapshot: **2026-07-29**; targeted research update: **2026-10-09**.
+This is a design baseline, not an Etzio performance claim. The update below does not
+silently refresh every historical result in the original comparison table.
 Sources are primary project, research, program, or vendor publications where available.
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
 
-## What the frontier demonstrates
+## Research update, 2026-10-09
+
+The engineering recommendation remains an independently verifiable research-and-remediation
+engine, with a narrow measured first domain. The current evidence supports a fixture
+integrity foundation, not comparative detection quality, a universal researcher, or revenue.
+The finder still has six Python rule classes and two fixtures; the release suite measures
+repository behavior rather than vulnerability-discovery performance.
+
+| Primary source and publication date | What it supports | Proposed consequence for Etzio |
+|---|---|---|
+| [CodeMender research](https://deepmind.google/blog/introducing-codemender-an-ai-agent-for-code-security/), 2025-10-06 | Google describes static/dynamic analysis, differential testing, fuzzing and SMT tools, with human review before upstream submission | combine semantic proposals with independent mechanical checks and patch regression evidence |
+| [ATLANTIS](https://arxiv.org/abs/2509.14589), 2025-09-18 | The AIxCC-winning system combines LLMs with symbolic execution, directed fuzzing and static analysis | evaluate complementary techniques against matched budgets; an agent count alone is not an advantage |
+| [CodeMender preview](https://cloud.google.com/blog/products/identity-security/find-and-fix-software-vulnerabilities-with-codemender/), 2026-07-21; [Fairwind](https://blog.google/innovation-and-ai/technology/safety-security/fairwind-program/), 2026-09-02 | Google describes a maintained scanning/remediation harness and restricted partner access to specialized cyber models | keep model providers replaceable and distinguish published capability from available access and local evidence |
+| [ReEVMBench](https://arxiv.org/abs/2603.10795), 2026-03-11 | The study varies scaffolds and uses incidents after model release to challenge transfer from contest results | retain unseen holdouts, repeated trials, exact information regimes and failed attempts before choosing a model or scaffold |
+| [Bugcrowd AI guidance](https://docs.bugcrowd.com/researchers/onboarding/ai-privacy-security/) and [submission limits](https://docs.bugcrowd.com/researchers/reporting-managing-submissions/reporting-a-bug/submissions-limit/), accessed 2026-10-09 | Researchers remain accountable for scope and manual verification; managed-bounty limits depend on account performance | optimize validated, reproducible, nonduplicate reports and review effort; account ownership and report volume do not establish access or income |
+
+These are source-attributed observations. The proposed consequences are Etzio design
+judgments, not statements about what another engineering team would build for this project.
+
+### Standards to pin at the next design boundary
+
+| Reference | Version and publication status checked 2026-10-09 | Etzio boundary |
+|---|---|---|
+| [NIST SSDF](https://csrc.nist.gov/pubs/sp/800/218/final) | SP 800-218, version 1.1, final, February 2022 | development and vulnerability-response practice; maintain a requirements-to-evidence crosswalk |
+| [SSDF revision](https://csrc.nist.gov/pubs/sp/800/218/r1/ipd) | SP 800-218 Rev. 1, version 1.2, initial public draft, 2025-12-17 | track separately from accepted final requirements |
+| [OWASP ASVS](https://owasp.github.io/www-project-application-security-verification-standard/) | 5.0.0, released 2025-05-30 | web application requirements with versioned identifiers; not an EVM or native-code completeness oracle |
+| [FIRST CVSS](https://www.first.org/cvss/v4.0/specification-document) | CVSS 4.0; specification revision 1.2, 2024-06-18 | retain vectors and impact assumptions; severity is not proof of exploitability or a payout forecast |
+| [TUF](https://theupdateframework.github.io/specification/v1.0.36/) | specification 1.0.36, modified 2026-08-05 | review the change from the historical 1.0.35 baseline before admitting a native revocation profile; this document does not upgrade a runtime trust contract |
+
+The RFC and isolation baselines below remain scoped design inputs. A named standard is
+not a conformance result. A provider profile needs pinned source/client versions, exact wire
+semantics, a threat model, independent administration evidence, positive vectors, and a
+known-bad for each claimed refusal.
+
+### Finite next steps and decision criteria
+
+The foundation exit gates are external latest-head authority after local loss, native
+provider qualification, a concrete storage profile, structured execution evidence and
+independent execution under an accepted isolation profile. The next design packet should
+map each remaining claim to its smallest falsifying experiment. Repository fixtures can
+exercise protocol failures; they cannot supply missing external administration evidence.
+
+After those gates, keep the EVM/Solidity first domain and compare a simple static-analysis
+baseline, a model-only baseline, and a hybrid analysis/search system on the same admitted
+tasks and budgets. Include clean, patched and near-miss targets. The independent verifier
+must receive the retained target and candidate bytes, and the generator must not control
+the success oracle. Add a new language or target category only with its own oracles,
+negative controls and measured transfer results.
+
+Treat resource allocation as a constrained experiment: maximize independently accepted
+unique results subject to exact authority, isolation and cost limits. Report reproducible
+precision/recall, duplicates, reviewer minutes, compute cost, time to reproduction and
+time to a validated patch separately. Report run uncertainty and undefined denominators.
+Repeated seeds on one target are not additional independent targets. Adaptive search or
+offline learning must earn promotion on untouched evaluation data; it cannot redefine a
+benchmark or relax a gate.
+
+Bug bounties are one future outcome channel. Maintainer remediation and customer-authorized
+code review are other hypotheses to measure, not current products or promised revenue.
+Choose among them using accepted outcomes and actual costs. The repository currently has
+no accepted finding or bounty-income evidence on which to base a millions-of-dollars claim.
+
+## What the frontier demonstrates — original July comparison
 
 | System or evidence | Published result | Architectural lesson for Etzio |
 |---|---|---|

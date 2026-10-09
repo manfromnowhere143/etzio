@@ -4,7 +4,7 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "feat/qualified-fixture-lifecycle-20261009",
+  "active_branch": "main",
   "foundation_base": {
     "commit": "4919a0c09f99f545336fc6482a2d52f8fd7c03e1",
     "tree": "73ae7dcf5fae6d889dcb1d4d63b0345ae6798361"
@@ -33,8 +33,8 @@
     "first_wedge": "benchmark-first Solidity, EVM, and later blockchain-client research",
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
-    "next_gate": "qualified_evidence_facade_driven_service_and_full_vertical",
-    "next_session_pickup": "Retain exact-commit CI on both declared runtimes and merge the reviewed ADR-0019 step 6 tranche. Both local 1366-test release suites pass. The next foundation gate is provider-native qualification under an explicitly admitted profile; independent administration, external durability, storage qualification, isolation and live targets remain blocked.",
+    "next_gate": "independently_administered_native_provider_qualification",
+    "next_session_pickup": "ADR-0019 step 6 is implemented and validated. Specify the smallest native-provider qualification profile and its failure corpus, with exact wire/client versions, request and predecessor semantics, retained evidence, independent administration, and a local-loss latest-head experiment. Repository fixtures remain the only execution surface; external acquisition requires its separately admitted grant. Preserve recovery, storage and isolation gates.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -192,9 +192,9 @@
   ],
   "current_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_release_suites_passed_github_pending",
-    "github_validated_commit": null,
-    "github_actions_run_id": null,
+    "validation_status": "local_and_github_release_suites_passed",
+    "github_validated_commit": "8b27c4209977e5ae25dca3e49e7af78829731697",
+    "github_actions_run_id": 37911789236,
     "test_count": 1366,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -211,7 +211,7 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "Networkless fixture service and all four lifecycle phases reconstruct signed provider requests from canonical bytes and enrolled profiles. The complete modeled receipt vertical, staging-free fresh-process replay, interruption recovery, concurrency and provider-forgery controls pass in both local 1366-test release suites. No independent provider, trustworthy UTC, execution, finding, income or live-target claim follows.",
+    "claim_boundary": "Networkless fixture service and all four lifecycle phases reconstruct signed provider requests from canonical bytes and enrolled profiles. The complete modeled receipt vertical, staging-free fresh-process replay, interruption recovery, concurrency and provider-forgery controls pass in both local and GitHub 1366-test release suites. No independent provider, trustworthy UTC, execution, finding, income or live-target claim follows.",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
     "blocked_finality_focused_tests": 61,
@@ -227,7 +227,7 @@
     "qualified_pending_record_wiring_tests": 12,
     "qualified_finality_lineage_tests": 6,
     "qualified_finalization_record_wiring_tests": 8,
-    "ci_note": "Step 6 CI pending. Recovery PR 26, scope PR 27 and catalog PR 28 passed CI and are merged.",
+    "ci_note": "PR 29 implementation commit 8b27c42 passed both Foundation runtimes, package/wheel checks, repository policy and GitGuardian in run 37911789236. This retained evidence names that exact implementation commit. The release documentation follow-up changes no runtime or test bytes; its own checks are visible on PR 29. Recovery PR 26, scope PR 27 and catalog PR 28 are already merged.",
     "blocked_finality_composition_tests": 38,
     "qualified_scope_composition_tests": 25,
     "catalog_projection_composition_tests": 23,
@@ -244,6 +244,18 @@
       "CPython 3.14.2": {
         "passed": 1366,
         "seconds": 814.22
+      }
+    },
+    "github_validated_runtime_tree": "38bc01c2fccb403290a96bb3518f1a638c32748e",
+    "github_validated_test_tree": "d4cc50a1963ae53c0eb90f0ee3e4ee9f1dab1144",
+    "github_release_results": {
+      "CPython 3.11.15": {
+        "passed": 1366,
+        "seconds": 1339.58
+      },
+      "CPython 3.14.2": {
+        "passed": 1366,
+        "seconds": 708.81
       }
     }
   },
@@ -328,18 +340,19 @@
   ],
   "active_integrity_repair": {
     "date": "2026-10-09",
-    "status": "qualified_lifecycle_local_release_passed_github_pending",
+    "status": "implemented_and_validated",
     "branch": "feat/qualified-fixture-lifecycle-20261009",
     "reviewed_base": "304d53199af94185aaed3e77227d7b580f3cf2f3",
     "base_test_count": 1198,
-    "new_composition_tests": 38,
     "focused_storage_lifecycle_crash_composition_tests": 85,
     "focused_runtime": "CPython 3.11.15",
-    "github_validation": null,
-    "remaining": [
-      "retain exact-commit CI on both declared runtimes and publish the reviewed ADR-0019 step 6 tranche"
-    ],
-    "claim_boundary": "Networkless fixture service and all four lifecycle phases reconstruct signed provider requests from canonical bytes and enrolled profiles. The complete modeled receipt vertical, staging-free fresh-process replay, interruption recovery, concurrency and provider-forgery controls pass in both local 1366-test release suites. No independent provider, trustworthy UTC, execution, finding, income or live-target claim follows.",
+    "github_validation": {
+      "commit": "8b27c4209977e5ae25dca3e49e7af78829731697",
+      "run_id": 37911789236,
+      "pull_request": 29
+    },
+    "remaining": [],
+    "claim_boundary": "Networkless fixture service and all four lifecycle phases reconstruct signed provider requests from canonical bytes and enrolled profiles. The complete modeled receipt vertical, staging-free fresh-process replay, interruption recovery, concurrency and provider-forgery controls pass in both local and GitHub 1366-test release suites. No independent provider, trustworthy UTC, execution, finding, income or live-target claim follows.",
     "implemented_and_locally_validated": [
       "complete signed recovery decision binding at store admission and facade recovery",
       "authenticated recovery-history replay with exact SQL-index and canonical-wire agreement",
@@ -352,18 +365,12 @@
       "revocation and head requests bound to freshly authenticated time scope",
       "head fixture and positive pending fixture corrected to use coherent service and transition scope",
       "catalog codec v2 exact projection inclusion at the last witnessed leaf",
-      "unchanged global and mission head sequences preserve retained checkpoint identity"
+      "unchanged global and mission head sequences preserve retained checkpoint identity",
+      "qualified fixture service and complete interleaved receipt vertical",
+      "signed checkpoint time and complete provider request reconstruction from retained bytes",
+      "cold replay without staging acquisition or transient bundles",
+      "qualified recovery interruption concurrency profile mode and coherent forgery controls"
     ],
-    "local_release_results": {
-      "CPython 3.11.15": {
-        "passed": 1236,
-        "seconds": 584.83
-      },
-      "CPython 3.14.2": {
-        "passed": 1236,
-        "seconds": 603.83
-      }
-    },
     "scope_composition_tests": 25,
     "scope_probe_before": {
       "failed": 20,
@@ -409,6 +416,19 @@
       "CPython 3.14.2": {
         "passed": 1366,
         "seconds": 814.22
+      }
+    },
+    "qualified_lifecycle_tests_added": 82,
+    "total_tests_added_since_reviewed_base": 168,
+    "recovery_composition_tests": 38,
+    "recovery_local_release_results": {
+      "CPython 3.11.15": {
+        "passed": 1236,
+        "seconds": 584.83
+      },
+      "CPython 3.14.2": {
+        "passed": 1236,
+        "seconds": 603.83
       }
     }
   },
@@ -581,5 +601,11 @@
     "catalog_projection_composition_tests": 23,
     "pull_request": 28,
     "merged_to_main": true
+  },
+  "frontier_research_update": {
+    "date": "2026-10-09",
+    "source": "docs/FRONTIER_BASELINE.md",
+    "scope": "targeted primary-source update; historical July comparison retained",
+    "claim_boundary": "research and proposed decision criteria only; no comparator performance or revenue claim"
   }
 }

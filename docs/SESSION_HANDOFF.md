@@ -4,9 +4,10 @@ Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
 ## Current qualified lifecycle tranche, 2026-10-09
 
-Current branch: `feat/qualified-fixture-lifecycle-20261009`, based on catalog repair
-`2f476fa`. ADR-0019 step 6 is implemented and both local release suites pass. The qualified
-fixture service now covers pending, signed checkpoint time, anchor registration, checkpoint,
+Canonical pickup: `main`. Release record: [PR #29](https://github.com/manfromnowhere143/etzio/pull/29),
+implementation `8b27c42`, based on catalog repair `2f476fa`. ADR-0019 step 6 is implemented
+and both local and GitHub release suites pass. The qualified fixture service now covers
+pending, signed checkpoint time, anchor registration, checkpoint,
 and finalization. Store admission and cold replay reconstruct exact requests from retained
 bytes and enrolled profiles. Optional transient bundles must authenticate and agree, including
 on retry; their absence is valid. The qualified anchor has an explicit wire mode, while
@@ -18,8 +19,11 @@ all four durable phases and both provider writes. The latest tests add interleav
 fresh-process replay with acquisition disabled, concurrent recovery, exact profile alignment,
 transient contradiction, and disconnected or extra-leaf log refusals. Full `make verify`
 passes `1366` tests on CPython 3.11.15 in `788.23` seconds and
-CPython 3.14.2 in `814.22` seconds, including policy, lint and fixture checks. Exact-commit
-GitHub validation remains pending.
+CPython 3.14.2 in `814.22` seconds, including policy, lint and fixture checks. GitHub run
+`37911789236` validates exact implementation `8b27c42`: both runtimes, package/wheel checks,
+repository policy and GitGuardian pass. The subsequent release documentation update changes
+no runtime or test bytes; its checks are retained on PR #29. The tranche adds `82` tests,
+bringing the four repair/completion tranches from `1198` to `1366` tests.
 No independently administered provider, real UTC, external durability, physical fault,
 isolation, execution, finding, bounty income, or comparative-superiority claim follows.
 
@@ -1351,9 +1355,11 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Current pickup, 2026-10-09:** retain exact-commit CI for the locally validated qualified
-lifecycle tranche, then publish the reviewed result. See the top of this file
-for current evidence. The next external-authority gate remains provider-native qualification
+**Current pickup, 2026-10-09:** ADR-0019 step 6 is implemented and validated. Specify the
+smallest native-provider qualification profile and its failure corpus, including exact wire
+and client versions, request/predecessor semantics, and a local-loss latest-head experiment.
+See the top of this file for release evidence and the dated update in
+`docs/FRONTIER_BASELINE.md` for primary research and standards. The next gate is qualification
 under an explicitly admitted profile, independent administration evidence, externally durable
 latest-head authority, and the documented storage/isolation gates. Finder breadth and live
 targets remain outside the current fixture execution surface.

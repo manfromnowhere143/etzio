@@ -37,9 +37,9 @@ the transient bundles are not proof of durable reauthentication.
 
 ## Step-6 implementation contract, 2026-10-09
 
-Status: implemented; both local release suites pass `1366` tests; exact-commit CI is pending.
-Before this tranche, the
-three record positives were partial: anchor time was unsigned, transient bundles disappeared
+Status: implemented; both local and GitHub release suites pass `1366` tests. CI run
+`37911789236` validates implementation `8b27c42`; see the handoff for release evidence.
+Before this tranche, the three record positives were partial: anchor time was unsigned, transient bundles disappeared
 on serialization, and replay did not reconstruct provider requests. The following contract
 now governs the service and store; the earlier implementation sequence below remains a
 historical record and does not override this reconstruction requirement.
@@ -140,6 +140,17 @@ proof, its leaf, root, and size. Such a mathematical state carries no authentica
 latest-head authority. Appending must reproduce the same RFC 9162 root, inclusion proof, and
 consistency proof as the independent full-tree implementation. This permits deterministic
 restart without retaining an entire simulated provider log in process memory.
+
+The construction invariant is the binary partition of a tree of size `n`: its retained
+peaks are the roots of complete subtrees in decreasing size order, with exactly
+`popcount(n)` peaks. Right-folding their hashes gives the RFC root. A last-leaf proof first
+climbs the rightmost complete subtree for `v2(n)` levels (the number of trailing zero bits);
+its remaining siblings recover the preceding peaks in reverse order. Appending is binary
+addition: combine equal-size rightmost subtrees while carrying, then retain the resulting
+peak. Each operation uses `O(log n)` hashes and bounded state. The implementation verifies
+the inclusion proof before recovery and checks the reconstructed root again. This is a
+construction argument, supported by the `512`-size differential test and refusal cases;
+it is not a machine-checked proof or evidence of an honest provider.
 
 The exact-one-append arithmetic and fixed genesis leaves belong to this repository-fixture
 lifecycle contract. They are not a universal layout for a shared external transparency log.
@@ -351,8 +362,8 @@ both runtimes and CI reproduction:
    fixture catalog head cannot be scoped to a produced checkpoint (unlike the anchor's
    dynamic leaves), so a full facade-driven qualified vertical that emits a catalog
    head matching its own checkpoint is required.
-6. **Qualified fixture service and crash recovery.** *(Implemented; both local release suites
-   pass `1366` tests, 2026-10-09; exact-commit CI pending.)*
+6. **Qualified fixture service and crash recovery.** *(Implemented; both runtimes pass `1366` tests
+   locally and in GitHub, 2026-10-09; implementation `8b27c42`.)*
    `RepositoryOwnedQualifiedFixtureIntegrityServiceV1` composes the
    modeled kernel signer/catalog core with signed fixture providers. The separate
    `qualified_lifecycle_v1` module reconstructs all four phases from canonical bytes and

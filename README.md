@@ -35,9 +35,10 @@ confidence.**
 > through the complete lifecycle and reconstructs them from retained bytes on cold replay.
 > Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
-> The current lifecycle tranche passes `1366` tests on CPython 3.11.15 and 3.14.2 locally;
-> exact-commit CI is pending. The preceding catalog repair passed CI. `19` accepted
-> architecture decisions define the contracts and their refusal cases.
+> The lifecycle implementation passes `1366` tests on CPython 3.11.15 and 3.14.2 locally
+> and in CI; exact commit and run evidence are retained in the
+> [handoff](docs/SESSION_HANDOFF.md). `19` accepted architecture decisions define the
+> contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
 > [Open gates and next mission](#open-gates-and-next-mission).
