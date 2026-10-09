@@ -193,6 +193,12 @@ The next bounded experiment must resolve actual service semantics, complete revo
 terms and containment under an explicit acquisition grant. No provider is yet selected
 for authority enrollment; documentary wire selection does not close these gates.
 
+[Public bounty-readiness research](BOUNTY_READINESS.md), inspected 2026-10-09, proposes
+CoW contracts as the first target dossier and Immutable bridge as a second. This preparatory
+work can continue alongside foundation proof; it changes no gate ordering and admits no
+target. Retain program-scope, duplicate, method and payment uncertainty before investing
+in a campaign.
+
 Remaining required:
 
 1. qualify independently administered time, revocation, anchor, catalog and monitor

@@ -4,7 +4,10 @@ Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
 ## Current offline RSA chain tranche, 2026-10-09
 
-Active branch: `feat/offline-rsa-time-20261009`, based on `35d8c18`.
+Release: [PR #31](https://github.com/manfromnowhere143/etzio/pull/31), corrected
+implementation `85aedf2`, based on `35d8c18`. Release branch:
+`feat/offline-rsa-time-20261009`; canonical pickup after fast-forward publication: `main`.
+Resolve merge state from Git and the PR.
 [ADR-0021](decisions/0021-offline-rsa-timestamp-chains.md) adds a separate finite
 RSA-4096/SHA-384 root/intermediate/TSA observation profile, two positional retained CRLs,
 whole-hull validity and closed parsing of the issuer's qualified-timestamp statement.
@@ -20,13 +23,28 @@ Pre-change `make verify` passed `1509` tests on CPython 3.11.15 in `787.93` seco
 The initial candidate `127e73a` passed `1747` tests locally, but pre-merge review then
 reproduced `3` equivalent-subject acceptances (string encoding, case and spacing). Role
 separation now uses the pinned ASN.1 library's RFC 5280 name comparison. The new collection
-target is `1750` (`241` new); revised local and GitHub validation are pending. The initial
-GitHub run `37941040050` was cancelled as superseded. Earlier local results remain in
-`docs/MISSION_STATE.json` and do not establish the corrected boundary.
+target is `1750` (`241` new). Revised full `make verify` passes on CPython 3.11.15
+in `854.08` seconds and CPython 3.14.2 in `899.73` seconds. All `384` focused timestamp
+tests pass. Source/wheel builds and installed-wheel replay of all `19` RSA cases pass.
+GitHub run [`37942343023`](https://github.com/manfromnowhere143/etzio/actions/runs/37942343023)
+validates exact corrected implementation `85aedf2b55214daaffb25148bd0f9e4380adf9ac`:
+`1750` tests on CPython 3.11.15 in `1059.80` seconds and CPython 3.14.2 in `812.51` seconds.
+Both package/wheel jobs, repository policy and GitGuardian pass. Exact runtime/test trees
+and distinct local/CI SQLite identities are retained in `docs/MISSION_STATE.json`. The
+release evidence follow-up changes no runtime, test or dependency bytes; its own checks
+are visible on PR #31. The initial GitHub run `37941040050` was cancelled as superseded.
+Earlier local results remain separately retained and do not establish the corrected boundary.
 No claim of current UTC, legal qualification, independently administered providers,
 external durability, execution, findings or income follows. Next: retain a concrete bounded
 acquisition dossier, including terms, request semantics, revocation route, containment and
 custody. The lifecycle and external latest-head local-loss gates remain open.
+
+The operator reaffirmed paid research as a priority while foundation work continues.
+[The dated bounty-readiness record](BOUNTY_READINESS.md) proposes CoW contracts first,
+Immutable bridge second, and retains the incomplete Bugcrowd brief and conflicting Aave
+reward evidence. This was public-document research only. No target is admitted, no account
+was used, and no campaign or submission ran. Preserve integrity, isolation, benchmark and
+exact-target gates; do not infer continuous background operation or expected income.
 
 ## Prior offline native-time tranche, 2026-10-09
 
@@ -217,7 +235,7 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Canonical pickup for this release: `main` (PR #30). Resolve the actual checkout and
+- Canonical pickup for this release: `main` after PR #31 publication. Resolve the actual checkout and
   merge state from Git; the current implementation and validation record appear above.
 - The repository is **public** as of 2026-08-01 (founder-authorized; source visibility, not
   an open-source license). Public repositories run GitHub Actions free and unmetered.

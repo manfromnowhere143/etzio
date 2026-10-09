@@ -35,9 +35,9 @@ confidence.**
 > through the complete lifecycle and reconstructs them from retained bytes on cold replay.
 > Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
-> The corrected RSA-chain candidate has `1750` collected tests; revised release
-> validation is pending. Exact release evidence
-> are retained in the [handoff](docs/SESSION_HANDOFF.md). `21` accepted architecture
+> The corrected RSA-chain release passes `1750` tests on both declared Python runtimes,
+> locally and in Linux CI. Exact release evidence
+> is retained in the [handoff](docs/SESSION_HANDOFF.md). `21` accepted architecture
 > decisions define the contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
@@ -116,7 +116,7 @@ provider is connected.
 A separate [RSA chain profile](docs/decisions/0021-offline-rsa-timestamp-chains.md) now
 covers an intermediate CA, both revocation roles and a closed issuer qualified statement.
 Its [19-case OpenSSL comparison and provider research](tools/native-time-rsa/README.md)
-are retained; revised release validation is pending. The statement does not establish legal
+are retained, with `241` new tests. The statement does not establish legal
 qualification, and no native provider is admitted.
 
 ## Implemented vertical slice
@@ -429,7 +429,7 @@ explicitly. None of it is a capability claim: the entire suite runs against repo
 
 | Retained | Value |
 |---|---|
-| Full suite | Corrected RSA-chain candidate: `1750` collected tests; revised release validation pending |
+| Full suite | `1750` passing tests on CPython 3.11.15 and 3.14.2, locally and in Linux CI |
 | Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
 | SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` `4` |
 | Accepted decisions | `21` architecture decision records, each with a known-bad where it names a gate |
