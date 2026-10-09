@@ -2742,6 +2742,7 @@ class SQLiteEventStore:
                 raise EventStoreCorruptionError(
                     "legacy store profile contains typed integrity state"
                 )
+            self._validate_blocked_finality_state_locked()
             return
         event_count = int(
             self._connection.execute("SELECT count(*) FROM events").fetchone()[0]
@@ -2996,6 +2997,7 @@ class SQLiteEventStore:
             if lineage.finalization is not None:
                 previous_global = lineage
                 previous_by_mission[event.mission_id] = lineage
+        self._validate_blocked_finality_state_locked()
 
     def enroll_modeled_integrity(
         self,
@@ -5473,6 +5475,151 @@ class SQLiteEventStore:
     # Durable blocked finality (ADR-0014 contract, ADR-0015 storage)
     # ------------------------------------------------------------------
 
+    def _recovery_profile_matches_store_locked(self, profile: object) -> bool:
+        stored = self._store_profile_locked()
+        return (
+            stored[0] == _MODELED_INTEGRITY_STORE_PROFILE_V1
+            and profile.service_instance_id == stored[1]
+            and profile.environment_id == stored[2]
+            and profile.authority_binding_id == stored[5]
+        )
+
+    def _blocked_observations_locked(self, event_digest: str) -> tuple[object, ...]:
+        from .blocked_finality_v1 import (
+            BlockedFinalityObservationV1,
+            validate_blocked_observation_lineage_v1,
+        )
+
+        rows = self._connection.execute(
+            "SELECT attempt_ordinal, observation_id, unresolved_phase, record "
+            "FROM integrity_blocked_observations WHERE event_digest = ? "
+            "ORDER BY attempt_ordinal ASC", (event_digest,),
+        ).fetchall()
+        if not rows:
+            return ()
+        profile = self._require_enrolled_recovery_profile_locked()
+        lineage = self._load_integrity_lineage_locked(event_digest)
+        observations = []
+        try:
+            for ordinal, identity, phase, wire in rows:
+                observed = BlockedFinalityObservationV1.from_canonical_bytes(wire)
+                if (
+                    (observed.event_digest, observed.attempt_ordinal,
+                     observed.observation_id, observed.unresolved_phase)
+                    != (event_digest, ordinal, identity, phase)
+                    or observed.to_canonical_bytes() != wire
+                ):
+                    raise EventStoreCorruptionError("blocked observation index differs from retained bytes")
+                validate_blocked_observation_lineage_v1(
+                    profile=profile, observation=observed, lineage=lineage)
+                observations.append(observed)
+        except (ProtocolError, TypeError, ValueError) as error:
+            raise EventStoreCorruptionError(f"invalid retained blocked observation: {error}") from error
+        return tuple(observations)
+
+    def _validate_blocked_finality_state_locked(self) -> None:
+        """Authenticate recovery history without treating historical grants as new authority."""
+
+        from .blocked_finality_v1 import (
+            INSTANCE_SEALED_DISPOSITION_V1,
+            RETRY_AUTHORIZED_DISPOSITION_V1,
+            SignedGovernedRecoveryDecisionV1,
+            resolve_blocked_finality_v1,
+        )
+
+        enrolled = self._connection.execute(
+            "SELECT 1 FROM integrity_recovery_profile").fetchone()
+        events = self._connection.execute(
+            "SELECT DISTINCT event_digest FROM integrity_blocked_observations").fetchall()
+        decisions = self._connection.execute(
+            "SELECT decision_id, event_digest, blocked_observation_id, disposition, record "
+            "FROM integrity_recovery_decisions").fetchall()
+        if enrolled is None:
+            if events or decisions:
+                raise EventStoreCorruptionError("blocked history has no enrolled recovery profile")
+            return
+        profile = self._require_enrolled_recovery_profile_locked()
+        observations = {}
+        latest = {}
+        for (event_digest,) in events:
+            retained = self._blocked_observations_locked(event_digest)
+            observations.update({entry.observation_id: entry for entry in retained})
+            latest[event_digest] = retained[-1].observation_id
+        dispositions = {}
+        try:
+            for identity, event_digest, observation_id, disposition, wire in decisions:
+                observed = observations.get(observation_id)
+                if observed is None:
+                    raise EventStoreCorruptionError("a recovery decision has no retained observation")
+                signed = SignedGovernedRecoveryDecisionV1.from_canonical_bytes(wire)
+                resolved = resolve_blocked_finality_v1(
+                    profile=profile, retained=(observed,), current_phase=observed.unresolved_phase,
+                    current_phase_record_id=observed.unresolved_phase_record_id, signed_decision=signed,
+                )
+                decision = resolved.authenticated_decision.decision
+                dispositions[observation_id] = decision.disposition
+                if (
+                    (decision.decision_id, decision.event_digest,
+                     decision.blocked_observation_id, decision.disposition)
+                    != (identity, event_digest, observation_id, disposition)
+                    or signed.to_canonical_bytes() != wire
+                ):
+                    raise EventStoreCorruptionError("recovery decision index differs from authenticated bytes")
+                if disposition == INSTANCE_SEALED_DISPOSITION_V1:
+                    lineage = self._load_integrity_lineage_locked(event_digest)
+                    if (
+                        latest[event_digest] != observation_id
+                        or lineage.finalization is not None
+                        or self._unresolved_integrity_digest_locked() != event_digest
+                    ):
+                        raise EventStoreCorruptionError("retained seal does not fence the unresolved transition")
+        except (ProtocolError, TypeError, ValueError) as error:
+            raise EventStoreCorruptionError(f"invalid retained recovery decision: {error}") from error
+        for event_digest, observation_id in latest.items():
+            lineage = self._load_integrity_lineage_locked(event_digest)
+            if (
+                lineage.phase != observations[observation_id].unresolved_phase
+                and dispositions.get(observation_id) != RETRY_AUTHORIZED_DISPOSITION_V1
+            ):
+                raise EventStoreCorruptionError("retained phase advanced past an unauthorized blocked observation")
+
+    def _require_governed_phase_write_locked(self, lineage: object) -> None:
+        """Fence every phase write, including callers that do not use the facade.
+
+        A retained retry may carry its attempt through subsequent phases. A fresh
+        facade recovery separately requires an exact-current phase authorization.
+        """
+
+        from .blocked_finality_v1 import (
+            RETRY_AUTHORIZED_DISPOSITION_V1,
+            SignedGovernedRecoveryDecisionV1,
+            resolve_blocked_finality_v1,
+        )
+
+        self._require_writer_transaction()
+        if self._connection.execute(
+            "SELECT 1 FROM integrity_recovery_decisions WHERE disposition = 'instance_sealed'"
+        ).fetchone() is not None:
+            raise IntegrityTransitionConflictError("a sealed instance cannot advance an integrity phase")
+        observations = self._blocked_observations_locked(lineage.pending.event_digest)
+        if not observations:
+            return
+        latest = observations[-1]
+        row = self._connection.execute(
+            "SELECT record FROM integrity_recovery_decisions WHERE blocked_observation_id = ?",
+            (latest.observation_id,),
+        ).fetchone()
+        if row is None:
+            raise IntegrityTransitionConflictError("the latest blocked observation has no governed retry decision")
+        resolved = resolve_blocked_finality_v1(
+            profile=self._require_enrolled_recovery_profile_locked(), retained=observations,
+            current_phase=latest.unresolved_phase,
+            current_phase_record_id=latest.unresolved_phase_record_id,
+            signed_decision=SignedGovernedRecoveryDecisionV1.from_canonical_bytes(row[0]),
+        )
+        if resolved.disposition != RETRY_AUTHORIZED_DISPOSITION_V1:
+            raise IntegrityTransitionConflictError("the latest recovery decision does not authorize phase progress")
+
     def enroll_blocked_finality_recovery(self, profile: object) -> str:
         """Retain the exact enrolled recovery profile once, or reconcile it.
 
@@ -5494,6 +5641,8 @@ class SQLiteEventStore:
             self._connection.execute("BEGIN IMMEDIATE")
             self._require_writer_transaction()
             self._validate_integrity_state_locked()
+            if not self._recovery_profile_matches_store_locked(profile):
+                raise EventStoreError("recovery profile differs from the enrolled integrity authority")
             retained = self._connection.execute(
                 "SELECT recovery_profile_id, recovery_profile_wire "
                 "FROM integrity_recovery_profile WHERE singleton = 1"
@@ -5529,7 +5678,10 @@ class SQLiteEventStore:
     def retain_blocked_finality_observation(self, observation: object) -> object:
         """Retain one durable blocked observation without resolving anything."""
 
-        from .blocked_finality_v1 import BlockedFinalityObservationV1
+        from .blocked_finality_v1 import (
+            BlockedFinalityObservationV1,
+            validate_blocked_observation_lineage_v1,
+        )
 
         if type(observation) is not BlockedFinalityObservationV1:
             raise EventStoreError(
@@ -5545,7 +5697,7 @@ class SQLiteEventStore:
             self._connection.execute("BEGIN IMMEDIATE")
             self._require_writer_transaction()
             self._validate_integrity_state_locked()
-            self._require_enrolled_recovery_profile_locked()
+            profile = self._require_enrolled_recovery_profile_locked()
             retained = self._connection.execute(
                 "SELECT observation_id, record FROM integrity_blocked_observations "
                 "WHERE event_digest = ? AND attempt_ordinal = ?",
@@ -5558,6 +5710,12 @@ class SQLiteEventStore:
                     )
                 self._connection.execute("COMMIT")
                 return record
+            lineage = self._load_integrity_lineage_locked(record.event_digest)
+            try:
+                validate_blocked_observation_lineage_v1(
+                    profile=profile, observation=record, lineage=lineage, require_current=True)
+            except ValueError as error:
+                raise IntegrityTransitionConflictError(str(error)) from error
             highest = self._connection.execute(
                 "SELECT COALESCE(max(attempt_ordinal), 0) "
                 "FROM integrity_blocked_observations WHERE event_digest = ?",
@@ -5601,6 +5759,7 @@ class SQLiteEventStore:
             GovernedRecoveryDecisionV1,
             SignedGovernedRecoveryDecisionV1,
             authenticate_recovery_decision_v1,
+            resolve_blocked_finality_v1,
         )
 
         if type(signed_decision) is not SignedGovernedRecoveryDecisionV1:
@@ -5631,6 +5790,17 @@ class SQLiteEventStore:
                     )
                 self._connection.execute("COMMIT")
                 return decision.decision_id
+            observations = self._blocked_observations_locked(decision.event_digest)
+            lineage = self._load_integrity_lineage_locked(decision.event_digest)
+            if lineage is None or lineage.finalization is not None:
+                raise IntegrityTransitionConflictError("recovery requires an unresolved retained transition")
+            try:
+                resolve_blocked_finality_v1(
+                    profile=profile, retained=observations, current_phase=lineage.phase,
+                    current_phase_record_id=lineage.phase_record_id, signed_decision=signed_decision,
+                )
+            except ValueError as error:
+                raise IntegrityTransitionConflictError(str(error)) from error
             used = self._logical_evidence_storage_used_locked()
             if used + len(wire) > self._max_vault_bytes:
                 raise EvidenceVaultCapacityError(
@@ -5661,20 +5831,10 @@ class SQLiteEventStore:
     def load_blocked_finality_observations(self, event_digest: str) -> tuple[object, ...]:
         """Return one transition's retained blocked observations in ordinal order."""
 
-        from .blocked_finality_v1 import BlockedFinalityObservationV1
-
         if type(event_digest) is not str or _DIGEST_RE.fullmatch(event_digest) is None:
             raise EventStoreError("event_digest must be a full lowercase sha256 digest")
         self._validate_integrity_state_locked()
-        rows = self._connection.execute(
-            "SELECT record FROM integrity_blocked_observations "
-            "WHERE event_digest = ? ORDER BY attempt_ordinal ASC",
-            (event_digest,),
-        ).fetchall()
-        return tuple(
-            BlockedFinalityObservationV1.from_canonical_bytes(bytes(row[0]))
-            for row in rows
-        )
+        return self._blocked_observations_locked(event_digest)
 
     def enroll_qualified_acceptance(
         self,
@@ -5987,10 +6147,13 @@ class SQLiteEventStore:
         ).fetchone()
         if row is None:
             raise EventStoreError("no governed recovery profile is enrolled")
-        profile = BlockedFinalityRecoveryProfileV1.from_canonical_bytes(bytes(row[1]))
-        if profile.profile_id != row[0]:
+        try:
+            profile = BlockedFinalityRecoveryProfileV1.from_canonical_bytes(bytes(row[1]))
+        except (ProtocolError, TypeError, ValueError) as error:
+            raise EventStoreCorruptionError(f"invalid retained recovery profile: {error}") from error
+        if profile.profile_id != row[0] or not self._recovery_profile_matches_store_locked(profile):
             raise EventStoreCorruptionError(
-                "the retained recovery profile does not match its identity"
+                "the retained recovery profile differs from its identity or enrolled authority"
             )
         return profile
 
@@ -6034,6 +6197,7 @@ class SQLiteEventStore:
                     )
                 self._connection.execute("COMMIT")
                 return lineage.anchor_statement
+            self._require_governed_phase_write_locked(lineage)
             unresolved = self._unresolved_integrity_digest_locked()
             if unresolved != anchor.event_digest:
                 raise PendingIntegrityTransitionError(
@@ -6160,6 +6324,7 @@ class SQLiteEventStore:
                     )
                 self._connection.execute("COMMIT")
                 return lineage.checkpoint_candidate
+            self._require_governed_phase_write_locked(lineage)
             unresolved = self._unresolved_integrity_digest_locked()
             if unresolved != candidate.event_digest:
                 raise PendingIntegrityTransitionError(
@@ -6333,6 +6498,7 @@ class SQLiteEventStore:
                     )
                 self._connection.execute("COMMIT")
                 return lineage.finalization
+            self._require_governed_phase_write_locked(lineage)
             if unresolved != finalization.event_digest:
                 raise PendingIntegrityTransitionError(
                     "finalization must close the singleton pending transition"

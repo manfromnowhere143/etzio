@@ -88,20 +88,22 @@ def _live_blocked_store(tmp_path: Path):
     return store, path, event, profile, signer
 
 
-def _observation(profile, event_digest: str, ordinal: int = 1):
+def _observation(store, profile, event_digest: str, ordinal: int = 1):
     fixture = _fixture()
     bundle = fixture_time_bundle_v1(fixture)
+    lineage = store.load_integrity_lineage(event_digest)
+    pending = lineage.pending
     return BlockedFinalityObservationV1.record(
         profile=profile,
-        mission_id=fixture.vector.mission_id,
-        authority_id=fixture.vector.authority_id,
-        target_id=fixture.vector.target_id,
+        mission_id=pending.mission_id,
+        authority_id=pending.decision.authority_id,
+        target_id=pending.decision.target_id,
         event_digest=event_digest,
-        event_seq=0,
-        instance_sequence=0,
-        pending_record_id=_digest("storage-v3-pending-record"),
-        unresolved_phase=LOCAL_PENDING_PHASE_V1,
-        unresolved_phase_record_id=_digest("storage-v3-phase-record"),
+        event_seq=pending.event_seq,
+        instance_sequence=pending.instance_sequence,
+        pending_record_id=pending.record_id,
+        unresolved_phase=lineage.phase,
+        unresolved_phase_record_id=lineage.phase_record_id,
         blocked_operation="prepare_anchor_statement",
         blocked_reason_code="modeled_anchor_equivocation",
         attempt_ordinal=ordinal,
@@ -246,7 +248,7 @@ def test_blocked_observation_requires_an_enrolled_recovery_profile(
         )
         with pytest.raises(EventStoreError):
             store.retain_blocked_finality_observation(
-                _observation(profile, event.event_digest)
+                _observation(store, profile, event.event_digest)
             )
 
 
@@ -274,7 +276,7 @@ def test_the_retained_recovery_profile_is_immutable(tmp_path: Path) -> None:
 def test_blocked_observation_is_retained_and_reloads_exactly(tmp_path: Path) -> None:
     store, _, event, profile, _ = _live_blocked_store(tmp_path)
     with store:
-        observation = _observation(profile, event.event_digest)
+        observation = _observation(store, profile, event.event_digest)
         retained = store.retain_blocked_finality_observation(observation)
         assert retained.to_body() == observation.to_body()
         reloaded = store.load_blocked_finality_observations(event.event_digest)
@@ -285,7 +287,7 @@ def test_blocked_observation_is_retained_and_reloads_exactly(tmp_path: Path) -> 
 def test_exact_duplicate_observation_reconciles(tmp_path: Path) -> None:
     store, _, event, profile, _ = _live_blocked_store(tmp_path)
     with store:
-        observation = _observation(profile, event.event_digest)
+        observation = _observation(store, profile, event.event_digest)
         store.retain_blocked_finality_observation(observation)
         store.retain_blocked_finality_observation(observation)
         assert len(store.load_blocked_finality_observations(event.event_digest)) == 1
@@ -295,7 +297,7 @@ def test_one_ordinal_cannot_carry_two_bodies(tmp_path: Path) -> None:
     store, _, event, profile, _ = _live_blocked_store(tmp_path)
     with store:
         store.retain_blocked_finality_observation(
-            _observation(profile, event.event_digest)
+            _observation(store, profile, event.event_digest)
         )
         fixture = _fixture()
         conflicting = BlockedFinalityObservationV1.record(
@@ -322,11 +324,11 @@ def test_a_blocked_attempt_ordinal_cannot_regress(tmp_path: Path) -> None:
     store, _, event, profile, _ = _live_blocked_store(tmp_path)
     with store:
         store.retain_blocked_finality_observation(
-            _observation(profile, event.event_digest, ordinal=3)
+            _observation(store, profile, event.event_digest, ordinal=3)
         )
         with pytest.raises(IntegrityTransitionConflictError):
             store.retain_blocked_finality_observation(
-                _observation(profile, event.event_digest, ordinal=2)
+                _observation(store, profile, event.event_digest, ordinal=2)
             )
 
 
@@ -334,7 +336,7 @@ def test_blocked_observations_are_append_only(tmp_path: Path) -> None:
     store, path, event, profile, _ = _live_blocked_store(tmp_path)
     with store:
         store.retain_blocked_finality_observation(
-            _observation(profile, event.event_digest)
+            _observation(store, profile, event.event_digest)
         )
     connection = sqlite3.connect(path, isolation_level=None)
     try:
@@ -356,7 +358,7 @@ def test_blocked_observations_are_append_only(tmp_path: Path) -> None:
 def test_retaining_a_block_never_releases_the_barrier(tmp_path: Path) -> None:
     store, path, event, profile, signer = _live_blocked_store(tmp_path)
     with store:
-        observation = _observation(profile, event.event_digest)
+        observation = _observation(store, profile, event.event_digest)
         store.retain_blocked_finality_observation(observation)
         store.retain_governed_recovery_decision(
             _sign(profile, signer, observation, RETRY_AUTHORIZED_DISPOSITION_V1)
@@ -388,7 +390,7 @@ def test_generic_replay_still_refuses_while_blocked(tmp_path: Path) -> None:
     store, _, event, profile, _ = _live_blocked_store(tmp_path)
     with store:
         store.retain_blocked_finality_observation(
-            _observation(profile, event.event_digest)
+            _observation(store, profile, event.event_digest)
         )
         with pytest.raises(PendingIntegrityTransitionError):
             store.load(event.mission_id)
@@ -402,7 +404,7 @@ def test_generic_replay_still_refuses_while_blocked(tmp_path: Path) -> None:
 def test_recovery_decision_is_retained_and_idempotent(tmp_path: Path) -> None:
     store, _, event, profile, signer = _live_blocked_store(tmp_path)
     with store:
-        observation = _observation(profile, event.event_digest)
+        observation = _observation(store, profile, event.event_digest)
         store.retain_blocked_finality_observation(observation)
         signed = _sign(profile, signer, observation, RETRY_AUTHORIZED_DISPOSITION_V1)
         first = store.retain_governed_recovery_decision(signed)
@@ -412,10 +414,10 @@ def test_recovery_decision_is_retained_and_idempotent(tmp_path: Path) -> None:
 def test_recovery_decision_must_answer_the_latest_observation(tmp_path: Path) -> None:
     store, _, event, profile, signer = _live_blocked_store(tmp_path)
     with store:
-        stale = _observation(profile, event.event_digest, ordinal=1)
+        stale = _observation(store, profile, event.event_digest, ordinal=1)
         store.retain_blocked_finality_observation(stale)
         store.retain_blocked_finality_observation(
-            _observation(profile, event.event_digest, ordinal=2)
+            _observation(store, profile, event.event_digest, ordinal=2)
         )
         with pytest.raises(EventStoreError):
             store.retain_governed_recovery_decision(
@@ -428,7 +430,7 @@ def test_a_forged_recovery_decision_is_refused(tmp_path: Path) -> None:
 
     store, _, event, profile, signer = _live_blocked_store(tmp_path)
     with store:
-        observation = _observation(profile, event.event_digest)
+        observation = _observation(store, profile, event.event_digest)
         store.retain_blocked_finality_observation(observation)
         signed = _sign(profile, signer, observation, RETRY_AUTHORIZED_DISPOSITION_V1)
         with pytest.raises(ValueError):
@@ -440,7 +442,7 @@ def test_a_forged_recovery_decision_is_refused(tmp_path: Path) -> None:
 def test_sealing_is_terminal_for_observations_and_decisions(tmp_path: Path) -> None:
     store, _, event, profile, signer = _live_blocked_store(tmp_path)
     with store:
-        observation = _observation(profile, event.event_digest)
+        observation = _observation(store, profile, event.event_digest)
         store.retain_blocked_finality_observation(observation)
         store.retain_governed_recovery_decision(
             _sign(profile, signer, observation, INSTANCE_SEALED_DISPOSITION_V1)
@@ -448,14 +450,14 @@ def test_sealing_is_terminal_for_observations_and_decisions(tmp_path: Path) -> N
         assert store.instance_is_sealed() is True
         with pytest.raises(EventStoreError):
             store.retain_blocked_finality_observation(
-                _observation(profile, event.event_digest, ordinal=2)
+                _observation(store, profile, event.event_digest, ordinal=2)
             )
 
 
 def test_recovery_decisions_are_append_only(tmp_path: Path) -> None:
     store, path, event, profile, signer = _live_blocked_store(tmp_path)
     with store:
-        observation = _observation(profile, event.event_digest)
+        observation = _observation(store, profile, event.event_digest)
         store.retain_blocked_finality_observation(observation)
         store.retain_governed_recovery_decision(
             _sign(profile, signer, observation, RETRY_AUTHORIZED_DISPOSITION_V1)
@@ -476,7 +478,7 @@ def test_raw_sql_cannot_forge_an_unknown_disposition(tmp_path: Path) -> None:
     store, path, event, profile, _ = _live_blocked_store(tmp_path)
     with store:
         store.retain_blocked_finality_observation(
-            _observation(profile, event.event_digest)
+            _observation(store, profile, event.event_digest)
         )
     connection = sqlite3.connect(path, isolation_level=None)
     try:
@@ -506,7 +508,7 @@ def test_blocked_records_are_charged_to_logical_storage(tmp_path: Path) -> None:
     with store:
         before = store._logical_evidence_storage_used_locked()  # noqa: SLF001
         store.retain_blocked_finality_observation(
-            _observation(profile, event.event_digest)
+            _observation(store, profile, event.event_digest)
         )
         after = store._logical_evidence_storage_used_locked()  # noqa: SLF001
         assert after > before

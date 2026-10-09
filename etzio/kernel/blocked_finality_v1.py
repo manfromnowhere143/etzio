@@ -43,7 +43,7 @@ from etzio.kernel.integrity_adapters_v1 import (
     create_repository_owned_adapter_fixture_v1,
     qualify_time_bundle_v1,
 )
-from etzio.kernel.integrity_transition import ModeledIntegrityAuthorityBindingV1
+from etzio.kernel.integrity_transition import IntegrityLineageV1, ModeledIntegrityAuthorityBindingV1
 from etzio.protocol import (
     ProtocolError,
     canonical_dumps,
@@ -104,6 +104,7 @@ BLOCKED_REASON_CODES_V1: Final = frozenset(
         "modeled_checkpoint_identity_conflict",
         "modeled_integrity_adapter_contract_failure",
         "modeled_integrity_retry_conflict",
+        "modeled_integrity_recovery_phase_changed",
     }
 )
 
@@ -1407,6 +1408,51 @@ class BlockedFinalityResolutionV1:
         }
 
 
+def validate_blocked_observation_lineage_v1(
+    *,
+    profile: BlockedFinalityRecoveryProfileV1,
+    observation: BlockedFinalityObservationV1,
+    lineage: IntegrityLineageV1,
+    require_current: bool = False,
+) -> None:
+    """Bind a blocked record to an immutable retained phase, or to the current phase.
+
+    Historical observations remain auditable after authorized phase progress. New
+    observations must name the highest durable phase inside the store transaction.
+    """
+
+    copied = _snapshot_profile(profile)
+    if type(observation) is not BlockedFinalityObservationV1 or type(lineage) is not IntegrityLineageV1:
+        _reject("invalid_blocked_observation", "exact observation and lineage records are required")
+    observed = BlockedFinalityObservationV1.from_canonical_bytes(observation.to_canonical_bytes())
+    pending = lineage.pending
+    decision = pending.decision
+    expected = {
+        "profile_id": copied.profile_id,
+        "trust_root_id": copied.authority_binding.trust_snapshot_id,
+        "service_instance_id": copied.service_instance_id,
+        "environment_id": copied.environment_id,
+        "mission_id": pending.mission_id,
+        "authority_id": decision.authority_id,
+        "target_id": decision.target_id,
+        "event_digest": pending.event_digest,
+        "event_seq": pending.event_seq,
+        "instance_sequence": pending.instance_sequence,
+        "pending_record_id": pending.record_id,
+    }
+    if any(getattr(observed, name) != value for name, value in expected.items()):
+        _reject("blocked_observation_binding_mismatch", "the observation names another retained transition")
+    record = {
+        LOCAL_PENDING_PHASE_V1: pending,
+        ANCHOR_STATEMENT_READY_PHASE_V1: lineage.anchor_statement,
+        CHECKPOINT_CANDIDATE_RETAINED_PHASE_V1: lineage.checkpoint_candidate,
+    }[observed.unresolved_phase]
+    if record is None or observed.unresolved_phase_record_id != record.record_id:
+        _reject("blocked_observation_binding_mismatch", "the observation names no exact retained phase record")
+    if require_current and observed.unresolved_phase != lineage.phase:
+        _reject("blocked_observation_stale", "the observation does not name the highest durable phase")
+
+
 def resolve_blocked_finality_v1(
     *,
     profile: BlockedFinalityRecoveryProfileV1,
@@ -1421,9 +1467,9 @@ def resolve_blocked_finality_v1(
     The decision must answer the exact latest retained observation and must name the
     lineage phase that is actually current.  A sealed instance admits nothing further.
 
-    ``retained``, ``current_phase``, ``current_phase_record_id``, and ``sealed`` are
-    caller-supplied in this tranche because nothing is persisted yet.  The storage tranche
-    derives all four from retained rows rather than from caller input.
+    This pure resolver accepts explicit state. Consequential store admission derives
+    it from retained rows inside the writer transaction; historical replay applies the
+    same binding checks to the observation's retained phase without granting a new retry.
     """
 
     copied = _snapshot_profile(profile)

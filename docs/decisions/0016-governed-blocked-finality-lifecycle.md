@@ -4,6 +4,47 @@
 - Date: 2026-07-31
 - Owner: Daniel Wahnich
 
+## Composition correction, 2026-10-09
+
+Status: specified; implementation and retained validation are tracked in the session
+handoff. Review of `304d531` reproduced two violations of this decision: recovery consumed
+a validly signed decision whose restated reason differed from its observation, and a
+late adapter refusal recorded the entry phase rather than the highest durable phase.
+The earlier component tests did not establish the complete lifecycle claim.
+
+Recovery decision admission must apply the complete ADR-0014 resolver against the latest
+retained observation and current immutable phase inside the writer transaction. Historical
+replay must authenticate every retained decision, compare every restated observation
+field, and cross-check all SQL index columns against canonical bytes. Reconciliation of
+identical historical bytes is permitted; it does not grant another attempt.
+
+The facade must apply that same resolver before recovery. If an authorized attempt
+advances a phase and is interrupted, its old decision does not authorize a new attempt
+from a different phase. Recovery retains a new observation with reason
+`modeled_integrity_recovery_phase_changed`, operation `recover_lineage`, and the highest
+current durable phase. The next attempt requires a decision answering that new
+observation. Missing authorization creates no additional observation. This deliberately
+prefers a durable, actionable refusal to inferring authority from progress or elapsed time.
+
+Blocked retention reloads the exact event's durable lineage outside the classifier. The
+store checks the observation's complete transition and current-phase binding under its
+writer transaction. The adapter-call wrapper supplies the actual refused operation from
+the kernel call site; provider exception fields and text cannot select it. Non-adapter
+validation failures and catalog priming use the existing `recover_lineage` operation.
+Store failures keep their store classification, and concurrent phase advancement refuses
+a stale observation rather than retaining an invented phase identity.
+
+Every store phase write also requires a retained retry for the latest observation and
+refuses a sealed instance, including writes made without the facade. That decision can
+carry the same attempt through subsequent phases; the facade's exact-current check
+governs starting a new recovery attempt. Reconciliation of already retained phase bytes
+performs no new write. Replay refuses phase progress beyond an unanswered observation.
+
+Known-bads must cover a correctly signed inconsistent decision, SQL-index/wire disagreement,
+corrupt retained signatures, stale phases, each adapter operation, interruption after
+authorized phase progress, and preservation of the unresolved-transition barrier. These
+changes add no external provider, execution, or finding authority.
+
 ## Context
 
 ADR-0014 specified the durable blocked-finality observation and the governed

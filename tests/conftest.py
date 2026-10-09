@@ -10,7 +10,7 @@ import pytest
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 _HANDOFF_TEST_COUNT = re.compile(
-    r"^- (?P<count>[0-9]+) tests passed;$",
+    r"^- (?P<count>[0-9]+) tests expected;$",
     re.MULTILINE,
 )
 
@@ -21,7 +21,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         "--verify-mission-evidence",
         action="store_true",
         default=False,
-        help="fail collection when retained full-suite counts differ",
+        help="fail collection when declared full-suite counts differ",
     )
 
 

@@ -1,6 +1,38 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-08-01, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
+
+## Current repair tranche, 2026-10-09
+
+Status: recovery repair locally validated on `fix/integrity-composition-20261009`; GitHub
+reproduction and the remaining composition repairs are pending. The reviewed base `304d531`
+passed `1198` tests on both declared runtimes, but additional adversarial probes reproduced
+incomplete recovery-decision binding,
+late-block phase misattribution, qualified pending scope mismatch, and catalog projection
+assurance missing from monitor agreement. Passing the inherited suite did not establish
+those composition properties. The historical descriptions below retain their original
+scope; this correction takes precedence over broader recovery-completeness claims.
+
+Full-suite collection declaration (a target count, not a passing result):
+
+- 1236 tests expected;
+
+The first repair tranche applies the complete recovery contract at signed-decision
+admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
+binds blocked observations and enrolled recovery profiles to actual retained authority,
+records the current durable phase and the kernel's actual refused operation, and fences
+direct store phase writes. An interrupted retry that advanced a phase now requires a new
+durable observation and a new exact-current recovery decision. It never infers authority
+from progress. See the dated correction in ADR-0016.
+
+The new composition file has `38` tests. The complete focused storage/lifecycle/crash/
+composition run passed `85` tests on CPython 3.11.15. Full `make verify` then passed
+`1236` tests on each declared runtime: CPython 3.11.15 in 584.83 seconds and CPython 3.14.2
+in 603.83 seconds, including policy, lint, and fixture checks. No GitHub run validates
+these changes yet. Qualified pending scope, catalog projection binding, and ADR-0019 step 6
+remain open.
+The mission remains repository-owned fixtures only; no provider, live target, spending,
+isolation, execution, finding, income, or comparative-superiority claim follows.
 
 This file describes Etzio only. The repository is public (source visibility, not an
 open-source license; `LICENSE.md` remains proprietary). This file is not authority to access

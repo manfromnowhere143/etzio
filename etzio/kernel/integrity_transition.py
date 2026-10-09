@@ -153,6 +153,12 @@ class IntegrityFinalityPendingError(IntegrityTransitionError):
 class IntegrityFinalityBlockedError(IntegrityTransitionError):
     """Finality cannot advance without resolving contradictory retained material."""
 
+    def __init__(
+        self, reason_code: str, message: str, *, blocked_operation: str = "recover_lineage"
+    ) -> None:
+        super().__init__(reason_code, message)
+        self.blocked_operation = blocked_operation
+
 
 class IntegrityInstanceSealedError(IntegrityTransitionError):
     """A terminal governed seal forbids every further consequential command."""
@@ -1710,6 +1716,15 @@ class IntegrityLineageV1:
         return "local_pending"
 
     @property
+    def phase_record_id(self) -> str:
+        """Identity of the highest retained immutable phase."""
+
+        for record in (self.finalization, self.checkpoint_candidate, self.anchor_statement, self.pending):
+            if record is not None:
+                return record.record_id
+        raise AssertionError("a lineage always contains its pending record")
+
+    @property
     def lineage_id(self) -> str:
         return content_id("integrity_lineage", self.to_body())
 
@@ -2258,12 +2273,18 @@ def _call_modeled_integrity_adapter(
         return call()
     except IntegrityFinalityPendingError:
         raise
-    except IntegrityFinalityBlockedError:
-        raise
+    except IntegrityFinalityBlockedError as exc:
+        # The kernel call site owns operation attribution, never provider text or fields.
+        raise IntegrityFinalityBlockedError(
+            exc.reason_code,
+            str(exc),
+            blocked_operation="recover_lineage" if operation == "prime_catalog" else operation,
+        ) from exc
     except IntegrityTransitionError as exc:
         raise IntegrityFinalityBlockedError(
             exc.reason_code,
             f"modeled integrity adapter {operation} is deterministically blocked",
+            blocked_operation="recover_lineage" if operation == "prime_catalog" else operation,
         ) from exc
     except (TimeoutError, ConnectionError, RuntimeError) as exc:
         raise IntegrityFinalityPendingError(
@@ -2274,6 +2295,7 @@ def _call_modeled_integrity_adapter(
         raise IntegrityFinalityBlockedError(
             "modeled_integrity_adapter_contract_failure",
             f"modeled integrity adapter {operation} violated its local fixture contract",
+            blocked_operation="recover_lineage" if operation == "prime_catalog" else operation,
         ) from exc
 
 
@@ -4196,7 +4218,8 @@ class ModeledIntegrityFinalizingEventStoreV1:
 
         from .blocked_finality_v1 import (
             RETRY_AUTHORIZED_DISPOSITION_V1,
-            GovernedRecoveryDecisionV1,
+            BlockedFinalityError,
+            resolve_blocked_finality_v1,
         )
 
         if self._blocked_finality is None:
@@ -4219,8 +4242,22 @@ class ModeledIntegrityFinalizingEventStoreV1:
                 "a retained blocked observation has no governed recovery decision: "
                 f"{retained_context}",
             )
-        decision = GovernedRecoveryDecisionV1.from_canonical_bytes(signed.decision_bytes)
-        if decision.disposition != RETRY_AUTHORIZED_DISPOSITION_V1:
+        try:
+            resolution = resolve_blocked_finality_v1(
+                profile=self._blocked_finality.profile,
+                retained=observations,
+                current_phase=lineage.phase,
+                current_phase_record_id=lineage.phase_record_id,
+                signed_decision=signed,
+            )
+        except BlockedFinalityError as error:
+            if error.reason_code == "blocked_observation_stale":
+                raise IntegrityFinalityBlockedError(
+                    "modeled_integrity_recovery_phase_changed",
+                    "the retained retry decision does not authorize the current phase",
+                ) from error
+            raise IntegrityRecoveryNotAuthorizedError(error.reason_code, str(error)) from error
+        if resolution.disposition != RETRY_AUTHORIZED_DISPOSITION_V1:
             raise IntegrityRecoveryNotAuthorizedError(
                 "modeled_integrity_recovery_unauthorized",
                 "the retained governed decision does not authorize a retry: "
@@ -4286,6 +4323,7 @@ class ModeledIntegrityFinalizingEventStoreV1:
         """
 
         from .blocked_finality_v1 import (
+            BLOCKED_OPERATIONS_V1,
             BLOCKED_REASON_CODES_V1,
             BlockedFinalityObservationV1,
         )
@@ -4293,18 +4331,17 @@ class ModeledIntegrityFinalizingEventStoreV1:
         binding = self._blocked_finality
         if binding is None:
             return
+        current = self._store.load_integrity_lineage(lineage.pending.event_digest)
+        if type(current) is not IntegrityLineageV1 or current.pending.record_id != lineage.pending.record_id:
+            raise EventStoreError("the blocked transition has no matching durable lineage")
+        lineage = current
         phase = lineage.phase
         if phase == "finalized":
             return
-        if phase == "checkpoint_candidate_retained":
-            phase_record_id = lineage.checkpoint_candidate.record_id
-            operation = "observe_current_floor"
-        elif phase == "anchor_statement_ready":
-            phase_record_id = lineage.anchor_statement.record_id
-            operation = "prepare_checkpoint_candidate"
-        else:
-            phase_record_id = lineage.pending.record_id
-            operation = "prepare_anchor_statement"
+        phase_record_id = lineage.phase_record_id
+        operation = blocked.blocked_operation
+        if operation not in BLOCKED_OPERATIONS_V1:
+            operation = "recover_lineage"
         reason_code = blocked.reason_code
         if reason_code not in BLOCKED_REASON_CODES_V1:
             # An unclassifiable refusal is retained as a contract failure rather than
@@ -4605,8 +4642,8 @@ class ModeledIntegrityFinalizingEventStoreV1:
         """Share deterministic local-integrity normalization across append and replay."""
 
         self._require_unsealed_instance()
-        self._require_recovery_authorization(lineage)
         try:
+            self._require_recovery_authorization(lineage)
             return self._classified_advance_finality(lineage)
         except IntegrityFinalityBlockedError as blocked:
             # Retention runs outside the classifier below, so a store failure keeps its
