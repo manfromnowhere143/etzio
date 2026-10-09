@@ -4,7 +4,7 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "feat/offline-rsa-time-20261009",
+  "active_branch": "main",
   "foundation_base": {
     "commit": "4919a0c09f99f545336fc6482a2d52f8fd7c03e1",
     "tree": "73ae7dcf5fae6d889dcb1d4d63b0345ae6798361"
@@ -261,7 +261,23 @@
         "sqlite_source_id": "2024-01-30 16:01:20 e876e51a0ed5c5b3126f52e532044363a014bc594cfefa87ffb5b82257ccalt1"
       }
     },
-    "ci_note": "PR 31 corrected implementation 85aedf2 passed both Foundation runtimes, package/wheel checks, repository policy and GitGuardian in run 37942343023. The release evidence and proposed bounty-readiness follow-up changes no runtime, test or dependency bytes; its own checks are visible on PR 31. Initial candidate results remain separately retained as superseded evidence."
+    "ci_note": "PR 31 corrected implementation 85aedf2 passed both Foundation runtimes, package/wheel checks, repository policy and GitGuardian in run 37942343023. The release evidence and proposed bounty-readiness follow-up changes no runtime, test or dependency bytes; its own checks are visible on PR 31. Initial candidate results remain separately retained as superseded evidence.",
+    "release_followup_evidence": {
+      "commit": "0d3510a0301b3b28dc6f971bdd8a2f13011b1234",
+      "github_actions_run_id": 37945073483,
+      "results": {
+        "CPython 3.11.15": {
+          "passed": 1750,
+          "seconds": 1109.24
+        },
+        "CPython 3.14.2": {
+          "passed": 1750,
+          "seconds": 1505.8
+        }
+      },
+      "package_wheel_policy_and_gitguardian_passed": true,
+      "boundary": "Documentation and bounty-readiness follow-up; runtime, test, dependency and comparator bytes equal corrected implementation 85aedf2. Canonical-pickup metadata is recorded after this validation and checked separately."
+    }
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",

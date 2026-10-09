@@ -522,7 +522,7 @@ custody survives independent reproduction, isolation, and adjudication — not b
 - [Roadmap](docs/ROADMAP.md)
 - [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
 - [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
-- [Architecture decisions (ADR-0001 through ADR-0019)](docs/decisions/README.md)
+- [Architecture decisions (ADR-0001 through ADR-0021)](docs/decisions/README.md)
 - [Presentation standard](docs/PRESENTATION.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)

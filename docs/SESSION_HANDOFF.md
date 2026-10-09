@@ -5,9 +5,13 @@ Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 ## Current offline RSA chain tranche, 2026-10-09
 
 Release: [PR #31](https://github.com/manfromnowhere143/etzio/pull/31), corrected
-implementation `85aedf2`, based on `35d8c18`. Release branch:
-`feat/offline-rsa-time-20261009`; canonical pickup after fast-forward publication: `main`.
-Resolve merge state from Git and the PR.
+implementation `85aedf2`, based on `35d8c18`. Canonical pickup: `main`.
+The release follow-up `0d3510a` passed both Linux runtimes, package/wheel checks, repository
+policy and GitGuardian in run `37945073483`: `1750` tests on CPython 3.11.15 in `1109.24`
+seconds and CPython 3.14.2 in `1505.80` seconds. Runtime/test/dependency bytes remain equal
+to the corrected implementation. The subsequent pickup metadata and index-label correction
+change documentation only and are checked by repository policy and full-suite collection.
+Resolve final publication state from Git and the PR.
 [ADR-0021](decisions/0021-offline-rsa-timestamp-chains.md) adds a separate finite
 RSA-4096/SHA-384 root/intermediate/TSA observation profile, two positional retained CRLs,
 whole-hull validity and closed parsing of the issuer's qualified-timestamp statement.
