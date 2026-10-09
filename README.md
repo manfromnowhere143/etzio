@@ -5,7 +5,7 @@ finding only when a separately authorized verifier reproduces a material effect 
 retained bytes and the kernel accepts the receipt — proof by reproduction, not by
 confidence.**
 
-> **Honest status — 2026-08-01. Phase: foundation integrity. This is the courtroom, not
+> **Honest status — 2026-10-09. Phase: foundation integrity. This is the courtroom, not
 > yet the detective.**
 >
 > Etzio has built an evidence and adjudication kernel to a high standard. It has *not* built
@@ -35,10 +35,10 @@ confidence.**
 > through the complete lifecycle and reconstructs them from retained bytes on cold replay.
 > Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
-> The lifecycle implementation passes `1366` tests on CPython 3.11.15 and 3.14.2 locally
-> and in CI; exact commit and run evidence are retained in the
-> [handoff](docs/SESSION_HANDOFF.md). `20` accepted architecture decisions define the
-> contracts and their refusal cases.
+> The full implementation, including the separate offline native-time profile, passes
+> `1509` tests on CPython 3.11.15 and 3.14.2 locally and in CI; exact commit and run evidence
+> are retained in the [handoff](docs/SESSION_HANDOFF.md). `20` accepted architecture
+> decisions define the contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
 > [Open gates and next mission](#open-gates-and-next-mission).

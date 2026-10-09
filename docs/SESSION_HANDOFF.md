@@ -4,7 +4,8 @@ Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
 ## Current offline native-time tranche, 2026-10-09
 
-Active branch: `feat/offline-native-time-20261009`, based on main `77f39ab`.
+Canonical pickup: `main`. Release record: [PR #30](https://github.com/manfromnowhere143/etzio/pull/30),
+implementation `2b279a8`, based on qualified lifecycle release `77f39ab`.
 [ADR-0020](decisions/0020-offline-native-time-qualification.md) adds a separate bounded
 RFC 3161/5816 offline observation validator using pyHanko CMS/PKIX. It pins the complete
 `21`-package optional qualification closure, one direct root/TSA path and exact request
@@ -18,8 +19,14 @@ dependency inventory are retained. The local pre-change baseline passed `1366` t
 CPython 3.11.15 in `753.84` seconds. The full release suite passes `1509` tests (`143` new) on
 CPython 3.11.15 in `785.42` seconds and CPython 3.14.2 in
 `814.0` seconds, including policy, lint and fixture checks.
-Source/wheel build and installed-wheel replay of all `14` native cases pass. GitHub
-validation is pending; local results are not a CI claim.
+Source/wheel build and installed-wheel replay of all `14` native cases pass. GitHub run
+[`37921728342`](https://github.com/manfromnowhere143/etzio/actions/runs/37921728342)
+validates exact implementation `2b279a892d35eda24fb74854c6b3ca27ca3741fe`: `1509` tests on
+CPython 3.11.15 in `1358.77` seconds and CPython 3.14.2 in `977.08` seconds, with SQLite
+`3.45.1` on both CI runtimes. Both package/wheel jobs, repository policy and GitGuardian
+pass. Runtime and test tree identities and the distinct local/CI SQLite identities are
+retained in `docs/MISSION_STATE.json`. The release evidence follow-up changes no runtime,
+test or dependency bytes; its own checks are visible on PR #30.
 
 This surface has no acquisition client, external source, enrollment or conversion into
 kernel-accepted time evidence. It does not prove current UTC/revocation, independent
@@ -173,7 +180,8 @@ and installation. Status, handoff reading, and validation remain mandatory. Then
 [ADR-0016](decisions/0016-governed-blocked-finality-lifecycle.md), and
 [ADR-0017](decisions/0017-blocked-finality-crash-recovery.md), and
 [ADR-0018](decisions/0018-qualified-evidence-consumption.md), and
-[ADR-0019](decisions/0019-qualified-evidence-lifecycle-consumption.md).
+[ADR-0019](decisions/0019-qualified-evidence-lifecycle-consumption.md), and
+[ADR-0020](decisions/0020-offline-native-time-qualification.md).
 
 Precedence: checked-out Git bytes → reproducible retained evidence → this handoff → chat
 memory. A green check validates only what it names.
@@ -183,24 +191,24 @@ memory. A green check validates only what it names.
 - Workspace: `/Users/danielwahnich/workspace/etzio`
 - Engine: **Etzio**
 - Canonical branch: `main`
-- Current working branch: `main`. Every tranche through ADR-0019 step 2 (store-layer
-  qualified anchor consumption) is consolidated on `main` by fast-forward; no branch is open.
+- Canonical pickup for this release: `main` (PR #30). Resolve the actual checkout and
+  merge state from Git; the current implementation and validation record appear above.
 - The repository is **public** as of 2026-08-01 (founder-authorized; source visibility, not
   an open-source license). Public repositories run GitHub Actions free and unmetered.
-- **CI note for a future session:** on 2026-08-01 the account's Actions were billing-blocked
+- **Historical CI note:** on 2026-08-01 the account's Actions were billing-blocked
   by heavy same-day usage; runs failed at startup even after going public. The schema-v4 and
   presentation tranches are green on both local runtimes (`1158` tests) but their CI
-  reproduction was **deferred** — `current_evidence.validation_status` reads
-  `local_release_suites_pending_github_reproduction`. Do not read that as a failure; re-run
-  CI once billing clears and update the evidence to reflect the reproduced commit.
+  reproduction was **deferred** at that time. The billing block was subsequently resolved;
+  current release evidence is the exact-commit validation recorded above. The historical
+  `1158`-test result is not the current suite size or CI status.
 - Every tranche stack has been merged into `main` by fast-forward, not squash. Each stack was
   strictly linear and `main` was a pure ancestor, so fast-forwarding preserved every
   authorship. Squashing would have collapsed each tranche and, because each branch still
   contained its predecessors' commits, produced replay conflicts against an already-squashed
   `main`. PR #3 is labelled closed rather than merged for that reason; its head commit
   `fbfa6ed` is an ancestor of `main` and a comment on the PR records this.
-- `main` was verified green after the merge: 1083 tests under CPython 3.11.15.
-- Canonical remote: private `https://github.com/manfromnowhere143/etzio`
+- Historical July merge validation: `1083` tests under CPython 3.11.15.
+- Canonical remote: public `https://github.com/manfromnowhere143/etzio`
 - Sole author: `Daniel Wahnich <cogitoergosum143@gmail.com>`
 
 Resolve the current branch head, pull request, workflow state, visibility, and default branch
@@ -1380,8 +1388,8 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Current pickup, 2026-10-09:** finish release validation and publication of ADR-0020's
-offline native-time tranche. Then select a concrete provider profile and collect exact
+**Current pickup, 2026-10-09:** ADR-0020's offline native-time tranche passes both local and
+GitHub release suites. Select a concrete provider profile and collect exact
 wire/client, independent-administration, freshness/revocation and local-loss experiment
 evidence. The narrow P-256/direct-root fixture profile is not evidence that a real TSA
 fits it. External acquisition needs a separately scoped grant. Do not connect this
