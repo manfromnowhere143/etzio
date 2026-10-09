@@ -184,11 +184,10 @@ claim.
 
 Remaining required:
 
-1. persist the specified blocked-finality observation and governed recovery decision under
-   a schema-version-3 migration, enrolled recovery authority, capacity accounting, and
-   crash-recovery known-bads before connecting any external provider;
-2. only then qualify independently administered providers and integrate accepted adapter
-   outputs without weakening the retained finality state machine;
+1. qualify independently administered time, revocation, anchor, catalog and monitor
+   providers under an explicitly admitted profile, with provider-native refusal evidence;
+2. integrate their accepted outputs without weakening the retained finality and governed
+   recovery state machines;
 3. prove external latest-head authority survives local loss, then close the documented
    same-user SQLite pathname and coherent offline-rewrite boundary;
 4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal
@@ -210,12 +209,14 @@ persists and recovers exact decision, anchor, checkpoint, and current-floor line
 every event before command success. A later mission begins at its own mission genesis while
 extending the latest instance-global checkpoint, and subsequent events extend both exact
 predecessors. Generic raw replay refuses while any transition is unresolved. Its
-providers remain deterministic fixtures and their modeled-finality assertions are unsigned
-and not independently authenticated. The separate signed trusted-time/revocation
-qualification harness is not consumed by this lifecycle path. It proves only deterministic
-repository-fixture conformance under its exact profile, not truthful UTC, current external
+providers remain deterministic fixtures. Default modeled mode uses unsigned assertions;
+explicit qualified enrollment now requires signed time, revocation, anchor, catalog and
+monitor packages throughout the lifecycle. Cold replay reconstructs their requests from
+canonical records, and interruption recovery preserves the governed barrier. This proves
+repository-fixture conformance under exact profiles, not truthful UTC, current external
 revocation, native-provider correctness, independent administration, external durability,
-execution, authority, or a finding.
+execution, live-target authority, or a finding. See ADR-0019 and the current handoff for
+release evidence.
 
 ## Phase 2 — independent proof plane
 

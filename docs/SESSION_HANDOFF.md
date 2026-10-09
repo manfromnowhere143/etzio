@@ -2,14 +2,41 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
-## Current repair tranche, 2026-10-09
+## Current qualified lifecycle tranche, 2026-10-09
 
-Current branch: `fix/catalog-projection-20261009`. Catalog codec v2 now binds the exact
+Current branch: `feat/qualified-fixture-lifecycle-20261009`, based on catalog repair
+`2f476fa`. ADR-0019 step 6 is implemented and both local release suites pass. The qualified
+fixture service now covers pending, signed checkpoint time, anchor registration, checkpoint,
+and finalization. Store admission and cold replay reconstruct exact requests from retained
+bytes and enrolled profiles. Optional transient bundles must authenticate and agree, including
+on retry; their absence is valid. The qualified anchor has an explicit wire mode, while
+historical modeled anchor bytes remain unchanged.
+
+Focused evidence includes the complete `14`-event receipt path, staging-free restart,
+provider forgery after coherent local index/hash rewrites, and interruptions before and after
+all four durable phases and both provider writes. The latest tests add interleaved missions,
+fresh-process replay with acquisition disabled, concurrent recovery, exact profile alignment,
+transient contradiction, and disconnected or extra-leaf log refusals. Full `make verify`
+passes `1366` tests on CPython 3.11.15 in `788.23` seconds and
+CPython 3.14.2 in `814.22` seconds, including policy, lint and fixture checks. Exact-commit
+GitHub validation remains pending.
+No independently administered provider, real UTC, external durability, physical fault,
+isolation, execution, finding, bounty income, or comparative-superiority claim follows.
+
+Recovery PR #26 (`e190c17`), scope PR #27 (`c0868b0`), and catalog PR #28 (`2f476fa`) passed
+both CI runtimes, package/wheel checks, policy and GitGuardian, and were fast-forward merged
+to `main`. Their remote branches were deleted. Catalog CI run `37904671098` passed on
+2026-10-09. The earlier records below are historical validation evidence for their exact
+tranches; this current section governs the active work.
+
+## Earlier repair tranches, 2026-10-09
+
+Historical catalog branch: `fix/catalog-projection-20261009`. Catalog codec v2 now binds the exact
 head projection to the last leaf of the witnessed log and refuses checkpoint-identity
 substitution at an unchanged sequence. The initial `12` probes all reproduced acceptance
 before repair. All `23` composition tests pass. Full `make verify` passes `1284` tests on
 CPython 3.11.15 (594.44 seconds) and CPython 3.14.2 (605.27 seconds), including policy,
-lint, and fixture checks. Catalog CI is pending. Recovery PR #26 (`e190c17`) and scope
+lint, and fixture checks. Catalog CI subsequently passed in run `37904671098`. Recovery PR #26 (`e190c17`) and scope
 PR #27 (`c0868b0`) passed both CI runtimes, package/wheel checks, policy, and GitGuardian,
 and were fast-forward merged to `main`; their remote branches were deleted.
 
@@ -33,7 +60,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1284 tests expected;
+- 1366 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
@@ -48,8 +75,8 @@ composition run passed `85` tests on CPython 3.11.15. Full `make verify` then pa
 `1236` tests on each declared runtime: CPython 3.11.15 in 584.83 seconds and CPython 3.14.2
 in 603.83 seconds, including policy, lint, and fixture checks. GitHub run `37901279636`
 also passed both foundation jobs, package/wheel checks, policy, and GitGuardian. Subsequent
-scope and catalog repairs are recorded above. Complete checkpoint time consumption, cold
-reconstruction, and ADR-0019 step 6 remain open.
+scope, catalog and qualified lifecycle repairs are recorded above. At this historical
+recovery-only boundary, checkpoint time consumption and cold reconstruction remained open.
 The mission remains repository-owned fixtures only; no provider, live target, spending,
 isolation, execution, finding, income, or comparative-superiority claim follows.
 
@@ -70,7 +97,7 @@ auto-delete merged branches; record CI and GitGuardian evidence honestly and nev
 CI run passed when it did not.
 
 **Founder intent (not derivable from the repo).** Bounty/audit income is a real survival
-priority for the founder, not a hobby. The foundation is deep and world-class; the *finder*
+priority for the founder, not a hobby. The foundation is extensive; the *finder*
 is deliberately tiny (six rule classes, two fixtures, zero findings). Foundation progress
 does not by itself move toward income — say so honestly. The faster honest path to money is a
 real EVM/Solidity finder plus human-in-the-loop audit-contest work, but that consciously
@@ -1297,18 +1324,15 @@ Known-bads now cover:
 
 ## Open foundation-integrity blockers
 
-1. The separate networkless harness authenticates and semantically qualifies signed
-   repository-owned time/revocation packages, but modeled commands still consume their
-   own code-derived assertions. No provider-native adapter or independently administered
-   source proves trustworthy clock or current revocation freshness; the ordinary fixture
-   CLI remains on the legacy profile.
+1. Qualified fixture enrollment now consumes signed packages throughout finality, but no
+   provider-native adapter or independently administered source proves trustworthy UTC or
+   current real-world revocation. The ordinary fixture CLI remains on the legacy profile.
 2. Modeled commands persist and require exact-current checkpoint lineages, but no qualified
    externally authenticated and durable anchor/catalog/witness survives local database
    loss or proves non-equivocation.
-3. The durable blocked disposition, exact reason, and governed recovery decision are now
-   specified, deterministically proved, and persisted under schema version 3. No recovery
-   path yet produces an observation or consumes a decision, so typed blocked results
-   remain attempt-local in the live lifecycle.
+3. Durable blocked observations and governed recovery are persisted and consumed, including
+   exact phase/attempt binding. Their qualified time and provider administration remain
+   deterministic fixture evidence; connecting real providers requires an admitted profile.
 4. SQLite retains a documented same-user pathname race, and a coherent offline rewrite
    remains undetectable without an authenticated external latest-head catalog.
 5. Production storage still needs an accepted SQLite/VFS/filesystem/device profile,
@@ -1327,7 +1351,14 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Exact next-session pickup: ADR-0019 step 6 — the facade-driven qualified-mode service and full vertical.** All four record phases are now wired to qualified mode and on `main`: the acceptance-primitive layer in `etzio/kernel/qualified_evidence_v1.py`; schema-version-4 store enrollment; the store-layer consumers `verify_qualified_anchor_evidence` / `verify_qualified_revocation_evidence` / `verify_qualified_head_floor_evidence`; **step 3** (`CheckpointCandidateRecordV1`), **step 4** (`PendingIntegrityTransitionV1`), and **step 5** (`FinalizedIntegrityTransitionV1`), each with `acceptance_mode`, transient sealed bundles, a mode-branching record gate, and a store path that cross-checks the mode and reauthenticates under the enrolled roots. The coherent-lineage end-to-end **positives** for the pending and checkpoint phases are proved in `tests/test_qualified_finality_lineage_v1.py`; the finalization phase has its record/store wiring and live refusals proved there, with only its end-to-end positive outstanding.
+**Current pickup, 2026-10-09:** retain exact-commit CI for the locally validated qualified
+lifecycle tranche, then publish the reviewed result. See the top of this file
+for current evidence. The next external-authority gate remains provider-native qualification
+under an explicitly admitted profile, independent administration evidence, externally durable
+latest-head authority, and the documented storage/isolation gates. Finder breadth and live
+targets remain outside the current fixture execution surface.
+
+**Historical pickup before the 2026-10-09 tranche (superseded): ADR-0019 step 6.** All four record phases are now wired to qualified mode and on `main`: the acceptance-primitive layer in `etzio/kernel/qualified_evidence_v1.py`; schema-version-4 store enrollment; the store-layer consumers `verify_qualified_anchor_evidence` / `verify_qualified_revocation_evidence` / `verify_qualified_head_floor_evidence`; **step 3** (`CheckpointCandidateRecordV1`), **step 4** (`PendingIntegrityTransitionV1`), and **step 5** (`FinalizedIntegrityTransitionV1`), each with `acceptance_mode`, transient sealed bundles, a mode-branching record gate, and a store path that cross-checks the mode and reauthenticates under the enrolled roots. The coherent-lineage end-to-end **positives** for the pending and checkpoint phases are proved in `tests/test_qualified_finality_lineage_v1.py`; the finalization phase has its record/store wiring and live refusals proved there, with only its end-to-end positive outstanding.
 
 Step 6: build a facade-driven qualified-mode `RepositoryOwnedDeterministicModeledIntegrityServiceV1` (and a qualified `ModeledIntegrityFinalizingEventStoreV1` path) that produces a *self-consistent* qualified vertical — including a head-catalog fixture whose expected head matches the checkpoint the service itself produced, which is the one missing piece for the finalization positive (the anchor works today because its adapter builds Merkle leaves dynamically; the catalog adapter's head is fixed, so the service must construct the catalog fixture around its own checkpoint). Then prove the full qualified `authority_admitted → verifier_receipt_admitted` vertical and qualified-path crash recovery, mirroring the modeled recovery matrix. The template is the coherent-lineage construction in `tests/test_qualified_finality_lineage_v1.py` (`_coherent_qualified_pending`, `_scoped_anchor_bundle`, `_qualified_checkpoint`) plus `prepare_checkpoint_candidate`'s qualified-mode parameters. Preserve every ADR-0012 integration requirement and store-error classification. A real provider still requires its own admitted grant.
 

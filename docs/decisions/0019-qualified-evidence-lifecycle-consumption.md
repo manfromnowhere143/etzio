@@ -35,6 +35,126 @@ This correction does not by itself finish checkpoint time consumption, catalog p
 binding, or cold reconstruction from retained packages. Those remain step-6 obligations;
 the transient bundles are not proof of durable reauthentication.
 
+## Step-6 implementation contract, 2026-10-09
+
+Status: implemented; both local release suites pass `1366` tests; exact-commit CI is pending.
+Before this tranche, the
+three record positives were partial: anchor time was unsigned, transient bundles disappeared
+on serialization, and replay did not reconstruct provider requests. The following contract
+now governs the service and store; the earlier implementation sequence below remains a
+historical record and does not override this reconstruction requirement.
+
+### Deterministic requests and explicit genesis
+
+The fixture lifecycle uses the permanently enrolled time and head profiles. Both must name
+the enrolled service and environment and exactly match its validation policy. Enrollment
+and cold replay check canonical profile bytes and their indexed identities. No provider
+connection or independently administered authority is implied.
+
+Decision-time requests use the scope correction above. Checkpoint-time requests use the
+same decision scope and nonce, purpose `checkpoint`, and imprint
+`content_id("qualified_checkpoint_time_imprint_v1", {"pending_record_id": pending.record_id})`.
+The pending record is already committed when checkpoint time is acquired; using its identity
+avoids a cycle through the anchor statement that will contain the returned time evidence.
+
+Derived nonces are the 64 lowercase hexadecimal characters of these content identities:
+
+| Request | Content-identity domain | Exact body |
+|---|---|---|
+| Revocation | `qualified_fixture_revocation_request_v1` | `namespace`, `time_bundle_id` |
+| Anchor | `qualified_fixture_anchor_request_v1` | `anchor_statement_id`, `time_bundle_id` |
+| Catalog and its monitors | `qualified_fixture_catalog_request_v1` | `phase` (`prior` or `current`), `time_bundle_id`, `checkpoint_id` |
+
+The `checkpoint_id` in a prior catalog request is the retained global predecessor's identity;
+in a current request it is the newly retained candidate's identity. Every request also binds
+its exact profile, source, mission, authority, target, event, transition intent, and the typed
+predecessor fields required by its adapter contract.
+
+Revocation predecessors come from the previous global pending record's exact namespace
+floors. Empty history uses root/version zero and
+`content_id("qualified_fixture_revocation_genesis_v1", {"profile_id": time_profile.profile_id,
+"namespace": namespace})`. The repository fixture advances metadata version with the global
+transition, retaining unanimous configured metadata and floor witnesses.
+
+Each fixture log starts with one fixed genesis leaf: canonical bytes containing exactly
+`leaf_schema` = `etzio.qualified-fixture-log-genesis.v1`, the head `profile_id`, enrolled
+`source_id`, and `log_origin`. Its RFC 9162 leaf hash is the initial root at tree size one.
+Each transition appends one leaf per anchor log, making its prior tree size
+`instance_sequence + 1`. The catalog appends a prior-head projection before pending admission
+and a current-head projection after checkpoint publication. Its prior root/size always come
+from the preceding qualified catalog observation, starting at the explicit genesis leaf.
+
+Qualified catalog requests and fixture heads admit sequence `-1` only for the corresponding
+domain-separated global or mission genesis identity, with absent attestation provenance.
+They reject smaller sequences, invented genesis identities, mixed provenance, and a mission
+head ahead of the global head. `HeadCheckpointFloorV1` already carries this protocol meaning;
+the adapter path must preserve it. Genesis observations still require signed qualified
+catalog and monitor packages; there is no unsigned-provider fallback.
+
+### Reconstruction and authority
+
+A separate lifecycle reconstruction module rebuilds requests from canonical phase records,
+the pinned profiles, and validated predecessor context. It selects exact retained package
+BLOBs by typed evidence references, authenticates the outer signed packages before consuming
+inner claims, reruns time/revocation/anchor/catalog qualification, and compares every claimed
+mapping with the freshly derived result. Unreferenced, missing, substituted, wrongly scoped,
+or invalidly signed packages refuse. The same reconstruction governs admission and cold
+replay, including an unresolved transition.
+
+Each lifecycle anchor is the last leaf of exactly one append to its validated predecessor
+log. Reconstruction derives that predecessor's append frontier and recomputes the new root;
+an inclusion proof in a disconnected, same-size or unrelated log is insufficient.
+
+Transient bundles become optional non-authoritative inputs. When supplied, including on an
+idempotent retry, they must freshly authenticate and agree with independent reconstruction;
+their absence after serialization is valid. Replay never
+calls a provider, accesses staging, reads an ambient clock, or falls back to unsigned content.
+Unsupported interim qualified records refuse; no historical profile or evidence is rewritten.
+
+The qualified anchor record must retain signed checkpoint-time packages. Its qualified mode
+is explicit in its canonical bytes; the legacy modeled form keeps its existing bytes and
+identity. Redundant modeled tags and mixed-mode lineages refuse. The store verifies the
+checkpoint time's scope, purpose, nonce, imprint, complete hull, policy, and evidence against
+the actual pending and anchor before accepting the phase. The checkpoint then uses that
+same authenticated anchor time.
+
+The store's private replay path reads and validates qualified profiles without recursively
+calling its public validation entrypoint. Provider reconstruction stays inside that trusted
+store boundary; provider acquisition remains outside SQLite transactions. A service can
+propose signed fixture evidence but cannot select or downgrade the store's enrolled mode.
+
+### Service and restart
+
+The qualified fixture service may compose the existing modeled signer and catalog state
+machine. It emits signed packages for every provider claim, including prior head floors,
+and leaves kernel decision/checkpoint authority checks intact. A point interval at the
+fixture event's declared time is permitted; it is simulated time, never trustworthy UTC.
+
+Qualified anchor registration receives the exact pending record explicitly. The retained
+anchor alone lacks the decision's transition intent and nonce and cannot serve as an
+implicit process cache. Finalization keeps the existing floor-plus-package service result;
+the facade selects the enrolled mode and the store reconstructs the qualified evidence.
+
+The fixture service may reconstruct an append frontier from a verified last-leaf inclusion
+proof, its leaf, root, and size. Such a mathematical state carries no authentication or
+latest-head authority. Appending must reproduce the same RFC 9162 root, inclusion proof, and
+consistency proof as the independent full-tree implementation. This permits deterministic
+restart without retaining an entire simulated provider log in process memory.
+
+The exact-one-append arithmetic and fixed genesis leaves belong to this repository-fixture
+lifecycle contract. They are not a universal layout for a shared external transparency log.
+A native-provider profile must separately specify its request, predecessor, cursor and
+restart semantics and retain the required inclusion, consistency and latest-head authority
+proofs. A fixture profile cannot authorize that change by substitution.
+
+Required evidence includes the complete `authority_admitted` to
+`verifier_receipt_admitted` vertical; interleaved missions; fresh-process and fresh-service
+recovery without transient bundles or staging; byte-identical retry around every phase and
+protocol write; invalid signatures and validly signed foreign scope on cold replay; profile
+and mode substitution; and preserved governed-recovery, store-error, and unresolved-barrier
+behavior. Power loss, independent administration, external durability, real UTC, execution,
+finding validity, and live-target authority remain separate gates.
+
 ## Context
 
 ADR-0018 built the complete acceptance-primitive layer — anchor, revocation,
@@ -231,18 +351,22 @@ both runtimes and CI reproduction:
    fixture catalog head cannot be scoped to a produced checkpoint (unlike the anchor's
    dynamic leaves), so a full facade-driven qualified vertical that emits a catalog
    head matching its own checkpoint is required.
-6. **Qualified-mode modeled service and crash recovery.** A qualified-mode
-   `RepositoryOwnedDeterministicModeledIntegrityServiceV1` produces signed
-   evidence from the harnesses so a fully coherent qualified lineage — whose
-   checkpoint statement the qualified bundle authenticates — can finalize;
-   injected-interruption known-bads across the qualified finality vertical, plus
-   a complete qualified-mode receipt vertical mirroring the modeled one.
+6. **Qualified fixture service and crash recovery.** *(Implemented; both local release suites
+   pass `1366` tests, 2026-10-09; exact-commit CI pending.)*
+   `RepositoryOwnedQualifiedFixtureIntegrityServiceV1` composes the
+   modeled kernel signer/catalog core with signed fixture providers. The separate
+   `qualified_lifecycle_v1` module reconstructs all four phases from canonical bytes and
+   exact enrolled roots inside store admission and cold replay. The full receipt path,
+   interleaved missions, fresh-process reconstruction, interruption matrix, concurrent
+   recovery and coherent offline provider-forgery controls exercise this path. Transient
+   bundles are optional and cannot replace retained evidence. No schema migration is
+   needed; unsupported interim qualified bytes refuse rather than being rewritten.
 
 ## Claim boundary
 
-This is a design record. It changes no code, schema, or test. When implemented,
-it establishes that the modeled finality lifecycle can consume authenticated
-signed fixture evidence under a permanently enrolled qualified profile. It does
+This decision is implemented by the qualified fixture service, store reconstruction and
+its retained tests. Release status is recorded in the handoff. It establishes consumption
+of authenticated signed fixture evidence under a permanently enrolled qualified profile. It does
 not establish trustworthy UTC, current real-world revocation, real head
 non-equivocation, independently administered providers, external durability,
 execution, a finding, or live-target authority. The qualified profiles are

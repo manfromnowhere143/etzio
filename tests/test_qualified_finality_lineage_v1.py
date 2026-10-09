@@ -1,21 +1,13 @@
-"""End-to-end coherent qualified finality lineage (ADR-0019 steps 3-4 positives).
+"""End-to-end coherent qualified finality lineage (ADR-0019).
 
-Builds a fully coherent qualified lineage on a qualified store -- a qualified pending whose
-decision the enrolled bundles authenticate, a modeled anchor statement, and a qualified
-checkpoint candidate whose anchor evidence the enrolled roots reauthenticate -- and proves the
-store's checkpoint-retention positive that ADR-0019 step 3 had to defer (the qualified-store
-checkpoint path could not be exercised until step 4 made the pending phase enforce
-qualified-mode consistency, so a coherent qualified pending is the prerequisite).
-
-The qualified anchor bundle is scoped to the modeled anchor's derived statement identity: the
-repository-owned anchor adapters build their Merkle leaves dynamically and recompute a genuine
-RFC 9162 inclusion proof, so the bundle authenticates the exact leaf the lineage claims. This
-is the construction the step-6 qualified-mode service will own; here it is proved end to end.
+The step-6 fixture service builds signed pending, anchor-time and checkpoint packages.
+The store reauthenticates their canonical bytes under enrolled profiles. These tests retain
+the earlier phase positives and refusals; the complete receipt path, cold replay and crash
+matrix live in test_qualified_fixture_lifecycle_v1 and test_qualified_cold_replay_v1.
 """
 
 from __future__ import annotations
 
-import hashlib
 from dataclasses import replace
 from pathlib import Path
 
@@ -28,12 +20,7 @@ from test_qualified_pending_record_wiring_v1 import (
 )
 
 from etzio.kernel.head_authority_adapters_v1 import (
-    HeadAnchorRequestV1,
     qualify_anchor_bundle_v1,
-)
-from etzio.kernel.integrity_adapters_v1 import (
-    TrustedTimeRequestV1,
-    qualify_time_bundle_v1,
 )
 from etzio.kernel.integrity_transition import (
     INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1,
@@ -41,73 +28,34 @@ from etzio.kernel.integrity_transition import (
     FinalizedIntegrityTransitionV1,
 )
 from etzio.kernel.store import EventStoreError
-from etzio.protocol import content_id
 
 
 def _checkpoint_time_bundle(hfx, pending):
-    """A checkpoint-purpose qualified time bundle scoped to the pending decision."""
+    from test_qualified_pending_record_wiring_v1 import _profile_aligned_service
 
-    tfx = hfx.time_fixture
-    decision = pending.decision
-    requests = {
-        adapter.source_id: TrustedTimeRequestV1.issue(
-            profile=tfx.profile,
-            source_id=adapter.source_id,
-            purpose="checkpoint",
-            mission_id=pending.mission_id,
-            authority_id=decision.authority_id,
-            target_id=decision.target_id,
-            event_digest=pending.event_digest,
-            transition_intent_id=decision.transition_intent_id,
-            imprint_id=content_id(
-                "qualified_finality_lineage_checkpoint_imprint",
-                {"event_digest": pending.event_digest},
-            ),
-            request_nonce=decision.request_nonce,
-        )
-        for adapter in tfx.time_adapters
-    }
-    return qualify_time_bundle_v1(
-        profile=tfx.profile,
-        requests=requests,
-        signed_evidence={
-            a.source_id: a.acquire(requests[a.source_id]) for a in tfx.time_adapters
-        },
-    )
+    from etzio.kernel.qualified_fixture_service_v1 import RepositoryOwnedQualifiedFixtureIntegrityServiceV1
+    from etzio.kernel.qualified_lifecycle_v1 import reconstruct_checkpoint_time_v1
+
+    service = RepositoryOwnedQualifiedFixtureIntegrityServiceV1(core=_profile_aligned_service(hfx), fixture=hfx)
+    anchor = service.prepare_anchor_statement(pending)
+    return reconstruct_checkpoint_time_v1(profile=hfx.time_fixture.profile, pending=pending, anchor=anchor)
+
 
 
 def _scoped_anchor_bundle(hfx, checkpoint_tb, pending, anchor):
-    """A qualified anchor bundle for the modeled anchor's exact statement identity."""
+    from test_qualified_pending_record_wiring_v1 import _profile_aligned_service
 
-    decision = pending.decision
-    requests = {
-        adapter.source_id: HeadAnchorRequestV1.issue(
-            profile=hfx.profile,
-            source_id=adapter.source_id,
-            mission_id=pending.mission_id,
-            authority_id=decision.authority_id,
-            target_id=decision.target_id,
-            event_digest=pending.event_digest,
-            transition_intent_id=decision.transition_intent_id,
-            anchor_statement_id=anchor.anchor_statement_id,
-            instance_sequence=pending.instance_sequence,
-            time_bundle=checkpoint_tb,
-            prior_tree_size=hfx.anchor_prior_tree_size,
-            request_nonce=hashlib.sha256(
-                f"anchor-{anchor.anchor_statement_id}".encode()
-            ).hexdigest(),
-        )
-        for adapter in hfx.anchor_adapters
-    }
-    return qualify_anchor_bundle_v1(
-        profile=hfx.profile,
-        time_profile=hfx.time_fixture.profile,
-        time_bundle=checkpoint_tb,
-        requests=requests,
-        signed_evidence={
-            a.source_id: a.acquire(requests[a.source_id]) for a in hfx.anchor_adapters
-        },
-    )
+    from etzio.kernel.head_authority_adapters_v1 import SignedHeadEvidenceV1
+    from etzio.kernel.qualified_fixture_service_v1 import RepositoryOwnedQualifiedFixtureIntegrityServiceV1
+    from etzio.kernel.qualified_lifecycle_v1 import qualified_anchor_requests_v1
+
+    service = RepositoryOwnedQualifiedFixtureIntegrityServiceV1(core=_profile_aligned_service(hfx), fixture=hfx)
+    blobs = service.register_anchor_statement(anchor, pending=pending)
+    return qualify_anchor_bundle_v1(profile=hfx.profile, time_profile=hfx.time_fixture.profile,
+        time_bundle=checkpoint_tb, requests=qualified_anchor_requests_v1(
+            profile=hfx.profile, time_bundle=checkpoint_tb, pending=pending, anchor=anchor),
+        signed_evidence={blob.source_id: SignedHeadEvidenceV1.from_canonical_bytes(blob.content) for blob in blobs})
+
 
 
 def _drive_pending_and_anchor(store, service, hfx):
@@ -120,7 +68,10 @@ def _drive_pending_and_anchor(store, service, hfx):
         )
         == event
     )
-    anchor = service.prepare_anchor_statement(pending)
+    from etzio.kernel.qualified_fixture_service_v1 import RepositoryOwnedQualifiedFixtureIntegrityServiceV1
+
+    qualified = RepositoryOwnedQualifiedFixtureIntegrityServiceV1(core=service, fixture=hfx)
+    anchor = qualified.prepare_anchor_statement(pending)
     assert store.retain_integrity_anchor_statement(anchor) == anchor
     return event, pending, anchor
 
@@ -208,7 +159,7 @@ def test_qualified_checkpoint_replay_is_idempotent(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_a_qualified_checkpoint_without_bundles_is_refused(tmp_path: Path) -> None:
+def test_a_qualified_checkpoint_without_transient_bundles_is_reconstructed(tmp_path: Path) -> None:
     hfx = _head_fixture()
     store, service = _aligned_qualified_store(tmp_path, hfx)
     with store:
@@ -222,9 +173,7 @@ def test_a_qualified_checkpoint_without_bundles_is_refused(tmp_path: Path) -> No
             candidate.to_canonical_bytes()
         )
         assert stripped.anchor_bundle is None
-        with pytest.raises(EventStoreError) as exc:
-            store.retain_integrity_checkpoint_candidate(stripped)
-        assert "sealed qualified" in str(exc.value)
+        assert store.retain_integrity_checkpoint_candidate(stripped) == candidate
 
 
 def test_checkpoint_retention_refuses_a_foreign_anchor_bundle(tmp_path: Path) -> None:
@@ -242,7 +191,14 @@ def test_checkpoint_retention_refuses_a_foreign_anchor_bundle(tmp_path: Path) ->
         )
         # Swap in a bundle from foreign roots for the same claimed checkpoint.
         foreign_tb = _checkpoint_time_bundle(other, pending)
-        foreign_ab = _scoped_anchor_bundle(other, foreign_tb, pending, anchor)
+        from test_qualified_pending_record_wiring_v1 import _profile_aligned_service
+
+        from etzio.kernel.qualified_fixture_service_v1 import RepositoryOwnedQualifiedFixtureIntegrityServiceV1
+
+        foreign_service = RepositoryOwnedQualifiedFixtureIntegrityServiceV1(
+            core=_profile_aligned_service(other), fixture=other)
+        foreign_anchor = foreign_service.prepare_anchor_statement(pending)
+        foreign_ab = _scoped_anchor_bundle(other, foreign_tb, pending, foreign_anchor)
         forged = replace(candidate, anchor_bundle=foreign_ab, time_bundle=foreign_tb)
         with pytest.raises(EventStoreError) as exc:
             store.retain_integrity_checkpoint_candidate(forged)
@@ -256,7 +212,7 @@ def test_checkpoint_retention_refuses_a_foreign_anchor_bundle(tmp_path: Path) ->
 # ---------------------------------------------------------------------------
 
 
-def test_a_qualified_finalization_without_bundles_is_refused(tmp_path: Path) -> None:
+def test_unsigned_finalization_bytes_are_refused_without_transient_bundles(tmp_path: Path) -> None:
     hfx = _head_fixture()
     store, service = _aligned_qualified_store(tmp_path, hfx)
     with store:
@@ -272,7 +228,7 @@ def test_a_qualified_finalization_without_bundles_is_refused(tmp_path: Path) -> 
         )
         with pytest.raises(EventStoreError) as exc:
             store.finalize_integrity_transition(final)
-        assert "sealed qualified" in str(exc.value)
+        assert "reauthentication" in str(exc.value)
 
 
 def test_finalization_refuses_a_foreign_head_floor_bundle(tmp_path: Path) -> None:

@@ -39,7 +39,9 @@ from etzio.integrity_v1 import (
     EvidenceReferenceV1,
     HeadCheckpointFloorV1,
     IntegrityValidationPolicyV1,
+    head_checkpoint_genesis_id,
     integrity_key_id,
+    mission_checkpoint_genesis_id,
 )
 from etzio.kernel.integrity_adapters_v1 import (
     IntegrityAdapterTrustProfileV1,
@@ -393,6 +395,12 @@ def _require_nonnegative_int(value: object, field: str) -> int:
 def _require_positive_int(value: object, field: str) -> int:
     if type(value) is not int or value <= 0 or value > MAX_EPOCH_SECOND:
         _reject("invalid_head_integer", f"{field} must be a bounded positive integer")
+    return value  # type: ignore[return-value]
+
+
+def _require_head_sequence(value: object, field: str) -> int:
+    if type(value) is not int or value < -1 or value > MAX_EPOCH_SECOND:
+        _reject("invalid_head_integer", f"{field} must be a bounded sequence at or above genesis -1")
     return value  # type: ignore[return-value]
 
 
@@ -1555,8 +1563,20 @@ class HeadCatalogRequestV1:
                 "catalog request requires a catalog or monitor evidence role",
             )
         _require_tree_size(self.prior_tree_size, "prior_tree_size")
-        _require_nonnegative_int(self.prior_instance_sequence, "prior_instance_sequence")
-        _require_nonnegative_int(self.prior_mission_event_seq, "prior_mission_event_seq")
+        _require_head_sequence(self.prior_instance_sequence, "prior_instance_sequence")
+        _require_head_sequence(self.prior_mission_event_seq, "prior_mission_event_seq")
+        global_genesis = head_checkpoint_genesis_id(
+            service_instance_id=self.service_instance_id, environment_id=self.environment_id,
+        )
+        mission_genesis = mission_checkpoint_genesis_id(
+            service_instance_id=self.service_instance_id, environment_id=self.environment_id,
+            mission_id=self.mission_id,
+        )
+        if (
+            (self.prior_instance_sequence == -1) != (self.prior_checkpoint_id == global_genesis)
+            or (self.prior_mission_event_seq == -1) != (self.prior_mission_checkpoint_id == mission_genesis)
+        ):
+            _reject("head_genesis_identity_mismatch", "a genesis predecessor requires its exact checkpoint identity")
         if self.prior_mission_event_seq > self.prior_instance_sequence:
             _reject(
                 "invalid_head_request",
@@ -2067,8 +2087,8 @@ def _validate_catalog_claim(
             "head_scope_mismatch",
             "catalog claim mission does not match the requested scope",
         )
-    _require_nonnegative_int(body["instance_sequence"], "instance_sequence")
-    _require_nonnegative_int(body["mission_event_seq"], "mission_event_seq")
+    _require_head_sequence(body["instance_sequence"], "instance_sequence")
+    _require_head_sequence(body["mission_event_seq"], "mission_event_seq")
     _require_digest(body["checkpoint_id"], "checkpoint_id")
     _require_digest(body["mission_checkpoint_id"], "mission_checkpoint_id")
     for field in (
@@ -3052,7 +3072,7 @@ class ExpectedHeadStateV1:
             "instance_sequence",
             "mission_event_seq",
         ):
-            _require_nonnegative_int(getattr(self, field), field)
+            _require_head_sequence(getattr(self, field), field)
         if self.mission_event_seq > self.instance_sequence:
             _reject(
                 "invalid_expected_head",

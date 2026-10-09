@@ -31,10 +31,13 @@ confidence.**
 > revocation; RFC 9162 anchor, catalog, and monitor head-authority; and a qualified-evidence
 > acceptance layer); durable governed blocked-finality — specified, persisted, wired into the
 > lifecycle, and crash-recovered; and a schema-version-4 store that pins the qualified
-> adapter roots. The Merkle proofs are checked against the published **RFC 6962/9162
-> reference vectors**, not against Etzio's own prover. `1198` tests pass on CPython 3.11.15
-> and 3.14.2; `19` accepted architecture decisions stand behind them; every consequential
-> gate carries a known-bad that proves it refuses.
+> adapter roots. The opt-in qualified fixture service now carries signed provider packages
+> through the complete lifecycle and reconstructs them from retained bytes on cold replay.
+> Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
+> recovery is also compared with the full-tree implementation across `512` tree sizes.
+> The current lifecycle tranche passes `1366` tests on CPython 3.11.15 and 3.14.2 locally;
+> exact-commit CI is pending. The preceding catalog repair passed CI. `19` accepted
+> architecture decisions define the contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
 > [Open gates and next mission](#open-gates-and-next-mission).
@@ -85,8 +88,8 @@ That yields six operating laws:
   exact request/profile/root/policy authentication, complete-roster conservative time
   fusion, full-hull revocation validity/freshness/floor checks, RFC 9162 inclusion and
   consistency verification, unanimous monitor agreement on one catalog head, and sealed
-  mapping for repository-owned signed fixtures. None is connected to modeled finality or
-  lifecycle admission.
+  mapping for repository-owned signed fixtures. An explicitly enrolled qualified mode now
+  consumes their signed packages at all four finality phases and reconstructs them on replay.
 - **Governed blocked finality:** a refused finality attempt is now a durable, reasoned,
   content-addressed observation persisted under SQLite schema version 3. Recovery past a
   block requires a signed decision from a principal and key separated from both the
@@ -94,9 +97,10 @@ That yields six operating laws:
   authorized retry and terminal instance sealing — and neither finalizes, deletes,
   rewrites, mints a checkpoint, or releases the database-global barrier.
 - **Modeled evidence:** receipt outputs and integrity-provider assertions are authenticated
-  or code-derived fixture statements. The modeled-finality provider assertions remain
-  unsigned and code-derived; the separately qualified signed packages do not make them
-  external observations. Neither path establishes execution, trustworthy UTC, current real
+  or code-derived fixture statements. Unsigned modeled mode and qualified signed-fixture
+  mode remain distinct enrollments. Signatures authenticate fixture producers; they do not
+  turn their statements into external observations. Neither path establishes execution,
+  trustworthy UTC, current real
   revocation, independent administration, external durability, or a finding.
 - **Blocked target system:** exploit construction, hard isolation, independent
   reproduction, adjudication, governed disclosure, evaluated promotion, live targets, and
@@ -170,8 +174,9 @@ The protocol-v1 foundation includes:
 - an irreversible schema-v2 modeled-integrity profile for an empty history, with atomic
   event-plus-pending retention, four append-only recovery phases, byte-exact two-stage
   idempotency, one instance-global pending barrier, and exact current global/mission floor
-  finalization before the modeled facade returns; this profile still uses its unsigned
-  code-derived provider assertions and does not consume the separate qualified mapping;
+  finalization before the fixture facade returns; the default modeled profile uses unsigned
+  assertions, while schema-v4 qualified enrollment requires signed packages and cold
+  reconstruction under exact copied roots, scope and policy;
 - exact-type composition boundaries that copy trust and policy inputs and rebuild fresh
   authenticated snapshots from verified wire before continuity logic runs;
 - exact fixture manifests, a bounded private filesystem staging/cache store, and a
@@ -223,9 +228,9 @@ claim.
 
 This compact diagram shows retained repository-fixture paths only. Green nodes and solid
 arrows are implemented; an `optional` edge is implemented but is not used by the supported
-CLI. Blue is the empty-store modeled-finality qualification surface. Amber is the separate
-implemented signed-fixture adapter-qualification surface; it deliberately terminates at a
-sealed mapping and has no edge into lifecycle or modeled finality. Legacy behavior-only
+CLI. Blue is the empty-store fixture-finality surface. Amber is signed-fixture adapter
+qualification, consumed only under explicit qualified enrollment. Its signed packages are
+reconstructed at store admission and replay. Legacy behavior-only
 stubs and blocked target roles are intentionally excluded here and named precisely in the
 status table below. The complete target-state authority topology is in
 [Architecture](docs/ARCHITECTURE.md#target-system); labels, rather than color alone, carry
@@ -250,18 +255,18 @@ flowchart TB
     subgraph OPTIONAL["Optional implemented paths and storage"]
         direction LR
         VR["ETZIO verification-intent path<br/>modeled lease · resolution · recovery<br/>signed opaque receipt admission · no execution"]
-        DBL[("SQLite schema v2 · legacy profile<br/>supported CLI + ordinary kernel store")]
-        IF["Modeled-integrity finality facade<br/>optional · empty history only"]
-        DBM[("SQLite schema v2 · modeled-integrity profile<br/>permanent after enrollment")]
+        DBL[("SQLite schema v4 · legacy profile<br/>supported CLI + ordinary kernel store")]
+        IF["Fixture-integrity finality facade<br/>mode selected at enrollment"]
+        DBM[("SQLite schema v4 · fixture-integrity profile<br/>permanent after enrollment")]
     end
 
-    subgraph QUAL["Separate implemented signed-fixture adapter qualification"]
+    subgraph QUAL["Implemented signed-fixture adapter qualification"]
         direction LR
         AP["Exact adapter profile<br/>trust root · validation/provider policies<br/>fixed all-source roster"]
         SP["Role-separated signed fixture packages<br/>Ed25519 · exact nonce-bound requests<br/>authenticate before claim parsing"]
         TH["All-source time qualification<br/>common overlap · conservative outer hull"]
         RF["Full-hull revocation qualification<br/>validity · staleness · metadata/floors"]
-        SM["Sealed provider-neutral mapping<br/>fresh reauthentication · exact BLOB coverage<br/>not lifecycle/finality input"]
+        SM["Sealed provider-neutral mapping<br/>fresh reauthentication · exact BLOB coverage<br/>qualified lifecycle input"]
     end
 
     AQ --> K
@@ -279,6 +284,7 @@ flowchart TB
     SP --> RF
     TH --> SM
     RF --> SM
+    SM -->|"qualified enrollment only"| IF
 
     classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
     classDef fixture fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
@@ -292,10 +298,10 @@ flowchart TB
     style QUAL fill:#fff9db,stroke:#f59f00,color:#3d2100
 ```
 
-The optional integrity facade retains four immutable local phases. Its current sources are
-not the separately qualified signed-fixture packages. A future independently administered
-full adapter set must replace the modeled sources inside this state machine; it is not a
-post-success hop:
+The optional integrity facade retains four immutable local phases. Its enrolled mode selects
+unsigned modeled assertions or qualified signed-fixture packages. Both remain local fixture
+sources. A future independently administered adapter set must satisfy the same state machine
+and prove external authority at each trust, write and read boundary:
 
 ```mermaid
 flowchart TB
@@ -307,24 +313,24 @@ flowchart TB
     P3["3 · Checkpoint candidate<br/>retain exact signed head<br/>then modeled publication"]
     P4["4 · Finalization<br/>retain exact current global + mission floor"]
     OK["Facade returns<br/>modeled command success"]
-    FX["Current modeled-finality fixtures<br/>unsigned code-derived provider assertions<br/>not external authority"]
+    FX["Legacy modeled-finality fixtures<br/>unsigned code-derived assertions<br/>not external authority"]
 
-    subgraph QUAL2["Implemented networkless time/revocation qualification · separate proof surface"]
+    subgraph QUAL2["Networkless time/revocation qualification · consumed by qualified mode"]
         direction LR
         QP["Exact profile · trust root · policies<br/>fixed signed-fixture roster"]
         QT["All-source common overlap<br/>conservative time outer hull"]
         QR["Full-hull revocation validity/freshness<br/>metadata + all floor sources agree"]
         QM["Freshly reauthenticated sealed mapping<br/>exact signed-BLOB coverage"]
-        QN["Contract boundary<br/>not consumed by pending transition<br/>or any lifecycle command"]
+        QN["Qualified pending and anchor time<br/>reconstruct exact requests<br/>authenticate retained signed bytes"]
     end
 
-    subgraph QUAL3["Implemented networkless head-authority qualification · separate proof surface"]
+    subgraph QUAL3["Networkless head-authority qualification · consumed by qualified mode"]
         direction LR
         HP["Exact profile · trust root · log origins<br/>2 anchors · 1 catalog · 2 monitors"]
         HA["Byte-bound registration leaf<br/>RFC 9162 inclusion proof recomputed"]
         HC["RFC 9162 consistency from retained root<br/>equal size cannot change root"]
         HM["Unanimous monitor agreement<br/>split view refused"]
-        HN["Contract boundary<br/>not consumed by pending transition<br/>or any lifecycle command"]
+        HN["Qualified anchor and catalog evidence<br/>exact append and head projection<br/>cold reconstruction under enrolled roots"]
     end
 
     subgraph BLOCKED["Implemented governed blocked finality · schema v3 · opt-in"]
@@ -335,7 +341,7 @@ flowchart TB
         BB["Barrier untouched<br/>retaining a block never releases finality"]
     end
 
-    NEXT["Exact next gate<br/>consume qualified signed evidence in the records<br/>schema-selected acceptance mode"]
+    NEXT["Next authority gate<br/>provider-native qualification<br/>independent administration evidence"]
     EXT["Future full adapter set<br/>independently administered, authenticated,<br/>durable, monitored, and qualified"]
 
     E --> D --> P1 --> RH --> P2 --> P3 --> P4 --> OK
@@ -349,7 +355,13 @@ flowchart TB
     QT --> QM
     QR --> QM
     QM --> QN
-    QN -. "roadmap succession · no runtime edge" .-> NEXT
+    QN --> D
+    QN --> P2
+    HP --> HA --> HC --> HM --> HN
+    HN --> D
+    HN --> P3
+    HN --> P4
+    HN -. "external authority remains blocked" .-> NEXT
     NEXT -. "later provider qualification" .-> EXT
     EXT -. "future replacement<br/>at trust, write, and read boundaries" .-> D
     EXT -.-> P2
@@ -373,11 +385,11 @@ observation, and recovery past a block requires a role-separated signed decision
 terminal seal — that never finalizes, rewrites, or releases the barrier. See the canonical
 [integrity-evidence architecture](docs/ARCHITECTURE.md#integrity-evidence-contract),
 [ADR-0011](docs/decisions/0011-crash-safe-modeled-integrity-finality.md#four-immutable-local-phases),
-and [ADR-0014 through ADR-0017](docs/decisions/README.md). The separate signed-fixture lanes
-end at `QualifiedIntegrityInputsV1` and `QualifiedHeadAuthorityInputsV1`; a complete
-networkless acceptance layer can now derive the exact evidence a record binds from a freshly
-reauthenticated bundle, but no lifecycle record consumes it yet. The remaining step is a
-schema-selected consumption mode, designed in
+and [ADR-0014 through ADR-0017](docs/decisions/README.md). In qualified mode, a separate
+reconstructor derives time, revocation, anchor and catalog requests from canonical records,
+checks their signed packages and log proofs, and compares the complete evidence closure.
+Transient bundles are optional; if supplied, they must freshly authenticate and agree,
+including on retry. The service does not choose the store's mode. See
 [ADR-0019](docs/decisions/0019-qualified-evidence-lifecycle-consumption.md).
 
 | Plane | Unit | Responsibility | Repository status |
@@ -466,28 +478,21 @@ The next mission is not more detector breadth. The evidence foundation is deep: 
 integrity-evidence contract, crash-safe modeled finality across four immutable phases, three
 networkless qualification harnesses, durable governed blocked-finality — specified,
 persisted, wired into the lifecycle, and crash-recovered — and a schema-version-4 store that
-pins the qualified adapter roots. The qualified-evidence acceptance layer can already derive
-the exact evidence any finality record binds from a freshly reauthenticated signed bundle.
+pins the qualified adapter roots. The qualified fixture service now completes the same
+four-phase lifecycle with signed provider packages, exact profile alignment and
+reconstruction from retained bytes. Release
+validation of this tranche is recorded in the handoff; these are still repository fixtures.
 
 What remains before a finding pipeline can exist:
 
-1. finish wiring the qualified-signed acceptance mode into the finality records so the
-   lifecycle consumes authenticated evidence instead of unsigned code-derived assertions
-   ([ADR-0019](docs/decisions/0019-qualified-evidence-lifecycle-consumption.md)) — the
-   pending (step 4), checkpoint (step 3), and finalization (step 5) records are all wired,
-   with the pending and checkpoint phases proved end to end on a coherent qualified lineage
-   (a qualified pending appends and a qualified checkpoint is retained under store
-   reauthentication) and the finalization phase's wiring and live refusals proved; a
-   facade-driven qualified-mode service that emits a full self-consistent qualified vertical
-   (and the finalization end-to-end positive) remains;
-2. qualify independently administered trusted-time, revocation, anchor, catalog, and monitor
+1. qualify independently administered trusted-time, revocation, anchor, catalog, and monitor
    providers, and prove external latest-head authority survives local database loss;
-3. close the documented same-user SQLite pathname and coherent offline-rewrite boundary, and
+2. close the documented same-user SQLite pathname and coherent offline-rewrite boundary, and
    accept a concrete VFS, device, quota, backup, process-kill, and power-fault storage
    profile with sensitive-evidence access control, encryption, and retention;
-4. replace opaque modeled outputs with structured, independently produced execution evidence;
+3. replace opaque modeled outputs with structured, independently produced execution evidence;
    and
-5. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
+4. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
 
 Only then does the benchmark-first EVM pack run, and only after the integrity, isolation,
 benchmark, and exact-`TargetContract` gates close may a strictly authorized bounty-research

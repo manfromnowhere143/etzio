@@ -93,12 +93,10 @@ def _modeled_store(tmp_path: Path):
 
 
 def _qualified_store(tmp_path: Path, hfx):
-    store = _modeled_store(tmp_path)
-    store.enroll_qualified_acceptance(
-        qualified_time_profile=hfx.time_fixture.profile,
-        qualified_head_profile=hfx.profile,
-    )
-    return store
+    from test_qualified_pending_record_wiring_v1 import _aligned_qualified_store
+
+    return _aligned_qualified_store(tmp_path, hfx)[0]
+
 
 
 def _verify(store, hfx, time_bundle, anchor_bundle, **overrides):

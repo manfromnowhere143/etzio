@@ -142,19 +142,24 @@ or skips an attempt ordinal, never releases the barrier, and never reclassifies 
 failure; the unauthorized-recovery refusal carries the retained reason, and a
 non-consequential status interface exposes the blocked state without resolving it.
 
-The three qualification harnesses are contract proof only and are not consumed by modeled
-finality unless the governed binding is configured. Modeled finality still uses unsigned, deterministic,
-code-derived provider assertions. No real or native provider is connected, and no external
-durability, trustworthy UTC, current real-world revocation, independent administration,
-real non-equivocation, execution, or finding claim follows.
+ADR-0019 now has an opt-in qualified signed-fixture lifecycle service. Its store reconstructs
+all four phases from canonical provider packages under the enrolled profiles, including
+checkpoint time, prior and current catalog projections, cold replay and idempotent retry.
+It preserves the governed recovery state machine and legacy modeled anchor bytes. The
+ordinary fixture CLI still uses its legacy profile; unsigned modeled finality remains a
+separate enrollment. This tranche's release evidence is recorded in the handoff.
+
+All providers remain repository-owned deterministic fixtures. No real or native provider
+is connected, and no external durability, trustworthy UTC, current real-world revocation,
+independent administration, real non-equivocation, execution, or finding claim follows.
 
 Close the remaining foundation-integrity gates before adding finder breadth:
 
 1. qualify independently administered trusted-time, revocation, anchor, catalog, and
    monitor adapters and connect an explicitly admitted profile without weakening the
    retained recovery state machine;
-2. only then qualify independently administered providers and integrate accepted adapter
-   outputs without weakening the retained recovery state machine;
+2. retain provider-native known-bads and independent administration evidence for every
+   accepted output without weakening the retained recovery state machine;
 3. prove external latest-head authority survives local loss, then close the documented
    same-user SQLite pathname and coherent offline-rewrite boundary;
 4. accept and qualify a concrete SQLite/VFS/filesystem/device profile, physical and journal

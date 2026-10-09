@@ -74,13 +74,10 @@ def _modeled_store(tmp_path: Path, name: str = "state"):
 
 
 def _qualified_store(tmp_path: Path, name: str = "state"):
-    store, service = _modeled_store(tmp_path, name)
-    fixture = _built()[0]
-    store.enroll_qualified_acceptance(
-        qualified_time_profile=fixture.time_fixture.profile,
-        qualified_head_profile=fixture.profile,
-    )
-    return store, service
+    from test_qualified_pending_record_wiring_v1 import _aligned_qualified_store
+
+    return _aligned_qualified_store(tmp_path, _built()[0], name)
+
 
 
 # ---------------------------------------------------------------------------

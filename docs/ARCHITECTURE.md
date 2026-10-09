@@ -34,8 +34,8 @@ trusted-time and revocation statements under an exact copied profile, fuses time
 conservatively, checks revocation validity, freshness, and unanimous floors against the
 complete time hull, and freshly maps sealed results into the provider-neutral integrity
 types. Its deterministic corpus and eighty-one focused tests prove contract and known-bad
-behavior only. The surface is not wired to the modeled-finality state machine, and it
-qualifies no native or externally administered provider.
+behavior. ADR-0019 consumes those packages through qualified fixture enrollment and cold
+reconstruction. It qualifies no native or externally administered provider.
 
 ## Target system
 
@@ -266,9 +266,13 @@ BLOBs and references into `ProviderEvidenceBlobV1`, `RevocationViewV1`, and
 `RevocationFloorV1`; direct construction, incomplete rosters, substitutions, replay,
 staleness, ambiguity, and malformed wire fail closed.
 
-This is contract-and-harness proof, not a lifecycle integration. The existing
-`PendingIntegrityTransitionV1` and modeled-finality facade do not consume the qualified
-mapping and continue to use their original unsigned, code-derived fixture assertions.
+ADR-0019 integrates these contracts through an explicitly enrolled qualified fixture mode.
+The store reconstructs requests from canonical pending, anchor, checkpoint and finalization
+records and the validated global predecessor, then authenticates every retained provider
+package. It compares exact scope, profile, policy, conservative time hull, revocation state,
+anchor append and prior/current head projection. Optional runtime bundles are independently
+reauthenticated and compared; cold replay requires neither bundles nor provider acquisition.
+The original unsigned modeled mode remains separate and preserves its anchor wire bytes.
 
 The canonical four-phase modeled-finality state machine is:
 
@@ -297,9 +301,9 @@ command can report success before TX4 has been reloaded and verified.
 No real trusted-time, revocation, transparency, monitoring, catalog, or anchor service is
 connected. Signed qualification statements authenticate deterministic repository-fixture
 producers; they do not establish truthful UTC, current real-world revocation, external
-durability, independent administration, or non-equivocation. Modeled-finality floor and
-provider-evidence assertions remain exact unsigned code-derived fixture claims. The legacy
-SQLite `SignedCheckpoint` remains opaque and untrusted.
+durability, independent administration, or non-equivocation. Qualified mode authenticates
+signed repository-fixture claims; the default modeled mode uses unsigned code-derived
+assertions. The legacy SQLite `SignedCheckpoint` remains opaque and untrusted.
 
 ADR-0014 closes the specification half of the durable blocked-finality gate. A refused
 finality attempt becomes one closed append-only observation naming the exact transition,
@@ -310,9 +314,10 @@ able to change a disposition, and exactly two are admissible: authorized retry f
 exact retained phase, and terminal instance sealing. `barrier_released` is a retained field
 that no admissible disposition sets.
 
-The exact next gate is to persist that contract: a schema-version-3 migration adding an
-append-only blocked table, an enrolled recovery authority, capacity accounting, and
-crash-recovery known-bads, before any external provider connection. The remaining blocked cluster then includes
+ADRs 0015–0017 persist this contract, enroll the recovery authority, charge its capacity,
+and exercise interruption recovery. The 2026-10-09 composition repair also authenticates
+historical recovery decisions and binds each attempt to the actual highest durable phase.
+The qualified lifecycle preserves those rules. The remaining blocked cluster includes
 qualifying independently administered providers without weakening retained recovery;
 closing the same-user pathname and coherent offline-rewrite boundary; production storage
 and power-fault qualification plus sensitive-evidence controls; and structured
@@ -692,17 +697,17 @@ injected-interruption recovery, byte-exact two-stage retry, and exact-current-he
 completion for every event. A separate versioned, networkless trusted-time and revocation
 qualification harness now proves exact fixture trust-root, policy, profile, source-roster,
 request, signature, interval, freshness, unanimous-floor, retry, corpus-manifest, and
-provider-evidence mapping behavior. It is not wired to lifecycle finality, whose provider
-assertions remain unsigned and code-derived. A second networkless harness proves
+provider-evidence mapping behavior. ADR-0019 now consumes those signed packages in the
+qualified fixture lifecycle, including cold reconstruction. A second networkless harness proves
 byte-bound anchor registration, RFC 9162 inclusion and consistency verification against the
 published reference tree, catalog rollback and equivocation refusal, unanimous monitor
-agreement, and sealed head-floor mapping. It is likewise not wired to lifecycle finality.
+agreement, and sealed head-floor mapping. Catalog codec v2 binds the exact head projection
+to the witnessed last leaf; the qualified lifecycle also checks each exact log append.
 
-A third networkless contract specifies the durable blocked-finality observation and its
-role-separated governed recovery decision. The exact next gate persists that contract under
-a schema-version-3 migration and enrolled recovery authority before any external provider
-connection. Independently administered providers are qualified and integrated only
-later, without weakening the retained state machine. Foundation integrity is accepted only
+A third contract specifies durable blocked-finality observations and role-separated governed
+recovery decisions. They are persisted, wired and covered by interruption controls. The
+next authority gate qualifies independently administered providers and their native evidence
+formats without weakening the retained state machine. Foundation integrity is accepted only
 when retained evidence also shows:
 
 - trusted time and revocation freshness for every consequential transition;

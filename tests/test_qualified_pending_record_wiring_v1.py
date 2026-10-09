@@ -1,22 +1,11 @@
-"""Record wiring for qualified signed revocation evidence (ADR-0019 step 4).
+"""Record wiring for qualified signed revocation evidence (ADR-0019).
 
-``PendingIntegrityTransitionV1`` now carries an ``acceptance_mode`` and, in qualified mode,
-transient sealed time and revocation bundles.  ``append_pending_integrity_event`` cross-checks
-the declared mode against the enrolled acceptance profile and, in qualified mode,
-reauthenticates the decision's time and revocation inputs under the enrolled roots via
-``store.verify_qualified_revocation_evidence`` before any append work.
-
-Boundary: because the pending append-verify runs before the append transaction (no lineage is
-required), this file proves the field, the mode-branching record gate, the canonical
-round-trip that drops the transient bundles, the store cross-check in both directions, the
-sealed bundle-presence gate, and a *live* reauthentication that refuses a pending whose
-decision the qualified bundles do not authenticate.  The positive is proved here too: a
-coherent qualified pending whose time and revocation inputs the enrolled bundles authenticate
-appends, is retained, and reconciles idempotently — built by a profile-aligned modeled service
-with the qualified inputs swapped into the decision (the seed of the ADR-0019 step-6 service).
-The store's positive revocation acceptance primitive is proved in
-``test_qualified_revocation_acceptance_v1``; the full pending+anchor+checkpoint lineage in
-``test_qualified_finality_lineage_v1``.
+Pending records declare the enrolled acceptance mode. Store admission reconstructs and
+reauthenticates canonical provider packages inside its writer transaction. Optional transient
+time and revocation bundles must authenticate and agree with those bytes. These tests cover
+record shape, mode separation, unsigned-package refusal and a coherent qualified pending
+that appends and retries idempotently. The complete lifecycle and cold-replay controls live
+in test_qualified_fixture_lifecycle_v1 and test_qualified_cold_replay_v1.
 """
 
 from __future__ import annotations
@@ -35,12 +24,10 @@ from test_integrity_store_v2 import (
 )
 from test_qualified_anchor_consumption_v1 import _head_fixture
 
-from etzio.integrity_v1 import IntegrityDecisionV1
 from etzio.kernel.events_v1 import GENESIS_DIGEST, EventV1
 from etzio.kernel.integrity_adapters_v1 import (
     RevocationRequestV1,
     TrustedTimeRequestV1,
-    map_qualified_integrity_inputs_v1,
     qualify_revocation_bundle_v1,
     qualify_time_bundle_v1,
 )
@@ -145,12 +132,8 @@ def _modeled_store(tmp_path: Path, name: str = "state"):
 
 
 def _qualified_store(tmp_path: Path, hfx, name: str = "state"):
-    store, service = _modeled_store(tmp_path, name)
-    store.enroll_qualified_acceptance(
-        qualified_time_profile=hfx.time_fixture.profile,
-        qualified_head_profile=hfx.profile,
-    )
-    return store, service
+    return _aligned_qualified_store(tmp_path, hfx, name)
+
 
 
 def _aligned_qualified_store(tmp_path: Path, hfx, name: str = "state"):
@@ -216,91 +199,19 @@ def _profile_aligned_service(hfx):
 
 
 def _coherent_qualified_pending(service, hfx):
-    """Build a coherent qualified pending whose decision the enrolled bundles authenticate.
+    """A complete qualified pending, including its signed predecessor catalog."""
+    from etzio.kernel.qualified_fixture_service_v1 import RepositoryOwnedQualifiedFixtureIntegrityServiceV1
 
-    The decision reuses the modeled service's scope, predecessors, transition intent, and
-    nonce for the genesis event, and swaps in the qualified time hull, time evidence,
-    revocation views, and external floors from the freshly mapped qualified inputs.  The
-    event's ``decision_time`` is fixed to the qualified hull's upper bound so
-    ``authenticate_pending_integrity_transition`` binds it.  The predecessor head floor stays
-    the modeled genesis floor, whose evidence the pending phase does not reauthenticate (that
-    is the finalization phase's concern).
-    """
-
-    tfx = hfx.time_fixture
-    policy = tfx.profile.validation_policy
-    vector = tfx.vector
+    vector = hfx.time_fixture.vector
     event = EventV1.create(
-        mission_id=vector.mission_id,
-        seq=0,
-        kind="mission_admission_refused",
-        unit="AQUILA",
-        authority_id=vector.authority_id,
-        target_id=vector.target_id,
-        decision_time=max(adapter.time_upper_bound for adapter in tfx.time_adapters),
-        payload={"reason_code": "authority_expired", "stage": "admission"},
-        prev_digest=GENESIS_DIGEST,
+        mission_id=vector.mission_id, seq=0, kind="mission_admission_refused", unit="AQUILA",
+        authority_id=vector.authority_id, target_id=vector.target_id,
+        decision_time=max(adapter.time_upper_bound for adapter in hfx.time_fixture.time_adapters),
+        payload={"reason_code": "authority_expired", "stage": "admission"}, prev_digest=GENESIS_DIGEST,
     )
-    modeled = service.prepare_pending_transition(
-        event, previous_global=None, previous_mission=None
-    )
-    md = modeled.decision
-    tb = _decision_time_bundle(hfx, md)
-    rev = _revocation_bundles(hfx, tb)
-    inputs = map_qualified_integrity_inputs_v1(
-        profile=tfx.profile, time_bundle=tb, revocation_bundles=rev
-    )
-    head_floor, head_floor_blobs = service._floor_for_predecessor(  # noqa: SLF001
-        event=event, previous_global=None, previous_mission=None
-    )
-    decision = IntegrityDecisionV1.issue(
-        service_instance_id=md.service_instance_id,
-        environment_id=md.environment_id,
-        mission_id=md.mission_id,
-        authority_id=md.authority_id,
-        target_id=md.target_id,
-        prior_global_checkpoint_sequence=md.prior_global_checkpoint_sequence,
-        prior_global_checkpoint_id=md.prior_global_checkpoint_id,
-        prior_global_checkpoint_attestation_id=md.prior_global_checkpoint_attestation_id,
-        prior_global_checkpoint_principal_id=md.prior_global_checkpoint_principal_id,
-        prior_global_checkpoint_trust_snapshot_id=(
-            md.prior_global_checkpoint_trust_snapshot_id
-        ),
-        prior_event_seq=md.prior_event_seq,
-        prior_event_digest=md.prior_event_digest,
-        event_kind=md.event_kind,
-        proposed_event_digest=md.proposed_event_digest,
-        transition_intent_id=md.transition_intent_id,
-        request_nonce=md.request_nonce,
-        time_lower_bound=inputs.time_lower_bound,
-        time_upper_bound=inputs.time_upper_bound,
-        time_policy_id=inputs.time_policy_id,
-        time_evidence=inputs.time_evidence,
-        revocation_views=inputs.revocation_views,
-        decision_policy_id=md.decision_policy_id,
-    )
-    provider_evidence = tuple(
-        sorted(
-            (*inputs.evidence_blobs, *head_floor_blobs),
-            key=lambda b: (b.evidence_kind, b.source_id, b.evidence_id),
-        )
-    )
-    pending = PendingIntegrityTransitionV1(
-        event_digest=event.event_digest,
-        mission_id=event.mission_id,
-        event_seq=event.seq,
-        instance_sequence=modeled.instance_sequence,
-        signed_decision=service._decision_signer.sign_decision(decision),  # noqa: SLF001
-        decision_trust_store=service.trust_store,
-        validation_policy=policy,
-        revocation_floors=inputs.external_floors,
-        prior_head_floor=head_floor,
-        provider_evidence=provider_evidence,
-        acceptance_mode=INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1,
-        time_bundle=tb,
-        revocation_bundles=rev,
-    )
-    return event, pending
+    qualified = RepositoryOwnedQualifiedFixtureIntegrityServiceV1(core=service, fixture=hfx)
+    return event, qualified.prepare_pending_transition(event, previous_global=None, previous_mission=None)
+
 
 
 # ---------------------------------------------------------------------------
@@ -413,7 +324,7 @@ def test_a_qualified_store_refuses_a_modeled_pending(tmp_path: Path) -> None:
         assert "acceptance mode" in str(exc.value)
 
 
-def test_a_qualified_pending_without_bundles_is_refused(tmp_path: Path) -> None:
+def test_unsigned_pending_bytes_are_refused_even_without_transient_bundles(tmp_path: Path) -> None:
     hfx = _head_fixture()
     store, service = _qualified_store(tmp_path, hfx)
     with store:
@@ -425,7 +336,7 @@ def test_a_qualified_pending_without_bundles_is_refused(tmp_path: Path) -> None:
             store.append_pending_integrity_event(
                 event, expected_head=GENESIS_DIGEST, pending=qualified
             )
-        assert "sealed qualified" in str(exc.value)
+        assert "reauthentication" in str(exc.value)
 
 
 # ---------------------------------------------------------------------------

@@ -18,9 +18,6 @@ from etzio.kernel.events_v1 import GENESIS_DIGEST
 from etzio.kernel.head_authority_adapters_v1 import (
     create_repository_owned_head_authority_fixture_v1,
 )
-from etzio.kernel.integrity_adapters_v1 import (
-    create_repository_owned_adapter_fixture_v1,
-)
 from etzio.kernel.store import (
     EventStoreCorruptionError,
     EventStoreError,
@@ -33,8 +30,9 @@ _MODE_MODELED = "modeled_unsigned_code_derived"
 _MODE_QUALIFIED = "qualified_signed_fixture"
 
 
-def _time_profile(seed: bytes = b"acceptance-enrollment-time"):
-    return create_repository_owned_adapter_fixture_v1(seed=seed).profile
+def _time_profile(seed: bytes = b"acceptance-enrollment-head"):
+    return create_repository_owned_head_authority_fixture_v1(seed=seed).time_fixture.profile
+
 
 
 def _head_profile(seed: bytes = b"acceptance-enrollment-head"):
@@ -44,8 +42,11 @@ def _head_profile(seed: bytes = b"acceptance-enrollment-head"):
 def _modeled_store(tmp_path: Path):
     path = _state_path(tmp_path)
     store = SQLiteEventStore(path)
-    _enroll(store, _policy())
+    profile = _time_profile()
+    _enroll(store, profile.validation_policy, service_instance_id=profile.service_instance_id,
+            environment_id=profile.environment_id)
     return store, path
+
 
 
 def _enroll_qualified(store):

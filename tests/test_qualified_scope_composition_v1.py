@@ -39,7 +39,6 @@ def test_pending_consumes_only_its_own_signed_scope(tmp_path, field):
     from test_qualified_pending_record_wiring_v1 import (
         _aligned_qualified_store,
         _coherent_qualified_pending,
-        _revocation_bundles,
     )
 
     from etzio.integrity_v1 import IntegrityDecisionV1
@@ -74,10 +73,16 @@ def test_pending_consumes_only_its_own_signed_scope(tmp_path, field):
             profile=tfx.profile,
             requests=requests,
             signed_evidence={
-                adapter.source_id: adapter.acquire(requests[adapter.source_id]) for adapter in tfx.time_adapters
+                adapter.source_id: replace(adapter, time_lower_bound=decision.time_lower_bound,
+                    time_upper_bound=decision.time_upper_bound).acquire(requests[adapter.source_id])
+                for adapter in tfx.time_adapters
             },
         )
-        revocation = _revocation_bundles(fixture, bundle)
+        from etzio.kernel.qualified_fixture_service_v1 import RepositoryOwnedQualifiedFixtureIntegrityServiceV1
+
+        revocation = RepositoryOwnedQualifiedFixtureIntegrityServiceV1(core=service, fixture=fixture)._revocation(
+            bundle, None, 0)
+
         mapped = map_qualified_integrity_inputs_v1(
             profile=tfx.profile, time_bundle=bundle, revocation_bundles=revocation
         )
@@ -109,7 +114,7 @@ def test_pending_consumes_only_its_own_signed_scope(tmp_path, field):
                 == event
             )
         else:
-            with pytest.raises(EventStoreError, match="scope|imprint"):
+            with pytest.raises(EventStoreError, match="scope|imprint|request_id"):
                 store.append_pending_integrity_event(event, expected_head=event.prev_digest, pending=rebound_pending)
             assert store.load_integrity_lineage(event.event_digest) is None
 

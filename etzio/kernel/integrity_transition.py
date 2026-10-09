@@ -1102,8 +1102,11 @@ class AnchorStatementRecordV1:
     anchor_statement_id: str
     registration_request: bytes
     provider_evidence: tuple[ProviderEvidenceBlobV1, ...]
+    acceptance_mode: str = INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1
 
     def __post_init__(self) -> None:
+        if self.acceptance_mode not in INTEGRITY_ACCEPTANCE_MODES_V1:
+            _reject("invalid_anchor_acceptance_mode", "unsupported anchor acceptance mode")
         _require_digest(self.pending_record_id, "pending_record_id")
         _require_digest(self.event_digest, "event_digest")
         _require_digest(
@@ -1163,12 +1166,13 @@ class AnchorStatementRecordV1:
             )
         if (
             type(self.time_evidence) is not tuple
-            or len(self.time_evidence)
-            != len(_MODELED_PROVIDER_SUFFIXES_V1)
+            or not self.time_evidence
+            or (self.acceptance_mode == INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1
+                and len(self.time_evidence) != len(_MODELED_PROVIDER_SUFFIXES_V1))
         ):
             _reject(
                 "invalid_checkpoint_time_evidence",
-                "checkpoint time evidence must be an exact modeled-source pair",
+                "checkpoint time evidence must cover the selected source roster",
             )
         references = tuple(_snapshot_reference(value) for value in self.time_evidence)
         if (
@@ -1206,11 +1210,10 @@ class AnchorStatementRecordV1:
             blobs,
             label="anchor_statement",
         )
-        _validate_modeled_anchor_provider_evidence(
-            registration_body=registration_body,
-            references=references,
-            blobs=blobs,
-        )
+        if self.acceptance_mode == INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1:
+            _validate_modeled_anchor_provider_evidence(
+                registration_body=registration_body, references=references, blobs=blobs,
+            )
         object.__setattr__(self, "time_evidence", references)
         object.__setattr__(
             self,
@@ -1231,6 +1234,8 @@ class AnchorStatementRecordV1:
 
     def to_body(self) -> dict[str, object]:
         return {
+            **({"acceptance_mode": self.acceptance_mode}
+               if self.acceptance_mode == INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1 else {}),
             "anchor_policy_id": self.anchor_policy_id,
             "anchor_statement_id": self.anchor_statement_id,
             "event_digest": self.event_digest,
@@ -1257,8 +1262,12 @@ class AnchorStatementRecordV1:
         cls,
         data: bytes | str,
     ) -> AnchorStatementRecordV1:
+        raw = _record_body(data, "anchor_statement")
+        mode = raw.get("acceptance_mode", INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1)
+        if "acceptance_mode" in raw and mode != INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
+            _reject("invalid_anchor_acceptance_mode", "only the qualified anchor form carries an explicit mode")
         body = _require_exact_dict(
-            _record_body(data, "anchor_statement"),
+            raw,
             frozenset(
                 {
                     "anchor_policy_id",
@@ -1278,7 +1287,7 @@ class AnchorStatementRecordV1:
                     "time_policy_id",
                     "time_upper_bound",
                 }
-            ),
+            ) | (frozenset({"acceptance_mode"}) if "acceptance_mode" in raw else frozenset()),
             "anchor_statement",
         )
         evidence = body["time_evidence"]
@@ -1306,6 +1315,7 @@ class AnchorStatementRecordV1:
                 maximum=1 << 20,
             ),
             provider_evidence=_evidence_blobs_from_body(body["provider_evidence"]),
+            acceptance_mode=mode,
         )
 
 
@@ -1589,6 +1599,7 @@ def _snapshot_anchor_record(
         anchor_statement_id=value.anchor_statement_id,
         registration_request=value.registration_request,
         provider_evidence=value.provider_evidence,
+        acceptance_mode=value.acceptance_mode,
     )
 
 
@@ -3937,6 +3948,8 @@ class _ModeledIntegrityServicePort(Protocol):
 
 
 class _IntegrityTransitionStorePort(Protocol):
+    def resolve_acceptance_mode(self) -> str: ...
+
     def enroll_modeled_integrity(
         self,
         *,
@@ -4054,6 +4067,7 @@ def _require_store_port(value: object) -> _IntegrityTransitionStorePort:
         "resolve_evidence_artifacts",
         "retain_integrity_anchor_statement",
         "retain_integrity_checkpoint_candidate",
+        "resolve_acceptance_mode",
     )
     if any(not callable(getattr(value, method, None)) for method in methods):
         _reject(
@@ -4158,6 +4172,7 @@ class ModeledIntegrityFinalizingEventStoreV1:
     # construction ungoverned, including deliberate ``__init__`` bypasses that exercise
     # ``_advance_finality`` in isolation.
     _blocked_finality: object | None = None
+    _acceptance_mode: str = INTEGRITY_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1
 
     def __init__(
         self,
@@ -4185,6 +4200,7 @@ class ModeledIntegrityFinalizingEventStoreV1:
             validation_policy=self.validation_policy,
             authority_binding=self.authority_binding,
         )
+        self._acceptance_mode = self._store.resolve_acceptance_mode()
         if self._blocked_finality is not None:
             self._store.enroll_blocked_finality_recovery(
                 self._blocked_finality.profile
@@ -4547,7 +4563,9 @@ class ModeledIntegrityFinalizingEventStoreV1:
             # idempotency key is the already-retained anchor_statement_id.
             receipts = _call_modeled_integrity_adapter(
                 "register_anchor_statement",
-                lambda: self._services.register_anchor_statement(anchor),
+                lambda: (self._services.register_anchor_statement(anchor, pending=lineage.pending)
+                         if self._acceptance_mode == INTEGRITY_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1
+                         else self._services.register_anchor_statement(anchor)),
             )
             proposed_candidate = _call_modeled_integrity_adapter(
                 "prepare_checkpoint_candidate",
@@ -4612,6 +4630,7 @@ class ModeledIntegrityFinalizingEventStoreV1:
                 event_digest=lineage.pending.event_digest,
                 external_head_floor=floor,
                 provider_evidence=floor_evidence,
+                acceptance_mode=self._acceptance_mode,
             )
             validate_finalization(
                 event,

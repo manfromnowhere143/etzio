@@ -62,10 +62,12 @@ current adapter-qualification baseline is deliberately compositional:
 | [RFC 9942](https://www.rfc-editor.org/rfc/rfc9942.html), [RFC 9943](https://www.rfc-editor.org/rfc/rfc9943.html), and [RFC 9162](https://www.rfc-editor.org/rfc/rfc9162.html) | byte-bound registration receipts plus inclusion and consistency evidence | accept only configured algorithms and proof forms; require predecessor consistency and a separately authenticated latest-head witness |
 | [Sigstore Rekor](https://docs.sigstore.dev/logging/overview/) | possible future transparency evidence source | never promote one deployment into trusted UTC, revocation freshness, independent witnessing, or complete Etzio command authority |
 
-The modeled-finality adapters currently exercise these roles and idempotent recovery with
-unsigned, canonical, code-derived provider assertions; only their decisions and
-checkpoints authenticate under the permanently enrolled fixture trust binding. They do not
-consume the separate qualified adapter outputs.
+The default modeled-finality adapters exercise these roles with unsigned, code-derived
+provider assertions. ADR-0019 adds a separate enrolled signed-fixture mode: every phase
+retains exact signed packages and cold replay reconstructs the original requests under the
+pinned profiles. Kernel decisions and checkpoints retain their separately enrolled signer
+binding. All sources remain deterministic repository fixtures; neither mode establishes
+independent administration or externally durable latest-head authority.
 
 ADR-0012 adds a versioned, networkless qualification contract for signed repository-owned
 trusted-time and revocation fixture statements. Its exact copied profile binds the trust
@@ -103,9 +105,10 @@ only a role-separated signed governed recovery decision may change its dispositi
 two dispositions are admissible—authorized retry and terminal instance sealing—and neither
 finalizes, deletes, rewrites, mints a checkpoint, or releases the database-global barrier.
 Separation of duty is enforced by key and principal, so the authority whose decisions caused
-a block cannot authorize its own escape from it. Nothing is persisted yet; the next gate
-adds the schema-version-3 migration, enrolled recovery authority, and crash-recovery
-known-bads before any external provider connection.
+a block cannot authorize its own escape from it. ADRs 0015–0017 persist and integrate that
+contract. The 2026-10-09 repairs enforce complete recovery binding and actual durable-phase
+attribution. Qualified lifecycle consumption preserves these constraints; independent
+provider qualification remains a separate gate.
 
 ## Required benchmark portfolio
 

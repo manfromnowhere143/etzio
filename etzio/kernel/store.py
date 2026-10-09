@@ -99,19 +99,6 @@ _ACCEPTANCE_MODE_MODELED_UNSIGNED_V1: Final = "modeled_unsigned_code_derived"
 _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1: Final = "qualified_signed_fixture"
 
 
-def _qualified_evidence_refusals() -> tuple[type[BaseException], ...]:
-    """The qualification-layer refusal family surfaced by the qualified accept primitives.
-
-    All three carry a ``reason_code`` and mean the same thing at the store boundary: the
-    qualified evidence did not authenticate.  Imported lazily to avoid an import cycle
-    (``integrity_adapters`` imports from ``integrity_transition``, which imports this module).
-    """
-
-    from .head_authority_adapters_v1 import HeadAuthorityAdapterError
-    from .integrity_adapters_v1 import IntegrityAdapterError
-    from .qualified_evidence_v1 import QualifiedEvidenceError
-
-    return (QualifiedEvidenceError, IntegrityAdapterError, HeadAuthorityAdapterError)
 _INTEGRITY_PHASES_V1: Final = frozenset(
     {"pending", "anchor_statement", "checkpoint_candidate", "finalization"}
 )
@@ -2702,6 +2689,7 @@ class SQLiteEventStore:
             _authority_binding_wire,
             authority_binding,
         ) = self._store_profile_locked()
+        self._qualified_acceptance_profiles_locked()
         integrity_tables = (
             "integrity_pending_transitions",
             "integrity_anchor_statements",
@@ -2982,9 +2970,10 @@ class SQLiteEventStore:
                         previous_global=previous_global,
                         previous_mission=previous_mission,
                     )
+                self._verify_qualified_lineage_locked(lineage, previous_global)
             except EventStoreCorruptionError:
                 raise
-            except (ProtocolError, TypeError, ValueError) as exc:
+            except (ProtocolError, TypeError, ValueError, EventStoreError) as exc:
                 reason_code = getattr(
                     exc,
                     "reason_code",
@@ -4850,6 +4839,7 @@ class SQLiteEventStore:
         pending_record: object,
     ) -> object:
         from .integrity_transition import (
+            IntegrityLineageV1,
             PendingIntegrityTransitionV1,
             validate_pending_transition,
         )
@@ -4921,6 +4911,9 @@ class SQLiteEventStore:
             raise EventStoreError(
                 f"pending integrity validation failed ({reason_code}): {exc}"
             ) from exc
+        self._verify_qualified_lineage_locked(
+            IntegrityLineageV1(pending=pending), previous_global, submitted_record=pending_record,
+        )
         self._reserve_integrity_finality_capacity_locked()
         self._require_writer_transaction()
         self._connection.execute(
@@ -5171,12 +5164,6 @@ class SQLiteEventStore:
 
         from .integrity_transition import PendingIntegrityTransitionV1
 
-        # ADR-0019 step 4: the pending record's declared acceptance mode must match the
-        # enrolled acceptance profile exactly, and in qualified mode the sealed time and
-        # revocation bundles must accompany the freshly submitted record so the store can
-        # reauthenticate the decision's time and revocation inputs under the enrolled roots.
-        # The acceptance profile is immutable once enrolled, so reading it here (before the
-        # append transaction) is race-free.
         if type(pending) is not PendingIntegrityTransitionV1:
             raise EventStoreError(
                 "integrity pending append requires an exact PendingIntegrityTransitionV1"
@@ -5188,24 +5175,6 @@ class SQLiteEventStore:
                 f"({pending.acceptance_mode}) differs from the enrolled acceptance "
                 f"profile ({enrolled_mode})"
             )
-        if enrolled_mode == _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
-            if pending.time_bundle is None or pending.revocation_bundles is None:
-                raise EventStoreError(
-                    "a qualified pending transition requires its sealed qualified time and "
-                    "revocation bundles for store-side reauthentication"
-                )
-            _QUALIFIED_EVIDENCE_REFUSALS_V1 = _qualified_evidence_refusals()
-            try:
-                self.verify_qualified_revocation_evidence(
-                    pending_record=pending,
-                    time_bundle=pending.time_bundle,
-                    revocation_bundles=pending.revocation_bundles,
-                )
-            except _QUALIFIED_EVIDENCE_REFUSALS_V1 as exc:
-                raise EventStoreError(
-                    "qualified pending revocation evidence failed reauthentication "
-                    f"({getattr(exc, 'reason_code', 'unknown')}): {exc}"
-                ) from exc
 
         self._validate_append_request(event, expected_head)
         is_protected = event.kind in PROTECTED_EVIDENCE_EVENT_KINDS_V1
@@ -5245,6 +5214,8 @@ class SQLiteEventStore:
                 and lineage is not None
                 and lineage.pending == requested
             ):
+                previous_global, _previous_mission = self.load_integrity_predecessor_lineages(event.event_digest)
+                self._verify_qualified_lineage_locked(lineage, previous_global, submitted_record=pending)
                 return retained
             if retained == event and lineage is not None:
                 raise IntegrityTransitionConflictError(
@@ -5845,7 +5816,7 @@ class SQLiteEventStore:
         """Pin the qualified time and head-authority adapter roots, once, permanently.
 
         Enrollment is empty-history only and requires an enrolled modeled profile.  It
-        selects the qualified_signed_fixture acceptance mode; nothing consumes it yet.
+        selects the qualified_signed_fixture acceptance mode for all four record phases.
         Store-domain failures keep their exact classification.
         """
 
@@ -5861,8 +5832,10 @@ class SQLiteEventStore:
                 "qualified acceptance requires an exact HeadAuthorityTrustProfileV1"
             )
         time_wire = qualified_time_profile.to_canonical_bytes()
+        qualified_time_profile = IntegrityAdapterTrustProfileV1.from_canonical_bytes(time_wire)
         time_id = qualified_time_profile.profile_id
         head_wire = qualified_head_profile.to_canonical_bytes()
+        qualified_head_profile = HeadAuthorityTrustProfileV1.from_canonical_bytes(head_wire)
         head_id = qualified_head_profile.profile_id
         for wire in (time_wire, head_wire):
             if len(wire) > _MAX_INTEGRITY_RECORD_BYTES_V1:
@@ -5890,6 +5863,7 @@ class SQLiteEventStore:
                     )
                 self._connection.execute("COMMIT")
                 return _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1
+            self._require_qualified_profile_alignment_locked(qualified_time_profile, qualified_head_profile)
             used = self._logical_evidence_storage_used_locked()
             additional = (
                 len(_ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1)
@@ -5946,24 +5920,70 @@ class SQLiteEventStore:
     def load_qualified_acceptance_profiles(self) -> tuple[object, object] | None:
         """Return the exact retained qualified time and head-authority profiles, if any."""
 
+        self._validate_integrity_state_locked()
+        return self._qualified_acceptance_profiles_locked()
+
+    def _qualified_acceptance_profiles_locked(self):
         from etzio.kernel.head_authority_adapters_v1 import HeadAuthorityTrustProfileV1
         from etzio.kernel.integrity_adapters_v1 import IntegrityAdapterTrustProfileV1
 
-        self._validate_integrity_state_locked()
         row = self._connection.execute(
             "SELECT qualified_time_profile_id, qualified_time_profile_wire, "
-            "qualified_head_profile_id, qualified_head_profile_wire "
+            "qualified_head_profile_id, qualified_head_profile_wire, acceptance_mode "
             "FROM integrity_acceptance_profile WHERE singleton = 1"
         ).fetchone()
         if row is None:
             return None
-        time_profile = IntegrityAdapterTrustProfileV1.from_canonical_bytes(bytes(row[1]))
-        head_profile = HeadAuthorityTrustProfileV1.from_canonical_bytes(bytes(row[3]))
+        if row[4] != _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
+            raise EventStoreCorruptionError("unsupported retained qualified acceptance mode")
+        try:
+            time_profile = IntegrityAdapterTrustProfileV1.from_canonical_bytes(bytes(row[1]))
+            head_profile = HeadAuthorityTrustProfileV1.from_canonical_bytes(bytes(row[3]))
+            self._require_qualified_profile_alignment_locked(time_profile, head_profile)
+        except (ProtocolError, TypeError, ValueError, EventStoreError) as exc:
+            raise EventStoreCorruptionError(f"invalid qualified acceptance profile: {exc}") from exc
         if time_profile.profile_id != row[0] or head_profile.profile_id != row[2]:
             raise EventStoreCorruptionError(
                 "a retained qualified acceptance profile does not match its identity"
             )
         return (time_profile, head_profile)
+
+    def _require_qualified_profile_alignment_locked(self, time_profile, head_profile):
+        profile, service, environment, _policy_id, policy_wire, *_rest = self._store_profile_locked()
+        expected = (service, environment, policy_wire)
+        if profile != _MODELED_INTEGRITY_STORE_PROFILE_V1 or any(
+            (value.service_instance_id, value.environment_id, canonical_dumps(value.validation_policy.to_body()))
+            != expected for value in (time_profile, head_profile)
+        ):
+            raise EventStoreError("qualified profiles differ from the enrolled kernel scope or validation policy")
+
+    def _verify_qualified_lineage_locked(self, lineage, previous_global, *, submitted_record=None):
+        from .qualified_lifecycle_v1 import (
+            reconstruct_qualified_lineage_v1,
+            validate_qualified_transients_v1,
+        )
+
+        profiles = self._qualified_acceptance_profiles_locked()
+        mode = (_ACCEPTANCE_MODE_MODELED_UNSIGNED_V1 if profiles is None
+                else _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1)
+        for record in (lineage.pending, lineage.anchor_statement, lineage.checkpoint_candidate, lineage.finalization):
+            if record is not None and record.acceptance_mode != mode:
+                raise EventStoreError("integrity phase acceptance mode differs from the enrolled acceptance profile")
+        if profiles is None:
+            return
+        time_profile, head_profile = profiles
+        try:
+            reconstructed = reconstruct_qualified_lineage_v1(
+                time_profile=time_profile, head_profile=head_profile, lineage=lineage, previous_global=previous_global,
+            )
+            if submitted_record is not None:
+                validate_qualified_transients_v1(record=submitted_record, reconstructed=reconstructed,
+                    time_profile=time_profile, head_profile=head_profile)
+        except (ProtocolError, TypeError, ValueError) as exc:
+            raise EventStoreError(
+                "qualified lifecycle evidence failed reauthentication "
+                f"({getattr(exc, 'reason_code', 'invalid_qualified_lineage')}): {exc}"
+            ) from exc
 
     def verify_qualified_anchor_evidence(
         self,
@@ -6178,6 +6198,7 @@ class SQLiteEventStore:
 
         from .integrity_transition import (
             AnchorStatementRecordV1,
+            IntegrityLineageV1,
             validate_anchor_statement,
         )
 
@@ -6201,6 +6222,8 @@ class SQLiteEventStore:
                     raise IntegrityTransitionConflictError(
                         "anchor statement identity was reused with different bytes"
                     )
+                previous_global, _previous_mission = self.load_integrity_predecessor_lineages(anchor.event_digest)
+                self._verify_qualified_lineage_locked(lineage, previous_global, submitted_record=record)
                 self._connection.execute("COMMIT")
                 return lineage.anchor_statement
             self._require_governed_phase_write_locked(lineage)
@@ -6209,7 +6232,7 @@ class SQLiteEventStore:
                 raise PendingIntegrityTransitionError(
                     "anchor statement must extend the singleton pending transition"
                 )
-            _previous_global, previous_mission = (
+            previous_global, previous_mission = (
                 self._previous_integrity_lineages_locked(
                     lineage.pending.mission_id
                 )
@@ -6229,6 +6252,10 @@ class SQLiteEventStore:
                 raise EventStoreError(
                     f"anchor statement validation failed ({reason_code}): {exc}"
                 ) from exc
+            self._verify_qualified_lineage_locked(
+                IntegrityLineageV1(pending=lineage.pending, anchor_statement=anchor), previous_global,
+                submitted_record=record,
+            )
             self._require_writer_transaction()
             self._connection.execute(
                 """
@@ -6293,6 +6320,7 @@ class SQLiteEventStore:
         from ..integrity_v1 import signed_head_checkpoint_attestation_id
         from .integrity_transition import (
             CheckpointCandidateRecordV1,
+            IntegrityLineageV1,
             validate_checkpoint_candidate,
         )
 
@@ -6304,11 +6332,8 @@ class SQLiteEventStore:
             self._connection.execute("BEGIN IMMEDIATE")
             self._require_writer_transaction()
             self._validate_integrity_state_locked()
-            # ADR-0019 step 3: the record's declared acceptance mode must match the
-            # enrolled acceptance profile exactly.  A qualified record on a modeled/legacy
-            # store and a modeled record on a qualified store are both refused before any
-            # lineage work.  In qualified mode the sealed bundles must accompany the freshly
-            # submitted record so the store can reauthenticate them under the enrolled roots.
+            # The record must match enrollment; provider verification below reconstructs
+            # requests and authenticates retained packages, including after serialization.
             enrolled_mode = self.resolve_acceptance_mode()
             if candidate.acceptance_mode != enrolled_mode:
                 raise EventStoreError(
@@ -6328,6 +6353,8 @@ class SQLiteEventStore:
                     raise IntegrityTransitionConflictError(
                         "checkpoint candidate identity was reused with different bytes"
                     )
+                previous_global, _previous_mission = self.load_integrity_predecessor_lineages(candidate.event_digest)
+                self._verify_qualified_lineage_locked(lineage, previous_global, submitted_record=record)
                 self._connection.execute("COMMIT")
                 return lineage.checkpoint_candidate
             self._require_governed_phase_write_locked(lineage)
@@ -6373,33 +6400,10 @@ class SQLiteEventStore:
                     f"checkpoint candidate validation failed ({reason_code}): {exc}"
                 ) from exc
             checkpoint = candidate.checkpoint
-            if enrolled_mode == _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
-                # ADR-0019 step 3: reauthenticate the checkpoint's claimed anchor statement,
-                # references, and signed-package blobs from the record's retained sealed
-                # bundles under the enrolled roots.  Unsigned or non-authenticating evidence
-                # is refused here; the store never falls back to the modeled gate.  The
-                # sealed bundles are non-serializable, so this fresh-insert path requires the
-                # freshly submitted record to carry them; an idempotent retry of an already
-                # retained candidate returns above without reaching this reauthentication.
-                if record.anchor_bundle is None or record.time_bundle is None:
-                    raise EventStoreError(
-                        "a qualified checkpoint candidate requires its sealed qualified "
-                        "anchor and time bundles for store-side reauthentication"
-                    )
-                _QUALIFIED_EVIDENCE_REFUSALS_V1 = _qualified_evidence_refusals()
-                try:
-                    self.verify_qualified_anchor_evidence(
-                        anchor_bundle=record.anchor_bundle,
-                        time_bundle=record.time_bundle,
-                        claimed_anchor_statement_id=checkpoint.anchor_statement_id,
-                        claimed_anchor_evidence=checkpoint.anchor_evidence,
-                        claimed_evidence_blobs=candidate.provider_evidence,
-                    )
-                except _QUALIFIED_EVIDENCE_REFUSALS_V1 as exc:
-                    raise EventStoreError(
-                        "qualified checkpoint anchor evidence failed reauthentication "
-                        f"({getattr(exc, 'reason_code', 'unknown')}): {exc}"
-                    ) from exc
+            self._verify_qualified_lineage_locked(
+                IntegrityLineageV1(pending=lineage.pending, anchor_statement=lineage.anchor_statement,
+                                   checkpoint_candidate=candidate), previous_global, submitted_record=record,
+            )
             attestation_id = signed_head_checkpoint_attestation_id(
                 candidate.signed_checkpoint
             )
@@ -6468,6 +6472,7 @@ class SQLiteEventStore:
 
         from .integrity_transition import (
             FinalizedIntegrityTransitionV1,
+            IntegrityLineageV1,
             validate_finalization,
             validate_finalized_integrity_transition,
         )
@@ -6502,6 +6507,8 @@ class SQLiteEventStore:
                     raise IntegrityTransitionConflictError(
                         "finalization identity was reused with different bytes"
                     )
+                previous_global, _previous_mission = self.load_integrity_predecessor_lineages(finalization.event_digest)
+                self._verify_qualified_lineage_locked(lineage, previous_global, submitted_record=record)
                 self._connection.execute("COMMIT")
                 return lineage.finalization
             self._require_governed_phase_write_locked(lineage)
@@ -6534,30 +6541,11 @@ class SQLiteEventStore:
                 raise EventStoreError(
                     f"integrity finalization validation failed ({reason_code}): {exc}"
                 ) from exc
-            if enrolled_mode == _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1:
-                # ADR-0019 step 5: reauthenticate the finalization's claimed external head
-                # floor from the record's retained sealed head-catalog and time bundles under
-                # the enrolled roots.  The sealed bundles are non-serializable, so this
-                # fresh-insert path requires the freshly submitted record to carry them; an
-                # idempotent retry of an already finalized transition returns above without
-                # reaching this reauthentication.
-                if record.catalog_bundle is None or record.time_bundle is None:
-                    raise EventStoreError(
-                        "a qualified finalization requires its sealed qualified head-catalog "
-                        "and time bundles for store-side reauthentication"
-                    )
-                _QUALIFIED_EVIDENCE_REFUSALS_V1 = _qualified_evidence_refusals()
-                try:
-                    self.verify_qualified_head_floor_evidence(
-                        finalization_record=finalization,
-                        catalog_bundle=record.catalog_bundle,
-                        time_bundle=record.time_bundle,
-                    )
-                except _QUALIFIED_EVIDENCE_REFUSALS_V1 as exc:
-                    raise EventStoreError(
-                        "qualified finalization head-floor evidence failed reauthentication "
-                        f"({getattr(exc, 'reason_code', 'unknown')}): {exc}"
-                    ) from exc
+            self._verify_qualified_lineage_locked(
+                IntegrityLineageV1(pending=lineage.pending, anchor_statement=lineage.anchor_statement,
+                    checkpoint_candidate=lineage.checkpoint_candidate, finalization=finalization),
+                previous_global, submitted_record=record,
+            )
             self._require_writer_transaction()
             self._connection.execute(
                 """
