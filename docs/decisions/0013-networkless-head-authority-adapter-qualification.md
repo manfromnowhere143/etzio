@@ -4,6 +4,46 @@
 - Date: 2026-07-31
 - Owner: Daniel Wahnich
 
+## Catalog projection correction, 2026-10-09
+
+The V1 catalog codec authenticated a checkpoint projection and a log root in the same
+statement, but did not prove that the projection belonged to that tree. Review reproduced
+ten altered head fields accepted under the same tree size, root, and monitor packages. It
+also reproduced replacement of a retained checkpoint identity at an unchanged sequence.
+The prior component tests and unanimous root agreement did not establish those properties.
+
+The catalog source now requires codec `etzio.fixture.signed-head-catalog.v2`. Its closed
+claim adds `projection_inclusion_proof`, an ordered RFC 9162 proof. The verifier derives a
+canonical leaf from the authenticated projection and recomputes its inclusion at exactly
+`tree_size - 1`. The leaf body contains exactly:
+
+- `leaf_schema`: `etzio.head-catalog-projection.v1`;
+- the exact `profile_id`, `service_instance_id`, and `environment_id`;
+- the enrolled catalog `source_id` and `log_origin`;
+- `mission_id`; and
+- `head`, containing the global sequence, checkpoint identity, and its three attestation
+  provenance fields, plus the mission sequence, checkpoint identity, and its three
+  attestation provenance fields.
+
+The leaf excludes evidence references, publication time, and request-specific predecessors.
+The signed package binds the observation to its exact request and qualified time; the leaf
+commits the observed head state. Existing consistency verification still binds the tree to
+the retained predecessor root. Every configured monitor must still witness that exact root.
+If either head sequence equals its requested predecessor sequence, its checkpoint identity
+must equal the corresponding retained identity. Advancing counters alone is not an ancestry
+proof; the kernel continues to enforce its independent global and mission continuity rules.
+
+This is an append-only log of catalog projections. A later observation for another mission
+may append another projection. Inclusion of the last leaf establishes which projection is
+committed at the witnessed tree head, not independently administered latest-head authority,
+the truth of a provider's state, real-world non-equivocation, or survival of local loss.
+
+V1 catalog profiles and packages are refused, not reinterpreted. Fixture profile, package,
+and corpus identities change by content. No retained bytes are migrated or rewritten.
+Known-bads must include validly re-signed projection substitution under unchanged monitors,
+missing, altered, truncated, padded, and non-last inclusion proofs, legacy codec refusal,
+and unchanged-sequence identity substitution; exact observations and retries must still pass.
+
 ## Context
 
 ADR-0008 defines four provider-neutral integrity evidence kinds:
@@ -122,7 +162,7 @@ Three new roles complete the four ADR-0008 evidence kinds:
 | Role | Evidence kind | Codec profile |
 |---|---|---|
 | `head_anchor` | `head_anchor_receipt` | `etzio.fixture.signed-anchor-receipt.v1` |
-| `head_catalog` | `external_floor` | `etzio.fixture.signed-head-catalog.v1` |
+| `head_catalog` | `external_floor` | `etzio.fixture.signed-head-catalog.v2` |
 | `head_monitor` | `external_floor` | `etzio.fixture.signed-head-monitor.v1` |
 
 Each role has a distinct Ed25519 signature domain:

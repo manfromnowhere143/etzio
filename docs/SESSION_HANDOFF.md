@@ -4,18 +4,26 @@ Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
 ## Current repair tranche, 2026-10-09
 
-The active branch is now `fix/qualified-scope-20261009`. Recovery commit `e190c17` is
-retained in PR #26; its local release results below apply to that commit. The second repair
+Current branch: `fix/catalog-projection-20261009`. Catalog codec v2 now binds the exact
+head projection to the last leaf of the witnessed log and refuses checkpoint-identity
+substitution at an unchanged sequence. The initial `12` probes all reproduced acceptance
+before repair. All `23` composition tests pass. Full `make verify` passes `1284` tests on
+CPython 3.11.15 (594.44 seconds) and CPython 3.14.2 (605.27 seconds), including policy,
+lint, and fixture checks. Catalog CI is pending. Recovery PR #26 (`e190c17`) and scope
+PR #27 (`c0868b0`) passed both CI runtimes, package/wheel checks, policy, and GitGuardian,
+and were fast-forward merged to `main`; their remote branches were deleted.
+
+The preceding scope repair is retained at `c0868b0` through PR #27. The second repair
 binds qualified pending time to the consuming decision, including its deterministic
 pre-acquisition imprint, and compares revocation/head scope with freshly authenticated time.
 It corrects the head fixture's different service identity and the positive pending fixture's
 foreign event/intent/nonce. There are `25` new composition tests; the initial probe reproduced
 `20` failures and one valid control before repair. All `271` focused tests pass. Full
 `make verify` passes `1261` tests on CPython 3.11.15 (594.80 seconds) and CPython 3.14.2
-(607.93 seconds), including policy, lint, and fixture checks. Scope-repair CI is pending.
+(607.93 seconds), including policy, lint, and fixture checks. CI run `37902995281` also passed.
 
-Status: recovery repair locally validated on `fix/integrity-composition-20261009`; GitHub
-reproduction and the remaining composition repairs are pending. The reviewed base `304d531`
+Recovery repair status: locally and GitHub validated at `e190c17`; its branch was
+fast-forward merged and deleted. The reviewed base `304d531`
 passed `1198` tests on both declared runtimes, but additional adversarial probes reproduced
 incomplete recovery-decision binding,
 late-block phase misattribution, qualified pending scope mismatch, and catalog projection
@@ -25,7 +33,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1261 tests expected;
+- 1284 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
@@ -38,10 +46,10 @@ from progress. See the dated correction in ADR-0016.
 The new composition file has `38` tests. The complete focused storage/lifecycle/crash/
 composition run passed `85` tests on CPython 3.11.15. Full `make verify` then passed
 `1236` tests on each declared runtime: CPython 3.11.15 in 584.83 seconds and CPython 3.14.2
-in 603.83 seconds, including policy, lint, and fixture checks. No GitHub run validates
-these recovery changes yet. The subsequent scope repair is recorded above. Catalog
-projection binding, complete checkpoint time consumption, cold reconstruction, and
-ADR-0019 step 6 remain open.
+in 603.83 seconds, including policy, lint, and fixture checks. GitHub run `37901279636`
+also passed both foundation jobs, package/wheel checks, policy, and GitGuardian. Subsequent
+scope and catalog repairs are recorded above. Complete checkpoint time consumption, cold
+reconstruction, and ADR-0019 step 6 remain open.
 The mission remains repository-owned fixtures only; no provider, live target, spending,
 isolation, execution, finding, income, or comparative-superiority claim follows.
 

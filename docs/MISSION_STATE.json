@@ -34,7 +34,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "qualified_evidence_facade_driven_service_and_full_vertical",
-    "next_session_pickup": "Retain CI reproduction for recovery PR 26 and the scope repair, then bind catalog checkpoint projections to witnessed contents and enforce unchanged-sequence checkpoint identity. Implement ADR-0019 step 6 qualified fixture service, complete checkpoint time consumption, full receipt vertical, cold reconstruction and crash recovery. Scope repair passes all 1261 tests on both local runtimes. Preserve all external-provider, isolation and live-target gates.",
+    "next_session_pickup": "Retain CI reproduction for the catalog projection repair (1284 tests pass on both local runtimes), then implement ADR-0019 step 6 qualified service, complete checkpoint time consumption, full receipt vertical, cold reconstruction and crash recovery. Recovery e190c17 and scope c0868b0 are merged and validated locally and in CI. No external provider, execution or live target is admitted.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -188,7 +188,7 @@
     "validation_status": "local_release_suites_passed_github_pending",
     "github_validated_commit": null,
     "github_actions_run_id": null,
-    "test_count": 1261,
+    "test_count": 1284,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
       "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
@@ -204,7 +204,7 @@
     "clean_fixtures": 1,
     "adapter_qualification_cases": 10,
     "adapter_qualification_focused_tests": 81,
-    "claim_boundary": "Qualified pending admission now binds authenticated time scope, purpose, nonce and deterministic imprint to its exact decision. Revocation and head qualification compare authenticated requests with the time bundle scope. Both local release suites pass 1261 tests. Catalog projection, complete checkpoint time consumption, cold reconstruction and ADR-0019 step 6 remain open.",
+    "claim_boundary": "Catalog codec v2 binds the exact head projection to the witnessed last leaf and refuses checkpoint-identity substitution at unchanged sequences. Both local release suites pass 1284 tests. Complete checkpoint time consumption, cold reconstruction and ADR-0019 step 6 remain open; no external-provider, execution, finding or live-target authority follows.",
     "head_authority_qualification_focused_tests": 78,
     "head_authority_qualification_cases": 9,
     "blocked_finality_focused_tests": 61,
@@ -220,9 +220,10 @@
     "qualified_pending_record_wiring_tests": 12,
     "qualified_finality_lineage_tests": 6,
     "qualified_finalization_record_wiring_tests": 8,
-    "ci_note": "No GitHub run validates the scope repair yet. Recovery PR 26 has passing CPython 3.14.2, policy and GitGuardian checks; its CPython 3.11.15 foundation job remains pending.",
+    "ci_note": "No GitHub run validates the catalog repair yet. Recovery PR 26 and scope PR 27 passed both foundation jobs, policy and GitGuardian and are fast-forward merged.",
     "blocked_finality_composition_tests": 38,
-    "qualified_scope_composition_tests": 25
+    "qualified_scope_composition_tests": 25,
+    "catalog_projection_composition_tests": 23
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -305,8 +306,8 @@
   ],
   "active_integrity_repair": {
     "date": "2026-10-09",
-    "status": "scope_repair_locally_validated_catalog_repair_next",
-    "branch": "fix/qualified-scope-20261009",
+    "status": "catalog_repair_locally_validated_step6_next",
+    "branch": "fix/catalog-projection-20261009",
     "reviewed_base": "304d53199af94185aaed3e77227d7b580f3cf2f3",
     "base_test_count": 1198,
     "new_composition_tests": 38,
@@ -314,12 +315,10 @@
     "focused_runtime": "CPython 3.11.15",
     "github_validation": null,
     "remaining": [
-      "GitHub reproduction of the recovery repair",
-      "GitHub reproduction of qualified pending and internal adapter scope repair",
-      "catalog checkpoint projection binding to witnessed log contents",
-      "ADR-0019 step 6 qualified service full receipt vertical cold reconstruction and crash recovery"
+      "GitHub reproduction of catalog projection repair",
+      "ADR-0019 step 6 qualified service complete checkpoint time consumption full receipt vertical cold reconstruction and crash recovery"
     ],
-    "claim_boundary": "Both local runtime release suites pass for each retained repair; GitHub reproduction remains pending. All execution remains repository-owned fixtures.",
+    "claim_boundary": "All three composition repairs pass both local release suites. Recovery and scope also passed CI and are merged. Catalog CI and qualified lifecycle completion remain pending.",
     "implemented_and_locally_validated": [
       "complete signed recovery decision binding at store admission and facade recovery",
       "authenticated recovery-history replay with exact SQL-index and canonical-wire agreement",
@@ -330,7 +329,9 @@
       "durable refusal and fresh exact-current authorization after interrupted retry phase progress",
       "qualified pending time bound to exact decision scope purpose nonce and deterministic pre-acquisition imprint",
       "revocation and head requests bound to freshly authenticated time scope",
-      "head fixture and positive pending fixture corrected to use coherent service and transition scope"
+      "head fixture and positive pending fixture corrected to use coherent service and transition scope",
+      "catalog codec v2 exact projection inclusion at the last witnessed leaf",
+      "unchanged global and mission head sequences preserve retained checkpoint identity"
     ],
     "local_release_results": {
       "CPython 3.11.15": {
@@ -357,7 +358,22 @@
         "seconds": 607.93
       }
     },
-    "scope_focused_tests": 271
+    "scope_focused_tests": 271,
+    "catalog_projection_composition_tests": 23,
+    "catalog_probe_before": {
+      "failed": 12,
+      "passed": 0
+    },
+    "catalog_local_release_results": {
+      "CPython 3.11.15": {
+        "passed": 1284,
+        "seconds": 594.44
+      },
+      "CPython 3.14.2": {
+        "passed": 1284,
+        "seconds": 605.27
+      }
+    }
   },
   "inherited_qualified_record_wiring_evidence": {
     "scope": "repository-owned deterministic fixtures only",
@@ -400,9 +416,9 @@
   },
   "recovery_composition_evidence": {
     "scope": "repository-owned deterministic fixtures only",
-    "validation_status": "local_release_suites_passed_github_pending",
-    "github_validated_commit": null,
-    "github_actions_run_id": null,
+    "validation_status": "local_and_github_release_suites_passed",
+    "github_validated_commit": "e190c17c55d5615194f331ee5b17300aa8d81ead",
+    "github_actions_run_id": 37901279636,
     "test_count": 1236,
     "validated_runtimes": [
       "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
@@ -435,9 +451,54 @@
     "qualified_pending_record_wiring_tests": 12,
     "qualified_finality_lineage_tests": 6,
     "qualified_finalization_record_wiring_tests": 8,
-    "ci_note": "No GitHub run validates the 2026-10-09 recovery composition candidate. Historical CI is retained in inherited_qualified_record_wiring_evidence.",
+    "ci_note": "PR 26 passed both foundation jobs, policy and GitGuardian; main fast-forwarded to e190c17 on 2026-10-09.",
     "blocked_finality_composition_tests": 38,
     "implementation_commit": "e190c17c55d5615194f331ee5b17300aa8d81ead",
-    "pull_request": 26
+    "pull_request": 26,
+    "merged_to_main": true
+  },
+  "qualified_scope_repair_evidence": {
+    "scope": "repository-owned deterministic fixtures only",
+    "validation_status": "local_and_github_release_suites_passed",
+    "github_validated_commit": "c0868b0b0890ddb271f148639de5366916d123ac",
+    "github_actions_run_id": 37902995281,
+    "test_count": 1261,
+    "validated_runtimes": [
+      "CPython 3.11.15 / SQLite 3.53.1 / DELETE/EXTRA",
+      "CPython 3.14.2 / SQLite 3.51.2 / DELETE/EXTRA"
+    ],
+    "sqlite_source_ids": {
+      "CPython 3.11.15": "2026-05-05 10:34:17 c88b22011a54b4f6fbd149e9f8e4de77658ce58143a1af0e3785e4e6475127e9",
+      "CPython 3.14.2": "2026-01-09 17:27:48 b270f8339eb13b504d0b2ba154ebca966b7dde08e40c3ed7d559749818cb2075"
+    },
+    "ruff_clean": true,
+    "repository_policy_passed": true,
+    "python_rule_classes": 6,
+    "planted_instances": 7,
+    "clean_fixtures": 1,
+    "adapter_qualification_cases": 10,
+    "adapter_qualification_focused_tests": 81,
+    "claim_boundary": "Qualified pending admission now binds authenticated time scope, purpose, nonce and deterministic imprint to its exact decision. Revocation and head qualification compare authenticated requests with the time bundle scope. Both local release suites pass 1261 tests. Catalog projection, complete checkpoint time consumption, cold reconstruction and ADR-0019 step 6 remain open.",
+    "head_authority_qualification_focused_tests": 78,
+    "head_authority_qualification_cases": 9,
+    "blocked_finality_focused_tests": 61,
+    "blocked_finality_qualification_cases": 8,
+    "blocked_finality_storage_tests": 23,
+    "sqlite_schema_version": 4,
+    "blocked_finality_lifecycle_tests": 11,
+    "blocked_finality_crash_recovery_tests": 13,
+    "qualified_evidence_acceptance_tests": 47,
+    "qualified_acceptance_enrollment_tests": 15,
+    "qualified_anchor_consumption_tests": 7,
+    "qualified_anchor_record_wiring_tests": 7,
+    "qualified_pending_record_wiring_tests": 12,
+    "qualified_finality_lineage_tests": 6,
+    "qualified_finalization_record_wiring_tests": 8,
+    "ci_note": "PR 27 passed both foundation jobs, package/wheel checks, policy and GitGuardian; main fast-forwarded to c0868b0 on 2026-10-09.",
+    "blocked_finality_composition_tests": 38,
+    "qualified_scope_composition_tests": 25,
+    "implementation_commit": "c0868b0b0890ddb271f148639de5366916d123ac",
+    "pull_request": 27,
+    "merged_to_main": true
   }
 }

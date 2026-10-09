@@ -82,7 +82,7 @@ _ROLE_TO_EVIDENCE_KIND_V1: Final = MappingProxyType(
 _ROLE_TO_CODEC_V1: Final = MappingProxyType(
     {
         HEAD_ANCHOR_ADAPTER_ROLE_V1: "etzio.fixture.signed-anchor-receipt.v1",
-        HEAD_CATALOG_ADAPTER_ROLE_V1: "etzio.fixture.signed-head-catalog.v1",
+        HEAD_CATALOG_ADAPTER_ROLE_V1: "etzio.fixture.signed-head-catalog.v2",
         HEAD_MONITOR_ADAPTER_ROLE_V1: "etzio.fixture.signed-head-monitor.v1",
     }
 )
@@ -263,6 +263,7 @@ _CATALOG_CLAIM_FIELDS: Final = frozenset(
         "mission_event_seq",
         "mission_id",
         "published_at",
+        "projection_inclusion_proof",
         "tree_size",
     }
 )
@@ -2060,6 +2061,7 @@ def _validate_catalog_claim(
     _require_tree_size(body["tree_size"], "tree_size")
     _require_epoch(body["published_at"], "published_at")
     _validated_proof(body["consistency_proof"], "consistency_proof")
+    _validated_proof(body["projection_inclusion_proof"], "projection_inclusion_proof")
     if _require_digest(body["mission_id"], "mission_id") != request.mission_id:
         _reject(
             "head_scope_mismatch",
@@ -2746,6 +2748,17 @@ def qualify_head_catalog_bundle_v1(
             "head_catalog_head_rollback",
             "catalog mission head regressed below the retained predecessor",
         )
+    if (
+        catalog_claim["instance_sequence"] == catalog_request.prior_instance_sequence
+        and catalog_claim["checkpoint_id"] != catalog_request.prior_checkpoint_id
+    ) or (
+        catalog_claim["mission_event_seq"] == catalog_request.prior_mission_event_seq
+        and catalog_claim["mission_checkpoint_id"] != catalog_request.prior_mission_checkpoint_id
+    ):
+        _reject(
+            "head_catalog_checkpoint_equivocation",
+            "an unchanged head sequence cannot replace its retained checkpoint identity",
+        )
 
     for source_id in sorted(monitor_sources):
         monitor_claim = packages[source_id].claim
@@ -2806,6 +2819,15 @@ def qualify_head_catalog_bundle_v1(
             "the qualified catalog head is not an admissible external head floor",
         ) from exc
 
+    verify_merkle_inclusion_v1(
+        leaf_hash=merkle_leaf_hash_v1(catalog_projection_leaf_bytes_v1(
+            profile=copied_profile, mission_id=external_floor.mission_id, head=external_floor,
+        )),
+        leaf_index=tree_size - 1,
+        tree_size=tree_size,
+        proof=_validated_proof(catalog_claim["projection_inclusion_proof"], "projection_inclusion_proof"),
+        root_hash=_digest_to_bytes(log_root_hash, "log_root_hash"),
+    )
     return _construct_sealed_result(
         QualifiedHeadCatalogBundleV1,
         seal=_QUALIFIED_CATALOG_SEAL,
@@ -3081,6 +3103,44 @@ class ExpectedHeadStateV1:
         return cls(**body)  # type: ignore[arg-type]
 
 
+def catalog_projection_leaf_bytes_v1(
+    *, profile: HeadAuthorityTrustProfileV1, mission_id: str,
+    head: ExpectedHeadStateV1 | HeadCheckpointFloorV1,
+) -> bytes:
+    """Canonical catalog projection bytes; construction alone grants no authority."""
+
+    copied = _snapshot_profile(profile)
+    _require_digest(mission_id, "mission_id")
+    if type(head) is ExpectedHeadStateV1:
+        projected = ExpectedHeadStateV1.from_body(head.to_body())
+    elif type(head) is HeadCheckpointFloorV1:
+        projected = HeadCheckpointFloorV1.from_body(head.to_body())
+        if (
+            projected.service_instance_id != copied.service_instance_id
+            or projected.environment_id != copied.environment_id
+            or projected.mission_id != mission_id
+        ):
+            _reject("head_scope_mismatch", "catalog projection names another enrolled scope")
+    else:
+        _reject("invalid_head_projection", "an exact fixture head or external floor is required")
+    fields = (
+        "instance_sequence", "checkpoint_id", "checkpoint_attestation_id",
+        "checkpoint_principal_id", "checkpoint_trust_snapshot_id", "mission_event_seq",
+        "mission_checkpoint_id", "mission_checkpoint_attestation_id",
+        "mission_checkpoint_principal_id", "mission_checkpoint_trust_snapshot_id",
+    )
+    return _canonical_record_bytes({
+        "leaf_schema": "etzio.head-catalog-projection.v1",
+        "profile_id": copied.profile_id,
+        "service_instance_id": copied.service_instance_id,
+        "environment_id": copied.environment_id,
+        "source_id": copied.catalog_binding.source_id,
+        "log_origin": copied.catalog_binding.log_origin,
+        "mission_id": mission_id,
+        "head": {field: getattr(projected, field) for field in fields},
+    })
+
+
 @dataclass(frozen=True, slots=True)
 class HeadAuthorityQualificationVectorV1:
     """One deterministic qualification scope and expected head projection."""
@@ -3334,6 +3394,10 @@ class RepositoryOwnedDeterministicHeadCatalogAdapterV1:
             "mission_event_seq": head.mission_event_seq,
             "mission_id": self.mission_id,
             "published_at": self.published_at,
+            "projection_inclusion_proof": [
+                _bytes_to_digest(node)
+                for node in merkle_inclusion_proof_v1(self.leaf_hashes, tree_size - 1)
+            ],
             "tree_size": tree_size,
         }
         return self.signer.sign(
@@ -3794,8 +3858,10 @@ def create_repository_owned_head_authority_fixture_v1(
     )
 
     catalog_leaves = tuple(
-        _fixture_leaf(seed, f"catalog-{index}") for index in range(catalog_tree_size)
-    )
+        _fixture_leaf(seed, f"catalog-{index}") for index in range(catalog_tree_size - 1)
+    ) + (merkle_leaf_hash_v1(catalog_projection_leaf_bytes_v1(
+        profile=profile, mission_id=vector.mission_id, head=expected_head,
+    )),)
     anchor_adapters: list[RepositoryOwnedDeterministicHeadAnchorAdapterV1] = []
     for binding in bindings:
         if binding.role != HEAD_ANCHOR_ADAPTER_ROLE_V1:
@@ -4287,6 +4353,7 @@ __all__ = (
     "merkle_root_v1",
     "qualify_anchor_bundle_v1",
     "qualify_head_catalog_bundle_v1",
+    "catalog_projection_leaf_bytes_v1",
     "qualify_repository_head_authority_adapters_v1",
     "reauthenticate_anchor_bundle_v1",
     "reauthenticate_head_catalog_bundle_v1",
