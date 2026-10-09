@@ -119,6 +119,10 @@ Its [19-case OpenSSL comparison and provider research](tools/native-time-rsa/REA
 are retained, with `241` new tests. The statement does not establish legal
 qualification, and no native provider is admitted.
 
+A separate [public-material replay](docs/PUBLISHED_TSA_MATERIAL.md) now retains a published
+historical signer chain and both CRLs, with `44` diagnostic controls and a local nine-case
+OpenSSL path comparison. It does not establish the current service signer or admit a time source.
+
 ## Implemented vertical slice
 
 The supported `etzio` command can analyze only the two repository-owned manifest fixtures

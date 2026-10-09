@@ -34,7 +34,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Read docs/QUALIFICATION_NEXT_STEPS.md. Cloud access is authorized for bounded benign qualification preparation; no hardware procurement is presently needed. Published Sectigo CA bytes falsify compatibility with the all-4096 profile; retain its refusal and obtain the complete TSA chain, revocation and applicable terms before a separately versioned profile/acquisition. Native lifecycle, independent latest-head local-loss, storage and execution gates remain open.",
+    "next_session_pickup": "Read docs/PUBLISHED_TSA_MATERIAL.md and docs/QUALIFICATION_NEXT_STEPS.md. A published historical signer and both CRLs now have bounded offline replay and a pinned OpenSSL comparison. Current endpoint signer/CMS, applicable acquisition terms, independent root administration and the separate compatible native profile remain open. Continue contained acquisition preparation, then native lifecycle and independently administered latest-head recovery; storage and execution gates remain open.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -861,7 +861,38 @@
     "publication": {
       "pull_request": 32,
       "canonical_pickup": "main after merge; resolve publication from Git and PR checks",
-      "reviewed_observation_commit": "abd681f0ed52996601a6ab9891eb85a4c14ad69e"
+      "reviewed_observation_commit": "abd681f0ed52996601a6ab9891eb85a4c14ad69e",
+      "merged_commit": "1a65e78e3bd78cfc78dd2d7d82004d78aa16380b",
+      "github_actions_run_id": 37953787988,
+      "both_ci_runtimes_passed": 1750
     }
+  },
+  "published_tsa_material": {
+    "status": "implemented_offline_diagnostic",
+    "date": "2026-10-09",
+    "contract": "docs/PUBLISHED_TSA_MATERIAL.md",
+    "manifest": "docs/evidence/published-tsa-material-2026-10-09.json",
+    "source_ledger": "docs/evidence/published-tsa-sources-2026-10-09.json",
+    "openssl_comparison": "docs/evidence/published-tsa-comparison-2026-10-09.json",
+    "inspector": "scripts/inspect_published_tsa_material.py",
+    "focused_tests": 44,
+    "full_suite_collection_target": 1794,
+    "openssl_cases": 9,
+    "openssl_positive_paths": 1,
+    "openssl_expected_refusals": 8,
+    "prechange_validation": {
+      "runtime": "CPython 3.11.15",
+      "passed": 1750,
+      "seconds": 819.59,
+      "exit": 0,
+      "log_sha256": "6ebf81a5e99a3b8dbdd9d20235cdceea79e33aeb276ceebab1154d1126a6cb7e"
+    },
+    "release_validation": "Resolve full supported-runtime and package checks from the exact published Git commit and its pull request.",
+    "timestamp_protocol_requests": 0,
+    "provider_admitted": false,
+    "current_service_signer_observed": false,
+    "kernel_authority": false,
+    "boundary": "Public historical chain material and offline diagnostic only. No current UTC/revocation, external trust, native lifecycle, storage/isolation, finding or income claim.",
+    "canonical_pickup": "main after publication; inspect Git and matching pull request"
   }
 }

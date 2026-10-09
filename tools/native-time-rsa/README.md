@@ -86,3 +86,9 @@ separate local-loss experiment must recover independently witnessed H1 after del
 local state or explicitly block, including when coherent older H0 bytes are restored.
 Neither experiment is performed or claimed here. Their concrete controls remain in
 ADR-0021 and [ADR-0020](../../docs/decisions/0020-offline-native-time-qualification.md).
+
+The subsequent [published-material inspection](../../docs/PUBLISHED_TSA_MATERIAL.md)
+retains signer #3 and the intermediate-issued CRL through the provider's public discovery
+route. The signer's `contentCommitment` usage adds another profile mismatch. This is
+historical public material and a local path comparison, not the endpoint's current CMS or
+an admitted provider. The released codec and corpus remain unchanged.

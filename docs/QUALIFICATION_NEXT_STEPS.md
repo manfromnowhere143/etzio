@@ -10,6 +10,12 @@ available for qualification work; hardware procurement is not the immediate depe
 
 ## Provider evidence and a corrected assumption
 
+Follow-up, 2026-10-09: a [published-material replay](PUBLISHED_TSA_MATERIAL.md) now retains
+signer #3 and the intermediate-issued CRL. All five named signatures verify and a pinned
+OpenSSL timestamp-purpose path check passes at one stated diagnostic instant, with eight
+refusal controls. The historical signer is not evidence of the endpoint's current key;
+no timestamp request, trust enrollment or native profile acceptance follows.
+
 The earlier provider comparison described a whole RSA-4096 hierarchy. The policy says
 the service issues RSA-4096 timestamps; that does not specify every CA key. Read-only
 inspection of the publisher's listed certificates found a 4096-bit root and a 3072-bit
@@ -29,8 +35,9 @@ design a separately versioned profile only after obtaining the complete intended
 
 One explicit public CRL GET resolved the root-to-intermediate revocation route. The
 retained CRL authenticates under the downloaded root and contains no revoked entries.
-Its issuer-declared interval is retained without claiming current revocation. The TSA
-certificate and intermediate-to-TSA CRL are still missing. The root CRL also carries
+Its issuer-declared interval is retained without claiming current revocation. The endpoint
+response and current signer remain unobserved; published historical signer material and
+its issuer CRL are now available in the follow-up above. The root CRL also carries
 noncritical OID `2.5.29.60`, outside the current codec's closed AKI/CRL-number extension
 set; obtaining a signed CRL does not establish codec compatibility. The disclosure statement
 also identifies CRLs as a validation route, correcting the earlier OCSP-only documentary

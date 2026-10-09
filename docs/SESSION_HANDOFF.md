@@ -2,6 +2,36 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
+## Published TSA material replay, 2026-10-09
+
+The [public-material inspection contract](PUBLISHED_TSA_MATERIAL.md) now retains a
+complete published root/intermediate/signer chain and both CRLs. The provider's policy
+links crt.sh, which returned three historical signer entries; signer #3 was obtained
+without a timestamp request. Its intermediate-issued CRL signature verifies under the
+retained intermediate. The signer permits `contentCommitment`, another mismatch with
+Etzio's released finite profile. The two CRLs' noncritical `expiredCertsOnCRL` values
+are reported; no native-codec compatibility or current revocation is claimed.
+
+`scripts/inspect_published_tsa_material.py` replays bounded, digest-bound public bytes
+without networking. It checks named signatures and reports fields, rather than accepting
+a provider or time source. A separately pinned local OpenSSL 3.6.3 comparison accepts
+one path at the explicit diagnostic instant and refuses eight mutations/omissions/time
+controls with exact error-code and path-depth checks. The executable is pinned; complete
+library/host provenance and independent administration remain unqualified.
+
+Pre-change `make verify` passed `1750` tests on CPython 3.11.15 in `819.59` seconds.
+The `44` new focused controls pass, for a full-suite collection target of `1794`.
+Resolve full release validation and publication from this tranche's exact Git commit and
+pull-request checks. Engine runtime, existing timestamp codecs/corpora, dependencies,
+workflow and kernel authority remain unchanged. The previous preparation release is
+merged as PR #32 at `1a65e78`; both CI runtimes passed `1750` tests.
+
+Next: establish the current service's actual signer/CMS and applicable acquisition terms,
+then specify the separate compatible profile and contained request. Published historical
+material does not establish current key use. There is still no timestamp protocol request,
+provider admission, native lifecycle integration, storage/isolation qualification or bounty
+execution. Canonical pickup after publication is `main`.
+
 ## Provider and host preparation, 2026-10-09
 
 The operator explicitly authorized using available Google Cloud infrastructure for Etzio

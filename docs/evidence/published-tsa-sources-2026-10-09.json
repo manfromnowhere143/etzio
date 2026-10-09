@@ -1,0 +1,66 @@
+{
+  "schema": "etzio.published-tsa-material.sources.v1",
+  "inspected": "2026-10-09",
+  "boundary": "Passive public GETs only. No timestamp protocol request, current-signer claim, trust enrollment or provider admission.",
+  "discovery_policy": {
+    "url": "https://www.sectigo.com/uploads/files/eIDAS/Sectigo_eIDAS_TSPPS_v1.1.4.pdf",
+    "size": 701625,
+    "sha256": "f1a7f9e09b3139ba3c49382dbcc01889555e1511133c394231649944ed4ca2b6",
+    "section": "7.6.4",
+    "embedded_link": "https://crt.sh/?q=Sectigo+Qualified+Time+Stamping+Signer"
+  },
+  "search": {
+    "url": "https://crt.sh/?q=Sectigo+Qualified+Time+Stamping+Signer&output=json",
+    "response": {
+      "size": 1140,
+      "sha256": "d27f994cb7d798dda8481934b22b8877a2a22811ccf257c1c7ac50a27c4b3cfa",
+      "base64": "W3siaXNzdWVyX2NhX2lkIjoxODg5NTYsImlzc3Vlcl9uYW1lIjoiQz1FUywgTz1TZWN0aWdvIChFdXJvcGUpIFNMLCBDTj1TZWN0aWdvIFF1YWxpZmllZCBUaW1lIFN0YW1waW5nIENBIFIzNSIsImNvbW1vbl9uYW1lIjoiU2VjdGlnbyBRdWFsaWZpZWQgVGltZSBTdGFtcGluZyBTaWduZXIgIzMiLCJuYW1lX3ZhbHVlIjoiU2VjdGlnbyBRdWFsaWZpZWQgVGltZSBTdGFtcGluZyBTaWduZXIgIzMiLCJpZCI6OTI5NzM4MjUxNywibm90X2JlZm9yZSI6IjIwMjMtMDUtMDNUMDA6MDA6MDAiLCJub3RfYWZ0ZXIiOiIyMDM0LTA4LTAyVDIzOjU5OjU5Iiwic2VyaWFsX251bWJlciI6IjY2MGE5OGYxNGUxNWIyZWM4M2M1OTU4MWJlZDJlMDM4IiwicmVzdWx0X2NvdW50IjoxfSx7Imlzc3Vlcl9jYV9pZCI6MTg4OTU2LCJpc3N1ZXJfbmFtZSI6IkM9RVMsIE89U2VjdGlnbyAoRXVyb3BlKSBTTCwgQ049U2VjdGlnbyBRdWFsaWZpZWQgVGltZSBTdGFtcGluZyBDQSBSMzUiLCJjb21tb25fbmFtZSI6IlNlY3RpZ28gUXVhbGlmaWVkIFRpbWUgU3RhbXBpbmcgU2lnbmVyICMyIiwibmFtZV92YWx1ZSI6IlNlY3RpZ28gUXVhbGlmaWVkIFRpbWUgU3RhbXBpbmcgU2lnbmVyICMyIiwiaWQiOjY3NjA5NDgzNzgsIm5vdF9iZWZvcmUiOiIyMDIyLTA1LTExVDAwOjAwOjAwIiwibm90X2FmdGVyIjoiMjAzMy0wOC0xMFQyMzo1OTo1OSIsInNlcmlhbF9udW1iZXIiOiIwMGQ5ZWRmMWQ3ZWM3ZjYwZDZlODg3MmIwZGMwN2M2ZDYzIiwicmVzdWx0X2NvdW50IjoxfSx7Imlzc3Vlcl9jYV9pZCI6MTg4OTU2LCJpc3N1ZXJfbmFtZSI6IkM9RVMsIE89U2VjdGlnbyAoRXVyb3BlKSBTTCwgQ049U2VjdGlnbyBRdWFsaWZpZWQgVGltZSBTdGFtcGluZyBDQSBSMzUiLCJjb21tb25fbmFtZSI6IlNlY3RpZ28gUXVhbGlmaWVkIFRpbWUgU3RhbXBpbmcgU2lnbmVyICMxIiwibmFtZV92YWx1ZSI6IlNlY3RpZ28gUXVhbGlmaWVkIFRpbWUgU3RhbXBpbmcgU2lnbmVyICMxIiwiaWQiOjM1NDgwMDEyNzEsIm5vdF9iZWZvcmUiOiIyMDIwLTEwLTIyVDAwOjAwOjAwIiwibm90X2FmdGVyIjoiMjAzMi0wMS0yMVQyMzo1OTo1OSIsInNlcmlhbF9udW1iZXIiOiIwNmYxYjA2Mzg3Yzg1YjI0MzMxNzI3ZDFmNjMxYmEyMyIsInJlc3VsdF9jb3VudCI6MX1d"
+    },
+    "returned_ids": [
+      9297382517,
+      6760948378,
+      3548001271
+    ],
+    "completeness": "not established"
+  },
+  "tsa_capture": {
+    "url": "https://crt.sh/?d=9297382517",
+    "response_pem": {
+      "size": 2256,
+      "sha256": "e44f4b8726fdb27c8462fdb5142308094b19f798de2f8b33dfa324ced85d1bfe",
+      "base64": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUdWVENDQkwyZ0F3SUJBZ0lRWmdxWThVNFZzdXlEeFpXQnZ0TGdPREFOQmdrcWhraUc5dzBCQVF3RkFEQmMKTVFzd0NRWURWUVFHRXdKRlV6RWNNQm9HQTFVRUNoTVRVMlZqZEdsbmJ5QW9SWFZ5YjNCbEtTQlRUREV2TUMwRwpBMVVFQXhNbVUyVmpkR2xuYnlCUmRXRnNhV1pwWldRZ1ZHbHRaU0JUZEdGdGNHbHVaeUJEUVNCU016VXdIaGNOCk1qTXdOVEF6TURBd01EQXdXaGNOTXpRd09EQXlNak0xT1RVNVdqQmZNUXN3Q1FZRFZRUUdFd0pGVXpFY01Cb0cKQTFVRUNoTVRVMlZqZEdsbmJ5QW9SWFZ5YjNCbEtTQlRUREV5TURBR0ExVUVBd3dwVTJWamRHbG5ieUJSZFdGcwphV1pwWldRZ1ZHbHRaU0JUZEdGdGNHbHVaeUJUYVdkdVpYSWdJek13Z2dJaU1BMEdDU3FHU0liM0RRRUJBUVVBCkE0SUNEd0F3Z2dJS0FvSUNBUUNZZHdaaFZzUWtmSDJFc3RTbW9GUGxGOUtSWjUrT1FGdU9FUitmRmFzL0NwaTQKS05lYTFGUGxjNGJLUGV6dkw3RWVRajNkY3EwQ0FTUGpzdElkWnl0NTBMeVZsZ2ttencxa2ZTZ0lsd2hzOHExSgpHSW1jQUY2ektvVGRkYTZhMTNkbUtRRzBlUlM4c2dwZUVWK0p5QjBzVHN4S2ZWOVBQYTlxNm5pS3huem0rL09MCkt0TU1MK3haSU4xSHBFQ2NVSnlhRGswdGNsdFVFUEp3TE1LL0RwV1Q1R3ZTN3VoZFkvWWx3UzNmRHMvQ01NU2cKVXlSZVNEZHdxRFN6R2NOUkQxM0dkdG5iMkhMNzNYMXB1UStySGZwMno5MmtJOStMSCtEbmZSa1IvUzZFSzZZbQpNNWJOQy9FaWY0QjZzME9pOXhySy9FYk40ZUE2UzlSak5TYUN0KzRyMmVzSTMvc3plaUkwbE5YcmwySy80TThaCkVjNHg0ajVTM2d6UVo4UUc0aXl3WVVRMzZYNHJZdGRwL2ZrVmtyNjNTektFazd2OFI1Q2FLelhKZEMyaVpzTzcKQTdpcDFIcmNZaVYyYU00cVR6WE9sNWEvQ1dWcG0vc1RTeXFXTTBoYk05dk1YMFBwQ1RQZmw4dzZlYm45ODhTSgo4SUNvMldYdndjNTNiMWw4NDIydFlJeEk3bXFOMXNSZ0lkaE0zUXRXakNUWCtZYlA5a2tMYTFBcWd3L0EyRnZWCkJqWTRLdklrdVhmWEFXVllsaEhuNFNXeFRDRXl4YU9WL0pPTSt3bWRQbGZOZmRSZHZFREFSVzJaQktSSDU0SCsKblJWUTJPa0lIYnJFQUxJT2VBZ1hNUHc2ZzhBVTNldDNzVlpOaUZxK25jZWw3ZC9yeE5KTFptd1oyLzJXRlFJRApBUUFCbzRJQmpqQ0NBWW93SHdZRFZSMGpCQmd3Rm9BVVlRQS9kOW4vNmpuU2thVWN2cDAxeDNoZXBHY3dIUVlEClZSME9CQllFRkRkUkR4bTlKdC9tMVVyUVliRnlQUUw4R0VzV01BNEdBMVVkRHdFQi93UUVBd0lHd0RBTUJnTlYKSFJNQkFmOEVBakFBTUJZR0ExVWRKUUVCL3dRTU1Bb0dDQ3NHQVFVRkJ3TUlNRVFHQTFVZElBUTlNRHN3T1FZTApLd1lCQkFHeU1RRUNBUWt3S2pBb0JnZ3JCZ0VGQlFjQ0FSWWNhSFIwY0hNNkx5OXpaV04wYVdkdkxtTnZiUzlsClNVUkJVME5RVXpCTkJnTlZIUjhFUmpCRU1FS2dRS0EraGp4b2RIUndPaTh2WTNKc0xuTmxZM1JwWjI4dVkyOXQKTDFObFkzUnBaMjlSZFdGc2FXWnBaV1JVYVcxbFUzUmhiWEJwYm1kRFFWSXpOUzVqY213d2ZRWUlLd1lCQlFVSApBUUVFY1RCdk1FZ0dDQ3NHQVFVRkJ6QUNoanhvZEhSd09pOHZZM0owTG5ObFkzUnBaMjh1WTI5dEwxTmxZM1JwCloyOVJkV0ZzYVdacFpXUlVhVzFsVTNSaGJYQnBibWREUVZJek5TNWpjblF3SXdZSUt3WUJCUVVITUFHR0YyaDAKZEhBNkx5OXZZM053TG5ObFkzUnBaMjh1WTI5dE1BMEdDU3FHU0liM0RRRUJEQVVBQTRJQmdRQWE5c1pVRS9iQgo5TGNlbVBmbUppMHlrNlNRRHJiaW5KQjV3T3lHc0tBK0srMlhWcC9sNWdpVWk3OVZORGxxcStnUzFsY0RsMVg1CmZHMjhxNndPbk1ubTdoYnRwTUJPdjdlR3NqL2REVnNHRVFnMVlGbGZ6WnJHVnkxNGVyRW03dzlseW1SdUVoTEcKTC9ZRENKSU5vNWZ5c21BYTVTMlZvSEpoakVhRk0xa0dnc09MTDhpZmJVTzY1Rlh3RklhbUNkOTQ4NjZiQ3Z0QQpSSzVpMlRsWWh5a0ZHbXVhOTVDT3R5dU9NdngvSUFkV0NlOWZaVk94QW5Td2FFNDIybDVCVklhaTF2ampPZWNYCkN1ZjU5NXVEaTMyMlNrWG94MUZPM3U5V1NBNWNCOTkySzdjWmxJUWNkVG1zNFdiTDZtVGxGYVRVMmI2dVQ4TjEKdHdpZDNWZm42dm95Y0pFRjR4M1RkaU0rYmJIK2VUY0M4Z0szcThFSWY5TzExY1g3L0Jhak45SWhGM3pOcEJaMwpnLzFkT0JVVHRTK2Y5NUpZQXZlSC9oWTJLZ1hNQktDaW02NHFRYnRlRFZtMCtiVkd5eENEMkhkd0NwWHNsRlN1CmtIV2R0V3VLeFB0WmI3K3NHemZhREY1NGlDRjFjc0gyQjFOMG1ZNGV6dUJXeTZ3Q2RnbjdKMXc9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+    },
+    "manifest_role": "tsa_certificate",
+    "der_sha256": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d",
+    "relationship": "DER decoded from captured PEM; signature checked under previously retained intermediate",
+    "current_service_use": "not observed"
+  },
+  "issuer_crl": {
+    "url": "http://crl.sectigo.com/SectigoQualifiedTimeStampingCAR35.crl",
+    "manifest_role": "issuer_issued_crl",
+    "sha256": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+    "route": "explicit CRL distribution point in captured signer; no implicit fetching",
+    "transport": "HTTP is not authenticated; retained signature checked under retained intermediate"
+  },
+  "prior_material": "provider-preparation-2026-10-09.json retains root, intermediate and root-issued CRL provenance; identical bytes copied into complete manifest",
+  "standards": [
+    {
+      "url": "https://www.itu.int/ITU-T/formal-language/itu-t/x/x509/2019/CertificateExtensions.html",
+      "version": "ITU-T X.509 10/2019 Annex A.2",
+      "use": "expiredCertsOnCRL OID and GeneralizedTime syntax",
+      "byte_identity": "not retained; web text inspected"
+    },
+    {
+      "url": "https://www.etsi.org/deliver/etsi_ts/119600_119699/119612/02.03.01_60/ts_119612v020301p.pdf",
+      "version": "ETSI TS 119 612 V2.3.1",
+      "use": "section 5.5.9.1 expired-certificate revocation information",
+      "byte_identity": "not retained; web text inspected"
+    },
+    {
+      "url": "https://docs.openssl.org/3.6/man1/openssl-verification-options/",
+      "version": "OpenSSL 3.6 documentation",
+      "use": "timestamp-purpose, strict X.509, explicit trust, CRL and verification-time options",
+      "byte_identity": "not retained; web text inspected"
+    }
+  ]
+}

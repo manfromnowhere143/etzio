@@ -1,0 +1,558 @@
+{
+  "boundary": "Local path/purpose/CRL comparison under a downloaded root; not independently administered trust or full binary provenance.",
+  "dependency_lock_sha256": "4678f55a4776c6c888c94645155850f2cd58eccfc3a5aa37d6d8bcd50fbb3198",
+  "inspection": {
+    "boundary": "Named signatures and field observations only; no PKIX, CRL scope/freshness or legal acceptance.",
+    "certificates": [
+      {
+        "content_commitment": false,
+        "covers_reference": true,
+        "digital_signature": true,
+        "extensions": [
+          {
+            "critical": false,
+            "oid": "2.5.29.14"
+          },
+          {
+            "critical": true,
+            "oid": "2.5.29.15"
+          },
+          {
+            "critical": true,
+            "oid": "2.5.29.19"
+          }
+        ],
+        "issuer": "CN=Sectigo Qualified Time Stamping Root R45,O=Sectigo (Europe) SL,C=ES",
+        "key_bits": 4096,
+        "not_after": "2045-10-04T23:59:59+00:00",
+        "not_before": "2020-10-05T00:00:00+00:00",
+        "role": "root_certificate",
+        "sha256": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "signature_oid": "1.2.840.113549.1.1.12",
+        "signature_under_named_parent": "verified",
+        "subject": "CN=Sectigo Qualified Time Stamping Root R45,O=Sectigo (Europe) SL,C=ES"
+      },
+      {
+        "content_commitment": false,
+        "covers_reference": true,
+        "digital_signature": true,
+        "extensions": [
+          {
+            "critical": false,
+            "oid": "2.5.29.35"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.14"
+          },
+          {
+            "critical": true,
+            "oid": "2.5.29.15"
+          },
+          {
+            "critical": true,
+            "oid": "2.5.29.19"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.37"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.32"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.31"
+          },
+          {
+            "critical": false,
+            "oid": "1.3.6.1.5.5.7.1.1"
+          }
+        ],
+        "issuer": "CN=Sectigo Qualified Time Stamping Root R45,O=Sectigo (Europe) SL,C=ES",
+        "key_bits": 3072,
+        "not_after": "2035-10-04T23:59:59+00:00",
+        "not_before": "2020-10-05T00:00:00+00:00",
+        "role": "intermediate_certificate",
+        "sha256": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "signature_oid": "1.2.840.113549.1.1.12",
+        "signature_under_named_parent": "verified",
+        "subject": "CN=Sectigo Qualified Time Stamping CA R35,O=Sectigo (Europe) SL,C=ES"
+      },
+      {
+        "content_commitment": true,
+        "covers_reference": true,
+        "digital_signature": true,
+        "extensions": [
+          {
+            "critical": false,
+            "oid": "2.5.29.35"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.14"
+          },
+          {
+            "critical": true,
+            "oid": "2.5.29.15"
+          },
+          {
+            "critical": true,
+            "oid": "2.5.29.19"
+          },
+          {
+            "critical": true,
+            "oid": "2.5.29.37"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.32"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.31"
+          },
+          {
+            "critical": false,
+            "oid": "1.3.6.1.5.5.7.1.1"
+          }
+        ],
+        "issuer": "CN=Sectigo Qualified Time Stamping CA R35,O=Sectigo (Europe) SL,C=ES",
+        "key_bits": 4096,
+        "not_after": "2034-08-02T23:59:59+00:00",
+        "not_before": "2023-05-03T00:00:00+00:00",
+        "role": "tsa_certificate",
+        "sha256": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d",
+        "signature_oid": "1.2.840.113549.1.1.12",
+        "signature_under_named_parent": "verified",
+        "subject": "CN=Sectigo Qualified Time Stamping Signer #3,O=Sectigo (Europe) SL,C=ES"
+      }
+    ],
+    "crls": [
+      {
+        "covers_reference_half_open": true,
+        "entry_count": 0,
+        "expired_certs_on_crl": "2020-10-05T00:00:00+00:00",
+        "extensions": [
+          {
+            "critical": false,
+            "oid": "2.5.29.35"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.20"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.60"
+          }
+        ],
+        "issuer": "CN=Sectigo Qualified Time Stamping Root R45,O=Sectigo (Europe) SL,C=ES",
+        "next_update": "2026-10-16T14:19:46+00:00",
+        "role": "root_issued_crl",
+        "sha256": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "signature_under_named_parent": "verified",
+        "subject_serial_listed": false,
+        "this_update": "2026-10-09T14:19:46+00:00"
+      },
+      {
+        "covers_reference_half_open": true,
+        "entry_count": 0,
+        "expired_certs_on_crl": "2020-10-05T00:00:00+00:00",
+        "extensions": [
+          {
+            "critical": false,
+            "oid": "2.5.29.35"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.20"
+          },
+          {
+            "critical": false,
+            "oid": "2.5.29.60"
+          }
+        ],
+        "issuer": "CN=Sectigo Qualified Time Stamping CA R35,O=Sectigo (Europe) SL,C=ES",
+        "next_update": "2026-10-16T05:42:11+00:00",
+        "role": "issuer_issued_crl",
+        "sha256": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+        "signature_under_named_parent": "verified",
+        "subject_serial_listed": false,
+        "this_update": "2026-10-09T05:42:11+00:00"
+      }
+    ],
+    "current_service_signer_observed": false,
+    "kernel_authority": false,
+    "manifest_sha256": "603887bec07ba2e3a985f6eb4baebfac535c2571e0f41cf241cd748569568e8e",
+    "reference_authority": "caller-selected diagnostic instant; not trusted UTC",
+    "reference_second": 1791555586,
+    "root_admitted": false,
+    "schema": "etzio.published-tsa-material.inspection.v1",
+    "timestamp_token_verified": false
+  },
+  "inspector_sha256": "b76865792e5d75f5e7195f3ca0be19d7f5bbc1c221cf67fca141c878c21bffe6",
+  "manifest_sha256": "603887bec07ba2e3a985f6eb4baebfac535c2571e0f41cf241cd748569568e8e",
+  "openssl_executable_sha256": "07f19671b4a4528b829f8b7b917df7c42163a79a9646785e85e278c1fdae4478",
+  "openssl_version": "OpenSSL 3.6.3 9 Jun 2026 (Library: OpenSSL 3.6.3 9 Jun 2026)",
+  "results": [
+    {
+      "case": "published",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791555586",
+        "tsa.pem"
+      ],
+      "expected_path_result": true,
+      "expected_verify_error_and_depth": null,
+      "input_sha256": {
+        "intermediate_certificate": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "issuer_issued_crl": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+        "root_certificate": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "root_issued_crl": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "tsa_certificate": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d"
+      },
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "tsa.pem: OK\n"
+    },
+    {
+      "case": "signature_bit_root_certificate",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791555586",
+        "tsa.pem"
+      ],
+      "expected_path_result": false,
+      "expected_verify_error_and_depth": [
+        7,
+        2
+      ],
+      "input_sha256": {
+        "intermediate_certificate": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "issuer_issued_crl": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+        "root_certificate": "0a2dc44c9f07ada420c3b94592c5f740b439cdf367b2d272dd2c6312f4144533",
+        "root_issued_crl": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "tsa_certificate": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d"
+      },
+      "returncode": 2,
+      "stderr": "C=ES, O=Sectigo (Europe) SL, CN=Sectigo Qualified Time Stamping Root R45\nerror 7 at 2 depth lookup: certificate signature failure\nerror tsa.pem: verification failed\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\n",
+      "stdout": ""
+    },
+    {
+      "case": "signature_bit_intermediate_certificate",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791555586",
+        "tsa.pem"
+      ],
+      "expected_path_result": false,
+      "expected_verify_error_and_depth": [
+        7,
+        1
+      ],
+      "input_sha256": {
+        "intermediate_certificate": "e582d15117f3ff67637cbc088e74fa17adecf61181141574fefe4e64712782ff",
+        "issuer_issued_crl": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+        "root_certificate": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "root_issued_crl": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "tsa_certificate": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d"
+      },
+      "returncode": 2,
+      "stderr": "C=ES, O=Sectigo (Europe) SL, CN=Sectigo Qualified Time Stamping CA R35\nerror 7 at 1 depth lookup: certificate signature failure\nerror tsa.pem: verification failed\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\n",
+      "stdout": ""
+    },
+    {
+      "case": "signature_bit_tsa_certificate",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791555586",
+        "tsa.pem"
+      ],
+      "expected_path_result": false,
+      "expected_verify_error_and_depth": [
+        7,
+        0
+      ],
+      "input_sha256": {
+        "intermediate_certificate": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "issuer_issued_crl": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+        "root_certificate": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "root_issued_crl": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "tsa_certificate": "7c67fc3783491b5c3c70ccd1ad4945ec2bfd6d52f7574bff39d643c674bf3a4b"
+      },
+      "returncode": 2,
+      "stderr": "C=ES, O=Sectigo (Europe) SL, CN=Sectigo Qualified Time Stamping Signer #3\nerror 7 at 0 depth lookup: certificate signature failure\nerror tsa.pem: verification failed\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\n",
+      "stdout": ""
+    },
+    {
+      "case": "signature_bit_root_issued_crl",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791555586",
+        "tsa.pem"
+      ],
+      "expected_path_result": false,
+      "expected_verify_error_and_depth": [
+        8,
+        1
+      ],
+      "input_sha256": {
+        "intermediate_certificate": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "issuer_issued_crl": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+        "root_certificate": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "root_issued_crl": "68daedb3b7d92ab087303fd08feca4e84b4d0d9347cc944c33594a57b79dc6ff",
+        "tsa_certificate": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d"
+      },
+      "returncode": 2,
+      "stderr": "C=ES, O=Sectigo (Europe) SL, CN=Sectigo Qualified Time Stamping CA R35\nerror 8 at 1 depth lookup: CRL signature failure\nerror tsa.pem: verification failed\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\n",
+      "stdout": ""
+    },
+    {
+      "case": "signature_bit_issuer_issued_crl",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791555586",
+        "tsa.pem"
+      ],
+      "expected_path_result": false,
+      "expected_verify_error_and_depth": [
+        8,
+        0
+      ],
+      "input_sha256": {
+        "intermediate_certificate": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "issuer_issued_crl": "9ef2c1d3545f4ef0f32b2e3cce7df6c9d64780525f249582db215e12e2d5c5f0",
+        "root_certificate": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "root_issued_crl": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "tsa_certificate": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d"
+      },
+      "returncode": 2,
+      "stderr": "C=ES, O=Sectigo (Europe) SL, CN=Sectigo Qualified Time Stamping Signer #3\nerror 8 at 0 depth lookup: CRL signature failure\nerror tsa.pem: verification failed\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\n",
+      "stdout": ""
+    },
+    {
+      "case": "missing_issuer_crl",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791555586",
+        "tsa.pem"
+      ],
+      "expected_path_result": false,
+      "expected_verify_error_and_depth": [
+        3,
+        0
+      ],
+      "input_sha256": {
+        "intermediate_certificate": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "root_certificate": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "root_issued_crl": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "tsa_certificate": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d"
+      },
+      "returncode": 2,
+      "stderr": "C=ES, O=Sectigo (Europe) SL, CN=Sectigo Qualified Time Stamping Signer #3\nerror 3 at 0 depth lookup: unable to get certificate CRL\nerror tsa.pem: verification failed\n",
+      "stdout": ""
+    },
+    {
+      "case": "before_root_crl",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791555585",
+        "tsa.pem"
+      ],
+      "expected_path_result": false,
+      "expected_verify_error_and_depth": [
+        11,
+        1
+      ],
+      "input_sha256": {
+        "intermediate_certificate": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "issuer_issued_crl": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+        "root_certificate": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "root_issued_crl": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "tsa_certificate": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d"
+      },
+      "returncode": 2,
+      "stderr": "C=ES, O=Sectigo (Europe) SL, CN=Sectigo Qualified Time Stamping CA R35\nerror 11 at 1 depth lookup: CRL is not yet valid\nerror tsa.pem: verification failed\n",
+      "stdout": ""
+    },
+    {
+      "case": "at_issuer_crl_expiry",
+      "command": [
+        "<pinned-openssl>",
+        "verify",
+        "-CAfile",
+        "root.pem",
+        "-no-CApath",
+        "-no-CAstore",
+        "-untrusted",
+        "issuer.pem",
+        "-CRLfile",
+        "crls.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1792129331",
+        "tsa.pem"
+      ],
+      "expected_path_result": false,
+      "expected_verify_error_and_depth": [
+        12,
+        0
+      ],
+      "input_sha256": {
+        "intermediate_certificate": "cd0a3e00a1bdae3a159fa9e3d70f8e664f560fdce16357cbe440ed0b0d88244f",
+        "issuer_issued_crl": "7c04719903e20a9a96c967b49450379b587fa8e6728400e81394e8b5fd061ff5",
+        "root_certificate": "f871f8976b4068d700d5f281084b4a29eaf4b8f35743330ba062fab46f58c2ed",
+        "root_issued_crl": "bd694b91827d37c9f5f5a87d5b59777fc4102d0f359469fabe1ca89ccbb925d9",
+        "tsa_certificate": "4ffc3bcb2da5c1623a5e98714df0c4e9ca622db07cb0eb6b2083388a0602029d"
+      },
+      "returncode": 2,
+      "stderr": "C=ES, O=Sectigo (Europe) SL, CN=Sectigo Qualified Time Stamping Signer #3\nerror 12 at 0 depth lookup: CRL has expired\nerror tsa.pem: verification failed\n",
+      "stdout": ""
+    }
+  ],
+  "schema": "etzio.published-tsa-material.openssl-comparison.v1"
+}
