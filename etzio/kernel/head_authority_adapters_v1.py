@@ -2293,6 +2293,13 @@ def _require_time_binding(
         or request.time_lower_bound != bundle.time_lower_bound
         or request.time_upper_bound != bundle.time_upper_bound
         or request.time_evidence != bundle.evidence
+        or any(
+            getattr(request, field) != getattr(bundle, field)
+            for field in (
+                "service_instance_id", "environment_id", "mission_id", "authority_id",
+                "target_id", "event_digest", "transition_intent_id",
+            )
+        )
     ):
         _reject(
             "head_time_bundle_mismatch",
@@ -2483,12 +2490,13 @@ def qualify_anchor_bundle_v1(
     blobs: list[ProviderEvidenceBlobV1] = []
     for source_id in ordered:
         request = copied_requests[source_id]
-        _require_time_binding(request, bundle)  # type: ignore[arg-type]
         package = authenticate_head_evidence_v1(
             profile=copied_profile,
             request=request,  # type: ignore[arg-type]
             signed_evidence=copied_signed[source_id],  # type: ignore[arg-type]
         )
+        request = package.request
+        _require_time_binding(request, bundle)
         claim = package.claim
         tree_size = claim["tree_size"]
         leaf_index = claim["leaf_index"]
@@ -2697,12 +2705,12 @@ def qualify_head_catalog_bundle_v1(
     blobs: list[ProviderEvidenceBlobV1] = []
     for source_id in ordered:
         request = copied_requests[source_id]
-        _require_time_binding(request, bundle)  # type: ignore[arg-type]
         package = authenticate_head_evidence_v1(
             profile=copied_profile,
             request=request,  # type: ignore[arg-type]
             signed_evidence=copied_signed[source_id],  # type: ignore[arg-type]
         )
+        _require_time_binding(package.request, bundle)
         packages[source_id] = package
         blobs.append(package.provider_evidence)
 
@@ -3688,19 +3696,9 @@ def create_repository_owned_head_authority_fixture_v1(
     time_vector = time_fixture.vector
     epoch = time_vector.expected_epoch_second
 
-    validation_policy = IntegrityValidationPolicyV1(
-        decision_policy_id=_fixture_content_id("decision-policy", "head-authority"),
-        decision_time_policy_id=_fixture_content_id("decision-time-policy", "head-authority"),
-        checkpoint_time_policy_id=_fixture_content_id(
-            "checkpoint-time-policy", "head-authority"
-        ),
-        anchor_policy_id=_fixture_content_id("anchor-policy", "head-authority"),
-        required_revocation_namespaces=frozenset({"authority"}),
-        max_decision_uncertainty_seconds=4,
-        max_checkpoint_uncertainty_seconds=4,
-    )
-    service_instance_id = "Etzio.head-authority-qualification-fixture"
-    environment_id = "fixture.networkless-control-plane"
+    validation_policy = time_fixture.profile.validation_policy
+    service_instance_id = time_fixture.profile.service_instance_id
+    environment_id = time_fixture.profile.environment_id
     catalog_log_origin = "fixture.catalog-log"
 
     specs: list[tuple[str, str, str]] = [

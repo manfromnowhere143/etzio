@@ -50,6 +50,7 @@ from etzio.kernel.integrity_transition import (
     PendingIntegrityTransitionV1,
     RepositoryOwnedDeterministicModeledIntegrityServiceV1,
 )
+from etzio.kernel.qualified_evidence_v1 import qualified_decision_time_imprint_v1
 from etzio.kernel.store import EventStoreError, SQLiteEventStore
 
 
@@ -66,7 +67,7 @@ def _nonce(label: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _decision_time_bundle(hfx):
+def _decision_time_bundle(hfx, decision=None):
     tfx = hfx.time_fixture
     vector = tfx.vector
     requests = {
@@ -74,13 +75,16 @@ def _decision_time_bundle(hfx):
             profile=tfx.profile,
             source_id=adapter.source_id,
             purpose="decision",
-            mission_id=vector.mission_id,
-            authority_id=vector.authority_id,
-            target_id=vector.target_id,
-            event_digest=vector.event_digest,
-            transition_intent_id=vector.transition_intent_id,
-            imprint_id=_digest("pending-decision-imprint"),
-            request_nonce=vector.request_nonce,
+            mission_id=vector.mission_id if decision is None else decision.mission_id,
+            authority_id=vector.authority_id if decision is None else decision.authority_id,
+            target_id=vector.target_id if decision is None else decision.target_id,
+            event_digest=vector.event_digest if decision is None else decision.proposed_event_digest,
+            transition_intent_id=vector.transition_intent_id if decision is None else decision.transition_intent_id,
+            imprint_id=(
+                _digest("pending-decision-imprint") if decision is None
+                else qualified_decision_time_imprint_v1(decision)
+            ),
+            request_nonce=vector.request_nonce if decision is None else decision.request_nonce,
         )
         for adapter in tfx.time_adapters
     }
@@ -225,11 +229,6 @@ def _coherent_qualified_pending(service, hfx):
 
     tfx = hfx.time_fixture
     policy = tfx.profile.validation_policy
-    tb = _decision_time_bundle(hfx)
-    rev = _revocation_bundles(hfx, tb)
-    inputs = map_qualified_integrity_inputs_v1(
-        profile=tfx.profile, time_bundle=tb, revocation_bundles=rev
-    )
     vector = tfx.vector
     event = EventV1.create(
         mission_id=vector.mission_id,
@@ -238,7 +237,7 @@ def _coherent_qualified_pending(service, hfx):
         unit="AQUILA",
         authority_id=vector.authority_id,
         target_id=vector.target_id,
-        decision_time=inputs.time_upper_bound,
+        decision_time=max(adapter.time_upper_bound for adapter in tfx.time_adapters),
         payload={"reason_code": "authority_expired", "stage": "admission"},
         prev_digest=GENESIS_DIGEST,
     )
@@ -246,6 +245,11 @@ def _coherent_qualified_pending(service, hfx):
         event, previous_global=None, previous_mission=None
     )
     md = modeled.decision
+    tb = _decision_time_bundle(hfx, md)
+    rev = _revocation_bundles(hfx, tb)
+    inputs = map_qualified_integrity_inputs_v1(
+        profile=tfx.profile, time_bundle=tb, revocation_bundles=rev
+    )
     head_floor, head_floor_blobs = service._floor_for_predecessor(  # noqa: SLF001
         event=event, previous_global=None, previous_mission=None
     )

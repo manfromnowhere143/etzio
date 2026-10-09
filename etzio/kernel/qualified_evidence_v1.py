@@ -22,6 +22,7 @@ from etzio.integrity_v1 import (
     HEAD_ANCHOR_RECEIPT_EVIDENCE_KIND,
     EvidenceReferenceV1,
     HeadCheckpointFloorV1,
+    IntegrityDecisionV1,
     RevocationFloorV1,
     RevocationViewV1,
 )
@@ -37,6 +38,7 @@ from etzio.kernel.integrity_adapters_v1 import (
     QualifiedRevocationBundleV1,
     QualifiedTimeBundleV1,
     map_qualified_integrity_inputs_v1,
+    reauthenticate_time_bundle_v1,
 )
 from etzio.kernel.integrity_transition import ProviderEvidenceBlobV1
 from etzio.protocol import content_id
@@ -64,6 +66,51 @@ class QualifiedEvidenceError(ValueError):
 
 def _reject(reason_code: str, message: str) -> None:
     raise QualifiedEvidenceError(reason_code, message)
+
+
+def qualified_decision_time_imprint_v1(decision: IntegrityDecisionV1) -> str:
+    """Bind decision-time acquisition to exact pre-acquisition scope and predecessors."""
+
+    if type(decision) is not IntegrityDecisionV1:
+        _reject("invalid_qualified_decision", "an exact integrity decision is required")
+    copied = IntegrityDecisionV1.from_envelope(decision.to_envelope())
+    fields = (
+        "service_instance_id", "environment_id", "mission_id", "authority_id", "target_id",
+        "prior_global_checkpoint_sequence", "prior_global_checkpoint_id",
+        "prior_global_checkpoint_attestation_id", "prior_global_checkpoint_principal_id",
+        "prior_global_checkpoint_trust_snapshot_id", "prior_event_seq", "prior_event_digest",
+        "event_kind", "proposed_event_digest", "transition_intent_id", "request_nonce",
+        "time_policy_id", "decision_policy_id",
+    )
+    return content_id("qualified_decision_time_imprint_v1", {
+        name: getattr(copied, name) for name in fields
+    })
+
+
+def require_qualified_decision_scope_v1(
+    *, profile: IntegrityAdapterTrustProfileV1, decision: IntegrityDecisionV1,
+    time_bundle: QualifiedTimeBundleV1,
+) -> QualifiedTimeBundleV1:
+    """Freshly authenticate time and bind it to the decision that consumes it."""
+
+    if type(decision) is not IntegrityDecisionV1:
+        _reject("invalid_qualified_decision", "an exact integrity decision is required")
+    copied = IntegrityDecisionV1.from_envelope(decision.to_envelope())
+    imprint = qualified_decision_time_imprint_v1(copied)
+    fresh = reauthenticate_time_bundle_v1(profile=profile, bundle=time_bundle)
+    expected = {
+        name: getattr(copied, name) for name in (
+            "service_instance_id", "environment_id", "mission_id", "authority_id",
+            "target_id", "transition_intent_id", "request_nonce",
+        )
+    }
+    expected.update(event_digest=copied.proposed_event_digest, purpose="decision", imprint_id=imprint)
+    if any(getattr(fresh, name) != value for name, value in expected.items()):
+        _reject(
+            "qualified_decision_scope_mismatch",
+            "qualified time scope or imprint differs from its consuming decision",
+        )
+    return fresh
 
 
 def _construct_sealed_result(
@@ -590,4 +637,6 @@ __all__ = (
     "accept_qualified_anchor_evidence_v1",
     "accept_qualified_head_floor_evidence_v1",
     "accept_qualified_revocation_evidence_v1",
+    "qualified_decision_time_imprint_v1",
+    "require_qualified_decision_scope_v1",
 )

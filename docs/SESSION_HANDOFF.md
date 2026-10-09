@@ -4,6 +4,16 @@ Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
 ## Current repair tranche, 2026-10-09
 
+The active branch is now `fix/qualified-scope-20261009`. Recovery commit `e190c17` is
+retained in PR #26; its local release results below apply to that commit. The second repair
+binds qualified pending time to the consuming decision, including its deterministic
+pre-acquisition imprint, and compares revocation/head scope with freshly authenticated time.
+It corrects the head fixture's different service identity and the positive pending fixture's
+foreign event/intent/nonce. There are `25` new composition tests; the initial probe reproduced
+`20` failures and one valid control before repair. All `271` focused tests pass. Full
+`make verify` passes `1261` tests on CPython 3.11.15 (594.80 seconds) and CPython 3.14.2
+(607.93 seconds), including policy, lint, and fixture checks. Scope-repair CI is pending.
+
 Status: recovery repair locally validated on `fix/integrity-composition-20261009`; GitHub
 reproduction and the remaining composition repairs are pending. The reviewed base `304d531`
 passed `1198` tests on both declared runtimes, but additional adversarial probes reproduced
@@ -15,7 +25,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1236 tests expected;
+- 1261 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
@@ -29,8 +39,9 @@ The new composition file has `38` tests. The complete focused storage/lifecycle/
 composition run passed `85` tests on CPython 3.11.15. Full `make verify` then passed
 `1236` tests on each declared runtime: CPython 3.11.15 in 584.83 seconds and CPython 3.14.2
 in 603.83 seconds, including policy, lint, and fixture checks. No GitHub run validates
-these changes yet. Qualified pending scope, catalog projection binding, and ADR-0019 step 6
-remain open.
+these recovery changes yet. The subsequent scope repair is recorded above. Catalog
+projection binding, complete checkpoint time consumption, cold reconstruction, and
+ADR-0019 step 6 remain open.
 The mission remains repository-owned fixtures only; no provider, live target, spending,
 isolation, execution, finding, income, or comparative-superiority claim follows.
 

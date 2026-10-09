@@ -4,6 +4,37 @@
 - Date: 2026-07-31
 - Owner: Daniel Wahnich
 
+## Scope correction, 2026-10-09
+
+Review reproduced acceptance of correctly signed qualified evidence for another event,
+transition intent, or nonce. The earlier positive pending fixture itself carried a time
+bundle for the qualification vector rather than for its consuming decision. Authenticating
+packages and comparing their projected hull and floors does not establish this binding.
+
+Qualification must compare service, environment, mission, authority, target, event, and
+transition intent between every revocation or head request and its freshly authenticated
+time bundle. Derived requests may use their own nonces; that does not permit another scope.
+The repository head fixture now takes its service, environment, and validation policy from
+its embedded time fixture. Its previous service label named another service. The resulting
+profile and corpus identities change by content; no retained profile is rewritten.
+
+At pending admission, the store must freshly authenticate the decision-time bundle and
+compare those seven fields, purpose `decision`, and the decision's exact request nonce.
+Its imprint is `content_id("qualified_decision_time_imprint_v1", scope)`, where `scope`
+contains exactly the decision's service and environment; mission, authority and target;
+prior global checkpoint sequence, identity and all three attestation-provenance fields;
+prior event sequence and digest; event kind and proposed event digest; transition intent;
+request nonce; time policy and decision policy. Time bounds, returned evidence, revocation
+views, and the resulting decision identity are excluded to avoid a dependency cycle.
+This pins the pre-acquisition request to its consumer and supports deterministic request
+reconstruction. The canonical decision schema remains unchanged.
+
+Known-bads use valid signatures and internally consistent qualified bundles with one foreign
+scope field, nonce, or imprint. A valid exact-scope control must still append and reconcile.
+This correction does not by itself finish checkpoint time consumption, catalog projection
+binding, or cold reconstruction from retained packages. Those remain step-6 obligations;
+the transient bundles are not proof of durable reauthentication.
+
 ## Context
 
 ADR-0018 built the complete acceptance-primitive layer — anchor, revocation,

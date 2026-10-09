@@ -2606,7 +2606,12 @@ def qualify_revocation_bundle_v1(
     authenticated: list[AuthenticatedProviderEvidencePackageV1] = []
     claims: list[dict[str, object]] = []
     for binding in expected_bindings:
-        request = request_map[binding.source_id]
+        package = authenticate_provider_evidence_v1(
+            profile=profile,
+            request=request_map[binding.source_id],
+            signed_evidence=signed_map[binding.source_id],
+        )
+        request = package.request
         if (
             request.source_id != binding.source_id
             or request.evidence_role != binding.role
@@ -2618,16 +2623,18 @@ def qualify_revocation_bundle_v1(
             or request.time_lower_bound != fresh_time.time_lower_bound
             or request.time_upper_bound != fresh_time.time_upper_bound
             or request.time_evidence != fresh_time.evidence
+            or any(
+                getattr(request, field) != getattr(fresh_time, field)
+                for field in (
+                    "service_instance_id", "environment_id", "mission_id", "authority_id",
+                    "target_id", "event_digest", "transition_intent_id",
+                )
+            )
         ):
             _reject(
                 "revocation_time_bundle_mismatch",
                 "revocation request differs from its exact profile or time bundle",
             )
-        package = authenticate_provider_evidence_v1(
-            profile=profile,
-            request=request,
-            signed_evidence=signed_map[binding.source_id],
-        )
         claim = thaw_json(package.claim)
         if type(claim) is not dict:
             _reject(

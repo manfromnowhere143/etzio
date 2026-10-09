@@ -6024,7 +6024,10 @@ class SQLiteEventStore:
         """
 
         from .integrity_transition import PendingIntegrityTransitionV1
-        from .qualified_evidence_v1 import accept_qualified_revocation_evidence_v1
+        from .qualified_evidence_v1 import (
+            accept_qualified_revocation_evidence_v1,
+            require_qualified_decision_scope_v1,
+        )
 
         if type(pending_record) is not PendingIntegrityTransitionV1:
             raise EventStoreError(
@@ -6039,6 +6042,9 @@ class SQLiteEventStore:
             )
         time_profile, _head_profile = profiles
         decision = pending_record.decision
+        time_bundle = require_qualified_decision_scope_v1(
+            profile=time_profile, decision=decision, time_bundle=time_bundle,
+        )
         floors = pending_record.revocation_floors
         # Partition the decision's time+revocation evidence out of the record's full
         # provider evidence by exact evidence identity, leaving the predecessor head-floor
