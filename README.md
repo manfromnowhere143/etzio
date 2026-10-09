@@ -37,7 +37,7 @@ confidence.**
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
 > The lifecycle implementation passes `1366` tests on CPython 3.11.15 and 3.14.2 locally
 > and in CI; exact commit and run evidence are retained in the
-> [handoff](docs/SESSION_HANDOFF.md). `19` accepted architecture decisions define the
+> [handoff](docs/SESSION_HANDOFF.md). `20` accepted architecture decisions define the
 > contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
@@ -106,6 +106,12 @@ That yields six operating laws:
 - **Blocked target system:** exploit construction, hard isolation, independent
   reproduction, adjudication, governed disclosure, evaluated promotion, live targets, and
   production external finality remain unavailable.
+
+The optional [native-time qualification profile](docs/decisions/0020-offline-native-time-qualification.md)
+now validates repository-owned RFC 3161/5816 bytes with pinned pyHanko and retains an
+OpenSSL comparison. It checks exact request binding, certificate/CRL evidence and the full
+time-uncertainty interval. Its offline observation has no kernel authority; no external
+provider is connected.
 
 ## Implemented vertical slice
 

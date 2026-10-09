@@ -13,3 +13,4 @@ recursive-include schemas *.json
 recursive-include scripts *.py *.sh
 recursive-include tests *.py
 recursive-include tools/ci *.in *.lock
+recursive-include tools/native-time *.json *.md

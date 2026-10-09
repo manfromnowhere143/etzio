@@ -149,6 +149,11 @@ It preserves the governed recovery state machine and legacy modeled anchor bytes
 ordinary fixture CLI still uses its legacy profile; unsigned modeled finality remains a
 separate enrollment. This tranche's release evidence is recorded in the handoff.
 
+ADR-0020 adds a separate bounded RFC 3161/5816 offline observation validator, pinned
+optional dependency closure, native certificate/CRL corpus and OpenSSL comparison. It
+has no acquisition client or conversion into kernel-accepted time evidence. The concrete
+provider-administration and local-loss experiment remains proposed.
+
 All providers remain repository-owned deterministic fixtures. No real or native provider
 is connected, and no external durability, trustworthy UTC, current real-world revocation,
 independent administration, real non-equivocation, execution, or finding claim follows.

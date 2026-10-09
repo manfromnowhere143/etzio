@@ -37,6 +37,13 @@ types. Its deterministic corpus and eighty-one focused tests prove contract and 
 behavior. ADR-0019 consumes those packages through qualified fixture enrollment and cold
 reconstruction. It qualifies no native or externally administered provider.
 
+ADR-0020 adds a separate optional `etzio.qualification.rfc3161_v1` surface for bounded native
+RFC 3161/5816 observations. It binds the complete request and exact dependency/profile
+closure, delegates CMS/PKIX to pyHanko, checks the full accuracy interval against retained
+certificate and CRL evidence, and retains an independent OpenSSL comparison. These are
+repository-owned native-format fixtures. No conversion into a qualified kernel time bundle
+or provider acquisition path is implemented.
+
 ## Target system
 
 ```text

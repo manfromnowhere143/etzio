@@ -22,6 +22,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0017: Blocked-finality crash recovery and status inspection](0017-blocked-finality-crash-recovery.md)
 - [ADR-0018: Qualified signed evidence consumption](0018-qualified-evidence-consumption.md)
 - [ADR-0019: Qualified evidence lifecycle consumption](0019-qualified-evidence-lifecycle-consumption.md)
+- [ADR-0020: Offline RFC 3161 timestamp qualification](0020-offline-native-time-qualification.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -68,9 +69,13 @@ checkpoint's, decision's, or finalization's claimed evidence only as the exact s
 packages. They change no record identity, store profile, or lifecycle command; the one
 remaining step is the schema-touching storage-wiring tranche.
 
-ADR-0019 designs the wiring of the ADR-0018 acceptance primitives into the modeled finality
-lifecycle: a schema-version-4 profile-selected acceptance mode that pins the qualified adapter
-roots, a service that produces signed-package evidence, and record validators that re-derive
-requests and reauthenticate from retained scope, sequenced into five dependency-complete
-tranches. Step 1 (the schema-version-4 append-only `integrity_acceptance_profile` table and
-its empty-history-only qualified enrollment) is implemented; record consumption follows.
+ADR-0019 wires the ADR-0018 acceptance primitives into the four-phase fixture finality
+lifecycle. Schema-version-4 enrollment pins the qualified adapter roots; store admission,
+retry and cold replay reconstruct requests and reauthenticate retained signed packages.
+The qualified fixture service, complete receipt vertical and governed interruption
+recovery are implemented; externally administered providers remain a separate gate.
+
+ADR-0020 qualifies a bounded native RFC 3161/5816 offline observation profile using pinned
+pyHanko CMS/PKIX validation and a retained OpenSSL comparison. It introduces no provider
+acquisition or lifecycle authority; independent administration and fresh external evidence
+remain required.

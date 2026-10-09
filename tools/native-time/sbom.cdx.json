@@ -1,0 +1,455 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:pypi/aiohappyeyeballs@2.7.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "PSF-2.0"
+          }
+        }
+      ],
+      "name": "aiohappyeyeballs",
+      "purl": "pkg:pypi/aiohappyeyeballs@2.7.1",
+      "type": "library",
+      "version": "2.7.1"
+    },
+    {
+      "bom-ref": "pkg:pypi/aiohttp@3.14.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 AND MIT"
+          }
+        }
+      ],
+      "name": "aiohttp",
+      "purl": "pkg:pypi/aiohttp@3.14.4",
+      "type": "library",
+      "version": "3.14.4"
+    },
+    {
+      "bom-ref": "pkg:pypi/aiosignal@1.4.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache 2.0"
+          }
+        }
+      ],
+      "name": "aiosignal",
+      "purl": "pkg:pypi/aiosignal@1.4.0",
+      "type": "library",
+      "version": "1.4.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/asn1crypto@1.5.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "name": "asn1crypto",
+      "purl": "pkg:pypi/asn1crypto@1.5.1",
+      "type": "library",
+      "version": "1.5.1"
+    },
+    {
+      "bom-ref": "pkg:pypi/attrs@26.1.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "name": "attrs",
+      "purl": "pkg:pypi/attrs@26.1.0",
+      "type": "library",
+      "version": "26.1.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/certifi@2026.7.22",
+      "licenses": [
+        {
+          "license": {
+            "name": "MPL-2.0"
+          }
+        }
+      ],
+      "name": "certifi",
+      "purl": "pkg:pypi/certifi@2026.7.22",
+      "type": "library",
+      "version": "2026.7.22"
+    },
+    {
+      "bom-ref": "pkg:pypi/cffi@2.1.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT-0"
+          }
+        }
+      ],
+      "name": "cffi",
+      "purl": "pkg:pypi/cffi@2.1.0",
+      "type": "library",
+      "version": "2.1.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/cryptography@49.0.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0 OR BSD-3-Clause"
+          }
+        }
+      ],
+      "name": "cryptography",
+      "purl": "pkg:pypi/cryptography@49.0.0",
+      "type": "library",
+      "version": "49.0.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/frozenlist@1.8.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "frozenlist",
+      "purl": "pkg:pypi/frozenlist@1.8.0",
+      "type": "library",
+      "version": "1.8.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/idna@3.20",
+      "licenses": [
+        {
+          "license": {
+            "name": "BSD-3-Clause"
+          }
+        }
+      ],
+      "name": "idna",
+      "purl": "pkg:pypi/idna@3.20",
+      "type": "library",
+      "version": "3.20"
+    },
+    {
+      "bom-ref": "pkg:pypi/lxml@6.1.3",
+      "licenses": [
+        {
+          "license": {
+            "name": "BSD-3-Clause"
+          }
+        }
+      ],
+      "name": "lxml",
+      "purl": "pkg:pypi/lxml@6.1.3",
+      "type": "library",
+      "version": "6.1.3"
+    },
+    {
+      "bom-ref": "pkg:pypi/multidict@6.9.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache License 2.0"
+          }
+        }
+      ],
+      "name": "multidict",
+      "purl": "pkg:pypi/multidict@6.9.1",
+      "type": "library",
+      "version": "6.9.1"
+    },
+    {
+      "bom-ref": "pkg:pypi/oscrypto@1.3.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "name": "oscrypto",
+      "purl": "pkg:pypi/oscrypto@1.3.0",
+      "type": "library",
+      "version": "1.3.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/propcache@0.5.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "propcache",
+      "purl": "pkg:pypi/propcache@0.5.4",
+      "type": "library",
+      "version": "0.5.4"
+    },
+    {
+      "bom-ref": "pkg:pypi/pycparser@3.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "BSD-3-Clause"
+          }
+        }
+      ],
+      "name": "pycparser",
+      "purl": "pkg:pypi/pycparser@3.0",
+      "type": "library",
+      "version": "3.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/pyhanko-certvalidator@0.32.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "name": "pyhanko-certvalidator",
+      "purl": "pkg:pypi/pyhanko-certvalidator@0.32.1",
+      "type": "library",
+      "version": "0.32.1"
+    },
+    {
+      "bom-ref": "pkg:pypi/pyhanko@0.37.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "name": "pyhanko",
+      "purl": "pkg:pypi/pyhanko@0.37.0",
+      "type": "library",
+      "version": "0.37.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/typing-extensions@4.16.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "PSF-2.0"
+          }
+        }
+      ],
+      "name": "typing-extensions",
+      "purl": "pkg:pypi/typing-extensions@4.16.0",
+      "type": "library",
+      "version": "4.16.0"
+    },
+    {
+      "bom-ref": "pkg:pypi/tzlocal@5.4.4",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "name": "tzlocal",
+      "purl": "pkg:pypi/tzlocal@5.4.4",
+      "type": "library",
+      "version": "5.4.4"
+    },
+    {
+      "bom-ref": "pkg:pypi/uritools@6.1.3",
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
+        }
+      ],
+      "name": "uritools",
+      "purl": "pkg:pypi/uritools@6.1.3",
+      "type": "library",
+      "version": "6.1.3"
+    },
+    {
+      "bom-ref": "pkg:pypi/yarl@1.25.1",
+      "licenses": [
+        {
+          "license": {
+            "name": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "yarl",
+      "purl": "pkg:pypi/yarl@1.25.1",
+      "type": "library",
+      "version": "1.25.1"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:pypi/asn1crypto@1.5.1",
+        "pkg:pypi/cryptography@49.0.0",
+        "pkg:pypi/pyhanko@0.37.0",
+        "pkg:pypi/pyhanko-certvalidator@0.32.1"
+      ],
+      "ref": "etzio-native-time-offline-v1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/aiohappyeyeballs@2.7.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:pypi/aiohappyeyeballs@2.7.1",
+        "pkg:pypi/aiosignal@1.4.0",
+        "pkg:pypi/attrs@26.1.0",
+        "pkg:pypi/frozenlist@1.8.0",
+        "pkg:pypi/multidict@6.9.1",
+        "pkg:pypi/propcache@0.5.4",
+        "pkg:pypi/typing-extensions@4.16.0",
+        "pkg:pypi/yarl@1.25.1"
+      ],
+      "ref": "pkg:pypi/aiohttp@3.14.4"
+    },
+    {
+      "dependsOn": [
+        "pkg:pypi/frozenlist@1.8.0",
+        "pkg:pypi/typing-extensions@4.16.0"
+      ],
+      "ref": "pkg:pypi/aiosignal@1.4.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/asn1crypto@1.5.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/attrs@26.1.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/certifi@2026.7.22"
+    },
+    {
+      "dependsOn": [
+        "pkg:pypi/pycparser@3.0"
+      ],
+      "ref": "pkg:pypi/cffi@2.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:pypi/cffi@2.1.0"
+      ],
+      "ref": "pkg:pypi/cryptography@49.0.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/frozenlist@1.8.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/idna@3.20"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/lxml@6.1.3"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/multidict@6.9.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:pypi/asn1crypto@1.5.1"
+      ],
+      "ref": "pkg:pypi/oscrypto@1.3.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/propcache@0.5.4"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/pycparser@3.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:pypi/aiohttp@3.14.4",
+        "pkg:pypi/asn1crypto@1.5.1",
+        "pkg:pypi/certifi@2026.7.22",
+        "pkg:pypi/cryptography@49.0.0",
+        "pkg:pypi/oscrypto@1.3.0",
+        "pkg:pypi/uritools@6.1.3"
+      ],
+      "ref": "pkg:pypi/pyhanko-certvalidator@0.32.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:pypi/aiohttp@3.14.4",
+        "pkg:pypi/asn1crypto@1.5.1",
+        "pkg:pypi/cryptography@49.0.0",
+        "pkg:pypi/lxml@6.1.3",
+        "pkg:pypi/pyhanko-certvalidator@0.32.1",
+        "pkg:pypi/tzlocal@5.4.4"
+      ],
+      "ref": "pkg:pypi/pyhanko@0.37.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/typing-extensions@4.16.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/tzlocal@5.4.4"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:pypi/uritools@6.1.3"
+    },
+    {
+      "dependsOn": [
+        "pkg:pypi/idna@3.20",
+        "pkg:pypi/multidict@6.9.1",
+        "pkg:pypi/propcache@0.5.4"
+      ],
+      "ref": "pkg:pypi/yarl@1.25.1"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "etzio-native-time-offline-v1",
+      "name": "Etzio offline native-time qualification",
+      "type": "application",
+      "version": "1"
+    },
+    "properties": [
+      {
+        "name": "etzio:boundary",
+        "value": "Optional offline qualification closure; not production or binary provenance admission"
+      },
+      {
+        "name": "etzio:requirements-ci-lock-sha256",
+        "value": "4678f55a4776c6c888c94645155850f2cd58eccfc3a5aa37d6d8bcd50fbb3198"
+      },
+      {
+        "name": "etzio:dependency-markers",
+        "value": "Union of CPython 3.11/3.14 and macOS/Linux marker environments"
+      }
+    ]
+  },
+  "specVersion": "1.6",
+  "version": 1
+}

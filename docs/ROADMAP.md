@@ -182,6 +182,11 @@ closure. Replay also accepts the exact pre-recovery zero-candidate `completed` s
 reader-only legacy alias; it is vacuous coverage compatibility, not a finding or execution
 claim.
 
+ADR-0020 implements the first native-format offline proof: a bounded RFC 3161/5816 profile,
+exact optional dependency closure, signed certificate/CRL corpus and OpenSSL comparison.
+Actual TSA suitability, independent administration, live freshness and native lifecycle
+retention remain open; the offline observation is not an enrolled time source.
+
 Remaining required:
 
 1. qualify independently administered time, revocation, anchor, catalog and monitor

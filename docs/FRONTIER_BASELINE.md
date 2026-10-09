@@ -41,6 +41,18 @@ not a conformance result. A provider profile needs pinned source/client versions
 semantics, a threat model, independent administration evidence, positive vectors, and a
 known-bad for each claimed refusal.
 
+### Native-time qualification update
+
+[ADR-0020](decisions/0020-offline-native-time-qualification.md) pins pyHanko `0.37.0`
+(2026-08-31), pyhanko-certvalidator `0.32.1` (2026-09-10), and their full optional
+qualification closure. Its bounded RFC 3161/5816 fixture profile is compared with local
+OpenSSL `3.6.3` using retained exact requests, responses, CRLs and explicit verification
+times. This is native-format offline evidence, not native-provider or general PKIX
+conformance. CMS signatures and timestamps cannot establish current revocation, truthful
+UTC, independent administration or the latest catalog head after local loss. The ADR
+specifies the concrete external-administration and local-loss experiment before those
+claims can be accepted.
+
 ### Finite next steps and decision criteria
 
 The foundation exit gates are external latest-head authority after local loss, native

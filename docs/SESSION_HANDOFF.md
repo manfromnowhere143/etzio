@@ -2,7 +2,32 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
 
-## Current qualified lifecycle tranche, 2026-10-09
+## Current offline native-time tranche, 2026-10-09
+
+Active branch: `feat/offline-native-time-20261009`, based on main `77f39ab`.
+[ADR-0020](decisions/0020-offline-native-time-qualification.md) adds a separate bounded
+RFC 3161/5816 offline observation validator using pyHanko CMS/PKIX. It pins the complete
+`21`-package optional qualification closure, one direct root/TSA path and exact request
+semantics. It rejects ambiguous ASN.1/CMS, forged or foreign evidence, missing accuracy,
+and certificate/CRL evidence that does not cover the entire conservative time hull.
+
+The retained [native comparison dossier](../tools/native-time/README.md) contains `14`
+OpenSSL `3.6.3` cases: all `11` shared protocol outcomes agree, with `3` deliberate Etzio
+accuracy/CRL-age policy refusals. The corpus, commands, raw results and CycloneDX `1.6`
+dependency inventory are retained. The local pre-change baseline passed `1366` tests on
+CPython 3.11.15 in `753.84` seconds. The full release suite passes `1509` tests (`143` new) on
+CPython 3.11.15 in `785.42` seconds and CPython 3.14.2 in
+`814.0` seconds, including policy, lint and fixture checks.
+Source/wheel build and installed-wheel replay of all `14` native cases pass. GitHub
+validation is pending; local results are not a CI claim.
+
+This surface has no acquisition client, external source, enrollment or conversion into
+kernel-accepted time evidence. It does not prove current UTC/revocation, independent
+administration, external durability, execution, a finding or income. The ADR specifies
+provider-administration evidence and a local-loss latest-head experiment as proposed next
+work, preserving every existing recovery, storage and isolation gate.
+
+## Prior qualified lifecycle tranche, 2026-10-09
 
 Canonical pickup: `main`. Release record: [PR #29](https://github.com/manfromnowhere143/etzio/pull/29),
 implementation `8b27c42`, based on catalog repair `2f476fa`. ADR-0019 step 6 is implemented
@@ -64,7 +89,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1366 tests expected;
+- 1509 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
@@ -1355,14 +1380,13 @@ These blockers prevent a finding pipeline and all live-target work.
 
 ### Mission 1 — close finding-admission integrity
 
-**Current pickup, 2026-10-09:** ADR-0019 step 6 is implemented and validated. Specify the
-smallest native-provider qualification profile and its failure corpus, including exact wire
-and client versions, request/predecessor semantics, and a local-loss latest-head experiment.
-See the top of this file for release evidence and the dated update in
-`docs/FRONTIER_BASELINE.md` for primary research and standards. The next gate is qualification
-under an explicitly admitted profile, independent administration evidence, externally durable
-latest-head authority, and the documented storage/isolation gates. Finder breadth and live
-targets remain outside the current fixture execution surface.
+**Current pickup, 2026-10-09:** finish release validation and publication of ADR-0020's
+offline native-time tranche. Then select a concrete provider profile and collect exact
+wire/client, independent-administration, freshness/revocation and local-loss experiment
+evidence. The narrow P-256/direct-root fixture profile is not evidence that a real TSA
+fits it. External acquisition needs a separately scoped grant. Do not connect this
+observation type to finality without canonical native dossier retention/reconstruction,
+complete source-roster qualification and the existing governed recovery contract.
 
 **Historical pickup before the 2026-10-09 tranche (superseded): ADR-0019 step 6.** All four record phases are now wired to qualified mode and on `main`: the acceptance-primitive layer in `etzio/kernel/qualified_evidence_v1.py`; schema-version-4 store enrollment; the store-layer consumers `verify_qualified_anchor_evidence` / `verify_qualified_revocation_evidence` / `verify_qualified_head_floor_evidence`; **step 3** (`CheckpointCandidateRecordV1`), **step 4** (`PendingIntegrityTransitionV1`), and **step 5** (`FinalizedIntegrityTransitionV1`), each with `acceptance_mode`, transient sealed bundles, a mode-branching record gate, and a store path that cross-checks the mode and reauthenticates under the enrolled roots. The coherent-lineage end-to-end **positives** for the pending and checkpoint phases are proved in `tests/test_qualified_finality_lineage_v1.py`; the finalization phase has its record/store wiring and live refusals proved there, with only its end-to-end positive outstanding.
 
