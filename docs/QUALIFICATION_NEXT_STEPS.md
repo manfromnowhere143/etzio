@@ -62,6 +62,24 @@ indeterminate. Parse retained bytes in the accepted environment, preserve refusa
 and keep the result outside kernel authority until native lifecycle qualification passes.
 These are proposed limits, not a sent request or an admitted grant.
 
+If the provider publishes no current TSA certificate, avoid a circular bootstrap: a
+separately authorized material-discovery capture may collect one bounded response as
+untrusted bytes. It has no Etzio time authority and cannot satisfy the exact-profile
+request contract. Inspect its chain under the independently selected trust procedure,
+then pin the complete profile before a later qualification request. Each experiment
+needs its own single-request budget; neither permits silent retries or promotion of the
+discovery token. Also specify trusted elapsed-time and acquisition bounds before native
+observations become decision time: issuance time plus accuracy does not describe an
+arbitrarily later receipt or commit.
+
+Spain's [official publication page](https://digital.sede.gob.es/pagina?id=Lista-de-confianza-de-prestadores-cualificados-de-servicios-electr%C3%B3nicos-de-confianza)
+links the current trust-list location. The downloaded XML contains the same R35
+intermediate fingerprint under the Sectigo timestamp-service entry; it does not supply
+the missing current TSA leaf. Its XML signature and EU list-of-lists bootstrap have not
+been locally validated. This is a second publication lead, not an admission or legal-status
+conclusion. The obsolete ministry PDF URL redirects to a general services page and must
+not be used as current evidence.
+
 ## Acceptance experiments
 
 | Dependency | Smallest decisive experiment | Required adversarial control | Evidence that permits progression |

@@ -33,6 +33,13 @@
       "resolved_url": "https://secure.sectigo.com/products/PubliclyDisclosedSubCACerts",
       "size": 474593,
       "sha256": "7db663dbca02c0458d8e797ffa31f33e25b727500e6a1e8eeacf114e430fca3f"
+    },
+    {
+      "file": "spanish-tsl.xml",
+      "url": "https://tsl.digital.gob.es/TSL.xml",
+      "size": 3042285,
+      "sha256": "19edfb5923cd27289ba78548255ca79ae5c9ae4b7dc8a5a334170d4a821a73cf",
+      "boundary": "Read-only publication lead; XML signature and EU LOTL bootstrap not locally validated. Sectigo TSA/QTST entry contains the same R35 intermediate, not a current TSA leaf."
     }
   ],
   "web_text_only_sources": [
@@ -68,6 +75,10 @@
     {
       "url": "https://cloud.google.com/products/compute/pricing/general-purpose",
       "version": "public price table inspected 2026-10-09; estimate only"
+    },
+    {
+      "url": "https://digital.sede.gob.es/pagina?id=Lista-de-confianza-de-prestadores-cualificados-de-servicios-electr%C3%B3nicos-de-confianza",
+      "version": "Official publication page inspected 2026-10-09; current TSL.xml link"
     }
   ]
 }

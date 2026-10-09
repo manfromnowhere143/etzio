@@ -23,6 +23,10 @@ protocol request has been sent. Preserve ADR-0021 and design a separate profile 
 after the complete service evidence is available.
 
 The pre-change baseline passed `1750` tests in `817.00` seconds on CPython 3.11.15.
+Post-change local `make verify` passed `1750` tests in `842.59` seconds; source/wheel
+builds, repository policy and exact public-evidence digest checks passed. Runtime, tests,
+scripts and dependency bytes remain equal to `f1061dc`. [PR #32](https://github.com/manfromnowhere143/etzio/pull/32)
+carries exact candidate CI and package/wheel results; resolve its final state there.
 The completed host preflight used a dedicated, disposable N2 VM, no public IP or service
 account, a VPC deny-egress rule and an absolute automatic deletion deadline. Linux
 `7.0.0-1011-gcp` exposed KVM API `12`; an empty VM descriptor was created and closed with
@@ -36,6 +40,11 @@ Next: complete native TSA material/terms and contained acquisition, qualify exac
 lifecycle reconstruction and independently administered latest-head recovery, then qualify
 storage and isolated execution before any historical benchmark or bounty campaign.
 Cloud permission persists; do not ask again for already authorized benign preparation.
+If no current TSA leaf is published, separate bounded material discovery from a later
+exact-profile qualification request; discovery is never time authority. Bind acquisition
+latency and the claimed time instant before lifecycle integration. Spain's current XML
+trust list independently publishes the same intermediate bytes, but its XML signature
+and EU bootstrap have not been locally validated and it does not resolve the TSA leaf.
 
 ## Current offline RSA chain tranche, 2026-10-09
 
