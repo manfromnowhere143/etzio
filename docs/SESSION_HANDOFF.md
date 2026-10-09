@@ -22,7 +22,7 @@ library/host provenance and independent administration remain unqualified.
 Pre-change `make verify` passed `1750` tests on CPython 3.11.15 in `819.59` seconds.
 The `44` new focused controls pass, for a full-suite collection target of `1794`.
 Resolve full release validation and publication from this tranche's exact Git commit and
-pull-request checks. Engine runtime, existing timestamp codecs/corpora, dependencies,
+[PR #33](https://github.com/manfromnowhere143/etzio/pull/33) checks. Engine runtime, existing timestamp codecs/corpora, dependencies,
 workflow and kernel authority remain unchanged. The previous preparation release is
 merged as PR #32 at `1a65e78`; both CI runtimes passed `1750` tests.
 
@@ -218,7 +218,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1750 tests expected;
+- 1794 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
