@@ -2,6 +2,48 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-10, Asia/Jerusalem.
 
+## Approved discovery outcome and bounded diagnostics, 2026-10-10
+
+[PR #37](https://github.com/manfromnowhere143/etzio/pull/37) is published at
+`baa9e0dce7a0e7d35f76ed4fc5b5118e6d37afb1`. Release validation passed `2202` tests locally
+and on both declared CI runtimes, plus package, wheel and repository checks. The unchanged
+baseline for this tranche passed `2202` tests in `866.88` seconds, exit `0`. An earlier
+baseline stopped at link policy because an ignored third-party README capture contained
+relative links; the inert capture was renamed `.source.txt` without changing its bytes,
+and its local manifests were updated. The policy was not weakened; that earlier run failed.
+
+The operator accepted the exact prepared FreeTSA plan and finite assumptions. One collector
+invocation retained `capture_indeterminate`, reason `transport_error`, with zero retained
+response bytes. The [public result](evidence/freetsa-discovery-result-2026-10-10.json)
+retains the original intent/outcome bytes and invocation record. Request delivery, phase
+and underlying cause are unknown. The original journal is spent and must never be reset,
+copied, replaced or resent. There is no native response to inspect and no provider admission.
+
+[ADR-0024](decisions/0024-bounded-https-material-capture.md) now defines bounded advisory
+transport diagnostics. Collector observations distinguish phase, typed failure category,
+decrypted-byte count and an optional numeric TLS verification code. Controller failures
+remain separate and do not invent a collector phase. The canonical journal and existing
+capture API remain unchanged. CLI diagnostics must be retained separately; cold inspection
+cannot reconstruct them. TLS closure, response limits, process cleanup and no-retry behavior
+remain enforced. Historical failures receive no invented diagnostic.
+
+The focused file now contains `144` tests. A draft replay passed `143` and failed one
+owned macOS fixture assumption: a bound non-listening socket timed out instead of refusing.
+Closing the reserved socket before connection corrected the fixture; the next replay
+passed all `144`. Both declared runtimes then passed the `144` focused checks in the
+checkout (`7.68` and `7.47` seconds). This does not diagnose FreeTSA. Full collection target: `2246`; resolve
+final full local, supported-runtime CI and package results from the exact published
+candidate and matching PR. Collection and draft replays are not full-suite release evidence.
+Local checkpoint records live under `artifacts/checkpoints/2026-10-10-capture-diagnostics/`.
+
+A [separate diagnostic proposal](FREETSA_DIAGNOSTIC_PROPOSAL.md) is prepared with a new
+bound runtime/request and the same finite service, host, time and byte limits. It has no
+journal and no dispatch. Next: obtain the new exact scoped decision before creating that
+journal or making another request. Preserve the original spent attempt. Then inspect any
+retained material offline, qualify clock custody/causality, native lifecycle and independent
+latest-head recovery, followed by production storage, isolation and measured EVM discovery.
+Competitive detection and bounty income remain unproven. Pickup after publication is `main`.
+
 ## Bounded HTTPS discovery preparation, 2026-10-10
 
 The preceding custody release is published as [PR #36](https://github.com/manfromnowhere143/etzio/pull/36)

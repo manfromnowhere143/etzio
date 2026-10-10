@@ -19,11 +19,13 @@ import subprocess
 import sys
 import tempfile
 import time
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from etzio.protocol import ProtocolError, canonical_dumps, strict_loads
 from etzio.qualification.acquisition_custody_v1 import AcquisitionJournal, CustodySnapshot
+from etzio.qualification.https_capture_worker_v1 import CATEGORIES, DIAGNOSTIC_SIZE, NO_VERIFY_CODE, PHASES
 
 MAX_CA = 524288
 MAX_PLAN = 8192
@@ -41,6 +43,80 @@ _FIELDS = frozenset({
 
 class CaptureError(ValueError):
     """Deterministic preflight or offline HTTP refusal; not a storage exception."""
+
+
+
+@dataclass(frozen=True)
+class TransportObservation:
+    """Advisory local observation, never delivery proof or journal authority."""
+
+    source: str
+    phase: str
+    category: str
+    received_bytes: int | None = None
+    tls_verify_code: int | None = None
+
+
+@dataclass(frozen=True)
+class _TransportResult:
+    reason: str
+    response: bytes
+    observation: TransportObservation
+
+
+@dataclass(frozen=True)
+class CaptureReport:
+    state: CustodySnapshot
+    plan_id: str
+    observation: TransportObservation
+
+    def diagnostic(self) -> dict:
+        return {
+            "schema": "etzio.https-capture.transport-observation.v1",
+            "plan_id": self.plan_id,
+            "intent_id": self.state.intent_id,
+            "attempt_id": self.state.attempt_id,
+            "authority": "advisory_local_observation_only",
+            **asdict(self.observation),
+        }
+
+
+def _controller_result(reason, category, phase="supervision"):
+    return _TransportResult(reason, b"", TransportObservation("controller", phase, category))
+
+
+def _decode_worker_result(wire, cap):
+    refused = _controller_result("transport_error", "worker_protocol")
+    if wire.startswith(b"R"):
+        if 1 < len(wire) <= cap + 1:
+            return _TransportResult(
+                "response", wire[1:], TransportObservation("collector", "complete", "response", len(wire) - 1),
+            )
+        return _controller_result("body_limit", "stdout_limit") if len(wire) > cap + 1 else refused
+    if len(wire) != DIAGNOSTIC_SIZE or wire[:2] != b"D1":
+        return refused
+    phase, category = wire[2], wire[3]
+    received = int.from_bytes(wire[4:8], "big")
+    code = int.from_bytes(wire[8:12], "big")
+    allowed_phases = (
+        {1, 2, 3, 4}, {2}, {2, 3, 4}, {0, 2, 3, 4}, {1},
+        {1, 2, 3, 4}, {0, 1, 2, 3, 4}, {0, 3}, {4}, {4},
+    )
+    if category >= len(CATEGORIES) or phase >= len(PHASES) or phase not in allowed_phases[category]:
+        return refused
+    if code != NO_VERIFY_CODE and (category != 1 or not 1 <= code <= 0x7FFFFFFF):
+        return refused
+    if received > cap + 1 or (phase != 4 and received != 0):
+        return refused
+    if (category == 9 and received != cap + 1) or (category != 9 and received > cap):
+        return refused
+    if category == 8 and received != 0:
+        return refused
+    reason = "timeout" if category == 0 else "body_limit" if category == 9 else "transport_error"
+    observation = TransportObservation(
+        "collector", PHASES[phase], CATEGORIES[category], received, None if code == NO_VERIFY_CODE else code,
+    )
+    return _TransportResult(reason, b"", observation)
 
 
 def _require(condition, reason):
@@ -165,7 +241,7 @@ def _kill_and_reap(process):
         process.wait(timeout=2)
 
 
-def _supervise(packet: bytes, cap: int, timeout_ms: int) -> tuple[str, bytes]:
+def _supervise(packet: bytes, cap: int, timeout_ms: int) -> _TransportResult:
     """Bound pipes and elapsed acquisition time; cleanup errors propagate separately."""
     deadline = time.monotonic() + timeout_ms / 1000
     output = bytearray()
@@ -179,7 +255,7 @@ def _supervise(packet: bytes, cap: int, timeout_ms: int) -> tuple[str, bytes]:
                 start_new_session=True, close_fds=True,
             )
         except OSError:
-            return "transport_error", b""
+            return _controller_result("transport_error", "spawn_error", "launch")
         try:
             with selectors.DefaultSelector() as selector:
                 for stream, event, role in (
@@ -193,7 +269,7 @@ def _supervise(packet: bytes, cap: int, timeout_ms: int) -> tuple[str, bytes]:
                 while selector.get_map():
                     remaining = deadline - time.monotonic()
                     if remaining <= 0:
-                        return "timeout", b""
+                        return _controller_result("timeout", "watchdog_timeout")
                     for key, _ in selector.select(min(remaining, 0.05)):
                         stream = key.fileobj
                         if key.data == "input":
@@ -205,7 +281,10 @@ def _supervise(packet: bytes, cap: int, timeout_ms: int) -> tuple[str, bytes]:
                                 selector.unregister(stream)
                                 stream.close()
                         else:
-                            target, limit = (output, cap + 1) if key.data == "output" else (errors, MAX_STDERR)
+                            target, limit = (
+                                (output, max(cap + 1, DIAGNOSTIC_SIZE))
+                                if key.data == "output" else (errors, MAX_STDERR)
+                            )
                             chunk = os.read(stream.fileno(), min(8192, limit + 1 - len(target)))
                             if not chunk:
                                 selector.unregister(stream)
@@ -213,41 +292,52 @@ def _supervise(packet: bytes, cap: int, timeout_ms: int) -> tuple[str, bytes]:
                             else:
                                 target.extend(chunk)
                                 if len(target) > limit:
-                                    return ("body_limit" if key.data == "output" else "transport_error"), b""
+                                    return _controller_result(
+                                        "body_limit" if key.data == "output" else "transport_error",
+                                        "stdout_limit" if key.data == "output" else "stderr_limit",
+                                    )
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                return "timeout", b""
+                return _controller_result("timeout", "watchdog_timeout")
             try:
                 process.wait(timeout=remaining)
             except subprocess.TimeoutExpired:
-                return "timeout", b""
-            if process.returncode != 0 or errors:
-                return "transport_error", b""
-            result = bytes(output)
-            if result.startswith(b"R") and len(result) > 1:
-                return "response", result[1:]
-            return {b"T": "timeout", b"B": "body_limit"}.get(result, "transport_error"), b""
+                return _controller_result("timeout", "watchdog_timeout")
+            if process.returncode != 0:
+                return _controller_result("transport_error", "worker_exit")
+            if errors:
+                return _controller_result("transport_error", "worker_stderr")
+            return _decode_worker_result(bytes(output), cap)
         finally:
             _kill_and_reap(process)
             for stream in (process.stdin, process.stdout, process.stderr):
                 stream.close()
 
 
+def capture_observed(
+    journal: AcquisitionJournal, wire: bytes, ca_pem: bytes, *, acknowledged_plan_id: str,
+) -> CaptureReport:
+    """One capture with advisory diagnostics; caller retains the report separately."""
+    value, packet = _preflight(journal, wire, ca_pem, acknowledged_plan_id)
+    journal.debit()  # A failed/lost acknowledgement must never reach the collector.
+    try:
+        result = _supervise(packet, value["response_limit_bytes"], value["timeout_ms"])
+    except KeyboardInterrupt:
+        journal.retain_indeterminate("operator_stop")
+        raise
+    # A store failure stays a store failure; no diagnostic report replaces its acknowledgement.
+    if result.reason == "response":
+        state = journal.retain_response(result.response)
+    else:
+        state = journal.retain_indeterminate(result.reason)
+    return CaptureReport(state, plan_id(wire), result.observation)
+
+
 def capture_once(
     journal: AcquisitionJournal, wire: bytes, ca_pem: bytes, *, acknowledged_plan_id: str,
 ) -> CustodySnapshot:
     """Dispatch only after separate operator acceptance; digest equality is not authority."""
-    value, packet = _preflight(journal, wire, ca_pem, acknowledged_plan_id)
-    journal.debit()  # A failed/lost acknowledgement must never reach the collector.
-    try:
-        reason, response = _supervise(packet, value["response_limit_bytes"], value["timeout_ms"])
-    except KeyboardInterrupt:
-        journal.retain_indeterminate("operator_stop")
-        raise
-    # Deliberately outside the transport exception domain. A store failure stays a store failure.
-    if reason == "response":
-        return journal.retain_response(response)
-    return journal.retain_indeterminate(reason)
+    return capture_observed(journal, wire, ca_pem, acknowledged_plan_id=acknowledged_plan_id).state
 
 
 def timestamp_body(wire: bytes) -> bytes:

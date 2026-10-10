@@ -17,7 +17,7 @@ from etzio.qualification.https_capture_v1 import (  # noqa: E402
     MAX_CA,
     MAX_PLAN,
     CaptureError,
-    capture_once,
+    capture_observed,
     timestamp_body,
 )
 
@@ -44,18 +44,22 @@ def main(argv=None):
     parser.add_argument("--body-output", help="New private output path; inspection mode only")
     args = parser.parse_args(argv)
     journal = AcquisitionJournal(args.journal)
+    observation = None
     if args.capture:
         if not args.plan or not args.ca or not args.acknowledged_plan_id or args.body_output:
             parser.error("capture requires --plan, --ca and --acknowledged-plan-id; body export uses --inspect")
-        state = capture_once(
+        captured = capture_observed(
             journal, bounded_file(args.plan, MAX_PLAN), bounded_file(args.ca, MAX_CA),
             acknowledged_plan_id=args.acknowledged_plan_id,
         )
+        state, observation = captured.state, captured.diagnostic()
     else:
         if args.plan or args.ca or args.acknowledged_plan_id:
             parser.error("inspection accepts no transport inputs")
         state = journal.inspect()
     report = {"status": state.status, "intent_id": state.intent_id, "attempt_id": state.attempt_id}
+    if observation is not None:
+        report["transport_observation"] = observation
     if state.status == "response_captured":
         try:
             body = timestamp_body(state.response_wire)

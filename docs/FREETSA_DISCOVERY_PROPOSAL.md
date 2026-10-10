@@ -1,7 +1,22 @@
-# Proposed FreeTSA material-discovery capture
+# FreeTSA material-discovery capture
 
-Status: prepared experiment, 2026-10-10; **not executed or accepted**. No native provider,
+Status: accepted and attempted once, 2026-10-10; **spent, capture indeterminate**. No native provider,
 trusted clock, storage profile, execution environment or bounty target is admitted.
+
+## Retained outcome
+
+The operator accepted the exact plan below and its finite assumptions. One collector
+invocation retained `capture_indeterminate`, reason `transport_error`, with zero retained
+response bytes. The released collector did not report its phase or error subclass.
+Whether the HTTP request reached the service and why capture failed remain unknown.
+Exit code zero records the outcome; it does not mean acquisition succeeded. See the
+[public result record](evidence/freetsa-discovery-result-2026-10-10.json).
+
+The original journal remains spent. Do not resend, reset, copy or replace it. The original
+[preparation record](evidence/freetsa-discovery-proposal-2026-10-10.json) preserves its
+historical unaccepted state and original bytes. The scope below documents the consumed
+experiment, not a reusable grant. A [separate diagnostic proposal](FREETSA_DIAGNOSTIC_PROPOSAL.md)
+uses the new collector observations and requires a new scoped decision.
 
 ## Decision and useful outcome
 
@@ -36,7 +51,7 @@ is sufficient to design discovery; it is not a reason to weaken a native codec.
 | Cost | Publisher describes the service as free; no paid account or cloud resource is used |
 | Failure | Spent attempt remains spent; missing or partial response remains indeterminate |
 | Output | Private retained HTTP bytes, then separate networkless HTTP extraction and native inspection |
-| Authority | Operator acceptance of this exact plan and finite assumptions is still required before dispatch |
+| Authority | Exact plan and finite assumptions accepted; the one permitted attempt is now spent |
 
 The [prepared evidence record](evidence/freetsa-discovery-proposal-2026-10-10.json) retains
 the complete machine plan, exact 93-byte synthetic request and execution command. Plan:
@@ -45,9 +60,9 @@ The raw CA bundle and source-page captures remain in the private local
 preparation directory with digest/size manifests. Transport CA trust is distinct from
 the timestamping CA and does not admit FreeTSA as a source of Etzio time.
 
-## Accepted-environment proposal
+## Accepted finite environment
 
-The finite experiment proposes the current owned macOS host, pinned Python executable,
+The finite experiment used the accepted owned macOS host, pinned Python executable,
 controller/collector source and OpenSSL version, and the exact retained certifi CA bundle.
 The host's ordinary wall clock is assumed usable for TLS certificate validity; it is not
 qualified UTC. The collector runs as trusted repository code in a fresh process with
@@ -67,8 +82,8 @@ or the MARCELLUS/CATO execution environment.
 
 ## Execution and recovery
 
-Only after the exact scope and assumptions are accepted, invoke the prepared command
-with the recorded plan identity. The capture CLI requires `--capture`, the existing
+The command in the historical preparation record has been invoked once; it must not
+be invoked again. The capture CLI requires `--capture`, the existing
 prepared journal, exact plan and CA files, and `--acknowledged-plan-id`. The digest is a
 substitution guard, not proof of permission. A failed command must be inspected before
 any next action; there is no resend or automatic replacement journal.
@@ -79,9 +94,10 @@ HTTP timestamp body to a new private file. An HTTP decoder refusal does not disc
 rewrite captured bytes. A timeout, store failure or lost acknowledgement is not evidence
 that the server did nothing.
 
-Next after capture: inspect the retained ASN.1/CMS under a separately bounded offline
-diagnostic, compare named signatures and request binding with the pinned OpenSSL tool,
-and record every incompatible field. Provider admission remains dependent on complete
+No ASN.1/CMS response was retained, so native inspection cannot proceed from this attempt.
+If a separately authorized capture retains one, inspect it offline, compare named signatures
+and request binding with the pinned OpenSSL tool, and record every incompatible field.
+Provider admission remains dependent on complete
 trust, revocation, clock/causality, administration and lifecycle evidence.
 
 ## Source record

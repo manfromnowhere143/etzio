@@ -1,0 +1,121 @@
+{
+  "schema": "etzio.freetsa-diagnostic-proposal.v1",
+  "date": "2026-10-10",
+  "status": "proposed_not_accepted",
+  "prior_attempt_id": "sha256:2063f3e0914b541f16a6cf04241270261ecd121208cb21ff209334661b5b684b",
+  "prior_budget_remains_spent": true,
+  "journal_status": "not_created",
+  "collector_invocations": 0,
+  "timestamp_protocol_requests": 0,
+  "plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
+  "plan": {
+    "assumptions_reference_id": "sha256:eb6a99c2ca187766ea3d93d77b4bb1d239105462c28ebcc80f4d32e5f51089c5",
+    "ca_sha256": "9cc2a774b5198dcff14d9be1e66091f538975d867ce029a96bce15a55dfd730f",
+    "endpoint": "https://freetsa.org/tsr",
+    "ipv4": "192.119.76.43",
+    "request_sha256": "20ac6d0164269afc4ed8b2882fe6574a68d0d436a216202d80ab4093c5a189ba",
+    "request_size": 93,
+    "response_limit_bytes": 65536,
+    "runtime_id": "sha256:19835576a12ce027c3b6c798fb0451ac8fbff7c5ea5a606c1c0e8b1390bf5f8d",
+    "schema": "etzio.https-capture.plan.v1",
+    "service_id": "discovery.freetsa.diagnostic.2026-10-10",
+    "surface": "external_discovery",
+    "terms_reference_id": "sha256:69ca0a04dabc1e42062dd6e944a411a215407ed479320384dc0980b10b6c393b",
+    "timeout_ms": 30000
+  },
+  "plan_wire_base64": "eyJhc3N1bXB0aW9uc19yZWZlcmVuY2VfaWQiOiJzaGEyNTY6ZWI2YTk5YzJjYTE4Nzc2NmVhM2Q5M2Q3N2I0YmIxZDIzOTEwNTQ2MmMyOGViY2M4MGY0ZDMyZTVmNTEwODljNSIsImNhX3NoYTI1NiI6IjljYzJhNzc0YjUxOThkY2ZmMTRkOWJlMWU2NjA5MWY1Mzg5NzVkODY3Y2UwMjlhOTZiY2UxNWE1NWRmZDczMGYiLCJlbmRwb2ludCI6Imh0dHBzOi8vZnJlZXRzYS5vcmcvdHNyIiwiaXB2NCI6IjE5Mi4xMTkuNzYuNDMiLCJyZXF1ZXN0X3NoYTI1NiI6IjIwYWM2ZDAxNjQyNjlhZmM0ZWQ4YjI4ODJmZTY1NzRhNjhkMGQ0MzZhMjE2MjAyZDgwYWI0MDkzYzVhMTg5YmEiLCJyZXF1ZXN0X3NpemUiOjkzLCJyZXNwb25zZV9saW1pdF9ieXRlcyI6NjU1MzYsInJ1bnRpbWVfaWQiOiJzaGEyNTY6MTk4MzU1NzZhMTJjZTAyN2MzYjZjNzk4ZmIwNDUxYWM4ZmJmZjdjNWVhNWE2MDZjMWMwZThiMTM5MGJmNWY4ZCIsInNjaGVtYSI6ImV0emlvLmh0dHBzLWNhcHR1cmUucGxhbi52MSIsInNlcnZpY2VfaWQiOiJkaXNjb3ZlcnkuZnJlZXRzYS5kaWFnbm9zdGljLjIwMjYtMTAtMTAiLCJzdXJmYWNlIjoiZXh0ZXJuYWxfZGlzY292ZXJ5IiwidGVybXNfcmVmZXJlbmNlX2lkIjoic2hhMjU2OjY5Y2EwYTA0ZGFiYzFlNDIwNjJkZDZlOTQ0YTQxMWEyMTU0MDdlZDQ3OTMyMDM4NGRjMDk4MGIxMGI2YzM5M2IiLCJ0aW1lb3V0X21zIjozMDAwMH0=",
+  "intent_wire_base64": "eyJlbmRwb2ludCI6Imh0dHBzOi8vZnJlZXRzYS5vcmcvdHNyIiwicmVxdWVzdF9zaGEyNTYiOiIyMGFjNmQwMTY0MjY5YWZjNGVkOGIyODgyZmU2NTc0YTY4ZDBkNDM2YTIxNjIwMmQ4MGFiNDA5M2M1YTE4OWJhIiwicmVxdWVzdF9zaXplIjo5MywicmVzcG9uc2VfbGltaXRfYnl0ZXMiOjY1NTM2LCJzY2hlbWEiOiJldHppby5hY3F1aXNpdGlvbi1jdXN0b2R5LmludGVudC52MSIsInNjb3BlX3JlZmVyZW5jZV9pZCI6InNoYTI1NjoyZjg4NjY1ZTI2NmVlZjEzMGU1MTAzMjQ1OTRlYTNiZjgzOTQ0OWExYjQxYjdhMmE5ZmQ1ZWI1MzllYjVkNzEzIiwic2VydmljZV9pZCI6ImRpc2NvdmVyeS5mcmVldHNhLmRpYWdub3N0aWMuMjAyNi0xMC0xMCIsInRlcm1zX3JlZmVyZW5jZV9pZCI6InNoYTI1Njo2OWNhMGEwNGRhYmMxZTQyMDYyZGQ2ZTk0NGE0MTFhMjE1NDA3ZWQ0NzkzMjAzODRkYzA5ODBiMTBiNmMzOTNiIn0=",
+  "request_der_base64": "MFsCAQEwMTANBglghkgBZQMEAgEFAAQg/ZoMZVAbemYn/g65jnL6t/271L4RvTmt+9VibBy0G0kCIE8BQl3ivxA5vA9rReuWDZvzf5pq+WJNngjr3ksqteTRAQH/",
+  "request_size": 93,
+  "request_sha256": "20ac6d0164269afc4ed8b2882fe6574a68d0d436a216202d80ab4093c5a189ba",
+  "statement": "Etzio public synthetic transport-diagnostic discovery v1; no target or user data.\n",
+  "nonce_hex": "4f01425de2bf1039bc0f6b45eb960d9bf37f9a6af9624d9e08ebde4b2ab5e4d1",
+  "nonce_source": "32 bytes from os.urandom during offline preparation; publicly retained, no unpredictable-at-dispatch or clock-causality claim",
+  "assumptions": {
+    "conditions": [
+      "owned trusted local OS and ordinary user account",
+      "one unchanged journal; no copies, rollback, reset or hostile same-user activity",
+      "SQLite atomicity assumed; physical device and power faults unqualified",
+      "sufficient disk capacity and responsive OS",
+      "local wall clock assumed usable for TLS validity, not qualified UTC",
+      "trusted Python/TLS dependencies; no received-code execution",
+      "no syscall, filesystem or network sandbox; no macOS address-space ceiling",
+      "parent watchdog and bounded pipes, with retention and cleanup outside acquisition timer",
+      "synthetic nonsensitive bytes only; no provider or kernel authority"
+    ],
+    "os": {
+      "machine": "arm64",
+      "release": "23.4.0",
+      "system": "Darwin"
+    },
+    "runtime": {
+      "certifi": "2026.07.22",
+      "openssl": "OpenSSL 3.5.7 9 Jun 2026",
+      "python": "3.11.15 (main, Jun 23 2026, 15:46:51) [Clang 22.1.3 ]",
+      "sqlite": "3.53.1"
+    },
+    "schema": "etzio.finite-capture-assumptions.v1",
+    "status": "proposed_not_accepted"
+  },
+  "assumptions_wire_base64": "eyJjb25kaXRpb25zIjpbIm93bmVkIHRydXN0ZWQgbG9jYWwgT1MgYW5kIG9yZGluYXJ5IHVzZXIgYWNjb3VudCIsIm9uZSB1bmNoYW5nZWQgam91cm5hbDsgbm8gY29waWVzLCByb2xsYmFjaywgcmVzZXQgb3IgaG9zdGlsZSBzYW1lLXVzZXIgYWN0aXZpdHkiLCJTUUxpdGUgYXRvbWljaXR5IGFzc3VtZWQ7IHBoeXNpY2FsIGRldmljZSBhbmQgcG93ZXIgZmF1bHRzIHVucXVhbGlmaWVkIiwic3VmZmljaWVudCBkaXNrIGNhcGFjaXR5IGFuZCByZXNwb25zaXZlIE9TIiwibG9jYWwgd2FsbCBjbG9jayBhc3N1bWVkIHVzYWJsZSBmb3IgVExTIHZhbGlkaXR5LCBub3QgcXVhbGlmaWVkIFVUQyIsInRydXN0ZWQgUHl0aG9uL1RMUyBkZXBlbmRlbmNpZXM7IG5vIHJlY2VpdmVkLWNvZGUgZXhlY3V0aW9uIiwibm8gc3lzY2FsbCwgZmlsZXN5c3RlbSBvciBuZXR3b3JrIHNhbmRib3g7IG5vIG1hY09TIGFkZHJlc3Mtc3BhY2UgY2VpbGluZyIsInBhcmVudCB3YXRjaGRvZyBhbmQgYm91bmRlZCBwaXBlcywgd2l0aCByZXRlbnRpb24gYW5kIGNsZWFudXAgb3V0c2lkZSBhY3F1aXNpdGlvbiB0aW1lciIsInN5bnRoZXRpYyBub25zZW5zaXRpdmUgYnl0ZXMgb25seTsgbm8gcHJvdmlkZXIgb3Iga2VybmVsIGF1dGhvcml0eSJdLCJvcyI6eyJtYWNoaW5lIjoiYXJtNjQiLCJyZWxlYXNlIjoiMjMuNC4wIiwic3lzdGVtIjoiRGFyd2luIn0sInJ1bnRpbWUiOnsiY2VydGlmaSI6IjIwMjYuMDcuMjIiLCJvcGVuc3NsIjoiT3BlblNTTCAzLjUuNyA5IEp1biAyMDI2IiwicHl0aG9uIjoiMy4xMS4xNSAobWFpbiwgSnVuIDIzIDIwMjYsIDE1OjQ2OjUxKSBbQ2xhbmcgMjIuMS4zIF0iLCJzcWxpdGUiOiIzLjUzLjEifSwic2NoZW1hIjoiZXR6aW8uZmluaXRlLWNhcHR1cmUtYXNzdW1wdGlvbnMudjEiLCJzdGF0dXMiOiJwcm9wb3NlZF9ub3RfYWNjZXB0ZWQifQ==",
+  "runtime_binding_material": {
+    "python": "3.11.15 (main, Jun 23 2026, 15:46:51) [Clang 22.1.3 ]",
+    "openssl": "OpenSSL 3.5.7 9 Jun 2026",
+    "executable_sha256": "612bb6e55a95ea6eaf3c9693cf17fbf1a738408ad3bbfce988f712d7321d2c42",
+    "worker_sha256": "3c6cbe1928cc321d3bef6eb6002b5334dca610d1d68a354a0a88687b5064fd94",
+    "controller_sha256": "28ed7c387f0f332267e768be0975f4e2528cd31db3734b8ea27c8a75476e8a8e"
+  },
+  "passive_sources": {
+    "sources": [
+      {
+        "name": "homepage",
+        "url": "https://freetsa.org/index_en.php",
+        "status": 200,
+        "size": 32360,
+        "sha256": "a186263c5d4d485fda38bfcef3296357215be295ba1cf4fef39d8de15299e7bd"
+      },
+      {
+        "name": "cps",
+        "url": "https://www.freetsa.org/freetsa_cps.html",
+        "status": 200,
+        "size": 3201,
+        "sha256": "69ca0a04dabc1e42062dd6e944a411a215407ed479320384dc0980b10b6c393b"
+      }
+    ],
+    "dns_ipv4_observation": [
+      "192.119.76.43"
+    ],
+    "timestamp_requests": 0
+  },
+  "tls_ca_bundle": {
+    "package": "certifi",
+    "version": "2026.07.22",
+    "size": 240216,
+    "sha256": "9cc2a774b5198dcff14d9be1e66091f538975d867ce029a96bce15a55dfd730f"
+  },
+  "local_directory": "artifacts/acquisition-preparation/2026-10-10-freetsa-diagnostic",
+  "execution_requires": "New exact scoped acceptance of one diagnostic acquisition and the finite assumptions. Only then create one new journal from the retained intent/request. Never reuse, copy or reset the original spent journal. Retain CLI output for advisory diagnostics.",
+  "command_after_acceptance_and_journal_creation": [
+    ".venv/bin/python",
+    "scripts/capture_timestamp_once.py",
+    "--capture",
+    "--journal",
+    "artifacts/acquisition-preparation/2026-10-10-freetsa-diagnostic/custody.sqlite3",
+    "--plan",
+    "artifacts/acquisition-preparation/2026-10-10-freetsa-diagnostic/plan.json",
+    "--ca",
+    "artifacts/acquisition-preparation/2026-10-10-freetsa-diagnostic/transport-ca.pem",
+    "--acknowledged-plan-id",
+    "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713"
+  ],
+  "openssl_request_diagnostic": {
+    "binary_sha256": "07f19671b4a4528b829f8b7b917df7c42163a79a9646785e85e278c1fdae4478",
+    "returncode": 0,
+    "stdout": "Version: 1\nHash Algorithm: sha256\nMessage data:\n    0000 - fd 9a 0c 65 50 1b 7a 66-27 fe 0e b9 8e 72 fa b7   ...eP.zf'....r..\n    0010 - fd bb d4 be 11 bd 39 ad-fb d5 62 6c 1c b4 1b 49   ......9...bl...I\nPolicy OID: unspecified\nNonce: 0x4F01425DE2BF1039BC0F6B45EB960D9BF37F9A6AF9624D9E08EBDE4B2AB5E4D1\nCertificate required: yes\nExtensions:\n",
+    "stderr": "Using configuration from /dev/null\n",
+    "configuration": "/dev/null",
+    "boundary": "Offline syntax observation of owned synthetic input only"
+  },
+  "provider_admitted": false,
+  "kernel_authority": false
+}

@@ -294,7 +294,7 @@ def test_lost_capture_acknowledgement_preserves_cold_response(tmp_path, tls_mate
     ca, _ = tls_material
     plan = _plan(ca)
     journal = _journal(tmp_path, plan)
-    monkeypatch.setattr(capture, "_supervise", lambda *a: ("response", REPLY))
+    monkeypatch.setattr(capture, "_supervise", lambda *a: capture._decode_worker_result(b"R" + REPLY, 65536))
     original = custody.AcquisitionJournal.retain_response
 
     def lost(self, raw):
@@ -446,7 +446,7 @@ def test_capture_store_failure_keeps_domain_and_spent_state(tmp_path, tls_materi
     ca, _ = tls_material
     plan = _plan(ca)
     journal = _journal(tmp_path, plan)
-    monkeypatch.setattr(capture, "_supervise", lambda *a: ("response", REPLY))
+    monkeypatch.setattr(capture, "_supervise", lambda *a: capture._decode_worker_result(b"R" + REPLY, 65536))
 
     def failed(*args):
         raise sqlite3.OperationalError("retention failed")
@@ -478,8 +478,8 @@ def test_operator_interrupt_is_retained_but_reraised(tmp_path, tls_material, mon
     ("import sys; sys.stderr.buffer.write(b'x'*10000)", "transport_error"),
     ("import sys; sys.stdout.buffer.write(b'Rreply'); sys.exit(2)", "transport_error"),
     ("import sys; sys.stdout.buffer.write(b'unknown')", "transport_error"),
-    ("import sys; sys.stdout.buffer.write(b'T')", "timeout"),
-    ("import sys; sys.stdout.buffer.write(b'B')", "body_limit"),
+    ("import sys; sys.stdout.buffer.write(b'T')", "transport_error"),
+    ("import sys; sys.stdout.buffer.write(b'B')", "transport_error"),
 ])
 def test_parent_watchdog_pipe_bounds_and_protocol(tmp_path, monkeypatch, program, reason):
     worker = tmp_path / "worker.py"
@@ -495,7 +495,8 @@ def test_parent_watchdog_pipe_bounds_and_protocol(tmp_path, monkeypatch, program
 
     monkeypatch.setattr(capture.subprocess, "Popen", spawn)
     start = time.monotonic()
-    assert capture._supervise(b"x" * 500000, 128, 400) == (reason, b"")
+    result = capture._supervise(b"x" * 500000, 128, 400)
+    assert result.reason == reason and result.response == b""
     assert time.monotonic() - start < 3
     assert children and children[0].poll() is not None
     with pytest.raises(ProcessLookupError):
@@ -558,7 +559,9 @@ def test_parent_timeout_stops_descendant_holding_output_pipe(tmp_path, monkeypat
         "    for _ in range(100):\n        output.write(b'x')\n        time.sleep(0.02)\n"
     )
     monkeypatch.setattr(capture, "WORKER", worker)
-    assert capture._supervise(b"{}", 128, 500) == ("timeout", b"")
+    result = capture._supervise(b"{}", 128, 500)
+    assert result.reason == "timeout" and result.response == b""
+    assert result.observation.category == "watchdog_timeout"
     captured = marker.read_bytes()
     assert captured
     time.sleep(0.1)
@@ -607,7 +610,9 @@ def test_start_failure_spends_attempt_and_retains_transport_failure(tmp_path, tl
         raise OSError("owned fixture start refusal")
 
     monkeypatch.setattr(capture.subprocess, "Popen", refused)
-    state = _acquire(journal, plan, ca)
+    result = capture.capture_observed(journal, plan, ca, acknowledged_plan_id=capture.plan_id(plan))
+    state = result.state
+    assert result.observation == capture.TransportObservation("controller", "launch", "spawn_error")
     assert strict_loads(state.outcome_wire)["reason"] == "transport_error"
     with pytest.raises(custody.CustodyError, match="attempt_already_spent"):
         _acquire(journal, plan, ca)
@@ -688,3 +693,192 @@ def test_retained_external_proposal_is_byte_bound_and_unaccepted():
     assert query["nonce"].native == int(record["nonce_hex"], 16)
     assert query["message_imprint"]["hashed_message"].native == hashlib.sha256(record["statement"].encode()).digest()
     assert record["status"] == "proposed_not_accepted" and record["timestamp_protocol_requests"] == 0
+
+
+@pytest.mark.parametrize("mode,reply,limit,category,received", [
+    ("ragged", REPLY, 65536, "tls_eof", len(REPLY)),
+    ("normal", b"", 65536, "empty_response", 0),
+    ("normal", REPLY, 1, "body_limit", 2),
+])
+def test_real_failure_diagnostics_preserve_indeterminate_custody(
+    tmp_path, tls_material, mode, reply, limit, category, received,
+):
+    ca, _ = tls_material
+    with _server(tls_material, reply=reply, mode=mode) as (port, record):
+        plan = _plan(ca, port, response_limit_bytes=limit)
+        journal = _journal(tmp_path, plan)
+        result = capture.capture_observed(journal, plan, ca, acknowledged_plan_id=capture.plan_id(plan))
+        assert result.state.status == "capture_indeterminate" and result.state.response_wire == b""
+        assert result.observation == capture.TransportObservation("collector", "response_read", category, received)
+        assert result.state == journal.inspect()
+        assert result.diagnostic()["attempt_id"] == result.state.attempt_id
+        assert result.diagnostic()["plan_id"] == capture.plan_id(plan)
+        assert record["connections"] == 1 and len(record["requests"]) == 1
+        with pytest.raises(custody.CustodyError, match="attempt_already_spent"):
+            capture.capture_observed(journal, plan, ca, acknowledged_plan_id=capture.plan_id(plan))
+        assert record["connections"] == 1
+
+
+def test_real_tls_certificate_failure_is_sanitized_and_bound(tmp_path, tls_material):
+    ca, _ = tls_material
+    with _server(tls_material) as (port, record):
+        plan = _plan(ca, port, endpoint=f"https://wrong.invalid:{port}/tsr")
+        journal = _journal(tmp_path, plan)
+        result = capture.capture_observed(journal, plan, ca, acknowledged_plan_id=capture.plan_id(plan))
+        assert result.state.status == "capture_indeterminate" and record["requests"] == []
+        observation = result.observation
+        assert (observation.source, observation.phase, observation.category) == (
+            "collector", "tls_handshake", "tls_verification",
+        )
+        assert observation.received_bytes == 0 and 1 <= observation.tls_verify_code <= 0x7FFFFFFF
+        diagnostic = json.dumps(result.diagnostic())
+        assert "wrong.invalid" not in diagnostic and "certificate verify failed" not in diagnostic.lower()
+        assert result.diagnostic()["intent_id"] == result.state.intent_id
+        assert result.diagnostic()["authority"] == "advisory_local_observation_only"
+
+
+def test_real_refused_connection_reports_no_response_bytes(tmp_path, tls_material):
+    ca, _ = tls_material
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as reserved:
+        reserved.bind(("127.0.0.1", 0))
+        port = reserved.getsockname()[1]
+    # macOS can silently drop SYNs to a bound, non-listening socket. Close it first.
+    plan = _plan(ca, port)
+    journal = _journal(tmp_path, plan)
+    result = capture.capture_observed(journal, plan, ca, acknowledged_plan_id=capture.plan_id(plan))
+    assert result.observation == capture.TransportObservation("collector", "connect", "connection_refused", 0)
+    assert strict_loads(result.state.outcome_wire)["reason"] == "transport_error"
+
+
+def _diagnostic_frame(phase, category, received=0, code=0xFFFFFFFF):
+    return b"D1" + bytes((phase, category)) + received.to_bytes(4, "big") + code.to_bytes(4, "big")
+
+
+@pytest.mark.parametrize("wire", [
+    b"E", b"T", b"B", b"D2" + bytes(10), b"D1", b"R",
+    _diagnostic_frame(4, 2)[:-1], _diagnostic_frame(4, 2) + b"x",
+    _diagnostic_frame(255, 2), _diagnostic_frame(4, 255),
+    _diagnostic_frame(4, 1), _diagnostic_frame(2, 1, 1),
+    _diagnostic_frame(2, 1, code=0), _diagnostic_frame(2, 1, code=0x80000000),
+    _diagnostic_frame(4, 2, code=62), _diagnostic_frame(4, 2, 130),
+    _diagnostic_frame(4, 9, 128), _diagnostic_frame(4, 9, 0),
+    _diagnostic_frame(4, 2, 129), _diagnostic_frame(4, 8, 1),
+    _diagnostic_frame(0, 0), _diagnostic_frame(3, 4), _diagnostic_frame(4, 7),
+])
+def test_malformed_diagnostics_cannot_become_a_worker_observation(wire):
+    result = capture._decode_worker_result(wire, 128)
+    assert result.reason == "transport_error" and result.response == b""
+    assert result.observation == capture.TransportObservation("controller", "supervision", "worker_protocol")
+
+
+def test_diagnostic_framing_does_not_increase_a_tiny_response_budget():
+    result = capture._decode_worker_result(b"Rxx", 1)
+    assert result.reason == "body_limit" and result.response == b""
+    assert result.observation.category == "stdout_limit"
+    assert capture._decode_worker_result(_diagnostic_frame(2, 1, code=62), 1).observation.tls_verify_code == 62
+
+
+@pytest.mark.parametrize("phase,error,category,received", [
+    (0, ValueError("fixture private detail"), "input_error", 0),
+    (1, ConnectionRefusedError("fixture private detail"), "connection_refused", 0),
+    (1, TimeoutError("fixture private detail"), "timeout", 0),
+    (2, ssl.SSLEOFError("fixture private detail"), "tls_eof", 0),
+    (2, ssl.SSLError("fixture private detail"), "tls_error", 0),
+    (3, BrokenPipeError("fixture private detail"), "os_error", 0),
+    (3, TimeoutError("fixture private detail"), "timeout", 0),
+    (4, ConnectionResetError("fixture private detail"), "connection_reset", 2),
+    (4, ssl.SSLEOFError("fixture private detail"), "tls_eof", 2),
+    (4, TimeoutError("fixture private detail"), "timeout", 2),
+])
+def test_worker_observes_faults_without_exposing_exception_text(monkeypatch, phase, error, category, received):
+    from etzio.qualification import https_capture_worker_v1 as worker
+
+    class Endpoint:
+        reads = 0
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def settimeout(self, value):
+            pass
+
+        def connect(self, address):
+            if phase == 1:
+                raise error
+
+        def sendall(self, data):
+            if phase == 3:
+                raise error
+
+        def recv(self, size):
+            self.reads += 1
+            if self.reads == 1:
+                return b"ab"
+            raise error
+
+    endpoint = Endpoint()
+
+    class Context:
+        def load_verify_locations(self, **kwargs):
+            if phase == 0:
+                raise error
+
+        def set_alpn_protocols(self, value):
+            pass
+
+        def wrap_socket(self, raw, **kwargs):
+            assert kwargs["suppress_ragged_eofs"] is False
+            if phase == 2:
+                raise error
+            return endpoint
+
+    monkeypatch.setattr(worker.socket, "socket", lambda *a: endpoint)
+    monkeypatch.setattr(worker.ssl, "SSLContext", lambda *a: Context())
+    wire = worker.collect({
+        "timeout_ms": 1000, "response_limit_bytes": 128, "ca_pem": "fixture", "ipv4": "127.0.0.1",
+        "hostname": "fixture.invalid", "port": 1, "http_request_base64": base64.b64encode(REQUEST).decode(),
+    })
+    assert len(wire) == 12 and b"fixture private detail" not in wire
+    result = capture._decode_worker_result(wire, 128)
+    assert result.observation == capture.TransportObservation("collector", worker.PHASES[phase], category, received)
+    assert result.reason == ("timeout" if category == "timeout" else "transport_error")
+
+
+@pytest.mark.parametrize("program,category", [
+    ("import sys; sys.stdout.buffer.write(b'Rabc'); sys.stderr.write('private detail')", "worker_stderr"),
+    ("import sys; sys.stdout.buffer.write(b'Rabc'); sys.exit(2)", "worker_exit"),
+    ("import sys; sys.stdout.buffer.write(b'unknown')", "worker_protocol"),
+    ("import sys; sys.stderr.buffer.write(b'x'*9000)", "stderr_limit"),
+])
+def test_parent_refusals_do_not_claim_a_collector_phase(tmp_path, monkeypatch, program, category):
+    worker = tmp_path / "refused_worker.py"
+    worker.write_text(program)
+    monkeypatch.setattr(capture, "WORKER", worker)
+    result = capture._supervise(b"{}", 128, 2000)
+    assert result.reason == "transport_error" and result.response == b""
+    assert result.observation == capture.TransportObservation("controller", "supervision", category)
+
+
+def test_cli_prints_failure_observation_but_cold_inspection_does_not_invent_it(tmp_path, tls_material):
+    ca, _ = tls_material
+    with _server(tls_material, mode="ragged") as (port, record):
+        plan = _plan(ca, port)
+        journal = _journal(tmp_path, plan)
+        (tmp_path / "plan.json").write_bytes(plan)
+        (tmp_path / "ca.pem").write_bytes(ca)
+        result = _cli(
+            "--capture", "--journal", str(journal.path), "--plan", str(tmp_path / "plan.json"),
+            "--ca", str(tmp_path / "ca.pem"), "--acknowledged-plan-id", capture.plan_id(plan),
+        )
+        assert result.returncode == 0, result.stderr
+        report = json.loads(result.stdout)
+        assert report["status"] == "capture_indeterminate"
+        assert report["transport_observation"]["category"] == "tls_eof"
+        assert report["transport_observation"]["attempt_id"] == report["attempt_id"]
+        assert "opaque_timestamp_body" not in report and record["connections"] == 1
+    cold = _cli("--inspect", "--journal", str(journal.path))
+    assert cold.returncode == 0
+    assert "transport_observation" not in json.loads(cold.stdout)

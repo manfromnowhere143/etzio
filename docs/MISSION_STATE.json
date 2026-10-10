@@ -4,7 +4,7 @@
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
-  "active_branch": "agent/bounded-https-capture",
+  "active_branch": "agent/capture-diagnostics",
   "foundation_base": {
     "commit": "4919a0c09f99f545336fc6482a2d52f8fd7c03e1",
     "tree": "73ae7dcf5fae6d889dcb1d4d63b0345ae6798361"
@@ -34,7 +34,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Read ADR-0024 and docs/FREETSA_DISCOVERY_PROPOSAL.md. Bounded HTTPS capture is implemented outside the engine and tested on owned loopback TLS. Exact scoped acceptance of the prepared FreeTSA discovery plan and finite environment/storage assumptions is still required before one synthetic POST. No timestamp POST or provider admission has occurred. Then inspect native material, qualify clock custody/causality, native lifecycle, external latest-head recovery, production storage and hard isolation before measured EVM discovery.",
+    "next_session_pickup": "Read the current handoff and ADR-0024. The accepted FreeTSA attempt is spent: capture_indeterminate / transport_error, zero retained response bytes, delivery and underlying cause unknown. Never copy, reset, replace or resend its journal. Bounded advisory transport diagnostics are implemented. A separate exact diagnostic proposal is prepared in docs/FREETSA_DIAGNOSTIC_PROPOSAL.md with no journal or dispatch; obtain its scoped decision before creation/acquisition. Then inspect retained native material, qualify clock custody/causality, native lifecycle, independent latest-head recovery, production storage and hard isolation before measured EVM discovery.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -1086,7 +1086,7 @@
     }
   },
   "https_capture_preparation": {
-    "status": "implemented_fixture_qualified_external_plan_pending_acceptance",
+    "status": "implemented_original_external_plan_accepted_attempt_spent",
     "date": "2026-10-10",
     "contract": "docs/decisions/0024-bounded-https-material-capture.md",
     "proposal": "docs/FREETSA_DISCOVERY_PROPOSAL.md",
@@ -1101,8 +1101,8 @@
       "exit": 0,
       "log_sha256": "f1df4ea5b5c54a00c2e166b51608ce5909f34b61108e288b82a40f100f1137f3"
     },
-    "timestamp_protocol_requests": 0,
-    "external_plan_accepted": false,
+    "timestamp_protocol_requests": null,
+    "external_plan_accepted": true,
     "provider_admitted": false,
     "kernel_authority": false,
     "hard_isolation_qualified": false,
@@ -1111,6 +1111,34 @@
     "release_validation": "Resolve complete local, both-runtime CI and package results from exact published candidate and its matching pull request.",
     "prepared_evidence": "docs/evidence/freetsa-discovery-proposal-2026-10-10.json",
     "prepared_plan_id": "sha256:677d6402efee17bdd53e7596055bcd18060a2167269efa3ce57d1672554ee03d",
-    "development_corrections": "Review corrected owned TLS fixture EOF handling and added two disconnect controls. Original local/CI candidates stopped as superseded. Initial package harness refused macOS /tmp versus /private/tmp spelling; corrected to compare resolved paths."
+    "development_corrections": "Review corrected owned TLS fixture EOF handling and added two disconnect controls. Original local/CI candidates stopped as superseded. Initial package harness refused macOS /tmp versus /private/tmp spelling; corrected to compare resolved paths.",
+    "http_request_delivery": "unknown",
+    "collector_invocations": 1,
+    "result": "docs/evidence/freetsa-discovery-result-2026-10-10.json"
+  },
+  "https_capture_diagnostics": {
+    "status": "implemented_pending_release_validation",
+    "date": "2026-10-10",
+    "contract": "docs/decisions/0024-bounded-https-material-capture.md",
+    "focused_tests": 144,
+    "full_suite_collection_target": 2246,
+    "baseline": {
+      "passed": 2202,
+      "seconds": 866.88,
+      "exit": 0,
+      "log_sha256": "55aaae0c2e4c255af5e361e0e32ee094c06919fe9596bb3ea56e0685c3444d9b"
+    },
+    "canonical_custody_changed": false,
+    "diagnostic_authority": "advisory_local_observation_only",
+    "cold_inspection_has_diagnostics": false,
+    "provider_admitted": false,
+    "kernel_authority": false,
+    "followup_proposal": "docs/FREETSA_DIAGNOSTIC_PROPOSAL.md",
+    "followup_plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
+    "followup_accepted": false,
+    "followup_journal_created": false,
+    "followup_dispatches": 0,
+    "release_validation": "Resolve complete local, both-runtime CI and package results from exact published candidate and its matching pull request.",
+    "development_corrections": "Initial baseline failed repository link policy on inert ignored source capture; renamed to .source.txt with bytes preserved. Draft replay had 143 passed and one fixture failure; macOS non-listening bound socket timed out. Corrected to closed reserved port; 144 passed. Neither observation establishes the FreeTSA failure cause."
   }
 }

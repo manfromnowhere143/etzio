@@ -10,6 +10,17 @@ available for qualification work; hardware procurement is not the immediate depe
 
 ## Provider evidence and a corrected assumption
 
+Follow-up, 2026-10-10: the operator accepted the exact FreeTSA discovery plan and its
+finite assumptions. One acquisition ended `capture_indeterminate` / `transport_error`,
+with no retained response; request delivery and underlying cause are unknown. The
+[result](evidence/freetsa-discovery-result-2026-10-10.json) preserves the spent attempt.
+ADR-0024 now adds bounded advisory phase/category observations without changing custody,
+TLS closure or retry rules. A [separate diagnostic proposal](FREETSA_DIAGNOSTIC_PROPOSAL.md)
+is prepared offline, with no new journal or dispatch; its one-request scope needs a new
+decision. No provider, clock or execution profile is admitted.
+
+Historical preparation, preceding that attempt:
+
 Follow-up, 2026-10-10: [ADR-0024](decisions/0024-bounded-https-material-capture.md)
 implements a bounded, opt-in HTTPS collector with exact plan/CA/runtime binding, a parent
 watchdog, one durable debit and opaque HTTP retention before interpretation. Owned

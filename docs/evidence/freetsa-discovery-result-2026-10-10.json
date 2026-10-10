@@ -1,0 +1,61 @@
+{
+  "accepted_release_commit": "baa9e0dce7a0e7d35f76ed4fc5b5118e6d37afb1",
+  "additional_external_attempts": 0,
+  "attempt_id": "sha256:2063f3e0914b541f16a6cf04241270261ecd121208cb21ff209334661b5b684b",
+  "boundary": "Spent finite discovery attempt, no complete response or native material. Local timing is operational only. Neither a root cause nor remote non-delivery can be inferred; no retry or reset is authorized by this outcome.",
+  "collector_invocations": 1,
+  "complete_response_retained": false,
+  "date": "2026-10-10",
+  "http_request_delivery": "unknown",
+  "intent_id": "sha256:97efddd4aacdc6e5c4d204c224173845c8969945e9e3c0d5b12faa8ba95707de",
+  "intent_wire_base64": "eyJlbmRwb2ludCI6Imh0dHBzOi8vZnJlZXRzYS5vcmcvdHNyIiwicmVxdWVzdF9zaGEyNTYiOiJiNDg4MmFmNzMyZjdlMTMyYTViYzRmNmJiMmMwMWU4ZmMwYzM4NjZjYmI1YzMyYmE1OGZmMDQyZmM5NjZhZDc5IiwicmVxdWVzdF9zaXplIjo5MywicmVzcG9uc2VfbGltaXRfYnl0ZXMiOjY1NTM2LCJzY2hlbWEiOiJldHppby5hY3F1aXNpdGlvbi1jdXN0b2R5LmludGVudC52MSIsInNjb3BlX3JlZmVyZW5jZV9pZCI6InNoYTI1Njo2NzdkNjQwMmVmZWUxN2JkZDUzZTc1OTYwNTViY2QxODA2MGEyMTY3MjY5ZWZhM2NlNTdkMTY3MjU1NGVlMDNkIiwic2VydmljZV9pZCI6ImRpc2NvdmVyeS5mcmVldHNhLjIwMjYtMTAtMTAiLCJ0ZXJtc19yZWZlcmVuY2VfaWQiOiJzaGEyNTY6NjljYTBhMDRkYWJjMWU0MjA2MmRkNmU5NDRhNDExYTIxNTQwN2VkNDc5MzIwMzg0ZGMwOTgwYjEwYjZjMzkzYiJ9",
+  "invocation": {
+    "command": [
+      ".venv/bin/python",
+      "scripts/capture_timestamp_once.py",
+      "--capture",
+      "--journal",
+      "artifacts/acquisition-preparation/2026-10-10-freetsa/custody.sqlite3",
+      "--plan",
+      "artifacts/acquisition-preparation/2026-10-10-freetsa/plan.json",
+      "--ca",
+      "artifacts/acquisition-preparation/2026-10-10-freetsa/transport-ca.pem",
+      "--acknowledged-plan-id",
+      "sha256:677d6402efee17bdd53e7596055bcd18060a2167269efa3ce57d1672554ee03d"
+    ],
+    "elapsed_authority": "Operational observation only; includes local custody and command startup",
+    "local_elapsed_ns": 1816487125,
+    "observed_local_wall_time": "2026-10-10T15:14:32.424320+00:00",
+    "operator_acceptance_sha256": "8869c5097557938fa0a41249ca92d3ec232e871233fd7c203473cbbd30803094",
+    "returncode": 0,
+    "schema": "etzio.finite-acquisition.invocation.v1",
+    "stderr": "",
+    "stdout": "{\"attempt_id\": \"sha256:2063f3e0914b541f16a6cf04241270261ecd121208cb21ff209334661b5b684b\", \"intent_id\": \"sha256:97efddd4aacdc6e5c4d204c224173845c8969945e9e3c0d5b12faa8ba95707de\", \"status\": \"capture_indeterminate\"}\n"
+  },
+  "kernel_authority": false,
+  "operator_acceptance": {
+    "assumptions_reference_id": "sha256:eb6a99c2ca187766ea3d93d77b4bb1d239105462c28ebcc80f4d32e5f51089c5",
+    "basis": "Explicit conversational approval of the prepared single-attempt plan and finite assumptions",
+    "record_sha256": "8869c5097557938fa0a41249ca92d3ec232e871233fd7c203473cbbd30803094"
+  },
+  "outcome": {
+    "attempt_id": "sha256:2063f3e0914b541f16a6cf04241270261ecd121208cb21ff209334661b5b684b",
+    "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "body_size": 0,
+    "intent_id": "sha256:97efddd4aacdc6e5c4d204c224173845c8969945e9e3c0d5b12faa8ba95707de",
+    "kind": "capture_indeterminate",
+    "reason": "transport_error",
+    "schema": "etzio.acquisition-custody.outcome.v1"
+  },
+  "outcome_wire_base64": "eyJhdHRlbXB0X2lkIjoic2hhMjU2OjIwNjNmM2UwOTE0YjU0MWYxNmE2Y2YwNDI0MTI3MDI2MWVjZDEyMTIwOGNiMjFmZjIwOTMzNDY2MWI1YjY4NGIiLCJib2R5X3NoYTI1NiI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJib2R5X3NpemUiOjAsImludGVudF9pZCI6InNoYTI1Njo5N2VmZGRkNGFhY2RjNmU1YzRkMjA0YzIyNDE3Mzg0NWM4OTY5OTQ1ZTllM2MwZDViMTJmYWE4YmE5NTcwN2RlIiwia2luZCI6ImNhcHR1cmVfaW5kZXRlcm1pbmF0ZSIsInJlYXNvbiI6InRyYW5zcG9ydF9lcnJvciIsInNjaGVtYSI6ImV0emlvLmFjcXVpc2l0aW9uLWN1c3RvZHkub3V0Y29tZS52MSJ9",
+  "paid_resources_created": 0,
+  "plan_id": "sha256:677d6402efee17bdd53e7596055bcd18060a2167269efa3ce57d1672554ee03d",
+  "provider_admitted": false,
+  "request_sha256": "b4882af732f7e132a5bc4f6bb2c01e8fc0c3866cbb5c32ba58ff042fc966ad79",
+  "response_size": 0,
+  "retained_attempts": 1,
+  "schema": "etzio.freetsa-discovery-result.v1",
+  "status": "capture_indeterminate",
+  "transport_phase": "not_recorded_by_released_collector",
+  "underlying_failure": "unknown; transport_error is the only retained classification"
+}

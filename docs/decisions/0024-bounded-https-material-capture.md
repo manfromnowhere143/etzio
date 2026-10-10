@@ -110,3 +110,59 @@ Primary sources reviewed 2026-10-10:
   explicit trust configuration, hostname validation and ragged EOF handling.
 
 These sources inform the design; they do not certify its implementation or environment.
+
+## Advisory transport diagnostics, 2026-10-10
+
+The first approved FreeTSA acquisition retained `capture_indeterminate` with reason
+`transport_error` and no complete response. The released collector did not retain its
+phase or underlying exception class. The result cannot establish that a request reached
+the service, that it did not, or that any specific TLS behavior caused the refusal.
+The original request budget is spent. Nothing in this diagnostic extension rearms it.
+
+A new `capture_observed` API returns the unchanged custody snapshot plus an advisory
+observation bound to the plan, intent and attempt identities. The existing `capture_once`
+API continues to return only the custody snapshot. The capture CLI prints the observation
+in its result JSON; callers must retain that output separately. The observation is not
+stored in the canonical journal. Cold inspection cannot reconstruct it, and interruption,
+store failure or a lost command result can leave it unavailable. No synthetic diagnostic
+is backfilled onto a historical attempt. The journal remains the outcome authority.
+
+The collector's failure frame is exactly 12 bytes: ASCII `D1`, a one-byte phase index,
+a one-byte category index, a four-byte unsigned big-endian decrypted-byte count and a
+four-byte unsigned big-endian TLS verification code. `0xffffffff` means no verification
+code; otherwise only codes 1 through 0x7fffffff are allowed, and only for TLS certificate
+verification failure. The ordered phase roster is configuration, connect, TLS handshake,
+request write and response read. The ordered category roster is timeout, TLS verification,
+TLS EOF, other TLS error, connection refused, connection reset, other OS error, input
+error, empty response and body limit. The parent rejects unknown versions, lengths,
+indices, impossible phase/category pairs and inconsistent counts. Counts before response
+read must be zero. Body-limit observations must count exactly cap+1; all other failure
+counts must be at most cap, and an empty response must count zero.
+
+Successful output remains `R` plus bounded opaque response bytes. Legacy unversioned
+failure markers are refused by the new runtime. The pipe ceiling is max(cap+1, 12),
+while a response still has the exact original cap. A diagnostic frame cannot consume
+or enlarge the response allowance. No raw exception string, partial HTTP bytes, peer
+message or environment value is exposed in the failure observation.
+
+The controller separately labels launch refusal, watchdog timeout, stdout/stderr overflow,
+worker exit, unexpected stderr and malformed worker output. These observations use an
+unknown byte count and do not infer a collector phase from missing output. Only a clean
+worker exit and empty stderr permit the parent to interpret a frame. Canonical timeout,
+body-limit and transport-error outcomes, store exception domains, process-group cleanup,
+TLS verification, authenticated EOF, fixed destination and no-retry rules remain unchanged.
+A diagnostic is a statement by trusted local code, not independently authenticated delivery,
+provider, clock, isolation or kernel evidence. The changed runtime requires a new bound plan
+and separately scoped acceptance before any further external acquisition.
+
+Controls must distinguish a refused connection, TLS verification failure, truncated TLS,
+clean empty reply and tiny response cap using owned endpoints; exercise failures at each
+worker phase; reject malformed, contradictory and oversized diagnostic frames; and show
+that CLI capture exposes the observation while cold inspection does not invent it.
+All existing single-debit, storage-failure, timeout, cleanup and framing controls remain.
+
+The [Python SSL exception documentation](https://docs.python.org/3.11/library/ssl.html#exceptions)
+provides typed EOF and certificate-verification failures and a numeric verification code.
+[RFC 8446 section 6.1](https://www.rfc-editor.org/rfc/rfc8446.html#section-6.1), August 2018,
+describes TLS closure and truncation uncertainty. Those sources inform classification;
+they do not identify the cause of the retained FreeTSA failure.
