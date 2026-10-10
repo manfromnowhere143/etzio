@@ -86,14 +86,20 @@ def _server(tls_material, reply=REPLY, *, mode="normal"):
                     record["alpn"].append(stream.selected_alpn_protocol())
                     wire = b""
                     while b"\r\n\r\n" not in wire:
-                        wire += stream.recv(4096)
+                        chunk = stream.recv(4096)
+                        if not chunk:
+                            raise ConnectionError("fixture client closed before headers")
+                        wire += chunk
                         assert len(wire) <= 20000
                     head, body = wire.split(b"\r\n\r\n", 1)
                     size = int(next(
                         row.split(b":", 1)[1] for row in head.split(b"\r\n") if row.startswith(b"Content-Length:")
                     ))
                     while len(body) < size:
-                        body += stream.recv(4096)
+                        chunk = stream.recv(4096)
+                        if not chunk:
+                            raise ConnectionError("fixture client closed before body")
+                        body += chunk
                     record["requests"].append(head + b"\r\n\r\n" + body)
                     if mode == "stall":
                         stop.wait(2)
@@ -164,6 +170,22 @@ def test_real_tls_exact_request_cold_custody_and_no_second_dispatch(tmp_path, tl
             _acquire(custody.AcquisitionJournal(journal.path), plan, ca)
         assert record["connections"] == 1
     assert custody.AcquisitionJournal(journal.path).inspect() == state
+
+
+@pytest.mark.parametrize("partial", [b"", b"POST /tsr HTTP/1.1\r\nContent-Length: 4\r\n\r\nab"])
+def test_owned_server_recovers_after_client_disconnect(tmp_path, tls_material, partial):
+    ca, _ = tls_material
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.load_verify_locations(cadata=ca.decode())
+    with _server(tls_material) as (port, record):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as raw:
+            raw.settimeout(2)
+            raw.connect(("127.0.0.1", port))
+            with context.wrap_socket(raw, server_hostname="fixture.invalid") as stream:
+                stream.sendall(partial)
+        plan = _plan(ca, port)
+        assert _acquire(_journal(tmp_path, plan), plan, ca).status == "response_captured"
+        assert record["connections"] == 2 and len(record["requests"]) == 1
 
 
 @pytest.mark.parametrize("reply,reason", [

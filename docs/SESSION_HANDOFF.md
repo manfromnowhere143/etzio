@@ -24,13 +24,16 @@ guards against substitution; it does not authenticate an operator or grant permi
 No timestamp protocol request, cloud resource, provider admission or kernel integration
 occurred. Existing cloud preparation authority persists.
 
-The new file contains `98` focused tests, including real owned loopback TLS, certificate
+The new file contains `100` focused tests, including real owned loopback TLS, certificate
 failures, ambiguous HTTP, trickle/timeout/overflow, concurrent controllers, lost commit
 acknowledgements, store failures, resource ceilings, process-group cleanup and the opt-in
 CLI. The first draft lint pass found formatting/import issues; these were corrected
-without changing analyzer policy. Full collection target: `2200`. Resolve final local,
+without changing analyzer policy. Full collection target: `2202`. Resolve final local,
 both-runtime CI and package checks from the exact published candidate and its PR; a
-collection count is not a full passing result.
+collection count is not a full passing result. Review also corrected the owned TLS
+server fixture to terminate on EOF before a complete request; two disconnect controls
+prove it can subsequently serve a valid request. The initial local/CI runs were stopped
+as superseded, not passing evidence for this correction.
 
 Next: obtain exact acceptance of the prepared finite acquisition, capture once, inspect
 the retained material offline and define a separately versioned native profile from
@@ -407,7 +410,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2200 tests expected;
+- 2202 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

@@ -202,7 +202,7 @@
   "current_evidence": {
     "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture",
     "validation_status": "full_suite_collection_declared_release_results_in_pull_request",
-    "test_count": 2200,
+    "test_count": 2202,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -215,7 +215,7 @@
     "claim_boundary": "Bounded capture is an opt-in trusted-client experiment with separate scoped acceptance required for external dispatch. No native provider, qualified clock/storage/isolation, finding, comparative detection or income claim.",
     "focused_archived_timestamp_and_clock_capture_tests_passed": 68,
     "focused_acquisition_custody_tests_passed": 111,
-    "focused_https_capture_tests": 98
+    "focused_https_capture_tests": 100
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -1093,8 +1093,8 @@
     "implementation": "etzio/qualification/https_capture_v1.py",
     "collector": "etzio/qualification/https_capture_worker_v1.py",
     "tool": "scripts/capture_timestamp_once.py",
-    "focused_tests": 98,
-    "full_suite_collection_target": 2200,
+    "focused_tests": 100,
+    "full_suite_collection_target": 2202,
     "baseline": {
       "passed": 2102,
       "seconds": 876.8,
@@ -1110,6 +1110,7 @@
     "cloud_resources_created": 0,
     "release_validation": "Resolve complete local, both-runtime CI and package results from exact published candidate and its matching pull request.",
     "prepared_evidence": "docs/evidence/freetsa-discovery-proposal-2026-10-10.json",
-    "prepared_plan_id": "sha256:677d6402efee17bdd53e7596055bcd18060a2167269efa3ce57d1672554ee03d"
+    "prepared_plan_id": "sha256:677d6402efee17bdd53e7596055bcd18060a2167269efa3ce57d1672554ee03d",
+    "development_corrections": "Review corrected owned TLS fixture EOF handling and added two disconnect controls. Original local/CI candidates stopped as superseded. Initial package harness refused macOS /tmp versus /private/tmp spelling; corrected to compare resolved paths."
   }
 }
