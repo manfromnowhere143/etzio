@@ -1075,6 +1075,13 @@
     "cross_copy_budget_qualified": false,
     "provider_admitted": false,
     "claim_boundary": "At most one fresh debit return per unchanged journal under SQLite atomicity assumptions. Opaque capture is not authenticated provider evidence. Process kills are not power-fault qualification.",
-    "release_validation": "Resolve complete local verification, supported-runtime CI and package replay from exact candidate and matching pull request; collection alone is not a passing result."
+    "release_validation": "Resolve complete local verification, supported-runtime CI and package replay from exact candidate and matching pull request; collection alone is not a passing result.",
+    "development_full_run": {
+      "status": "failed_then_corrected",
+      "passed": 2101,
+      "failed": 1,
+      "seconds": 865.46,
+      "failure": "Inherited self-source analyzer flagged three constant-constructed SQL statements. Replaced with bound LIMIT and literal PRAGMAs without altering analyzer policy. Final full rerun remains required."
+    }
   }
 }

@@ -168,7 +168,9 @@ def _commit(connection: sqlite3.Connection) -> None:
 
 def _schema(connection):
     return tuple(
-        connection.execute(f"SELECT type,name,tbl_name,sql FROM sqlite_schema ORDER BY type,name LIMIT {len(_DDL) + 1}")
+        connection.execute(
+            "SELECT type,name,tbl_name,sql FROM sqlite_schema ORDER BY type,name LIMIT ?", (len(_DDL) + 1,)
+        )
     )
 
 
@@ -268,7 +270,7 @@ class AcquisitionJournal:
         descriptor = os.open(journal.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         os.close(descriptor)
         with journal._transaction(initializing=True) as connection:
-            connection.execute(f"PRAGMA application_id={APP_ID}")
+            connection.execute("PRAGMA application_id=0x45544131")
             connection.execute("PRAGMA user_version=1")
             for statement in _DDL:
                 connection.execute(statement)
@@ -307,14 +309,14 @@ class AcquisitionJournal:
             connection.execute("PRAGMA writable_schema=OFF")
             _require(
                 all(
-                    connection.execute("PRAGMA " + key).fetchone() == (expected,)
-                    for key, expected in [
-                        ("synchronous", 3),
-                        ("foreign_keys", 1),
-                        ("trusted_schema", 0),
-                        ("ignore_check_constraints", 0),
-                        ("read_uncommitted", 0),
-                        ("writable_schema", 0),
+                    connection.execute(statement).fetchone() == (expected,)
+                    for statement, expected in [
+                        ("PRAGMA synchronous", 3),
+                        ("PRAGMA foreign_keys", 1),
+                        ("PRAGMA trusted_schema", 0),
+                        ("PRAGMA ignore_check_constraints", 0),
+                        ("PRAGMA read_uncommitted", 0),
+                        ("PRAGMA writable_schema", 0),
                     ]
                 ),
                 "connection_settings",

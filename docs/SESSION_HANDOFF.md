@@ -33,6 +33,10 @@ reserved-parameter collection error and invalid content-ID domain spelling were 
 before release validation. Collection target is `2102` tests; resolve complete local and
 exact-candidate CI/package results from the published commit and its matching pull request.
 The complete `1991`-test replay above is the unchanged pre-tranche baseline.
+The first post-change full run had `2101` passes and one failure in the inherited
+self-source analyzer (`865.46` seconds). It flagged three SQL strings constructed
+from internal constants. Those statements now use a bound LIMIT and literal PRAGMAs;
+the analyzer and its rule remain unchanged. That run is retained as failed, not a pass.
 
 Next: settle exact service/terms and scoped acquisition authority, accept the finite
 capture/storage assumptions and implement contained transport. Clock custody and causality,
