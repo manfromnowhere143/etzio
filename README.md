@@ -35,9 +35,10 @@ confidence.**
 > through the complete lifecycle and reconstructs them from retained bytes on cold replay.
 > Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
-> The corrected RSA-chain release passes `1750` tests on both declared Python runtimes,
-> locally and in Linux CI. Exact release evidence
-> is retained in the [handoff](docs/SESSION_HANDOFF.md). `21` accepted architecture
+> The published-material release passes `1794` tests on both declared Python runtimes
+> in Linux CI. The next elapsed-time tranche has `129` focused tests passing on both
+> local runtimes; its full release checks are recorded in the [handoff](docs/SESSION_HANDOFF.md).
+> `22` accepted architecture
 > decisions define the contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
@@ -122,6 +123,12 @@ qualification, and no native provider is admitted.
 A separate [public-material replay](docs/PUBLISHED_TSA_MATERIAL.md) now retains a published
 historical signer chain and both CRLs, with `44` diagnostic controls and a local nine-case
 OpenSSL path comparison. It does not establish the current service signer or admit a time source.
+
+The [elapsed-time contract](docs/decisions/0022-native-time-consumption-bounds.md) now
+propagates native timestamp issuance intervals to receipt and use under explicit clock
+error assumptions. Its offline evaluator refuses delays and complete intervals crossing
+an evaluation window. Real clock qualification and the actual consequential use point
+remain prerequisites to integration.
 
 ## Implemented vertical slice
 
@@ -433,10 +440,10 @@ explicitly. None of it is a capability claim: the entire suite runs against repo
 
 | Retained | Value |
 |---|---|
-| Full suite | `1750` passing tests on CPython 3.11.15 and 3.14.2, locally and in Linux CI |
+| Published-material full-suite release | `1794` passing tests on CPython 3.11.15 and 3.14.2 in Linux CI; elapsed-time release evidence is in the handoff |
 | Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
 | SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` `4` |
-| Accepted decisions | `21` architecture decision records, each with a known-bad where it names a gate |
+| Accepted decisions | `22` architecture decision records, each with a known-bad where it names a gate |
 | Merkle core | reproduces the published RFC 6962/9162 reference tree for sizes `0`–`8`, and all `36` reference inclusion plus `36` reference consistency proofs |
 | Qualified-evidence acceptance | `47` known-bads across the anchor, revocation, and head-floor phases; unsigned content is refused in signed mode |
 | Governed fixture scans | vulnerable fixture closes with `7` candidates, clean fixture with `0`, neither mints a finding |
@@ -527,7 +534,7 @@ custody survives independent reproduction, isolation, and adjudication — not b
 - [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
 - [Provider and host qualification next steps](docs/QUALIFICATION_NEXT_STEPS.md)
 - [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
-- [Architecture decisions (ADR-0001 through ADR-0021)](docs/decisions/README.md)
+- [Architecture decisions (ADR-0001 through ADR-0022)](docs/decisions/README.md)
 - [Presentation standard](docs/PRESENTATION.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)

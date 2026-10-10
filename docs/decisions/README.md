@@ -24,6 +24,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0019: Qualified evidence lifecycle consumption](0019-qualified-evidence-lifecycle-consumption.md)
 - [ADR-0020: Offline RFC 3161 timestamp qualification](0020-offline-native-time-qualification.md)
 - [ADR-0021: Offline RSA timestamp chains and provider selection evidence](0021-offline-rsa-timestamp-chains.md)
+- [ADR-0022: Native timestamp acquisition and consumption bounds](0022-native-time-consumption-bounds.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -84,3 +85,8 @@ remain required.
 ADR-0021 adds a separate finite RSA chain observation profile, both revocation roles,
 closed qualified-statement parsing, documentary provider selection evidence and a retained
 whole-chain OpenSSL comparison. It admits no external provider or legal qualification.
+
+ADR-0022 composes both native validators with an exact elapsed-time trace and conditional
+clock-error model. It propagates issuance uncertainty to receipt and consumption, then
+checks the whole consumption interval against a half-open evaluation window. It adds no
+clock qualification, provider acquisition, kernel authority or lifecycle behavior.

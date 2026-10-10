@@ -50,6 +50,13 @@ issuer qualified-statement parsing. Both exact uncertainty endpoints receive fre
 contexts. The statement establishes neither legal qualification nor kernel authority.
 Provider selection evidence and unresolved acquisition requirements are retained separately.
 
+ADR-0022 adds a separate offline elapsed-time composition over both native validators.
+It reauthenticates the native dossier, binds an exact clock-epoch and request/response
+trace, and derives outward receipt/use intervals under explicit rate and reading-error
+assumptions. A half-open evaluation window must contain the complete use interval.
+These conditional observations qualify neither the host clock nor the actual consumption
+point and have no kernel authority. The native codecs and lifecycle remain unchanged.
+
 ## Target system
 
 ```text

@@ -199,19 +199,19 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "repository-owned fixture engine plus offline diagnostic replay of retained public certificate/CRL material",
+    "scope": "fixture kernel, historical public-material diagnostics and conditional offline native-time consumption bounds",
     "validation_status": "full_suite_collection_declared_release_results_in_pull_request",
-    "test_count": 1794,
+    "test_count": 1923,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
     "sqlite_schema_version": 4,
-    "inherited_engine_release_evidence": "offline_rsa_chain_release_evidence",
-    "focused_material_tests_passed": 44,
-    "openssl_comparison": "docs/evidence/published-tsa-comparison-2026-10-09.json",
-    "pull_request": 33,
-    "ci_note": "Resolve full local and GitHub validation from PR 33 and its exact candidate checks. The initial candidate was refused before test execution because the mandatory collection counters still declared 1750; corrected counters declare 1794 without claiming a passing full run.",
-    "claim_boundary": "Retained historical public material, named-signature diagnostics and a local path comparison. No current-service observation, provider/root admission, trustworthy UTC, current revocation, native lifecycle or finding claim."
+    "focused_elapsed_tests_passed": 129,
+    "focused_runtimes": [
+      "CPython 3.11.15",
+      "CPython 3.14.2"
+    ],
+    "claim_boundary": "Declared timing assumptions and offline native-byte validation only; no clock qualification, freshness, provider enrollment, revocation-at-use or kernel authority."
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -279,7 +279,8 @@
     "docs/decisions/0018-qualified-evidence-consumption.md",
     "docs/decisions/0019-qualified-evidence-lifecycle-consumption.md",
     "docs/decisions/0020-offline-native-time-qualification.md",
-    "docs/decisions/0021-offline-rsa-timestamp-chains.md"
+    "docs/decisions/0021-offline-rsa-timestamp-chains.md",
+    "docs/decisions/0022-native-time-consumption-bounds.md"
   ],
   "closed_integrity_gates": [
     {
@@ -909,6 +910,59 @@
       },
       "package_wheel_policy_and_gitguardian_passed": true,
       "boundary": "Documentation and bounty-readiness follow-up; runtime, test, dependency and comparator bytes equal corrected implementation 85aedf2. Canonical-pickup metadata is recorded after this validation and checked separately."
+    }
+  },
+  "published_tsa_material_release_evidence": {
+    "scope": "repository-owned fixture engine plus offline diagnostic replay of retained public certificate/CRL material",
+    "validation_status": "full_suite_collection_declared_release_results_in_pull_request",
+    "test_count": 1794,
+    "python_rule_classes": 6,
+    "planted_instances": 7,
+    "clean_fixtures": 1,
+    "sqlite_schema_version": 4,
+    "inherited_engine_release_evidence": "offline_rsa_chain_release_evidence",
+    "focused_material_tests_passed": 44,
+    "openssl_comparison": "docs/evidence/published-tsa-comparison-2026-10-09.json",
+    "pull_request": 33,
+    "ci_note": "Resolve full local and GitHub validation from PR 33 and its exact candidate checks. The initial candidate was refused before test execution because the mandatory collection counters still declared 1750; corrected counters declare 1794 without claiming a passing full run.",
+    "claim_boundary": "Retained historical public material, named-signature diagnostics and a local path comparison. No current-service observation, provider/root admission, trustworthy UTC, current revocation, native lifecycle or finding claim."
+  },
+  "native_time_elapsed": {
+    "status": "implemented_conditional_offline_evaluation",
+    "date": "2026-10-10",
+    "contract": "docs/decisions/0022-native-time-consumption-bounds.md",
+    "implementation": "etzio/qualification/native_time_elapsed_v1.py",
+    "tests": "tests/test_native_time_elapsed_v1.py",
+    "focused_tests": 129,
+    "fraction_comparisons": 180,
+    "constructed_timing_cases": 5832,
+    "full_suite_collection_target": 1923,
+    "initial_focused_run": "112 passed and one failure in the expected grid count; every interval-containment assertion passed. Count corrected from 17496 to 5832 without changing grid or interval arithmetic.",
+    "initial_focused_seconds": 5.89,
+    "focused_seconds": {
+      "CPython 3.11.15": 6.82,
+      "CPython 3.14.2": 11.84
+    },
+    "native_codecs_changed": false,
+    "kernel_or_lifecycle_changed": false,
+    "dependencies_changed": false,
+    "timestamp_protocol_requests": 0,
+    "clock_qualified": false,
+    "provider_admitted": false,
+    "kernel_authority": false,
+    "remaining": "Exact service terms/cost and acquisition grant; durable request debit; contained capture/parser; actual service signer/CMS; clock/causality and consequential-instant qualification; current revocation and complete native lifecycle roster.",
+    "release_validation": "Resolve complete local and both-runtime GitHub release checks from the exact published Git commit and matching pull request; the collection count alone is not a passing result.",
+    "prechange_validation": {
+      "runtime": "CPython 3.11.15",
+      "passed": 1794,
+      "seconds": 846.79,
+      "exit": 0,
+      "log_sha256": "f3d64df8c3ff97a7409f1383280f39339eefa79e3c6cb2b113b23c755dca8435"
+    },
+    "packaging": {
+      "source_and_wheel_built": true,
+      "installed_wheel_outside_checkout": "Both existing native corpus positives replayed and their half-open consumption-expiry controls refused; exact implementation bytes checked in wheel and source archive.",
+      "log_sha256": "bd78c3a96ef32da6ccf45057d2b48d5bab4285fbcc4a9dd46ad8b93709514b0d"
     }
   }
 }

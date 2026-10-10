@@ -10,6 +10,14 @@ available for qualification work; hardware procurement is not the immediate depe
 
 ## Provider evidence and a corrected assumption
 
+Follow-up, 2026-10-10: [ADR-0022](decisions/0022-native-time-consumption-bounds.md)
+now implements the offline elapsed-time prerequisite for both native codecs. It binds an
+exact query/response trace, accounts for declared clock rate and sample error, and checks
+the full projected consumption interval. The actual host clock, fresh challenge and
+consequential consumption point remain unqualified. Public terms research still does not
+establish which agreement and fees apply to the proposed one-request experiment; no
+timestamp POST has been sent.
+
 Follow-up, 2026-10-09: a [published-material replay](PUBLISHED_TSA_MATERIAL.md) now retains
 signer #3 and the intermediate-issued CRL. All five named signatures verify and a pinned
 OpenSSL timestamp-purpose path check passes at one stated diagnostic instant, with eight

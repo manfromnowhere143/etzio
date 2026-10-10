@@ -1,6 +1,43 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-09, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-10, Asia/Jerusalem.
+
+## Conditional native-time consumption bounds, 2026-10-10
+
+[ADR-0022](decisions/0022-native-time-consumption-bounds.md) adds an offline composition
+across both existing native timestamp profiles. It binds the exact request/response and
+clock trace, freshly validates the native signatures/path, propagates issuance uncertainty
+to receipt and consumption with integer drift/error bounds, and refuses a consumption hull
+outside the complete half-open evaluation window. Reboot/profile changes, counter
+regression, delayed responses, post-receipt pauses, substitutions and mutable caller state
+have explicit controls. Both existing codecs, corpora, dependencies and kernel lifecycle
+remain unchanged.
+
+The `129` focused tests pass on CPython 3.11.15 (`6.82` seconds) and 3.14.2 (`11.84`
+seconds), including `180` exact rational comparisons and `5832` constructed timing cases.
+An initial test-count assertion expected `17496` cases and failed; every containment
+assertion passed, and the count was corrected without changing the grid or arithmetic.
+The inherited full suite passed `1794` tests on CPython 3.11.15 in `846.79` seconds.
+Source/wheel builds and outside-checkout wheel replay passed for both native positives
+and half-open expiry refusals. Full-suite collection target: `1923`; the count alone
+is not a pass. Resolve full release results from the exact published Git commit and its
+matching pull request.
+The preceding published-material release merged as [PR #33](https://github.com/manfromnowhere143/etzio/pull/33)
+at `facac2972462d568e635838ee3ddeb17310ece17`; GitHub run `37960645826` passed both runtimes.
+
+These are conditional offline observations. No real clock, fresh challenge, current
+service signer, revocation at consumption, native provider or kernel time authority is
+qualified. The recorded consumption instant is not the evaluator's later return time;
+future integration must bind the actual consequential point, including commit waits.
+The operator's existing Google Cloud preparation permission persists. Public-source
+research did not resolve the exact applicable terms/fees for one synthetic service request,
+and no timestamp POST, agreement acceptance, cloud resource or target execution occurred.
+
+Next: finish the bounded acquisition dossier (terms/cost, exact request grant, durable
+single-request debit, capture/parser containment), observe actual service material, then
+qualify clock custody/causality and native lifecycle reconstruction. This arithmetic
+tranche must not become a substitute for external evidence. External latest-head recovery,
+storage, isolation and measured EVM discovery retain their dependency order.
 
 ## Published TSA material replay, 2026-10-09
 
@@ -218,7 +255,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1794 tests expected;
+- 1923 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

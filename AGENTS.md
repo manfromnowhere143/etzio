@@ -166,6 +166,12 @@ retained CRLs, closed qualified-statement parsing and a whole-chain OpenSSL comp
 Its provider source ledger is documentary evidence only. No native acquisition, legal
 qualification, external trust enrollment or kernel time conversion is implemented.
 
+ADR-0022 adds conditional offline elapsed-time evaluation over both native profiles.
+It binds exact request/response bytes and one clock epoch, projects issuance uncertainty
+to receipt and use, and checks the whole use interval against a half-open window. It
+qualifies no real clock, challenge freshness, revocation at use or kernel authority.
+The actual consequential consumption point still requires separate integration evidence.
+
 All providers remain repository-owned deterministic fixtures. No real or native provider
 is connected, and no external durability, trustworthy UTC, current real-world revocation,
 independent administration, real non-equivocation, execution, or finding claim follows.
