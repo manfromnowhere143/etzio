@@ -200,9 +200,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and one indeterminate finite discovery observation",
     "validation_status": "full_suite_collection_declared_release_results_in_pull_request",
-    "test_count": 2202,
+    "test_count": 2246,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -215,7 +215,7 @@
     "claim_boundary": "Bounded capture is an opt-in trusted-client experiment with separate scoped acceptance required for external dispatch. No native provider, qualified clock/storage/isolation, finding, comparative detection or income claim.",
     "focused_archived_timestamp_and_clock_capture_tests_passed": 68,
     "focused_acquisition_custody_tests_passed": 111,
-    "focused_https_capture_tests": 100
+    "focused_https_capture_tests": 144
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -1139,6 +1139,6 @@
     "followup_journal_created": false,
     "followup_dispatches": 0,
     "release_validation": "Resolve complete local, both-runtime CI and package results from exact published candidate and its matching pull request.",
-    "development_corrections": "Initial baseline failed repository link policy on inert ignored source capture; renamed to .source.txt with bytes preserved. Draft replay had 143 passed and one fixture failure; macOS non-listening bound socket timed out. Corrected to closed reserved port; 144 passed. Neither observation establishes the FreeTSA failure cause."
+    "development_corrections": "Initial baseline failed repository link policy on inert ignored source capture; renamed to .source.txt with bytes preserved. Draft replay had 143 passed and one fixture failure; macOS non-listening bound socket timed out. Corrected to closed reserved port; 144 passed. Neither observation establishes the FreeTSA failure cause. Initial complete verification and CI 38064097752 stopped before tests on stale shared count declarations (2202 versus 2246); corrected those declarations only."
   }
 }

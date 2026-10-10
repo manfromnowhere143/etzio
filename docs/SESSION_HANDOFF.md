@@ -35,6 +35,10 @@ checkout (`7.68` and `7.47` seconds). This does not diagnose FreeTSA. Full colle
 final full local, supported-runtime CI and package results from the exact published
 candidate and matching PR. Collection and draft replays are not full-suite release evidence.
 Local checkpoint records live under `artifacts/checkpoints/2026-10-10-capture-diagnostics/`.
+The first candidate's full local check and CI run `38064097752` stopped at collection:
+the two shared count declarations still said `2202`. Both declarations were corrected to
+`2246`; runtime, tests and the prepared plan are unchanged by this documentation correction.
+The stopped checks ran no suite tests and are retained as failed, not passing evidence.
 
 A [separate diagnostic proposal](FREETSA_DIAGNOSTIC_PROPOSAL.md) is prepared with a new
 bound runtime/request and the same finite service, host, time and byte limits. It has no
@@ -452,7 +456,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2202 tests expected;
+- 2246 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
