@@ -2,6 +2,40 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-10, Asia/Jerusalem.
 
+## Operator shutdown checkpoint, 2026-10-10
+
+Daniel asked for a safe stopping point before closing the laptop for about one hour.
+Work is paused on `codex/archived-timestamp-replay`; [PR #35](https://github.com/manfromnowhere143/etzio/pull/35)
+remains a draft and is not merged. Implementation commit is
+`5bc7e450c2fb628fbacdb6d4754f6751b3005b99`; this checkpoint changes documentation only.
+All implementation, public evidence and this checkpoint are pushed to the task branch.
+`main` still points to the preceding PR #34 release until validated publication.
+
+The local full run was cleanly interrupted for shutdown: `1529` tests passed in
+`521.05` seconds before KeyboardInterrupt, with `make verify` exit `2`. This is an
+incomplete run, not a full-suite pass or a test-failure result. Both focused runtimes,
+source-package replay, policy and lint passed as recorded below. Initial candidate CI
+run `38029910407` was still running at shutdown; this documentation push may supersede
+it. Resolve the latest run from the exact branch head, not from this historical run ID.
+
+All probe resources were verified absent. No local qualification job remains running.
+Exact original cloud control/capture records and validation logs are also preserved in
+ignored local directory `artifacts/checkpoints/2026-10-10-shutdown/`, with a size/digest
+manifest, so recovery does not depend on `/tmp`. Public replay material is committed.
+
+PR #35 additionally retains exact read-only Monitoring API response and descriptor
+bodies, with verified readback hashes. Four historical host-clock observations report
+83057–101639 ns; the descriptor calls this a GA gauge sampled every 60 seconds. These
+post-candidate observations admit no continuous bound, guest error or clock authority.
+No additional VM was created. Preserve this evidence for the next clock dossier.
+
+Resume: verify root/remote/status, read this handoff, fetch the task branch and inspect
+PR #35's exact-head checks. Run the mandatory complete local `make verify` on the
+checkpoint candidate. Resolve any failure; record full local and both-runtime CI
+results in the PR, then publish by the established fast-forward process and delete the
+task branch. Do not call the tranche merged or fully validated before those results.
+Continue the acquisition/clock qualification work only after closing this release.
+
 ## Historical timestamp authentication and C3 clock observation, 2026-10-10
 
 Read [ARCHIVED_TIMESTAMP_REPLAY.md](ARCHIVED_TIMESTAMP_REPLAY.md) for the current
