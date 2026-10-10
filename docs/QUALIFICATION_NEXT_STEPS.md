@@ -10,6 +10,15 @@ available for qualification work; hardware procurement is not the immediate depe
 
 ## Provider evidence and a corrected assumption
 
+Follow-up, 2026-10-10: [ADR-0023](decisions/0023-offline-acquisition-custody.md)
+implements the offline custody prerequisite: exact request retention, one committed
+attempt, immutable opaque or indeterminate capture, cold reconstruction and controls for
+concurrent callers and interrupted commits. Its scope/terms references are documentary;
+a debit grants no network permission. There is no transport or native-provider connection.
+The next acquisition tranche must resolve the exact service/terms, pin a scoped grant and
+accept a finite capture environment with explicit storage assumptions. Cross-copy budget
+enforcement and production storage qualification remain separate dependencies.
+
 Follow-up, 2026-10-10: [archived timestamp replay and clock preflight](ARCHIVED_TIMESTAMP_REPLAY.md)
 now authenticates one real historical Microsoft timestamp under its supplied root,
 including the retained CRLs across the whole claimed accuracy interval. A pinned
@@ -74,7 +83,7 @@ lead. [TSA disclosure v1.0.5](https://www.sectigo.com/uploads/files/eIDAS/Sectig
 | Trust and rotation | Two publisher-listed certificates, exact hashes and one signed CRL retained | Independent bootstrap authentication, current TSA, complete revocation and rotation policy |
 | Wire compatibility | Published CA bytes falsify the all-4096 assumption | Separate profile after full evidence; retain strict nonce, imprint, policy and full-hull checks |
 | Request fields | TSPPS and ETSI wording differs for reqPolicy/certReq | Observe exact behavior in a bounded admitted interoperability experiment |
-| Containment and custody | Concrete experiment below | Accepted parser/resource profile, exact acquisition grant, retained request and outcome |
+| Containment and custody | ADR-0023 offline request/debit/capture journal and interruption controls | Accepted finite storage/parser/resource assumptions, exact acquisition grant and contained transport |
 
 The [ET terms](https://www.sectigo.com/uploads/backgrounds/ET-Terms-of-Use-v1.1.pdf)
 exclude performance/security testing from their evaluation-use provision. This

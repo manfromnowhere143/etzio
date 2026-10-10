@@ -2,11 +2,50 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-10, Asia/Jerusalem.
 
-## Operator shutdown checkpoint, 2026-10-10
+## Offline acquisition custody and resumed publication, 2026-10-10
+
+The operator resumed the mission. [PR #35](https://github.com/manfromnowhere143/etzio/pull/35)
+is merged by linear fast-forward at `31ca79a0f7c47da7f5ddbd8d4783592aac5415d6`; its task
+branch is deleted. The shutdown checkpoint below is historical and resolved. Resumed
+local `make verify` passed all `1991` tests in `881.80` seconds, exit `0`, including
+policy, lint and fixture commands. Exact-candidate CI run `38030443388` passed `1991`
+tests on CPython 3.11.15 (`1459.15` seconds) and 3.14.2 (`1560.27` seconds), plus package,
+wheel, policy and GitGuardian checks. The exact Monitoring bodies remain retained in
+PR #35; their hashes were verified again before publication.
+
+[ADR-0023](decisions/0023-offline-acquisition-custody.md) specifies a separate offline
+acquisition journal, now implemented on `codex/acquisition-custody`. It retains exact
+request bytes, commits one non-resetting attempt before returning, and reconstructs
+opaque or indeterminate capture from retained bytes. Exact capture retries retain the
+same outcome; they never reissue a debit. Stored substitutions, raw replacement writes,
+missing parents, malformed schemas, oversized records, persistent WAL, competing callers,
+lost commit acknowledgements and actual process death have focused controls.
+
+The journal has no transport or grant checker. Documentary scope/terms references are
+not authority admissions. Within one unchanged database and SQLite's assumed atomicity,
+at most one debit call can return a fresh attempt. This does not establish remote delivery,
+cross-copy budget enforcement, power-fault durability, protected pathnames or production
+storage qualification. Kernel lifecycle, native codecs, dependency locks and workflows
+are unchanged. No timestamp request or cloud resource was created in this tranche.
+
+The focused file contains `111` tests. Both supported runtimes pass; the initial pytest
+reserved-parameter collection error and invalid content-ID domain spelling were corrected
+before release validation. Collection target is `2102` tests; resolve complete local and
+exact-candidate CI/package results from the published commit and its matching pull request.
+The complete `1991`-test replay above is the unchanged pre-tranche baseline.
+
+Next: settle exact service/terms and scoped acquisition authority, accept the finite
+capture/storage assumptions and implement contained transport. Clock custody and causality,
+native lifecycle integration, independent latest-head recovery, concrete production storage,
+isolation and measured EVM discovery retain their dependency order. Additional fixture
+coverage alone cannot establish independent administration or competitive detection.
+Canonical pickup after validated publication is `main`.
+
+## Historical operator shutdown checkpoint, 2026-10-10 (resolved)
 
 Daniel asked for a safe stopping point before closing the laptop for about one hour.
-Work is paused on `codex/archived-timestamp-replay`; [PR #35](https://github.com/manfromnowhere143/etzio/pull/35)
-remains a draft and is not merged. Implementation commit is
+At that checkpoint, work was paused on `codex/archived-timestamp-replay`; [PR #35](https://github.com/manfromnowhere143/etzio/pull/35)
+was a draft and unmerged. Implementation commit was
 `5bc7e450c2fb628fbacdb6d4754f6751b3005b99`; this checkpoint changes documentation only.
 All implementation, public evidence and this checkpoint are pushed to the task branch.
 `main` still points to the preceding PR #34 release until validated publication.
@@ -29,7 +68,8 @@ bodies, with verified readback hashes. Four historical host-clock observations r
 post-candidate observations admit no continuous bound, guest error or clock authority.
 No additional VM was created. Preserve this evidence for the next clock dossier.
 
-Resume: verify root/remote/status, read this handoff, fetch the task branch and inspect
+Historical resume instructions (completed above): verify root/remote/status, read this
+handoff, fetch the task branch and inspect
 PR #35's exact-head checks. Run the mandatory complete local `make verify` on the
 checkpoint candidate. Resolve any failure; record full local and both-runtime CI
 results in the PR, then publish by the established fast-forward process and delete the
@@ -326,7 +366,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1991 tests expected;
+- 2102 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
