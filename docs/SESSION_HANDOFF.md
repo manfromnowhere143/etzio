@@ -2,6 +2,43 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-10, Asia/Jerusalem.
 
+## Historical timestamp authentication and C3 clock observation, 2026-10-10
+
+Read [ARCHIVED_TIMESTAMP_REPLAY.md](ARCHIVED_TIMESTAMP_REPLAY.md) for the current
+finite diagnostic contract, exact evidence and next experiment. One archived Microsoft
+response now has offline CMS, imprint, path and retained-CRL validation across its
+complete claimed issuance interval. Two pinned OpenSSL endpoint checks agree; seven
+mutated/omitted inputs fail with their specific expected errors. The inspector's local
+ASN.1 handling does not change the native codecs or their refusal of this sample.
+No original request, fresh challenge, independently qualified accuracy, current
+revocation, trust admission or kernel time authority follows.
+
+The existing cloud authority was used for one bounded, disposable C3 probe. It observed
+a readable KVM PTP device, five POSIX clocks and 200 bracketed samples per clock.
+The initial serial parser failed on interleaved boot logs; cleanup completed and the
+exact JSON record was recovered offline. The retained evidence preserves that failure,
+the complete frame, collector identity and five exact-name absence readbacks. No
+resources remain from this probe. Reported 1 ns resolution is not measured accuracy;
+clock custody, drift, pause/migration behavior and UTC remain unqualified.
+
+The inherited `make verify` passed `1923` tests on CPython 3.11.15 in `836.84` seconds.
+The new `68` focused tests pass on CPython 3.11.15 (`5.55` seconds) and 3.14.2 (`7.89`
+seconds). Full-suite collection target is `1991`, not a passing result by itself.
+Resolve final full-suite/package/CI results from the exact candidate and matching PR.
+Engine runtime, native codecs, dependencies and workflows remain unchanged.
+
+The preceding elapsed-time release is merged as
+[PR #34](https://github.com/manfromnowhere143/etzio/pull/34) at
+`1b571d4a88a5e0254cbd061667267e71fa6e4c73`. Run `38027229076` passed all `1923` tests
+on CPython 3.11.15 (`1185.38` seconds) and 3.14.2 (`1295.61` seconds).
+
+Next: resolve the exact service/terms and acquisition budget, retain a single-request
+debit before any send, and qualify contained capture plus clock/causality evidence.
+Do not turn the historical token into a current-service or provider-admission claim.
+External latest-head recovery, concrete storage qualification, hard isolation and
+measured EVM discovery keep their dependency order. Canonical pickup after publication
+is `main`; cloud access and benign preparation permission are already available.
+
 ## Conditional native-time consumption bounds, 2026-10-10
 
 [ADR-0022](decisions/0022-native-time-consumption-bounds.md) adds an offline composition
@@ -255,7 +292,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 1923 tests expected;
+- 1991 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

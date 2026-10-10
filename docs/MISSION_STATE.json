@@ -1,6 +1,6 @@
 {
   "schema_version": "etzio.mission_state.v2",
-  "updated": "2026-10-09",
+  "updated": "2026-10-10",
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
@@ -34,7 +34,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Read docs/PUBLISHED_TSA_MATERIAL.md and docs/QUALIFICATION_NEXT_STEPS.md. A published historical signer and both CRLs now have bounded offline replay and a pinned OpenSSL comparison. Current endpoint signer/CMS, applicable acquisition terms, independent root administration and the separate compatible native profile remain open. Continue contained acquisition preparation, then native lifecycle and independently administered latest-head recovery; storage and execution gates remain open.",
+    "next_session_pickup": "Read docs/ARCHIVED_TIMESTAMP_REPLAY.md and docs/QUALIFICATION_NEXT_STEPS.md. A real archived Microsoft timestamp has offline whole-interval CMS/path/CRL replay and a pinned OpenSSL comparison. One C3 probe exposed a readable KVM PTP device; all resources were deleted. No real clock or provider is admitted. Resolve exact acquisition terms/budget and single-request custody, qualify error/drift/causality at consumption, then native lifecycle and external latest-head recovery. Storage, isolation and EVM remain dependent gates.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority"
   },
   "authority": {
@@ -199,9 +199,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "fixture kernel, historical public-material diagnostics and conditional offline native-time consumption bounds",
+    "scope": "fixture kernel, offline conditional timing, historical timestamp authentication and finite benign cloud clock observations",
     "validation_status": "full_suite_collection_declared_release_results_in_pull_request",
-    "test_count": 1923,
+    "test_count": 1991,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -211,7 +211,8 @@
       "CPython 3.11.15",
       "CPython 3.14.2"
     ],
-    "claim_boundary": "Declared timing assumptions and offline native-byte validation only; no clock qualification, freshness, provider enrollment, revocation-at-use or kernel authority."
+    "claim_boundary": "Historical signature/path replay and finite cloud clock observations only; no original request freshness, clock or provider qualification, native admission, storage/isolation, finding or income claim.",
+    "focused_archived_timestamp_and_clock_capture_tests_passed": 68
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -963,6 +964,65 @@
       "source_and_wheel_built": true,
       "installed_wheel_outside_checkout": "Both existing native corpus positives replayed and their half-open consumption-expiry controls refused; exact implementation bytes checked in wheel and source archive.",
       "log_sha256": "bd78c3a96ef32da6ccf45057d2b48d5bab4285fbcc4a9dd46ad8b93709514b0d"
+    },
+    "publication": {
+      "pull_request": 34,
+      "commit": "1b571d4a88a5e0254cbd061667267e71fa6e4c73",
+      "github_actions_run_id": 38027229076,
+      "local_release": {
+        "CPython 3.11.15": {
+          "passed": 1923,
+          "seconds": 860.03
+        }
+      },
+      "github_release": {
+        "CPython 3.11.15": {
+          "passed": 1923,
+          "seconds": 1185.38
+        },
+        "CPython 3.14.2": {
+          "passed": 1923,
+          "seconds": 1295.61
+        }
+      }
     }
+  },
+  "archived_timestamp_replay": {
+    "status": "implemented_offline_historical_diagnostic",
+    "date": "2026-10-10",
+    "contract": "docs/ARCHIVED_TIMESTAMP_REPLAY.md",
+    "manifest": "docs/evidence/archived-microsoft-timestamp-2026-10-10.json",
+    "source_ledger": "docs/evidence/archived-timestamp-sources-2026-10-10.json",
+    "comparison": "docs/evidence/archived-timestamp-comparison-2026-10-10.json",
+    "clock_preflight": "docs/evidence/clock-preflight-2026-10-10.json",
+    "focused_tests": 68,
+    "focused_seconds": {
+      "CPython 3.11.15": 5.55,
+      "CPython 3.14.2": 7.89
+    },
+    "full_suite_collection_target": 1991,
+    "openssl_positive_endpoints": 2,
+    "openssl_specific_refusals": 7,
+    "prechange_validation": {
+      "runtime": "CPython 3.11.15",
+      "passed": 1923,
+      "seconds": 836.84,
+      "exit": 0,
+      "log_sha256": "9b4f3e697ea4c918d58cf6ebfe9a1cbf8b2cf78306d7a69d9096ebe0cd72d29e"
+    },
+    "native_codecs_changed": false,
+    "kernel_or_lifecycle_changed": false,
+    "dependencies_changed": false,
+    "timestamp_protocol_requests": 0,
+    "clock_qualified": false,
+    "provider_admitted": false,
+    "kernel_authority": false,
+    "cloud_resources_remaining": 0,
+    "capture_status": "initial frame parser failed; exact record recovered offline; cleanup verified for five resource types",
+    "actual_billed_cost": null,
+    "release_validation": "Resolve full local and supported-runtime GitHub checks from the exact published candidate and matching pull request; collection count is not a passing result.",
+    "claim_boundary": "Historical authentication under supplied root and finite device availability/read observations. No current-service, request freshness, independent accuracy, current revocation, qualified host or provider authority.",
+    "packaging": "Source and wheel built; exact new evidence/scripts and every wheel Python runtime byte checked. All 68 focused tests replayed from the extracted source archive outside the checkout in 5.47 seconds.",
+    "review_correction": "The first evidence projection selected a duplicate disk readback instead of the VM readback. The retained original control record verified all five types; projection corrected and distinct-roster assertion added. The initial postchange full run was stopped as superseded before completion."
   }
 }

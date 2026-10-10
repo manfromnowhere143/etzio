@@ -1,0 +1,22 @@
+{
+  "archive": {
+    "authority_label": "Microsoft",
+    "endpoint_label": "http://timestamp.acs.microsoft.com",
+    "git_blob_sha1": "f567cdc94dd0f097bb637f62bd4c644d4df1e7ad",
+    "git_commit": "79dba6fe135ad8a6cf887d38a60e68c47e0c842c",
+    "retained_path": "docs/evidence/archived-timestamps-2026-10-09.json",
+    "selected_index": 4,
+    "sha256": "5b4ee53f51869ff2c484482382e1bb99962b3d40f2b88526667470e3e5c91782",
+    "size": 82957,
+    "url": "https://raw.githubusercontent.com/bil/timestamp-record/79dba6fe135ad8a6cf887d38a60e68c47e0c842c/.timestamps.json"
+  },
+  "boundary": "Public archive and publisher root correspondence; not request custody, service contact, independent bootstrap or provider admission.",
+  "inspected_date": "2026-10-10",
+  "publisher_root": {
+    "equals_archive_root": true,
+    "sha256": "5367f20c7ade0e2bca790915056d086b720c33c1fa2a2661acf787e3292e1270",
+    "size": 1488,
+    "url": "https://www.microsoft.com/pkiops/certs/Microsoft%20Identity%20Verification%20Root%20Certificate%20Authority%202020.crt"
+  },
+  "schema": "etzio.archived-timestamp-sources.v1"
+}

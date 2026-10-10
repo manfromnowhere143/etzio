@@ -1,0 +1,448 @@
+{
+  "boundary": "Local comparison with shared cryptographic ancestry; not independent administration. OpenSSL uses outward integer seconds, pyHanko uses exact microsecond endpoints. Explicit CAfile and empty CApath; pinned ts.c does not load default roots or an omitted CAstore. No provider, clock, request freshness, current revocation or kernel authority admitted.",
+  "comparator_sha256": "696f441a9f1f5ff5e3a60b0766e95d84db93be248a334eb9d689105c51fcfa46",
+  "dependency_lock_sha256": "4678f55a4776c6c888c94645155850f2cd58eccfc3a5aa37d6d8bcd50fbb3198",
+  "inspection": {
+    "accuracy_independently_measured": false,
+    "artifacts": {
+      "issuer_certificate": {
+        "sha256": "36e731cfa9bfd69dafb643809f6dec500902f7197daeaad86ea0159a2268a2b8",
+        "size": 1926
+      },
+      "issuer_crl": {
+        "sha256": "b24e0075ce5563850248c57ddb307121155468cd9f3ea7d7b517ea2fc6d509a4",
+        "size": 784
+      },
+      "response": {
+        "sha256": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "size": 6161
+      },
+      "root_certificate": {
+        "sha256": "5367f20c7ade0e2bca790915056d086b720c33c1fa2a2661acf787e3292e1270",
+        "size": 1488
+      },
+      "root_crl": {
+        "sha256": "1e3cc328ee13b0d733125e0350857f4cdbccb87852b9d58fc66d7f4915530b41",
+        "size": 913
+      },
+      "tsa_certificate": {
+        "sha256": "d9f566cc3b87460cad9974796d52fb330874086aaaa2cfb79036e65e5057eea3",
+        "size": 1947
+      }
+    },
+    "certificate_subjects": [
+      "CN=Microsoft Identity Verification Root Certificate Authority 2020,O=Microsoft Corporation,C=US",
+      "CN=Microsoft Public RSA Timestamping CA 2020,O=Microsoft Corporation,C=US",
+      "CN=Microsoft Public RSA Time Stamping Authority,OU=nShield TSS ESN:7800-05E0-D947,OU=Microsoft America Operations,O=Microsoft Corporation,L=Redmond,ST=Washington,C=US"
+    ],
+    "challenge_freshness_established": false,
+    "claimed_accuracy_microseconds": 500000,
+    "cms_signature_and_imprint_verified": true,
+    "crl_intervals_microseconds": [
+      [
+        1791051985000000,
+        1798872385000000
+      ],
+      [
+        1791483608000000,
+        1799390408000000
+      ]
+    ],
+    "current_revocation_established": false,
+    "generated_microseconds": 1791547400797000,
+    "imprint_sha256": "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+    "issuance_interval_microseconds": [
+      1791547400297000,
+      1791547401297000
+    ],
+    "kernel_authority": false,
+    "manifest_sha256": "255c4792559d0641efd2cb72e883ced15318eaac171de7afeccbabbe2fcc9970",
+    "original_request_retained": false,
+    "path_and_retained_crls_checked_at_both_endpoints": true,
+    "policy_oid": "1.3.6.1.4.1.601.10.3.1",
+    "root_admitted": false,
+    "schema": "etzio.archived-timestamp-inspection.v1",
+    "signed_attribute_oids": [
+      "1.2.840.113549.1.9.16.2.15",
+      "1.2.840.113549.1.9.16.2.18",
+      "1.2.840.113549.1.9.16.2.47",
+      "1.2.840.113549.1.9.3",
+      "1.2.840.113549.1.9.4",
+      "1.2.840.113549.1.9.5"
+    ],
+    "signer_attribute_certificate_trust_checked": false,
+    "status": "authenticated_historical_diagnostic_under_supplied_root",
+    "token_nonce_decimal": "14728508223627461272"
+  },
+  "inspector_sha256": "dcac4f6c42fa61e715806c441cba09486321d19a832c694c447223d411f47a32",
+  "manifest_sha256": "255c4792559d0641efd2cb72e883ced15318eaac171de7afeccbabbe2fcc9970",
+  "openssl_sha256": "07f19671b4a4528b829f8b7b917df7c42163a79a9646785e85e278c1fdae4478",
+  "openssl_version": "OpenSSL 3.6.3 9 Jun 2026 (Library: OpenSSL 3.6.3 9 Jun 2026)",
+  "results": [
+    {
+      "case": "lower_outward_second",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547400"
+      ],
+      "error_codes": [],
+      "expected_reason": null,
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "trust.pem": "8c9b83aa2f575457d0bda9714a7acff43c833bd159fd8abf027c356f3452755c"
+      },
+      "returncode": 0,
+      "stderr": "Using configuration from /dev/null\n",
+      "stdout": "Verification: OK\n"
+    },
+    {
+      "case": "upper_outward_second",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547402"
+      ],
+      "error_codes": [],
+      "expected_reason": null,
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "trust.pem": "8c9b83aa2f575457d0bda9714a7acff43c833bd159fd8abf027c356f3452755c"
+      },
+      "returncode": 0,
+      "stderr": "Using configuration from /dev/null\n",
+      "stdout": "Verification: OK\n"
+    },
+    {
+      "case": "response_signature_bit",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547400"
+      ],
+      "error_codes": [
+        "0200008A",
+        "02000072",
+        "1C880004",
+        "030000EA",
+        "10800069",
+        "1780006D"
+      ],
+      "expected_reason": "TS_RESP_verify_signature:signature failure:",
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "4f52efde086d062a1c38175eaeabe2efe55d0d5b6fd39bfb82f1447c4add4360",
+        "trust.pem": "8c9b83aa2f575457d0bda9714a7acff43c833bd159fd8abf027c356f3452755c"
+      },
+      "returncode": 1,
+      "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:030000EA:digital envelope routines:EVP_PKEY_verify:provider signature failure:crypto/evp/signature.c:1176:RSA verify:\nC0FA38EF01000000:error:10800069:PKCS7 routines:PKCS7_signatureVerify:signature failure:crypto/pkcs7/pk7_doit.c:1177:\nC0FA38EF01000000:error:1780006D:time stamp routines:TS_RESP_verify_signature:signature failure:crypto/ts/ts_rsp_verify.c:146:\n",
+      "stdout": "Verification: FAILED\n"
+    },
+    {
+      "case": "root_signature_bit",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547400"
+      ],
+      "error_codes": [
+        "0200008A",
+        "02000072",
+        "1C880004",
+        "06880006",
+        "17800064"
+      ],
+      "expected_reason": "Verify error:certificate signature failure",
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "trust.pem": "14ba8fcc86406cab50464d63adb1c059f8ea7aa7fa173f2621ce247706b1a7ec"
+      },
+      "returncode": 1,
+      "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:certificate signature failure\n",
+      "stdout": "Verification: FAILED\n"
+    },
+    {
+      "case": "root_crl_signature_bit",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547400"
+      ],
+      "error_codes": [
+        "0200008A",
+        "02000072",
+        "1C880004",
+        "06880006",
+        "17800064"
+      ],
+      "expected_reason": "Verify error:CRL signature failure",
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "trust.pem": "d4ec5b6950657bf3d502f316b502debf44ac25d0ba72870fb7a41fd3938680dc"
+      },
+      "returncode": 1,
+      "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL signature failure\n",
+      "stdout": "Verification: FAILED\n"
+    },
+    {
+      "case": "issuer_crl_signature_bit",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547400"
+      ],
+      "error_codes": [
+        "0200008A",
+        "02000072",
+        "1C880004",
+        "06880006",
+        "17800064"
+      ],
+      "expected_reason": "Verify error:CRL signature failure",
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "trust.pem": "c12e35561bf4fef36cbba93ad99353c3c338d2438cc09df8d391ce6910bef2d7"
+      },
+      "returncode": 1,
+      "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:0200008A:rsa routines:RSA_padding_check_PKCS1_type_1:invalid padding:crypto/rsa/rsa_pk1.c:78:\nC0FA38EF01000000:error:02000072:rsa routines:rsa_ossl_public_decrypt:padding check failed:crypto/rsa/rsa_ossl.c:779:\nC0FA38EF01000000:error:1C880004:Provider routines:rsa_verify_directly:RSA lib:providers/implementations/signature/rsa_sig.c:1057:\nC0FA38EF01000000:error:06880006:asn1 encoding routines:ASN1_item_verify_ctx:EVP lib:crypto/asn1/a_verify.c:219:\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:CRL signature failure\n",
+      "stdout": "Verification: FAILED\n"
+    },
+    {
+      "case": "wrong_imprint",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "0000000000000000000000000000000000000000000000000000000000000000",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547400"
+      ],
+      "error_codes": [
+        "17800067"
+      ],
+      "expected_reason": "ts_check_imprints:message imprint mismatch:",
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "trust.pem": "8c9b83aa2f575457d0bda9714a7acff43c833bd159fd8abf027c356f3452755c"
+      },
+      "returncode": 1,
+      "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800067:time stamp routines:ts_check_imprints:message imprint mismatch:crypto/ts/ts_rsp_verify.c:508:\n",
+      "stdout": "Verification: FAILED\n"
+    },
+    {
+      "case": "missing_root_crl",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547400"
+      ],
+      "error_codes": [
+        "17800064"
+      ],
+      "expected_reason": "Verify error:unable to get certificate CRL",
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "trust.pem": "274efa9af3e7cc7c664a24b618c55859b384a44c93e405c2f7fd2a86aca10e07"
+      },
+      "returncode": 1,
+      "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:unable to get certificate CRL\n",
+      "stdout": "Verification: FAILED\n"
+    },
+    {
+      "case": "missing_issuer_crl",
+      "command": [
+        "<pinned-openssl>",
+        "ts",
+        "-verify",
+        "-in",
+        "response.der",
+        "-digest",
+        "5063a60e45a3b75a5089f3e83df2013d0d824c456bd2553a93bd33ef671221bc",
+        "-CAfile",
+        "trust.pem",
+        "-CApath",
+        "empty",
+        "-untrusted",
+        "issuer.pem",
+        "-crl_check_all",
+        "-x509_strict",
+        "-check_ss_sig",
+        "-purpose",
+        "timestampsign",
+        "-auth_level",
+        "2",
+        "-attime",
+        "1791547400"
+      ],
+      "error_codes": [
+        "17800064"
+      ],
+      "expected_reason": "Verify error:unable to get certificate CRL",
+      "input_sha256": {
+        "issuer.pem": "ed3dec5a071b2070481b4e53f3a88dd81926a592fc19339bc43ca99ba4ebfc30",
+        "response.der": "c9f7818624a8e7b374a87865b0f45ac65b21c63e328d11914aa793282c6efa6f",
+        "trust.pem": "986375d851cbb1970f4d7bb62d0464f54b6636bce024de53c9e9655b6b9ac411"
+      },
+      "returncode": 1,
+      "stderr": "Using configuration from /dev/null\nC0FA38EF01000000:error:17800064:time stamp routines:ts_verify_cert:certificate verify error:crypto/ts/ts_rsp_verify.c:190:Verify error:unable to get certificate CRL\n",
+      "stdout": "Verification: FAILED\n"
+    }
+  ],
+  "schema": "etzio.archived-timestamp-comparison.v1"
+}

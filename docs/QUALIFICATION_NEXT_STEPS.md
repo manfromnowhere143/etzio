@@ -1,6 +1,6 @@
 # Provider and host qualification next steps
 
-Status: research and preparation, 2026-10-09. No native provider, storage profile,
+Status: research and preparation, 2026-10-10. No native provider, storage profile,
 execution profile or bounty target is admitted by this record.
 
 The next useful result is one reproducible native-provider observation carried through
@@ -9,6 +9,22 @@ More fixture gates alone cannot establish independent administration. Cloud acce
 available for qualification work; hardware procurement is not the immediate dependency.
 
 ## Provider evidence and a corrected assumption
+
+Follow-up, 2026-10-10: [archived timestamp replay and clock preflight](ARCHIVED_TIMESTAMP_REPLAY.md)
+now authenticates one real historical Microsoft timestamp under its supplied root,
+including the retained CRLs across the whole claimed accuracy interval. A pinned
+OpenSSL comparison agrees at two outward-rounded endpoints and refuses seven controls.
+The original request is absent; the additional signed attribute is handled only by the
+offline inspector. Native codecs still refuse this sample. Microsoft's generic service
+is a distinct service choice from the proposed Sectigo qualified endpoint.
+
+A disposable C3 probe observed a readable KVM PTP device and 200 bracketed samples
+from six clocks. The serial frame contained boot-log interleaving; the exact JSON line
+was recovered after the initial parser failed. All five resource types are verified
+absent. Device availability does not qualify clock error, drift, suspend/migration or
+UTC. The next clock experiment needs retained host-to-UTC and guest-to-host error
+observations, a defensible holdover bound and failures at the consequential instant.
+No new hardware or cloud login is needed for preparation.
 
 Follow-up, 2026-10-10: [ADR-0022](decisions/0022-native-time-consumption-bounds.md)
 now implements the offline elapsed-time prerequisite for both native codecs. It binds an
