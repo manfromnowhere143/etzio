@@ -10,6 +10,15 @@ available for qualification work; hardware procurement is not the immediate depe
 
 ## Provider evidence and a corrected assumption
 
+Follow-up, 2026-10-10: [ADR-0024](decisions/0024-bounded-https-material-capture.md)
+implements a bounded, opt-in HTTPS collector with exact plan/CA/runtime binding, a parent
+watchdog, one durable debit and opaque HTTP retention before interpretation. Owned
+loopback TLS controls exercise the transport. The [FreeTSA discovery proposal](FREETSA_DISCOVERY_PROPOSAL.md)
+now identifies one free ordinary synthetic request and explicit finite environment
+assumptions. It still requires exact scoped operator acceptance before external dispatch.
+It is distinct from the unresolved qualified Sectigo service choice below and admits
+neither service as an Etzio provider. No timestamp POST has been sent.
+
 Follow-up, 2026-10-10: [ADR-0023](decisions/0023-offline-acquisition-custody.md)
 implements the offline custody prerequisite: exact request retention, one committed
 attempt, immutable opaque or indeterminate capture, cold reconstruction and controls for

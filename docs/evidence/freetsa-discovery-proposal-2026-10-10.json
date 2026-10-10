@@ -1,0 +1,115 @@
+{
+  "schema": "etzio.freetsa-discovery-proposal.v1",
+  "date": "2026-10-10",
+  "status": "proposed_not_accepted",
+  "timestamp_protocol_requests": 0,
+  "journal_status": "prepared",
+  "plan_id": "sha256:677d6402efee17bdd53e7596055bcd18060a2167269efa3ce57d1672554ee03d",
+  "plan": {
+    "assumptions_reference_id": "sha256:eb6a99c2ca187766ea3d93d77b4bb1d239105462c28ebcc80f4d32e5f51089c5",
+    "ca_sha256": "9cc2a774b5198dcff14d9be1e66091f538975d867ce029a96bce15a55dfd730f",
+    "endpoint": "https://freetsa.org/tsr",
+    "ipv4": "192.119.76.43",
+    "request_sha256": "b4882af732f7e132a5bc4f6bb2c01e8fc0c3866cbb5c32ba58ff042fc966ad79",
+    "request_size": 93,
+    "response_limit_bytes": 65536,
+    "runtime_id": "sha256:86f9db5c59e2888acdfce2e1060f08b071b5c27895d3bb59600c80d3b31c05ca",
+    "schema": "etzio.https-capture.plan.v1",
+    "service_id": "discovery.freetsa.2026-10-10",
+    "surface": "external_discovery",
+    "terms_reference_id": "sha256:69ca0a04dabc1e42062dd6e944a411a215407ed479320384dc0980b10b6c393b",
+    "timeout_ms": 30000
+  },
+  "plan_wire_base64": "eyJhc3N1bXB0aW9uc19yZWZlcmVuY2VfaWQiOiJzaGEyNTY6ZWI2YTk5YzJjYTE4Nzc2NmVhM2Q5M2Q3N2I0YmIxZDIzOTEwNTQ2MmMyOGViY2M4MGY0ZDMyZTVmNTEwODljNSIsImNhX3NoYTI1NiI6IjljYzJhNzc0YjUxOThkY2ZmMTRkOWJlMWU2NjA5MWY1Mzg5NzVkODY3Y2UwMjlhOTZiY2UxNWE1NWRmZDczMGYiLCJlbmRwb2ludCI6Imh0dHBzOi8vZnJlZXRzYS5vcmcvdHNyIiwiaXB2NCI6IjE5Mi4xMTkuNzYuNDMiLCJyZXF1ZXN0X3NoYTI1NiI6ImI0ODgyYWY3MzJmN2UxMzJhNWJjNGY2YmIyYzAxZThmYzBjMzg2NmNiYjVjMzJiYTU4ZmYwNDJmYzk2NmFkNzkiLCJyZXF1ZXN0X3NpemUiOjkzLCJyZXNwb25zZV9saW1pdF9ieXRlcyI6NjU1MzYsInJ1bnRpbWVfaWQiOiJzaGEyNTY6ODZmOWRiNWM1OWUyODg4YWNkZmNlMmUxMDYwZjA4YjA3MWI1YzI3ODk1ZDNiYjU5NjAwYzgwZDNiMzFjMDVjYSIsInNjaGVtYSI6ImV0emlvLmh0dHBzLWNhcHR1cmUucGxhbi52MSIsInNlcnZpY2VfaWQiOiJkaXNjb3ZlcnkuZnJlZXRzYS4yMDI2LTEwLTEwIiwic3VyZmFjZSI6ImV4dGVybmFsX2Rpc2NvdmVyeSIsInRlcm1zX3JlZmVyZW5jZV9pZCI6InNoYTI1Njo2OWNhMGEwNGRhYmMxZTQyMDYyZGQ2ZTk0NGE0MTFhMjE1NDA3ZWQ0NzkzMjAzODRkYzA5ODBiMTBiNmMzOTNiIiwidGltZW91dF9tcyI6MzAwMDB9",
+  "request_der_base64": "MFsCAQEwMTANBglghkgBZQMEAgEFAAQg1SGXT9VE/20czUYxuFgVo7lOGAnJSGYodcZ5xv82LuICIAIujlqBH2iX2oRzLUbUKadbct0pudcSOMR1+h/GjESoAQH/",
+  "request_size": 93,
+  "request_sha256": "b4882af732f7e132a5bc4f6bb2c01e8fc0c3866cbb5c32ba58ff042fc966ad79",
+  "statement": "Etzio public synthetic provider-material discovery v1; no target or user data.\n",
+  "nonce_hex": "022e8e5a811f6897da84732d46d429a75b72dd29b9d71238c475fa1fc68c44a8",
+  "nonce_source": "32 bytes from os.urandom during offline preparation; no qualified freshness claim",
+  "assumptions": {
+    "schema": "etzio.finite-capture-assumptions.v1",
+    "status": "proposed_not_accepted",
+    "os": {
+      "system": "Darwin",
+      "release": "23.4.0",
+      "machine": "arm64"
+    },
+    "runtime": {
+      "python": "3.11.15 (main, Jun 23 2026, 15:46:51) [Clang 22.1.3 ]",
+      "openssl": "OpenSSL 3.5.7 9 Jun 2026",
+      "sqlite": "3.53.1",
+      "certifi": "2026.07.22"
+    },
+    "conditions": [
+      "owned trusted local OS and ordinary user account",
+      "one unchanged journal; no copies, rollback, reset or hostile same-user activity",
+      "SQLite atomicity assumed; physical device and power faults unqualified",
+      "sufficient disk capacity and responsive OS",
+      "local wall clock assumed usable for TLS validity, not qualified UTC",
+      "trusted Python/TLS dependencies; no received-code execution",
+      "no syscall, filesystem or network sandbox; no macOS address-space ceiling",
+      "parent watchdog and bounded pipes, with retention and cleanup outside acquisition timer",
+      "synthetic nonsensitive bytes only; no provider or kernel authority"
+    ]
+  },
+  "assumptions_wire_base64": "eyJjb25kaXRpb25zIjpbIm93bmVkIHRydXN0ZWQgbG9jYWwgT1MgYW5kIG9yZGluYXJ5IHVzZXIgYWNjb3VudCIsIm9uZSB1bmNoYW5nZWQgam91cm5hbDsgbm8gY29waWVzLCByb2xsYmFjaywgcmVzZXQgb3IgaG9zdGlsZSBzYW1lLXVzZXIgYWN0aXZpdHkiLCJTUUxpdGUgYXRvbWljaXR5IGFzc3VtZWQ7IHBoeXNpY2FsIGRldmljZSBhbmQgcG93ZXIgZmF1bHRzIHVucXVhbGlmaWVkIiwic3VmZmljaWVudCBkaXNrIGNhcGFjaXR5IGFuZCByZXNwb25zaXZlIE9TIiwibG9jYWwgd2FsbCBjbG9jayBhc3N1bWVkIHVzYWJsZSBmb3IgVExTIHZhbGlkaXR5LCBub3QgcXVhbGlmaWVkIFVUQyIsInRydXN0ZWQgUHl0aG9uL1RMUyBkZXBlbmRlbmNpZXM7IG5vIHJlY2VpdmVkLWNvZGUgZXhlY3V0aW9uIiwibm8gc3lzY2FsbCwgZmlsZXN5c3RlbSBvciBuZXR3b3JrIHNhbmRib3g7IG5vIG1hY09TIGFkZHJlc3Mtc3BhY2UgY2VpbGluZyIsInBhcmVudCB3YXRjaGRvZyBhbmQgYm91bmRlZCBwaXBlcywgd2l0aCByZXRlbnRpb24gYW5kIGNsZWFudXAgb3V0c2lkZSBhY3F1aXNpdGlvbiB0aW1lciIsInN5bnRoZXRpYyBub25zZW5zaXRpdmUgYnl0ZXMgb25seTsgbm8gcHJvdmlkZXIgb3Iga2VybmVsIGF1dGhvcml0eSJdLCJvcyI6eyJtYWNoaW5lIjoiYXJtNjQiLCJyZWxlYXNlIjoiMjMuNC4wIiwic3lzdGVtIjoiRGFyd2luIn0sInJ1bnRpbWUiOnsiY2VydGlmaSI6IjIwMjYuMDcuMjIiLCJvcGVuc3NsIjoiT3BlblNTTCAzLjUuNyA5IEp1biAyMDI2IiwicHl0aG9uIjoiMy4xMS4xNSAobWFpbiwgSnVuIDIzIDIwMjYsIDE1OjQ2OjUxKSBbQ2xhbmcgMjIuMS4zIF0iLCJzcWxpdGUiOiIzLjUzLjEifSwic2NoZW1hIjoiZXR6aW8uZmluaXRlLWNhcHR1cmUtYXNzdW1wdGlvbnMudjEiLCJzdGF0dXMiOiJwcm9wb3NlZF9ub3RfYWNjZXB0ZWQifQ==",
+  "tls_ca_bundle": {
+    "package": "certifi",
+    "version": "2026.07.22",
+    "size": 240216,
+    "sha256": "9cc2a774b5198dcff14d9be1e66091f538975d867ce029a96bce15a55dfd730f"
+  },
+  "passive_sources": {
+    "sources": [
+      {
+        "name": "homepage",
+        "url": "https://freetsa.org/index_en.php",
+        "status": 200,
+        "size": 32360,
+        "sha256": "a186263c5d4d485fda38bfcef3296357215be295ba1cf4fef39d8de15299e7bd"
+      },
+      {
+        "name": "cps",
+        "url": "https://www.freetsa.org/freetsa_cps.html",
+        "status": 200,
+        "size": 3201,
+        "sha256": "69ca0a04dabc1e42062dd6e944a411a215407ed479320384dc0980b10b6c393b"
+      }
+    ],
+    "dns_ipv4_observation": [
+      "192.119.76.43"
+    ],
+    "timestamp_requests": 0
+  },
+  "local_directory": "artifacts/acquisition-preparation/2026-10-10-freetsa",
+  "execution_requires": "Separate operator acceptance of exact scope and finite assumptions; plan digest possession grants no authority",
+  "command_after_acceptance": [
+    ".venv/bin/python",
+    "scripts/capture_timestamp_once.py",
+    "--capture",
+    "--journal",
+    "artifacts/acquisition-preparation/2026-10-10-freetsa/custody.sqlite3",
+    "--plan",
+    "artifacts/acquisition-preparation/2026-10-10-freetsa/plan.json",
+    "--ca",
+    "artifacts/acquisition-preparation/2026-10-10-freetsa/transport-ca.pem",
+    "--acknowledged-plan-id",
+    "sha256:677d6402efee17bdd53e7596055bcd18060a2167269efa3ce57d1672554ee03d"
+  ],
+  "runtime_binding_material": {
+    "python": "3.11.15 (main, Jun 23 2026, 15:46:51) [Clang 22.1.3 ]",
+    "openssl": "OpenSSL 3.5.7 9 Jun 2026",
+    "executable_sha256": "612bb6e55a95ea6eaf3c9693cf17fbf1a738408ad3bbfce988f712d7321d2c42",
+    "worker_sha256": "4ebd70553d71650f0d6b7b0c7e61e056cdb2940a96094ac4c5378179675175d2",
+    "controller_sha256": "4274fc265a5462b6259602241b958e177544ef453a3cca59fac73ed2ea34e44b"
+  },
+  "openssl_request_diagnostic": {
+    "binary_sha256": "07f19671b4a4528b829f8b7b917df7c42163a79a9646785e85e278c1fdae4478",
+    "returncode": 0,
+    "stdout": "Version: 1\nHash Algorithm: sha256\nMessage data:\n    0000 - d5 21 97 4f d5 44 ff 6d-1c cd 46 31 b8 58 15 a3   .!.O.D.m..F1.X..\n    0010 - b9 4e 18 09 c9 48 66 28-75 c6 79 c6 ff 36 2e e2   .N...Hf(u.y..6..\nPolicy OID: unspecified\nNonce: 0x022E8E5A811F6897DA84732D46D429A75B72DD29B9D71238C475FA1FC68C44A8\nCertificate required: yes\nExtensions:\n",
+    "stderr": "Using configuration from /dev/null\n",
+    "configuration": "/dev/null",
+    "boundary": "Offline syntax diagnostic of owned synthetic request only; no signing or external request."
+  }
+}

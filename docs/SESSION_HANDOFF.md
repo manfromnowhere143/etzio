@@ -2,6 +2,43 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-10, Asia/Jerusalem.
 
+## Bounded HTTPS discovery preparation, 2026-10-10
+
+The preceding custody release is published as [PR #36](https://github.com/manfromnowhere143/etzio/pull/36)
+at `c0f2d5d9a8af48c032f7a836a5191306ba12657a`. It passed `2102` tests locally and on
+both declared CI runtimes. The unchanged pre-tranche `make verify` here passed all
+`2102` tests in `876.80` seconds, exit `0`; all `37` installed locked packages matched.
+
+[ADR-0024](decisions/0024-bounded-https-material-capture.md) now specifies and implements
+an opt-in transport outside the engine. It binds the exact plan, CA, request, destination
+and runtime before debit, runs one fresh collector with bounded pipes and a parent
+watchdog, and retains raw HTTP bytes before offline interpretation. There is no DNS,
+proxy, credential, redirect or retry path. The collector receives no journal path and
+executes no received code. This is a finite trusted-client experiment, not hard isolation.
+The raw response cap includes HTTP framing. Storage exceptions keep their own domain.
+
+The [FreeTSA proposal](FREETSA_DISCOVERY_PROPOSAL.md) prepares one free synthetic POST
+to the publisher's ordinary public interface. Exact scoped acceptance of the plan and
+finite host/storage assumptions is still required before sending it. A digest argument
+guards against substitution; it does not authenticate an operator or grant permission.
+No timestamp protocol request, cloud resource, provider admission or kernel integration
+occurred. Existing cloud preparation authority persists.
+
+The new file contains `98` focused tests, including real owned loopback TLS, certificate
+failures, ambiguous HTTP, trickle/timeout/overflow, concurrent controllers, lost commit
+acknowledgements, store failures, resource ceilings, process-group cleanup and the opt-in
+CLI. The first draft lint pass found formatting/import issues; these were corrected
+without changing analyzer policy. Full collection target: `2200`. Resolve final local,
+both-runtime CI and package checks from the exact published candidate and its PR; a
+collection count is not a full passing result.
+
+Next: obtain exact acceptance of the prepared finite acquisition, capture once, inspect
+the retained material offline and define a separately versioned native profile from
+observed bytes. Qualify clock custody/causality, native lifecycle and independent
+latest-head recovery, then production storage, isolation and measured EVM discovery.
+Current service accuracy, competitive detection and income remain unproven. Canonical
+pickup after validated publication is `main`.
+
 ## Offline acquisition custody and resumed publication, 2026-10-10
 
 The operator resumed the mission. [PR #35](https://github.com/manfromnowhere143/etzio/pull/35)
@@ -370,7 +407,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2102 tests expected;
+- 2200 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
