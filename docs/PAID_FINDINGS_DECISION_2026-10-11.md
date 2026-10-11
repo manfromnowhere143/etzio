@@ -14,6 +14,12 @@ old contests with selective Audit Engine engagements. Neither account access nor
 invitation is established. There is no currently authorized route from this checkout
 directly to a paid finding.
 
+The bounded continuation selected below is complete: the [updated CoW dossier](COW_SOURCE_DOSSIER.md)
+reconciles both audits and maps 19 exact source files to publisher deployment metadata.
+Five files differ from the advertised revision. The [offline inspector](SOURCE_PROVENANCE_INSPECTION.md)
+makes that evidence reusable; it establishes neither live bytecode identity nor discovery
+performance. Resume the foundation critical path without repeating the completed dossier.
+
 ## Architectural verdict
 
 Keep the target-neutral authority, immutable evidence, governed recovery and independent

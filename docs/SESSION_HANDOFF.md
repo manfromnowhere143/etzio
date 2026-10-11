@@ -2,10 +2,54 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-11, Asia/Jerusalem.
 
+## Offline source identity and completed reconciliation, 2026-10-11
+
+This is the latest recovery summary. The [decision packet](PAID_FINDINGS_DECISION_2026-10-11.md)
+and [CoW dossier](COW_SOURCE_DOSSIER.md) remain the architectural and commercial decision.
+The bounded audit/source follow-up is now complete; do not repeat it as unfinished work.
+The next critical path is native-provider admission/lifecycle, external latest-head
+recovery, qualified storage, isolated independent execution, measured discovery and exact
+admission. No engine gate or commercial exception was accepted in this tranche.
+
+**Concrete progress:** implemented the [offline source inspector](SOURCE_PROVENANCE_INSPECTION.md)
+outside the kernel. It compares retained exact bytes and literal deployment metadata,
+keeps missing/URL-only/empty content distinct, refuses malformed captures and never runs
+inspected code. Unicode and line-ending normalization cannot turn different sources into
+an equality claim. The 52 focused controls include altered byte/hash pairs, scope omissions,
+duplicates, aliases, resource bounds and CLI replay. This is not a detector or execution
+verifier; no new Etzio vulnerability is alleged.
+
+The [reconciliation evidence](evidence/cow-source-reconciliation-2026-10-11.json) retains
+50 new public captures and ten replayable comparisons. All 19 retained source files match
+publisher-embedded settlement/authentication metadata at June 4 revision `dd08e12e...`;
+five differ from the advertised revision. All four brief addresses occur in later publisher
+records. Both audits were read; the old advertised source predates a known rounding fix,
+and the later audit revision differs from embedded settlement source. Missing initial-medium
+detail in the Hacken report stays unresolved. Publisher agreement is not independent
+chain-state, bytecode, complete audit coverage or build evidence. Campaign readiness remains
+refused; the proposed duplicate-fill hypothesis has not run.
+
+Entry was clean published `main` at `52e25cf0dd98ef0fe918f4bf7c489cb9eab4aa74`
+([PR #40](https://github.com/manfromnowhere143/etzio/pull/40)). Its unchanged bytes had already
+passed full verification on both local runtimes and exact-head CI earlier in this session;
+that retained baseline was reused. New-candidate results must come from its exact-head PR
+and `artifacts/checkpoints/2026-10-11-target-provenance/release-validation.json`.
+The full collection target is `2298`; expected counts and older passes are not new-release
+validation. Private captures, self-contained replay inputs, original development warning
+and all release logs remain under that ignored checkpoint directory. A fresh clone lacks
+those raw bytes; preserve them, and never infer a pass from a missing record.
+
+**Pending decision unchanged:** the original spent FreeTSA journal remains untouched.
+Follow-up plan `sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713`
+remains unaccepted, with no new journal or dispatch. The renewed ambition does not accept
+that exact experiment. No provider request, chain query, target execution, submission,
+new cloud resource or income occurred. Repository publication remains authorized under
+the exact-head, sole-human-authorship and linear fast-forward rules below.
+
 ## Decision packet and source-dossier continuation, 2026-10-11
 
-This is the latest recovery summary. The requested repository review, fresh primary-source
-and arXiv comparison, decision packet and authorized continuation are retained in
+This earlier recovery summary records the repository review, fresh primary-source
+and arXiv comparison, decision packet and authorized continuation retained in
 [PAID_FINDINGS_DECISION_2026-10-11](PAID_FINDINGS_DECISION_2026-10-11.md). Start there and
 at the [CoW source dossier](COW_SOURCE_DOSSIER.md); the older research assignment below
 remains context, not an instruction to repeat the whole survey.
@@ -590,7 +634,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2246 tests expected;
+- 2298 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

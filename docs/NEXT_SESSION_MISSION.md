@@ -9,10 +9,15 @@ The latest dated recovery section governs current status; older sections retain 
 
 The [2026-10-11 decision packet](PAID_FINDINGS_DECISION_2026-10-11.md) fulfills the initial
 research/decision assignment below and records its source and review coverage. Its
-[CoW continuation](COW_SOURCE_DOSSIER.md) retained the source import closure and exposed an
-unresolved historical-deployment/address mapping. It did not admit or execute a target.
-Resume the bounded audit/source/deployment reconciliation and foundation critical path;
-do not repeat the full survey or treat conditional revenue routes as accepted exceptions.
+[CoW continuation](COW_SOURCE_DOSSIER.md) now includes completed audit/source reconciliation:
+19 retained files match publisher-embedded source at a specific June 2021 revision; five
+differ from the advertised revision. Publisher address records agree with the brief, while
+independent runtime/state identity and scope resolution remain open. The new
+[offline inspector](SOURCE_PROVENANCE_INSPECTION.md) makes comparisons replayable and
+keeps absent evidence distinct. No target was admitted or executed. Resume the foundation
+critical path; do not repeat this bounded dossier or the full survey, or treat conditional
+revenue routes as accepted exceptions. Source and audit labels cannot substitute for
+independent reproduction or actual buyer demand.
 The FreeTSA diagnostic follow-up remains unaccepted with no journal or dispatch. Resolve
 current exact-head release evidence from the latest handoff before changing bytes.
 

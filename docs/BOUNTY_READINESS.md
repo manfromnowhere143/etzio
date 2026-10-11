@@ -7,12 +7,15 @@ Etzio `TargetContract`. The engine remains limited to repository-owned fixtures.
 
 The [2026-10-11 decision packet](PAID_FINDINGS_DECISION_2026-10-11.md) supersedes the
 revenue-route assumptions below where updated. The [CoW source dossier](COW_SOURCE_DOSSIER.md)
-now retains all 12 listed files and their 19-file import closure, but the advertised four
-addresses do not match the pinned historical deployment/network records. The phrase
-"source-to-deployment boundary" below is a candidate boundary, not established equivalence.
-CoW remains first for bounded documentary preparation; investment in a campaign is refused
-until that mapping and the other gates close. The dossier also retains the audit index;
-audit contents and full duplicate review remain open. No scope or execution grant changed.
+now retains all 12 listed files and their 19-file import closure. Completed reconciliation
+maps all four advertised addresses to later publisher records and all 19 source files to
+their embedded literal source at revision `dd08e12e765088470268eb0bbba13e86b14b9cb6`.
+Five source files differ from the advertised revision. Both indexed audits were reviewed;
+known-fix and audit-revision differences remain explicit. The phrase "source-to-deployment
+boundary" below is a candidate boundary: no live bytecode/state mapping, complete duplicate
+clearance or build reproduction exists. CoW remains the first prepared dossier; campaign
+investment is refused until those and the engine gates close. No scope or execution grant
+changed. See the [replayable evidence](evidence/cow-source-reconciliation-2026-10-11.json).
 
 The operator requested continued foundation work with paid research as soon as the engine
 is ready. Preserve ADR-0001's ordering. Public scope research can proceed now; a campaign

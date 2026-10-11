@@ -1,0 +1,3300 @@
+{
+  "schema": "etzio.cow-source-reconciliation.v1",
+  "status": "documentary_observation",
+  "date": "2026-10-11",
+  "baseline_commit": "52e25cf0dd98ef0fe918f4bf7c489cb9eab4aa74",
+  "advertised_commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+  "publisher_records_commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+  "literal_source_matching_commit": "dd08e12e765088470268eb0bbba13e86b14b9cb6",
+  "matching_commit_date": "2021-06-04",
+  "authority_revision_substituted": false,
+  "review_depth": {
+    "audits": "Full extracted text of both reports; revision and finding pages visually inspected. Report assertions are not independently reproduced audits.",
+    "source": "Exact-byte comparison of 19-file source closure; selected settlement differences read. Not a complete code audit.",
+    "history": "One settlement path, 2021-04-01 through 2021-12-03, 100-record limit; nine commits returned and no next-page link. Not a full repository history audit."
+  },
+  "capture_count": 50,
+  "captures": [
+    {
+      "upstream_path": "audits/GnosisProtocolV2May2021.pdf",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/audits/GnosisProtocolV2May2021.pdf",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:01.509499+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "30f0addffa30da1d94888b69313fff631bc19ce93f66371a50c7aff04eca3876",
+      "git_blob_sha1": "45079a56d05d069c1b7e597447d9d3c639535f0e",
+      "size_bytes": 321918,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/audits__GnosisProtocolV2May2021.pdf"
+    },
+    {
+      "upstream_path": "audits/[Cowswap_10122021]SCAudit_Report_2.pdf",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/audits/%5BCowswap_10122021%5DSCAudit_Report_2.pdf",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:01.509892+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "8ff6bb9f364d38cebcd489867f39e305eb7d887c603895c7e272ca10220bae94",
+      "git_blob_sha1": "0a97c3a861a420dbe1d90a423645c3c2eae2de18",
+      "size_bytes": 304503,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/audits__[Cowswap_10122021]SCAudit_Report_2.pdf"
+    },
+    {
+      "upstream_path": "networks.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/networks.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:01.509989+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "d55c25fdcea24cfbc0f15fa7f0dc94b6d6e467b187eed436e844cadc8bf8e6d3",
+      "git_blob_sha1": "389e00d9ebe6be1effe4b290456f716cce087116",
+      "size_bytes": 9845,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/networks.json.source.txt"
+    },
+    {
+      "upstream_path": "deployments/mainnet/GPv2AllowListAuthentication.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/deployments/mainnet/GPv2AllowListAuthentication.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:01.511107+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "6d12dbeeacab2b18df258124cdbb00b6c7aed6af5980c2f0c311841c353c485e",
+      "git_blob_sha1": "a462090e518e80615a8eb830529d646f54664912",
+      "size_bytes": 30923,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/deployments__mainnet__GPv2AllowListAuthentication.json.source.txt"
+    },
+    {
+      "upstream_path": "deployments/mainnet/GPv2AllowListAuthentication_Implementation.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/deployments/mainnet/GPv2AllowListAuthentication_Implementation.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:02.038399+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "1ce20084eed8c33b3ae637c74aa9a03adc3528ddcb50c6f060a6e1061f074ea1",
+      "git_blob_sha1": "88f49989eabbf21810ae15e5d336680d663976ae",
+      "size_bytes": 46174,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/deployments__mainnet__GPv2AllowListAuthentication_Implementation.json.source.txt"
+    },
+    {
+      "upstream_path": "deployments/mainnet/GPv2AllowListAuthentication_Proxy.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/deployments/mainnet/GPv2AllowListAuthentication_Proxy.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:02.045727+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "3c0b84207a1b1fad26ac47f2a7e53c3360c28681ec0fdc0f3029de9c544976d3",
+      "git_blob_sha1": "7172238971b6cf469d286bdac6c383aa36c4123d",
+      "size_bytes": 26558,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/deployments__mainnet__GPv2AllowListAuthentication_Proxy.json.source.txt"
+    },
+    {
+      "upstream_path": "deployments/mainnet/GPv2Settlement.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/deployments/mainnet/GPv2Settlement.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:02.291109+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "5e023e080087f25e32b28d5a782200edcad65bc20b19ece3860128822f3acdc6",
+      "git_blob_sha1": "7e5428b5c211a711425d196378019331fda7cc86",
+      "size_bytes": 219203,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/deployments__mainnet__GPv2Settlement.json.source.txt"
+    },
+    {
+      "upstream_path": "deployments/xdai/GPv2AllowListAuthentication.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/deployments/xdai/GPv2AllowListAuthentication.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:02.349050+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "61aa0221fbfd14233b30e8dc46ed20125f0c349659bad1ae8e6ad01847c864fa",
+      "git_blob_sha1": "3f475feab063895da0d14cd6f7f97c43e6822aa5",
+      "size_bytes": 30920,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/deployments__xdai__GPv2AllowListAuthentication.json.source.txt"
+    },
+    {
+      "upstream_path": "deployments/xdai/GPv2AllowListAuthentication_Implementation.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/deployments/xdai/GPv2AllowListAuthentication_Implementation.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:02.505782+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "a828b6500d9352c142eb9c694d7876e24afaf3888ae5c4bfcd0968508dea5b17",
+      "git_blob_sha1": "7fe83deb33052830d5d93b79ee27ef0f7bbf2074",
+      "size_bytes": 46174,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/deployments__xdai__GPv2AllowListAuthentication_Implementation.json.source.txt"
+    },
+    {
+      "upstream_path": "deployments/xdai/GPv2AllowListAuthentication_Proxy.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/deployments/xdai/GPv2AllowListAuthentication_Proxy.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:02.624315+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "fedb26c37e101b112c42ab51194f7415ba7eae234d455352228914d4cc6e335d",
+      "git_blob_sha1": "b855f6ac653f9377a67608ee3cfc01150a99ccce",
+      "size_bytes": 26555,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/deployments__xdai__GPv2AllowListAuthentication_Proxy.json.source.txt"
+    },
+    {
+      "upstream_path": "deployments/xdai/GPv2Settlement.json",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/deployments/xdai/GPv2Settlement.json",
+      "commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+      "retrieved_at_host_clock": "2026-10-11T06:38:02.836423+00:00",
+      "http_status": 200,
+      "status": "retained_git_blob_matches",
+      "sha256": "0abd7e07782ff615643dd993406a50d2c548ad28bf911f7ccf70ad70f7731bbf",
+      "git_blob_sha1": "35fe2210823aebeb8855e51024613fbb170c03ab",
+      "size_bytes": 219203,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/deployments__xdai__GPv2Settlement.json.source.txt"
+    },
+    {
+      "name": "g0-reviewed-commit",
+      "url": "https://api.github.com/repos/cowprotocol/contracts/commits/7184fc98c05d2d336d90ee4e6b36429457a56d43",
+      "retrieved_at_host_clock": "2026-10-11T06:39:52.627925+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "4118c172e4c775014bde5f571062bea704719074bf3c4d91fc4222867309439e",
+      "size_bytes": 180398,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/g0-reviewed-commit.source.txt"
+    },
+    {
+      "name": "g0-reviewed-tree",
+      "url": "https://api.github.com/repos/cowprotocol/contracts/git/trees/7184fc98c05d2d336d90ee4e6b36429457a56d43?recursive=1",
+      "retrieved_at_host_clock": "2026-10-11T06:39:52.628300+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "84c79cb2e0cfbe2a49675c1b3563dc80eb388fb543d8e44f37a55298bf7ab9b1",
+      "size_bytes": 44756,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/g0-reviewed-tree.source.txt"
+    },
+    {
+      "name": "g0-reviewed-settlement",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/7184fc98c05d2d336d90ee4e6b36429457a56d43/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:39:52.628437+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "36a9db0d8e31bdb9bfb936c4bb72a8be4b974882e815823b4a9c7415896f74b4",
+      "size_bytes": 18374,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/g0-reviewed-settlement.source.txt"
+    },
+    {
+      "name": "g0-fixed-commit",
+      "url": "https://api.github.com/repos/cowprotocol/contracts/commits/5d90c5842b30b8c8945512e613971675897570a9",
+      "retrieved_at_host_clock": "2026-10-11T06:39:52.628517+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "5a0ef3568c5096aa59d9443e310c857c595c76b60dcc39cdda329f35afd57147",
+      "size_bytes": 11530,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/g0-fixed-commit.source.txt"
+    },
+    {
+      "name": "g0-fixed-tree",
+      "url": "https://api.github.com/repos/cowprotocol/contracts/git/trees/5d90c5842b30b8c8945512e613971675897570a9?recursive=1",
+      "retrieved_at_host_clock": "2026-10-11T06:39:53.038556+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "c9260854484326a6d3d66908304fca343c8f33b6334debb5930ce405c7e11d4e",
+      "size_bytes": 44757,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/g0-fixed-tree.source.txt"
+    },
+    {
+      "name": "g0-fixed-settlement",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/5d90c5842b30b8c8945512e613971675897570a9/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:39:53.056971+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "7876ba395d6109097e7ee839ab01a51cd45df078527b7f23150e2eef44708b46",
+      "size_bytes": 18408,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/g0-fixed-settlement.source.txt"
+    },
+    {
+      "name": "hacken-reviewed-commit",
+      "url": "https://api.github.com/repos/cowprotocol/contracts/commits/40c349d52d14f8f3c9f787fe2fca5a496bb10ea9",
+      "retrieved_at_host_clock": "2026-10-11T06:39:53.171525+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "6d62ad3160ae5c3625c87647c6b48bf4555e70821a665d3f9f4cba13bb3e4117",
+      "size_bytes": 17158,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/hacken-reviewed-commit.source.txt"
+    },
+    {
+      "name": "hacken-reviewed-tree",
+      "url": "https://api.github.com/repos/cowprotocol/contracts/git/trees/40c349d52d14f8f3c9f787fe2fca5a496bb10ea9?recursive=1",
+      "retrieved_at_host_clock": "2026-10-11T06:39:53.179746+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "7fc0471580730a22beb099ad657f15162588212e61242e5d0f188deb357f0506",
+      "size_bytes": 55441,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/hacken-reviewed-tree.source.txt"
+    },
+    {
+      "name": "hacken-reviewed-settlement",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/40c349d52d14f8f3c9f787fe2fca5a496bb10ea9/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:39:53.403901+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "sha256": "8d9ecfcf9eede8d040b8ff4101029b07342e61113891127e438068b7fc7953bc",
+      "size_bytes": 19213,
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/hacken-reviewed-settlement.source.txt"
+    },
+    {
+      "name": "settlement-path-history",
+      "url": "https://api.github.com/repos/cowprotocol/contracts/commits?sha=c07a93e3596194c5e3cf331c755a3f9f0e4a17d8&path=src%2Fcontracts%2FGPv2Settlement.sol&since=2021-04-01T00%3A00%3A00Z&until=2021-12-03T00%3A00%3A00Z&per_page=100",
+      "retrieved_at_host_clock": "2026-10-11T06:41:53.247349+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-path-history.source.txt",
+      "size_bytes": 39874,
+      "sha256": "6734152bdda8007e6185f334f620f3ecbb3c3e402a731e6a6bf2fd90a96ee3a0"
+    },
+    {
+      "name": "settlement-4ce7a9e54b9ff11593e22d10e2852b734e6abe23",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/4ce7a9e54b9ff11593e22d10e2852b734e6abe23/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:53.663689+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-4ce7a9e54b9ff11593e22d10e2852b734e6abe23.source.txt",
+      "size_bytes": 19213,
+      "sha256": "8d9ecfcf9eede8d040b8ff4101029b07342e61113891127e438068b7fc7953bc"
+    },
+    {
+      "name": "settlement-dd08e12e765088470268eb0bbba13e86b14b9cb6",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:53.663874+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-dd08e12e765088470268eb0bbba13e86b14b9cb6.source.txt",
+      "size_bytes": 19271,
+      "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+    },
+    {
+      "name": "settlement-f87e8a4ca8d718a85f848b98df4bc9c1b7f21a7c",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/f87e8a4ca8d718a85f848b98df4bc9c1b7f21a7c/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:53.663992+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-f87e8a4ca8d718a85f848b98df4bc9c1b7f21a7c.source.txt",
+      "size_bytes": 18408,
+      "sha256": "7876ba395d6109097e7ee839ab01a51cd45df078527b7f23150e2eef44708b46"
+    },
+    {
+      "name": "settlement-4bbe0413f12afcf4d23ce47768c0c3f3ef9e7e41",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/4bbe0413f12afcf4d23ce47768c0c3f3ef9e7e41/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:53.664972+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-4bbe0413f12afcf4d23ce47768c0c3f3ef9e7e41.source.txt",
+      "size_bytes": 18374,
+      "sha256": "36a9db0d8e31bdb9bfb936c4bb72a8be4b974882e815823b4a9c7415896f74b4"
+    },
+    {
+      "name": "settlement-3516fb401b300bbcb40e6e9e3aff609a9510c0e4",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/3516fb401b300bbcb40e6e9e3aff609a9510c0e4/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:54.334478+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-3516fb401b300bbcb40e6e9e3aff609a9510c0e4.source.txt",
+      "size_bytes": 18363,
+      "sha256": "b1d281fc7934ce0baae7169cd6208d646486ed437b5f17d0d8b19fad9496c84c"
+    },
+    {
+      "name": "settlement-7625283707beaf5c3c44c116fca3fa6ab2404984",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/7625283707beaf5c3c44c116fca3fa6ab2404984/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:54.334601+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-7625283707beaf5c3c44c116fca3fa6ab2404984.source.txt",
+      "size_bytes": 18352,
+      "sha256": "f58667631cfa6a9cd4c23f30bd058a3585e42bdaffcd1b04b2988753687356cb"
+    },
+    {
+      "name": "settlement-a0461364611ea879e7fef6cf328312a4cbb0db7c",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/a0461364611ea879e7fef6cf328312a4cbb0db7c/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:54.334731+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-a0461364611ea879e7fef6cf328312a4cbb0db7c.source.txt",
+      "size_bytes": 14984,
+      "sha256": "7d87c48941b522f61a1e9aca1b4c44ea50831f46297cb5251c3bd609460ff0e7"
+    },
+    {
+      "name": "settlement-e499aa674def4fb11f339f71aa0fda7a5f7503ac",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/e499aa674def4fb11f339f71aa0fda7a5f7503ac/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:54.334904+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-e499aa674def4fb11f339f71aa0fda7a5f7503ac.source.txt",
+      "size_bytes": 14734,
+      "sha256": "5e9df3e6ad1f8fd664994f57f7256a15d9d0d455f29bb41f76ca43b48bcc2a32"
+    },
+    {
+      "name": "settlement-ec0756441e50f109e9c806b7110ec8b33a209b69",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/ec0756441e50f109e9c806b7110ec8b33a209b69/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:41:54.838441+00:00",
+      "http_status": 200,
+      "link": null,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/settlement-ec0756441e50f109e9c806b7110ec8b33a209b69.source.txt",
+      "size_bytes": 15080,
+      "sha256": "148e321fa0dda6378a30f93673accc4ea98bef2fc43d1de9f23136a0ab3b7ea5"
+    },
+    {
+      "name": "matching-revision-tree",
+      "url": "https://api.github.com/repos/cowprotocol/contracts/git/trees/dd08e12e765088470268eb0bbba13e86b14b9cb6?recursive=1",
+      "retrieved_at_host_clock": "2026-10-11T06:43:41.414178+00:00",
+      "http_status": 200,
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matching-revision-tree.source.txt",
+      "size_bytes": 44952,
+      "sha256": "de1b13d77f0b115c55b4a33d00d386e6b5be17b87fcc388477d8e92265a166b2"
+    },
+    {
+      "name": "matched__src__contracts__GPv2AllowListAuthentication.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/GPv2AllowListAuthentication.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:41.816445+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "205ca0bb7fb413305c7b00a275a0ee0e7d384082",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__GPv2AllowListAuthentication.sol.source.txt",
+      "size_bytes": 3683,
+      "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013",
+      "upstream_path": "src/contracts/GPv2AllowListAuthentication.sol"
+    },
+    {
+      "name": "matched__src__contracts__GPv2Settlement.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/GPv2Settlement.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:41.817579+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "3dec58bc04fba0edbd2f93a85f5aaca1410ca1a1",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__GPv2Settlement.sol.source.txt",
+      "size_bytes": 19271,
+      "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63",
+      "upstream_path": "src/contracts/GPv2Settlement.sol"
+    },
+    {
+      "name": "matched__src__contracts__GPv2VaultRelayer.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/GPv2VaultRelayer.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:41.817747+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "41d56445f4757edd57e482c109635dfbec59aaf9",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__GPv2VaultRelayer.sol.source.txt",
+      "size_bytes": 2939,
+      "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc",
+      "upstream_path": "src/contracts/GPv2VaultRelayer.sol"
+    },
+    {
+      "name": "matched__src__contracts__interfaces__GPv2Authentication.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/interfaces/GPv2Authentication.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:41.817847+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "37ee0c7a0afb556ca141fae15974dca336941d74",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__interfaces__GPv2Authentication.sol.source.txt",
+      "size_bytes": 506,
+      "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335",
+      "upstream_path": "src/contracts/interfaces/GPv2Authentication.sol"
+    },
+    {
+      "name": "matched__src__contracts__interfaces__GPv2EIP1271.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/interfaces/GPv2EIP1271.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:42.120769+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "79f5b4391d2cb87e591b55c18107c066d6221d3a",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__interfaces__GPv2EIP1271.sol.source.txt",
+      "size_bytes": 1285,
+      "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48",
+      "upstream_path": "src/contracts/interfaces/GPv2EIP1271.sol"
+    },
+    {
+      "name": "matched__src__contracts__interfaces__IERC20.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/interfaces/IERC20.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:42.265384+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "002841cb7d1709c7a300f83287b4f513f61d34ae",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__interfaces__IERC20.sol.source.txt",
+      "size_bytes": 3457,
+      "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875",
+      "upstream_path": "src/contracts/interfaces/IERC20.sol"
+    },
+    {
+      "name": "matched__src__contracts__interfaces__IVault.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/interfaces/IVault.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:42.286925+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "f12016cedfee13bb0cfc8da594c6e8b11d082148",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__interfaces__IVault.sol.source.txt",
+      "size_bytes": 13494,
+      "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469",
+      "upstream_path": "src/contracts/interfaces/IVault.sol"
+    },
+    {
+      "name": "matched__src__contracts__libraries__GPv2EIP1967.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/libraries/GPv2EIP1967.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:42.591436+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "d74008d39f6032536a6cd852aa5495a8fa69db24",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__libraries__GPv2EIP1967.sol.source.txt",
+      "size_bytes": 1243,
+      "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a",
+      "upstream_path": "src/contracts/libraries/GPv2EIP1967.sol"
+    },
+    {
+      "name": "matched__src__contracts__libraries__GPv2Interaction.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/libraries/GPv2Interaction.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:42.615238+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "0c247f9a4f084c94657e6662bb9477f4230ca532",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__libraries__GPv2Interaction.sol.source.txt",
+      "size_bytes": 2941,
+      "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40",
+      "upstream_path": "src/contracts/libraries/GPv2Interaction.sol"
+    },
+    {
+      "name": "matched__src__contracts__libraries__GPv2Order.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/libraries/GPv2Order.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:42.748225+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "a7eee11582503173628382e5e203a054c6393877",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__libraries__GPv2Order.sol.source.txt",
+      "size_bytes": 10152,
+      "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089",
+      "upstream_path": "src/contracts/libraries/GPv2Order.sol"
+    },
+    {
+      "name": "matched__src__contracts__libraries__GPv2SafeERC20.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/libraries/GPv2SafeERC20.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:42.764886+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "ff7ff6461ee4e00e4d21da9b03be17760e57e98f",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__libraries__GPv2SafeERC20.sol.source.txt",
+      "size_bytes": 5616,
+      "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d",
+      "upstream_path": "src/contracts/libraries/GPv2SafeERC20.sol"
+    },
+    {
+      "name": "matched__src__contracts__libraries__GPv2Trade.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/libraries/GPv2Trade.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:43.064007+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "b914eed5123d087b4e1a71fe9432f2022e927877",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__libraries__GPv2Trade.sol.source.txt",
+      "size_bytes": 5406,
+      "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc",
+      "upstream_path": "src/contracts/libraries/GPv2Trade.sol"
+    },
+    {
+      "name": "matched__src__contracts__libraries__GPv2Transfer.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/libraries/GPv2Transfer.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:43.085829+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "360f4cc78353c08c81be43a533dfe153f32ec8f6",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__libraries__GPv2Transfer.sol.source.txt",
+      "size_bytes": 7967,
+      "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6",
+      "upstream_path": "src/contracts/libraries/GPv2Transfer.sol"
+    },
+    {
+      "name": "matched__src__contracts__libraries__SafeCast.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/libraries/SafeCast.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:43.229770+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "14d0547e5b810ebf98e842623eaac6154518e947",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__libraries__SafeCast.sol.source.txt",
+      "size_bytes": 1825,
+      "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71",
+      "upstream_path": "src/contracts/libraries/SafeCast.sol"
+    },
+    {
+      "name": "matched__src__contracts__libraries__SafeMath.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/libraries/SafeMath.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:43.238440+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "638caa1e1c651c8f1719727f50e5c95adb4274ab",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__libraries__SafeMath.sol.source.txt",
+      "size_bytes": 3405,
+      "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9",
+      "upstream_path": "src/contracts/libraries/SafeMath.sol"
+    },
+    {
+      "name": "matched__src__contracts__mixins__GPv2Signing.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/mixins/GPv2Signing.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:43.517060+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "7839ae8e83a3320f56fa96720cd01f07bb5b9395",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__mixins__GPv2Signing.sol.source.txt",
+      "size_bytes": 12253,
+      "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19",
+      "upstream_path": "src/contracts/mixins/GPv2Signing.sol"
+    },
+    {
+      "name": "matched__src__contracts__mixins__Initializable.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/mixins/Initializable.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:43.549743+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "51aa400a1ee6b1f3500bce8ff35db4d88dffebc2",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__mixins__Initializable.sol.source.txt",
+      "size_bytes": 2410,
+      "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225",
+      "upstream_path": "src/contracts/mixins/Initializable.sol"
+    },
+    {
+      "name": "matched__src__contracts__mixins__ReentrancyGuard.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/mixins/ReentrancyGuard.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:43.687459+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "0363b9d0171c0aa284aaaf214859845691b775c9",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__mixins__ReentrancyGuard.sol.source.txt",
+      "size_bytes": 2820,
+      "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409",
+      "upstream_path": "src/contracts/mixins/ReentrancyGuard.sol"
+    },
+    {
+      "name": "matched__src__contracts__mixins__StorageAccessible.sol",
+      "url": "https://raw.githubusercontent.com/cowprotocol/contracts/dd08e12e765088470268eb0bbba13e86b14b9cb6/src/contracts/mixins/StorageAccessible.sol",
+      "retrieved_at_host_clock": "2026-10-11T06:43:43.727252+00:00",
+      "http_status": 200,
+      "git_blob_sha1": "0dd466fbc80def2e2f8bb550e7b622d0c0b524a9",
+      "status": "retained",
+      "local_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched__src__contracts__mixins__StorageAccessible.sol.source.txt",
+      "size_bytes": 4560,
+      "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea",
+      "upstream_path": "src/contracts/mixins/StorageAccessible.sol"
+    }
+  ],
+  "web_reader_failures": [
+    "Both PDF requests returned Cache miss; raw public HTTPS GET used instead."
+  ],
+  "audit_observations": [
+    {
+      "publisher": "G0 Group",
+      "report_date": "2021-05",
+      "pdf_sha256": "30f0addffa30da1d94888b69313fff631bc19ce93f66371a50c7aff04eca3876",
+      "reviewed_commit": "7184fc98c05d2d336d90ee4e6b36429457a56d43",
+      "reported_fixed_commit": "5d90c5842b30b8c8945512e613971675897570a9",
+      "observation": "One minor settlement rounding issue reported fixed. Advertised source predates that fix. Publisher-embedded settlement contains the ceiling-division change.",
+      "new_finding": false,
+      "independent_execution": false
+    },
+    {
+      "publisher": "Hacken",
+      "report_date": "2021-12-10",
+      "pdf_sha256": "8ff6bb9f364d38cebcd489867f39e305eb7d887c603895c7e272ca10220bae94",
+      "reviewed_commit": "40c349d52d14f8f3c9f787fe2fca5a496bb10ea9",
+      "observation": "Initial summary mentions one medium and one low issue. Detailed final overview supplies no medium issue and records fixed StorageAccessible test-coverage gaps. Missing initial-medium detail is unresolved; second-review assurance remains a report claim.",
+      "filename_date_interpretation": "December 10, not October 12",
+      "new_finding": false,
+      "independent_execution": false
+    }
+  ],
+  "publisher_addresses": [
+    {
+      "chain": "mainnet",
+      "chain_id": "1",
+      "role": "GPv2Settlement",
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "publisher_network_and_deployment_records_agree": true,
+      "chain_verified": false
+    },
+    {
+      "chain": "mainnet",
+      "chain_id": "1",
+      "role": "GPv2AllowListAuthentication_Implementation",
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "publisher_network_and_deployment_records_agree": true,
+      "chain_verified": false
+    },
+    {
+      "chain": "mainnet",
+      "chain_id": "1",
+      "role": "GPv2AllowListAuthentication_Proxy",
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "publisher_network_and_deployment_records_agree": true,
+      "chain_verified": false
+    },
+    {
+      "chain": "mainnet",
+      "chain_id": "1",
+      "role": "GPv2VaultRelayer",
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "evidence": "publisher_network_manifest_only",
+      "chain_verified": false
+    },
+    {
+      "chain": "xdai",
+      "chain_id": "100",
+      "role": "GPv2Settlement",
+      "address": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
+      "publisher_network_and_deployment_records_agree": true,
+      "chain_verified": false
+    },
+    {
+      "chain": "xdai",
+      "chain_id": "100",
+      "role": "GPv2AllowListAuthentication_Implementation",
+      "address": "0x9E7Ae8Bdba9AA346739792d219a808884996Db67",
+      "publisher_network_and_deployment_records_agree": true,
+      "chain_verified": false
+    },
+    {
+      "chain": "xdai",
+      "chain_id": "100",
+      "role": "GPv2AllowListAuthentication_Proxy",
+      "address": "0x2c4c28DDBdAc9C5E7055b4C863b72eA0149D8aFE",
+      "publisher_network_and_deployment_records_agree": true,
+      "chain_verified": false
+    },
+    {
+      "chain": "xdai",
+      "chain_id": "100",
+      "role": "GPv2VaultRelayer",
+      "address": "0xC92E8bdf79f0507f65a392b0ab4667716BFE0110",
+      "evidence": "publisher_network_manifest_only",
+      "chain_verified": false
+    }
+  ],
+  "source_comparisons": [
+    {
+      "name": "advertised-mainnet-GPv2Settlement",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-mainnet-GPv2Settlement.input.json",
+      "input_sha256": "ead318bf0f572c4bfe4c9cddd6f456c5752440b141a5d59a35e509251c0a6d1f",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-mainnet-GPv2Settlement.observation.json",
+      "output_sha256": "525be2a16103dab02f6430e46c3904921021e56f108a2bcc7a8cb33cb53b484f",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "ead318bf0f572c4bfe4c9cddd6f456c5752440b141a5d59a35e509251c0a6d1f",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "advertised.6ebbd810",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.mainnet.GPv2Settlement",
+            "kind": "hardhat_deployment",
+            "document_sha256": "5e023e080087f25e32b28d5a782200edcad65bc20b19ece3860128822f3acdc6",
+            "available_source_paths": [
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2Settlement.sol",
+          "src/contracts/GPv2VaultRelayer.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/interfaces/GPv2EIP1271.sol",
+          "src/contracts/interfaces/IERC20.sol",
+          "src/contracts/interfaces/IVault.sol",
+          "src/contracts/libraries/GPv2Interaction.sol",
+          "src/contracts/libraries/GPv2Order.sol",
+          "src/contracts/libraries/GPv2SafeERC20.sol",
+          "src/contracts/libraries/GPv2Trade.sol",
+          "src/contracts/libraries/GPv2Transfer.sol",
+          "src/contracts/libraries/SafeCast.sol",
+          "src/contracts/libraries/SafeMath.sol",
+          "src/contracts/mixins/GPv2Signing.sol",
+          "src/contracts/mixins/ReentrancyGuard.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 11,
+          "different": 5,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": false,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2Settlement.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 18363,
+              "sha256": "b1d281fc7934ce0baae7169cd6208d646486ed437b5f17d0d8b19fad9496c84c"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            }
+          },
+          {
+            "path": "src/contracts/GPv2VaultRelayer.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 4607,
+              "sha256": "46ea87f97de75f0c10defc36c6f42eb35e9f7aa9013d9870f9084cc31a714290"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2EIP1271.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IVault.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 1799,
+              "sha256": "36a1e773c29d623a9a0a8eb4359f78cd1884a6b3d0c73ec0b67da2bf1b62edd3"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Interaction.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Order.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2SafeERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Trade.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Transfer.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 7899,
+              "sha256": "b7684a5369f99bda309695a783f091f5e79c0a7571a95b5af2a7feec99a75c73"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeCast.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeMath.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 2843,
+              "sha256": "124d9a33d584294a084934d0e75b9b4f281521cb98854ac52ae5be6390885c2f"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/GPv2Signing.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/ReentrancyGuard.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "matched-mainnet-GPv2Settlement",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched-mainnet-GPv2Settlement.input.json",
+      "input_sha256": "010f683097fcd9a03bdf9134b62733d04b2bfb831e4013e95af79499efa6acf6",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched-mainnet-GPv2Settlement.observation.json",
+      "output_sha256": "70d949e5e3d7be8e21dba529b17a0d24358287ea6ebba9da5802cda58c55e391",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "010f683097fcd9a03bdf9134b62733d04b2bfb831e4013e95af79499efa6acf6",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "candidate.dd08e12e",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.mainnet.GPv2Settlement",
+            "kind": "hardhat_deployment",
+            "document_sha256": "5e023e080087f25e32b28d5a782200edcad65bc20b19ece3860128822f3acdc6",
+            "available_source_paths": [
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2Settlement.sol",
+          "src/contracts/GPv2VaultRelayer.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/interfaces/GPv2EIP1271.sol",
+          "src/contracts/interfaces/IERC20.sol",
+          "src/contracts/interfaces/IVault.sol",
+          "src/contracts/libraries/GPv2Interaction.sol",
+          "src/contracts/libraries/GPv2Order.sol",
+          "src/contracts/libraries/GPv2SafeERC20.sol",
+          "src/contracts/libraries/GPv2Trade.sol",
+          "src/contracts/libraries/GPv2Transfer.sol",
+          "src/contracts/libraries/SafeCast.sol",
+          "src/contracts/libraries/SafeMath.sol",
+          "src/contracts/mixins/GPv2Signing.sol",
+          "src/contracts/mixins/ReentrancyGuard.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 16,
+          "different": 0,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": true,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2Settlement.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            }
+          },
+          {
+            "path": "src/contracts/GPv2VaultRelayer.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2EIP1271.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IVault.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Interaction.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Order.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2SafeERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Trade.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Transfer.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeCast.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeMath.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/GPv2Signing.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/ReentrancyGuard.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "full-closure-vs-settlement-subset",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/full-closure-vs-settlement-subset.input.json",
+      "input_sha256": "4e3707dddcfd5b1116b7f58a4844a34fb8fc16ae08f4498e5eb3660847354e81",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/full-closure-vs-settlement-subset.observation.json",
+      "output_sha256": "d011cf9206311ae063c5b044b7f0264a9c5e3b087bb4ba6dd9f521fbeece4773",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "4e3707dddcfd5b1116b7f58a4844a34fb8fc16ae08f4498e5eb3660847354e81",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "candidate.dd08e12e",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.mainnet.GPv2Settlement",
+            "kind": "hardhat_deployment",
+            "document_sha256": "5e023e080087f25e32b28d5a782200edcad65bc20b19ece3860128822f3acdc6",
+            "available_source_paths": [
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2AllowListAuthentication.sol",
+          "src/contracts/GPv2Settlement.sol",
+          "src/contracts/GPv2VaultRelayer.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/interfaces/GPv2EIP1271.sol",
+          "src/contracts/interfaces/IERC20.sol",
+          "src/contracts/interfaces/IVault.sol",
+          "src/contracts/libraries/GPv2EIP1967.sol",
+          "src/contracts/libraries/GPv2Interaction.sol",
+          "src/contracts/libraries/GPv2Order.sol",
+          "src/contracts/libraries/GPv2SafeERC20.sol",
+          "src/contracts/libraries/GPv2Trade.sol",
+          "src/contracts/libraries/GPv2Transfer.sol",
+          "src/contracts/libraries/SafeCast.sol",
+          "src/contracts/libraries/SafeMath.sol",
+          "src/contracts/mixins/GPv2Signing.sol",
+          "src/contracts/mixins/Initializable.sol",
+          "src/contracts/mixins/ReentrancyGuard.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 16,
+          "different": 0,
+          "unknown": 3
+        },
+        "all_requested_sources_equal": false,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2AllowListAuthentication.sol",
+            "state": "unknown",
+            "left": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            },
+            "right": {
+              "state": "absent"
+            }
+          },
+          {
+            "path": "src/contracts/GPv2Settlement.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            }
+          },
+          {
+            "path": "src/contracts/GPv2VaultRelayer.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2EIP1271.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IVault.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2EIP1967.sol",
+            "state": "unknown",
+            "left": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            },
+            "right": {
+              "state": "absent"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Interaction.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Order.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2SafeERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Trade.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Transfer.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeCast.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeMath.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/GPv2Signing.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/Initializable.sol",
+            "state": "unknown",
+            "left": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            },
+            "right": {
+              "state": "absent"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/ReentrancyGuard.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "advertised-mainnet-GPv2AllowListAuthentication_Implementation",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-mainnet-GPv2AllowListAuthentication_Implementation.input.json",
+      "input_sha256": "652f04646d3102a06e19040b7d9ac80231a90de10934ed1119bbd8c299834c44",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-mainnet-GPv2AllowListAuthentication_Implementation.observation.json",
+      "output_sha256": "03b30bc386deea8d505acdd5cc3feea8ba1e6fd5eca262a1ccad7d39462700f8",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "652f04646d3102a06e19040b7d9ac80231a90de10934ed1119bbd8c299834c44",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "advertised.6ebbd810",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.mainnet.GPv2AllowListAuthentication_Implementation",
+            "kind": "hardhat_deployment",
+            "document_sha256": "1ce20084eed8c33b3ae637c74aa9a03adc3528ddcb50c6f060a6e1061f074ea1",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2AllowListAuthentication.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/libraries/GPv2EIP1967.sol",
+          "src/contracts/mixins/Initializable.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 5,
+          "different": 0,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": true,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2AllowListAuthentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2EIP1967.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/Initializable.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "matched-mainnet-GPv2AllowListAuthentication_Implementation",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched-mainnet-GPv2AllowListAuthentication_Implementation.input.json",
+      "input_sha256": "d056ca5f7b4f429020bd2a8f5ea0e56d6016af6c732b2e1434d3417380e370ba",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched-mainnet-GPv2AllowListAuthentication_Implementation.observation.json",
+      "output_sha256": "a89068d2f90e63229fb6bad9074b0c00b2749380cf4c8c4e6c224ba85becaf34",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "d056ca5f7b4f429020bd2a8f5ea0e56d6016af6c732b2e1434d3417380e370ba",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "candidate.dd08e12e",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.mainnet.GPv2AllowListAuthentication_Implementation",
+            "kind": "hardhat_deployment",
+            "document_sha256": "1ce20084eed8c33b3ae637c74aa9a03adc3528ddcb50c6f060a6e1061f074ea1",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2AllowListAuthentication.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/libraries/GPv2EIP1967.sol",
+          "src/contracts/mixins/Initializable.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 5,
+          "different": 0,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": true,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2AllowListAuthentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2EIP1967.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/Initializable.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "advertised-xdai-GPv2Settlement",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-xdai-GPv2Settlement.input.json",
+      "input_sha256": "9c414be9fe26388bf2a80105b89b63bf45828163b3f52a5e498dc49b918696c6",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-xdai-GPv2Settlement.observation.json",
+      "output_sha256": "8e0acd858541d20a07415e856953f3e5ac30476f2d445e23c2022d06854dc5fc",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "9c414be9fe26388bf2a80105b89b63bf45828163b3f52a5e498dc49b918696c6",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "advertised.6ebbd810",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.xdai.GPv2Settlement",
+            "kind": "hardhat_deployment",
+            "document_sha256": "0abd7e07782ff615643dd993406a50d2c548ad28bf911f7ccf70ad70f7731bbf",
+            "available_source_paths": [
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2Settlement.sol",
+          "src/contracts/GPv2VaultRelayer.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/interfaces/GPv2EIP1271.sol",
+          "src/contracts/interfaces/IERC20.sol",
+          "src/contracts/interfaces/IVault.sol",
+          "src/contracts/libraries/GPv2Interaction.sol",
+          "src/contracts/libraries/GPv2Order.sol",
+          "src/contracts/libraries/GPv2SafeERC20.sol",
+          "src/contracts/libraries/GPv2Trade.sol",
+          "src/contracts/libraries/GPv2Transfer.sol",
+          "src/contracts/libraries/SafeCast.sol",
+          "src/contracts/libraries/SafeMath.sol",
+          "src/contracts/mixins/GPv2Signing.sol",
+          "src/contracts/mixins/ReentrancyGuard.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 11,
+          "different": 5,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": false,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2Settlement.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 18363,
+              "sha256": "b1d281fc7934ce0baae7169cd6208d646486ed437b5f17d0d8b19fad9496c84c"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            }
+          },
+          {
+            "path": "src/contracts/GPv2VaultRelayer.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 4607,
+              "sha256": "46ea87f97de75f0c10defc36c6f42eb35e9f7aa9013d9870f9084cc31a714290"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2EIP1271.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IVault.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 1799,
+              "sha256": "36a1e773c29d623a9a0a8eb4359f78cd1884a6b3d0c73ec0b67da2bf1b62edd3"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Interaction.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Order.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2SafeERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Trade.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Transfer.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 7899,
+              "sha256": "b7684a5369f99bda309695a783f091f5e79c0a7571a95b5af2a7feec99a75c73"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeCast.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeMath.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 2843,
+              "sha256": "124d9a33d584294a084934d0e75b9b4f281521cb98854ac52ae5be6390885c2f"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/GPv2Signing.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/ReentrancyGuard.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "matched-xdai-GPv2Settlement",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched-xdai-GPv2Settlement.input.json",
+      "input_sha256": "478864ec333454b4f314881dc07444f3634770c654a1c421319b72ea52670058",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched-xdai-GPv2Settlement.observation.json",
+      "output_sha256": "c702cc1973f096b2193441bf18a2984a47534e7791a6207acb41ad35e0b8e695",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "478864ec333454b4f314881dc07444f3634770c654a1c421319b72ea52670058",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "candidate.dd08e12e",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.xdai.GPv2Settlement",
+            "kind": "hardhat_deployment",
+            "document_sha256": "0abd7e07782ff615643dd993406a50d2c548ad28bf911f7ccf70ad70f7731bbf",
+            "available_source_paths": [
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2Settlement.sol",
+          "src/contracts/GPv2VaultRelayer.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/interfaces/GPv2EIP1271.sol",
+          "src/contracts/interfaces/IERC20.sol",
+          "src/contracts/interfaces/IVault.sol",
+          "src/contracts/libraries/GPv2Interaction.sol",
+          "src/contracts/libraries/GPv2Order.sol",
+          "src/contracts/libraries/GPv2SafeERC20.sol",
+          "src/contracts/libraries/GPv2Trade.sol",
+          "src/contracts/libraries/GPv2Transfer.sol",
+          "src/contracts/libraries/SafeCast.sol",
+          "src/contracts/libraries/SafeMath.sol",
+          "src/contracts/mixins/GPv2Signing.sol",
+          "src/contracts/mixins/ReentrancyGuard.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 16,
+          "different": 0,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": true,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2Settlement.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            }
+          },
+          {
+            "path": "src/contracts/GPv2VaultRelayer.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2EIP1271.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IVault.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Interaction.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Order.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2SafeERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Trade.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Transfer.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeCast.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeMath.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/GPv2Signing.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/ReentrancyGuard.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "advertised-xdai-GPv2AllowListAuthentication_Implementation",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-xdai-GPv2AllowListAuthentication_Implementation.input.json",
+      "input_sha256": "39f828b783df12d06d7e9ab3d5ac4ca7ab3dadf87b598dd12287f5b95fc22fed",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-xdai-GPv2AllowListAuthentication_Implementation.observation.json",
+      "output_sha256": "ed6e4d4f14eaf9d226e4f117217ccb548f4a94802fe5bd56e5810550bcddc71b",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "39f828b783df12d06d7e9ab3d5ac4ca7ab3dadf87b598dd12287f5b95fc22fed",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "advertised.6ebbd810",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.xdai.GPv2AllowListAuthentication_Implementation",
+            "kind": "hardhat_deployment",
+            "document_sha256": "a828b6500d9352c142eb9c694d7876e24afaf3888ae5c4bfcd0968508dea5b17",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2AllowListAuthentication.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/libraries/GPv2EIP1967.sol",
+          "src/contracts/mixins/Initializable.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 5,
+          "different": 0,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": true,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2AllowListAuthentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2EIP1967.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/Initializable.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "matched-xdai-GPv2AllowListAuthentication_Implementation",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched-xdai-GPv2AllowListAuthentication_Implementation.input.json",
+      "input_sha256": "934d634e4d729942179b364f61eaea4cd954eaf95c53238189ccbf280cc5b80f",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/matched-xdai-GPv2AllowListAuthentication_Implementation.observation.json",
+      "output_sha256": "0e15f76f200e1aef38a7a4f23776d172e94a23147a4662917517047f0df0e823",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "934d634e4d729942179b364f61eaea4cd954eaf95c53238189ccbf280cc5b80f",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "candidate.dd08e12e",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "publisher.xdai.GPv2AllowListAuthentication_Implementation",
+            "kind": "hardhat_deployment",
+            "document_sha256": "a828b6500d9352c142eb9c694d7876e24afaf3888ae5c4bfcd0968508dea5b17",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2AllowListAuthentication.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/libraries/GPv2EIP1967.sol",
+          "src/contracts/mixins/Initializable.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 5,
+          "different": 0,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": true,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2AllowListAuthentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2EIP1967.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/Initializable.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "advertised-vs-candidate-source-closure",
+      "input_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-vs-candidate-source-closure.input.json",
+      "input_sha256": "5e2262719636102ef93603f6b553f2e9a327f8201872710a36906129b4e6e2b6",
+      "output_path": "artifacts/checkpoints/2026-10-11-target-provenance/advertised-vs-candidate-source-closure.observation.json",
+      "output_sha256": "d8a9968030f00c8bbe270c222633b33862f74b42be62da0b63052444da112314",
+      "report": {
+        "schema": "etzio.source-provenance-observation.v1",
+        "status": "documentary_observation",
+        "manifest_sha256": "5e2262719636102ef93603f6b553f2e9a327f8201872710a36906129b4e6e2b6",
+        "kernel_authority": false,
+        "bytecode_reproduced": false,
+        "chain_state_verified": false,
+        "audit_coverage_established": false,
+        "metadata_keccak_validated": false,
+        "inputs": {
+          "left": {
+            "label": "advertised.6ebbd810",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          },
+          "right": {
+            "label": "candidate.dd08e12e",
+            "kind": "source_bundle",
+            "available_source_paths": [
+              "src/contracts/GPv2AllowListAuthentication.sol",
+              "src/contracts/GPv2Settlement.sol",
+              "src/contracts/GPv2VaultRelayer.sol",
+              "src/contracts/interfaces/GPv2Authentication.sol",
+              "src/contracts/interfaces/GPv2EIP1271.sol",
+              "src/contracts/interfaces/IERC20.sol",
+              "src/contracts/interfaces/IVault.sol",
+              "src/contracts/libraries/GPv2EIP1967.sol",
+              "src/contracts/libraries/GPv2Interaction.sol",
+              "src/contracts/libraries/GPv2Order.sol",
+              "src/contracts/libraries/GPv2SafeERC20.sol",
+              "src/contracts/libraries/GPv2Trade.sol",
+              "src/contracts/libraries/GPv2Transfer.sol",
+              "src/contracts/libraries/SafeCast.sol",
+              "src/contracts/libraries/SafeMath.sol",
+              "src/contracts/mixins/GPv2Signing.sol",
+              "src/contracts/mixins/Initializable.sol",
+              "src/contracts/mixins/ReentrancyGuard.sol",
+              "src/contracts/mixins/StorageAccessible.sol"
+            ],
+            "unavailable_source_paths": []
+          }
+        },
+        "scope": [
+          "src/contracts/GPv2AllowListAuthentication.sol",
+          "src/contracts/GPv2Settlement.sol",
+          "src/contracts/GPv2VaultRelayer.sol",
+          "src/contracts/interfaces/GPv2Authentication.sol",
+          "src/contracts/interfaces/GPv2EIP1271.sol",
+          "src/contracts/interfaces/IERC20.sol",
+          "src/contracts/interfaces/IVault.sol",
+          "src/contracts/libraries/GPv2EIP1967.sol",
+          "src/contracts/libraries/GPv2Interaction.sol",
+          "src/contracts/libraries/GPv2Order.sol",
+          "src/contracts/libraries/GPv2SafeERC20.sol",
+          "src/contracts/libraries/GPv2Trade.sol",
+          "src/contracts/libraries/GPv2Transfer.sol",
+          "src/contracts/libraries/SafeCast.sol",
+          "src/contracts/libraries/SafeMath.sol",
+          "src/contracts/mixins/GPv2Signing.sol",
+          "src/contracts/mixins/Initializable.sol",
+          "src/contracts/mixins/ReentrancyGuard.sol",
+          "src/contracts/mixins/StorageAccessible.sol"
+        ],
+        "counts": {
+          "equal": 14,
+          "different": 5,
+          "unknown": 0
+        },
+        "all_requested_sources_equal": false,
+        "sources": [
+          {
+            "path": "src/contracts/GPv2AllowListAuthentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3683,
+              "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013"
+            }
+          },
+          {
+            "path": "src/contracts/GPv2Settlement.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 18363,
+              "sha256": "b1d281fc7934ce0baae7169cd6208d646486ed437b5f17d0d8b19fad9496c84c"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 19271,
+              "sha256": "2878f0c7cf57b91a5ee6170eac15045c8c415993e676e2a23ac792a07607da63"
+            }
+          },
+          {
+            "path": "src/contracts/GPv2VaultRelayer.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 4607,
+              "sha256": "46ea87f97de75f0c10defc36c6f42eb35e9f7aa9013d9870f9084cc31a714290"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2939,
+              "sha256": "18904a8807db246f2dbbb94d1d376c73aed3150ab53a9c07a3e378095be598cc"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2Authentication.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 506,
+              "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/GPv2EIP1271.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1285,
+              "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3457,
+              "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875"
+            }
+          },
+          {
+            "path": "src/contracts/interfaces/IVault.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 1799,
+              "sha256": "36a1e773c29d623a9a0a8eb4359f78cd1884a6b3d0c73ec0b67da2bf1b62edd3"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 13494,
+              "sha256": "c744eef52eb3e530be251525275ba414b4796f473e98addc857882c91f1ca469"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2EIP1967.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1243,
+              "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Interaction.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2941,
+              "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Order.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 10152,
+              "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2SafeERC20.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5616,
+              "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Trade.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 5406,
+              "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/GPv2Transfer.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 7899,
+              "sha256": "b7684a5369f99bda309695a783f091f5e79c0a7571a95b5af2a7feec99a75c73"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 7967,
+              "sha256": "1966e9687ba560f590bfbe2b10812f8ba874058ac446cfaf2065d85e61a9fac6"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeCast.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 1825,
+              "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71"
+            }
+          },
+          {
+            "path": "src/contracts/libraries/SafeMath.sol",
+            "state": "different",
+            "left": {
+              "state": "available",
+              "size_bytes": 2843,
+              "sha256": "124d9a33d584294a084934d0e75b9b4f281521cb98854ac52ae5be6390885c2f"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 3405,
+              "sha256": "8d285c35596387260983618bb1d85d6c4421cca3a5bcf14fd5d70ec5e6b2a0b9"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/GPv2Signing.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 12253,
+              "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/Initializable.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2410,
+              "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/ReentrancyGuard.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 2820,
+              "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409"
+            }
+          },
+          {
+            "path": "src/contracts/mixins/StorageAccessible.sol",
+            "state": "equal",
+            "left": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            },
+            "right": {
+              "state": "available",
+              "size_bytes": 4560,
+              "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "matched_settlement_files": 16,
+    "matched_authentication_files": 5,
+    "overlap_files": 2,
+    "unique_matched_files": 19,
+    "advertised_vs_publisher_settlement_equal": 11,
+    "advertised_vs_publisher_settlement_different": 5,
+    "advertised_vs_candidate_closure_equal": 14,
+    "advertised_vs_candidate_closure_different": 5,
+    "full_closure_vs_settlement_alone_unknown": 3,
+    "chains_compared": [
+      "mainnet",
+      "xdai"
+    ],
+    "program_addresses_in_publisher_network_manifest": 4,
+    "changed_paths": [
+      "src/contracts/GPv2Settlement.sol",
+      "src/contracts/GPv2VaultRelayer.sol",
+      "src/contracts/interfaces/IVault.sol",
+      "src/contracts/libraries/GPv2Transfer.sol",
+      "src/contracts/libraries/SafeMath.sol"
+    ]
+  },
+  "tool": {
+    "path": "scripts/inspect_source_provenance.py",
+    "sha256": "8db74ad80f96970732d19d52505417f38e85c7ffd7f12124048df62e967ff0fd",
+    "contract": "docs/SOURCE_PROVENANCE_INSPECTION.md",
+    "test_path": "tests/test_source_provenance_inspection.py",
+    "focused_control_count": 52,
+    "replay": "Each private input manifest is self-contained; run the inspector and compare its complete JSON output to the retained observation."
+  },
+  "limits": [
+    "Publisher-controlled sources are not independent witnesses.",
+    "No compiler, package installer, contract, benchmark or exploit ran.",
+    "No runtime bytecode, proxy state, chain height or live state independently verified.",
+    "Proxy/vendor build closure and binary/compiler identities remain open.",
+    "No complete audit-equivalence proof, complete duplicate clearance, exact TargetContract, accepted finding or payment.",
+    "Raw captures and self-contained inputs are private ignored evidence, absent from a fresh clone. Host retrieval time is not qualified UTC."
+  ],
+  "campaign_ready": false,
+  "target_executions": 0,
+  "new_provider_protocol_requests": 0,
+  "new_cloud_resources": 0,
+  "pending_freetsa_plan_accepted": false,
+  "followup_journal_created": false,
+  "followup_dispatches": 0
+}

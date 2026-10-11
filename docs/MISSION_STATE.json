@@ -35,7 +35,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Verify current Git and exact-head release dossier, then read docs/PAID_FINDINGS_DECISION_2026-10-11.md and docs/COW_SOURCE_DOSSIER.md. Research comparison and documentary continuation are complete; do not repeat the broad survey. Continue bounded public audit/source/deployment reconciliation and the existing native-provider foundation path. CoW source closure is retained but historical deployment addresses differ from the public brief, so campaign readiness is refused. Original FreeTSA journal remains spent; follow-up remains unaccepted with no journal or dispatch. No roadmap exception, engagement or target has been accepted.",
+    "next_session_pickup": "Verify current Git and exact-head release evidence, then read docs/PAID_FINDINGS_DECISION_2026-10-11.md and the completed reconciliation in docs/COW_SOURCE_DOSSIER.md. The bounded dossier is complete: 19 source files match publisher deployment metadata at dd08e12e, five differ from the advertised revision, and both audit reports were reviewed. Offline source inspection is implemented outside kernel admission. Do not repeat the dossier or infer live deployed-state identity. Continue the native-provider foundation critical path. Original FreeTSA journal remains spent; exact follow-up remains unaccepted with no journal or dispatch. No roadmap exception, engagement, provider or target was accepted.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority",
     "next_session_brief": "docs/NEXT_SESSION_MISSION.md"
   },
@@ -168,7 +168,8 @@
     "bounded offline RFC 3161/5816 observation validation through pinned pyHanko CMS/PKIX with full request/profile binding conservative microsecond uncertainty full-hull certificate and CRL checks exact retained dossier and independent OpenSSL comparison; no lifecycle consumption",
     "separate finite offline RSA-4096/SHA-384 timestamp-chain observations with exact three-certificate pins two positional complete CRLs full-hull validation and closed issuer qualified-statement parsing; no legal qualification or kernel authority",
     "source-identified provider documentary comparison and retained 19-case native/OpenSSL whole-chain revocation experiment; no actual timestamp acquisition",
-    "offline single-request fixture acquisition custody with exact retained request bytes, one committed non-resetting debit, immutable opaque or indeterminate capture, fresh cold reconstruction and process-death/concurrency controls"
+    "offline single-request fixture acquisition custody with exact retained request bytes, one committed non-resetting debit, immutable opaque or indeterminate capture, fresh cold reconstruction and process-death/concurrency controls",
+    "bounded offline exact-byte source provenance inspector with missing/literal-unavailable states; documentary only, outside kernel admission"
   ],
   "modeled_only": [
     "original in-memory ten-unit behavior loop",
@@ -202,9 +203,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and one indeterminate finite discovery observation",
-    "validation_status": "released_implementation_validated_at_exact_commit",
-    "test_count": 2246,
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and one indeterminate finite discovery observation; offline source provenance inspection and publisher-source reconciliation",
+    "validation_status": "resolve_exact_candidate_release_record",
+    "test_count": 2298,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -219,7 +220,8 @@
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
     "validated_implementation_commit": "c8c8627f01c78807f41361b4e101c8c173e8ff9e",
-    "release_evidence_pointer": "/https_capture_diagnostics/release_validation"
+    "release_evidence_pointer": "/source_provenance_inspection/release_validation_record",
+    "focused_source_provenance_tests": 52
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -1249,7 +1251,7 @@
     "validation_boundary": "Resolve final results from the exact candidate PR and local dossier; no new-candidate pass is inferred from baseline or previous release.",
     "architectural_decision": "Preserve native lifecycle, external latest-head, storage, isolated independent execution, measured domain and exact target gates.",
     "conditional_cash_route": "Customer-paid reproduction/remediation if a real buyer, expert reviewer, exact engagement and any required scoped roadmap exception are established. None is currently established.",
-    "authorized_continuation": "Public CoW source/import/deployment/build/audit-index dossier retained; next bounded public audit/source/deployment reconciliation.",
+    "authorized_continuation": "Completed bounded audit/source/publisher-deployment reconciliation using the offline inspector; next native-provider foundation dependency. No independent chain/build/target equivalence.",
     "documentary_result": {
       "listed_sources": 12,
       "source_closure_files": 19,
@@ -1272,5 +1274,43 @@
     "followup_journal_created": false,
     "followup_dispatches": 0,
     "immediate_public_document_work_requires_new_user_input": false
+  },
+  "source_provenance_inspection": {
+    "status": "implemented_documentary_tool",
+    "date": "2026-10-11",
+    "contract": "docs/SOURCE_PROVENANCE_INSPECTION.md",
+    "implementation": "scripts/inspect_source_provenance.py",
+    "tests": "tests/test_source_provenance_inspection.py",
+    "focused_tests": 52,
+    "full_suite_collection_target": 2298,
+    "evidence": "docs/evidence/cow-source-reconciliation-2026-10-11.json",
+    "baseline_commit": "52e25cf0dd98ef0fe918f4bf7c489cb9eab4aa74",
+    "baseline_validation": "artifacts/checkpoints/2026-10-11-decision-packet/release-validation.json",
+    "baseline_boundary": "The unchanged published base was fully verified on both local runtimes and exact-head CI earlier in this same session. This does not validate the new candidate.",
+    "release_validation_record": "artifacts/checkpoints/2026-10-11-target-provenance/release-validation.json",
+    "validation_boundary": "Resolve completed local, both-runtime CI, policy, package/wheel and GitGuardian results from the exact candidate PR and retained release record; absent evidence is not a pass.",
+    "reconciliation": {
+      "public_captures": 50,
+      "audit_reports_reviewed": 2,
+      "replayable_comparisons": 10,
+      "matched_revision": "dd08e12e765088470268eb0bbba13e86b14b9cb6",
+      "unique_literal_source_matches": 19,
+      "files_different_from_advertised_revision": 5,
+      "program_addresses_in_publisher_manifest": 4,
+      "chain_state_verified": false,
+      "build_reproduced": false,
+      "campaign_ready": false
+    },
+    "development_observations": "First focused run: 47 passed with a Python invalid-escape deprecation warning in an owned malformed-JSON fixture. Literal spelling corrected; five additional bounded-input/CLI controls bring the focused suite to 52. No failing target or new vulnerability is claimed.",
+    "kernel_authority": false,
+    "target_executions": 0,
+    "accepted_findings": 0,
+    "settled_bounty_payments": 0,
+    "new_provider_protocol_requests": 0,
+    "new_cloud_resources": 0,
+    "pending_freetsa_plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
+    "pending_freetsa_accepted": false,
+    "followup_journal_created": false,
+    "followup_dispatches": 0
   }
 }

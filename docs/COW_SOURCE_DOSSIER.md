@@ -5,11 +5,74 @@ executed or queried on a chain. No vulnerability, accepted finding or payment is
 This continues the [paid-findings decision](PAID_FINDINGS_DECISION_2026-10-11.md) within
 public-source inspection authority.
 
-The advertised source boundary is recoverable, but its historical deployment records do
-not match the current brief's addresses. Resolve that discrepancy before investing in a
-campaign. It does not prove that the deployed source is different or that the program is
-invalid. It disproves the assumption that this commit's deployment records alone establish
-the current target identity.
+The advertised source boundary is recoverable. Its historical deployment records differ
+from the brief's addresses. The completed follow-up below maps those addresses to later
+publisher records and their literal source to a specific revision. Independent deployed
+bytecode/state identity and program-scope reconciliation remain open.
+
+## Completed audit and source reconciliation, 2026-10-11
+
+The [reconciliation record](evidence/cow-source-reconciliation-2026-10-11.json) retains
+50 new public captures, two audit reviews and ten replayable byte comparisons. The
+[offline inspector](SOURCE_PROVENANCE_INSPECTION.md) compares exact source bytes without
+normalizing Unicode or line endings, executing code, fetching metadata URLs or admitting
+a target. Self-contained input manifests and raw captures remain private under
+`artifacts/checkpoints/2026-10-11-target-provenance/`.
+
+All four advertised addresses occur in the publisher's pinned current `networks.json`.
+Settlement, authentication implementation and proxy addresses also agree with its mainnet
+and xDai deployment records. The vault-relayer address is supported here by the network
+manifest only. These are mutually consistent publisher records, not chain observations.
+
+The deployment metadata embeds literal source. A bounded settlement-path history review
+identified [revision dd08e12e](https://github.com/cowprotocol/contracts/tree/dd08e12e765088470268eb0bbba13e86b14b9cb6),
+dated 2021-06-04. Retained source at that revision exactly matches all 16 settlement metadata
+files and all five authentication implementation metadata files on both chains: 19 unique
+files with two shared files. This establishes a publisher-source mapping, not reproduced
+bytecode, complete proxy/build closure or a replacement for the advertised scope revision.
+
+| Exact-byte comparison | Result |
+| --- | --- |
+| Advertised revision versus publisher settlement metadata | 11 equal, five different |
+| June 4 revision versus publisher settlement metadata | All 16 equal |
+| Either revision versus publisher authentication implementation metadata | All five equal |
+| All 19 requested paths versus settlement metadata alone | 16 equal, three unknown; complete-agreement claim refused |
+| Advertised versus June 4 source bundles | 14 equal, five different |
+
+The changed files are settlement, vault relayer, vault interface, transfer library and
+SafeMath. Differences remain differences even where formatting appears responsible.
+The inspector reports literal equality, not semantic equivalence or safety.
+
+Both audit PDFs were read in full as extracted text, with revision/finding pages visually
+checked. The [May G0 report](https://github.com/cowprotocol/contracts/blob/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/audits/GnosisProtocolV2May2021.pdf)
+names reviewed revision `7184fc98c05d2d336d90ee4e6b36429457a56d43` and a minor rounding
+issue fixed in `5d90c5842b30b8c8945512e613971675897570a9`. The advertised source predates
+that fix; the publisher-embedded settlement contains the ceiling-division change. This is
+a known reported issue, not an Etzio finding or independently reproduced exploit.
+
+The [Hacken report](https://github.com/cowprotocol/contracts/blob/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/audits/%5BCowswap_10122021%5DSCAudit_Report_2.pdf)
+is dated **December 10, 2021**, and names revision
+`40c349d52d14f8f3c9f787fe2fca5a496bb10ea9`. Its summary mentions an initial medium and low
+issue; the detailed final overview supplies no medium issue and describes fixed test
+coverage gaps in `StorageAccessible`. Missing initial-medium detail remains unresolved.
+Its second-review assurance is the auditor's report, not our safety conclusion. The
+settlement bytes at this later audited revision differ from the embedded source; audit
+coverage cannot be transferred solely from the report title or version name.
+
+**Decision:** retain CoW as the first prepared dossier and stop this bounded reconciliation
+here. It removed a concrete source-identity uncertainty and identifies a known-fix trap;
+it did not establish discovery performance. Further broad scanning or paper collection
+would not close the remaining dependency. Preserve the foundation order in the decision
+packet. Later admission needs independently retained runtime/state evidence, compiler and
+proxy build closure, scope resolution, duplicate review and qualified independent execution.
+No build or chain query is authorized by this document. The duplicate-order hypothesis
+below remains proposed and must be restated against any eventually admitted revision.
+
+For offline replay, run the inspector on a retained `.input.json` manifest and compare
+the complete output with its `.observation.json`. The tracked record contains both hashes
+and the hash-only reports. Missing private inputs cannot be reconstructed from hashes;
+reacquisition is a new observation. The sections below retain the first-pass evidence and
+its historical limits; this dated section supersedes their unfinished-audit next step.
 
 ## Retained result
 
