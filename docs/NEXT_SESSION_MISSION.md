@@ -21,6 +21,15 @@ independent reproduction or actual buyer demand.
 The FreeTSA diagnostic follow-up remains unaccepted with no journal or dispatch. Resolve
 current exact-head release evidence from the latest handoff before changing bytes.
 
+The next completed foundation tranche is the
+[offline trusted-list signature inspection](TRUSTED_LIST_BOOTSTRAP.md): exact Commission
+notice pins → signed EU LOTL → signed Spain XML → the previously retained Sectigo R35
+intermediate. The narrow checker and 55 controls establish document mathematics and pin
+relationships, with official HTTPS publication as an explicit bootstrap assumption.
+This does not establish currentness, legal qualification, the current TSA leaf or provider
+admission. Continue toward complete native material and retained lifecycle recovery;
+do not repeat the signed-document investigation as unfinished or promote it to kernel trust.
+
 ## Founder objective and engineering verdict
 
 Build an enterprise-grade, target-neutral engine for authorized vulnerability discovery,

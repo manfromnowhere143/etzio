@@ -1,6 +1,6 @@
 # Provider and host qualification next steps
 
-Status: research and preparation, 2026-10-10. No native provider, storage profile,
+Status: research and preparation, 2026-10-11. No native provider, storage profile,
 execution profile or bounty target is admitted by this record.
 
 The next useful result is one reproducible native-provider observation carried through
@@ -9,6 +9,17 @@ More fixture gates alone cannot establish independent administration. Cloud acce
 available for qualification work; hardware procurement is not the immediate dependency.
 
 ## Provider evidence and a corrected assumption
+
+Follow-up, 2026-10-11: the [bounded trusted-list inspection](TRUSTED_LIST_BOOTSTRAP.md)
+now verifies the retained EU LOTL under an exact certificate published in notice
+C/2026/1944, then verifies Spain's retained XML under a certificate from the authenticated
+LOTL's exact Spain XML pointer. Its Sectigo timestamp-service entry contains the previously
+retained R35 intermediate. The two reference digests and RSA signature reproduce for each
+document; 55 owned controls exercise tampering and XML ambiguity. This supersedes the
+unvalidated-signature observation below for these exact snapshots only. Official HTTPS
+publication remains the bootstrap assumption; OJ seal verification, independent XMLDSig
+agreement, currentness, complete current TSA identity and native admission remain open.
+The FreeTSA follow-up is still unaccepted; no new custody journal or protocol dispatch exists.
 
 Follow-up, 2026-10-10: the operator accepted the exact FreeTSA discovery plan and its
 finite assumptions. One acquisition ended `capture_indeterminate` / `transport_error`,

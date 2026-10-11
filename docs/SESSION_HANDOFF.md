@@ -2,6 +2,48 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-11, Asia/Jerusalem.
 
+## Native-provider documentary bootstrap, 2026-10-11
+
+This is the latest recovery summary. The architectural and revenue decision remains
+[PAID_FINDINGS_DECISION_2026-10-11](PAID_FINDINGS_DECISION_2026-10-11.md); the CoW dossier
+is complete. This continuation advances a specific native-provider provenance gap.
+
+The [bounded offline XML signature inspector](TRUSTED_LIST_BOOTSTRAP.md) verifies the
+two exact signed references and RSA/SHA-512 signature of each retained EU/Spain list.
+The EU signer exactly matches a certificate in Commission notice C/2026/1944; its checked
+Spain XML pointer contains the retained Spanish signer. The checked Spanish document
+contains the same Sectigo R35 intermediate as the previous publisher capture. The
+[evidence record](evidence/trusted-list-bootstrap-2026-10-11.json) records complete input
+identities, source review depth, failures and conditional bootstrap assumptions.
+Fifty-five owned controls cover tampering, signer substitution, wrapping, ID ambiguity,
+external processing and resource bounds. No native codec or kernel policy changed.
+
+This is signed-document provenance under the retained official HTTPS publication and
+manually checked notice pins. No independent OJ seal verification, general XMLDSig/XAdES
+validation, currentness/rollback assurance, current TSA leaf, revocation-at-use, qualified
+clock or native provider admission follows. Published service status remains a declaration.
+The next dependency is complete observed native material under exact authority, then a
+compatible versioned profile and retained lifecycle replay. External latest-head recovery,
+storage and isolated independent execution remain after native qualification.
+
+Entry was clean published `main` at `092f4e54d5de73b57a697a97aa20d4fc3a0bfc67`
+([PR #41](https://github.com/manfromnowhere143/etzio/pull/41)). Its unchanged bytes had just
+passed full local verification on both runtimes and exact-head CI in this same session;
+the retained baseline in `artifacts/checkpoints/2026-10-11-target-provenance/` was reused.
+New-candidate results belong to its exact-head PR and
+`artifacts/checkpoints/2026-10-11-native-provider-continuation/release-validation.json`.
+The full collection target is `2353`; absence of release evidence is not a pass. Raw
+document captures, preparation preflight, exploratory results and release logs are private
+in that ignored directory. A fresh clone lacks these raw bytes.
+
+**Pending decision unchanged:** all seven prepared diagnostic inputs and runtime still
+match plan `sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713`.
+The original FreeTSA journal is unchanged and spent. The exact diagnostic was presented
+for a scoped decision; no acceptance has arrived, and no new journal or dispatch exists.
+Do not infer acceptance from broad mission continuation or this documentary success.
+No provider-protocol request, target execution, new cloud resource, submission or income
+occurred. Exact-head publication with Daniel's sole authorship remains authorized.
+
 ## Offline source identity and completed reconciliation, 2026-10-11
 
 This is the latest recovery summary. The [decision packet](PAID_FINDINGS_DECISION_2026-10-11.md)
@@ -634,7 +676,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2298 tests expected;
+- 2353 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
