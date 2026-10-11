@@ -8,8 +8,9 @@ This is the latest recovery summary. The [execution decision](FRONTIER_EXECUTION
 connects selected fresh primary/arXiv research to a concrete evaluation requirement. The
 [owned experiment](EFFECT_EVIDENCE_EXPERIMENT.md) enumerates all `16` permission policies
 and `256` transitions of a benign bit store. A single disappearing-effect differential
-accepts `8` policies, but `7` violate the complete authored specification. Three break
-legitimate use and four leave a second unauthorized route. Only one is a complete repair.
+accepts `8` policies, but `7` violate the complete authored specification. Three preserve
+security but break legitimate use; four leave a second unauthorized route, and three of
+those also break legitimate use. Only one is a complete repair.
 Both supported runtimes produce identical reports and pass `13` focused controls.
 
 This result separates effect, causal attribution, repair and preserved legitimate behavior.

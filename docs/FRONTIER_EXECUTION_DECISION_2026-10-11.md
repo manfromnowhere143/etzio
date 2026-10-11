@@ -40,8 +40,9 @@ primary-source reviews, not a complete frontier survey or an independently run b
 The [experiment contract](EFFECT_EVIDENCE_EXPERIMENT.md) precedes its implementation.
 All `16` permission policies and `256` transitions of an owned bit store were enumerated.
 The rule “the effect disappeared after the patch” accepted `8/16` policies; `7/8` of
-those fail the complete authored specification. Three break legitimate use, and four
-leave a second unauthorized route. Only one policy satisfies both requirements.
+those fail the complete authored specification. Three preserve security but break
+legitimate use; four leave a second unauthorized route, and three of those also break
+legitimate use. Only one policy satisfies both requirements.
 
 Both supported Python runtimes produce identical reports. A separate permission-table
 characterization agrees with every transition-based verdict. The controls also preserve
