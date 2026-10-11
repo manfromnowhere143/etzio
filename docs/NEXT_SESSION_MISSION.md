@@ -7,6 +7,14 @@ The latest dated recovery section governs current status; older sections retain 
 
 ## Completed research tranche and current pickup
 
+The latest continuation corrected an existing lifecycle defect: a caught pre-commit
+interruption could expose uncommitted finality through the same connection. Runtime write
+cleanup now rolls back, invalidates speculative validation and closes the handle if rollback
+is refused. Eighteen controls cover both fixture modes and distinguish pre-commit failure
+from a lost post-commit response. See the [retained correction evidence](evidence/interruption-cleanup-2026-10-11.json)
+and latest handoff. This is exception-recovery progress, not native-provider or physical
+storage qualification. The exact acquisition decision remains pending.
+
 The [2026-10-11 decision packet](PAID_FINDINGS_DECISION_2026-10-11.md) fulfills the initial
 research/decision assignment below and records its source and review coverage. Its
 [CoW continuation](COW_SOURCE_DOSSIER.md) now includes completed audit/source reconciliation:

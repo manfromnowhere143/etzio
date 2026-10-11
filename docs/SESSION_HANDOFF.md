@@ -2,6 +2,46 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-11, Asia/Jerusalem.
 
+## Interrupted transaction correction, 2026-10-11
+
+This is the latest recovery summary. A focused review of the existing lifecycle found a
+concrete exception-cleanup gap. In the owned reproduction, interruption immediately before
+finalization's commit left an open transaction. The same connection reported finalization,
+released its pending barrier and allowed raw replay; a fresh opening correctly found the
+transition still pending. This was a defect in Etzio, not an external finding.
+
+The [ADR-0011 clarification](decisions/0011-crash-safe-modeled-integrity-finality.md#escaping-exceptions-and-transaction-cleanup)
+requires cleanup before an exception escapes a runtime write. Five missing catch-all paths
+now roll back, and all runtime write cleanup discards speculative validation. If SQLite
+refuses rollback, the connection closes. Committed finality survives a lost caller response;
+exact retry reconciles its retained bytes. Schema, provider acceptance and governed recovery
+dispositions are unchanged. The [evidence record](evidence/interruption-cleanup-2026-10-11.json)
+retains the failure, review scope, primary documentation and limits.
+
+Eighteen focused controls pass on both declared runtimes. They cover enrollment, legacy
+checkpoints, all four modeled/signed-fixture phases, interruption before and after commit,
+exact state restoration, cold reopening, retry and rollback refusal. Before the correction,
+the same controls produced 16 failures and two passes: two failures concerned retained cache
+state on already-rolling-back pending appends, rather than an uncommitted phase being exposed.
+This is application exception recovery, not process-kill, power-fault or storage qualification.
+
+Entry was clean published `main` at `e8918d13ea364e1604b7c3187120a68a5c188d56`
+([PR #45](https://github.com/manfromnowhere143/etzio/pull/45)). Its unchanged full local and
+exact-head CI validation from this same session is retained and reused as the baseline.
+The new full collection target is `2504`. Resolve completed release checks from the exact
+candidate PR and `artifacts/checkpoints/2026-10-11-interruption-cleanup/release-validation.json`.
+Focused passes do not establish a full-release pass. Raw documentation, negative and positive
+logs, and release evidence remain in that ignored local directory; preserve it across sessions.
+
+**Next dependency:** complete native material and independently evidenced administration for
+an explicitly admitted lifecycle, then external latest-head recovery and qualified storage.
+This repair makes existing recovery more reliable; it does not close native admission or
+demonstrate competitive discovery. The commercial decision packet remains current. The
+exact FreeTSA diagnostic remains unaccepted, with no new journal or dispatch; the original
+spent journal is unchanged. No target execution, new cloud resource, submission or income
+occurred. Broad mission continuation did not change that pending decision. Publication after
+the required exact-head checks remains authorized under Daniel's sole identity.
+
 ## Effect-evidence falsification and execution decision, 2026-10-11
 
 This is the latest recovery summary. The [execution decision](FRONTIER_EXECUTION_DECISION_2026-10-11.md)
@@ -785,7 +825,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2486 tests expected;
+- 2504 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

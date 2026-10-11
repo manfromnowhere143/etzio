@@ -3132,22 +3132,22 @@ class SQLiteEventStore:
             self._require_writer_transaction()
             self._connection.execute("COMMIT")
         except EventStoreError:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
         except sqlite3.IntegrityError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise EventStoreError(
                 f"SQLite rejected modeled integrity enrollment: {exc}"
             ) from exc
         except sqlite3.DatabaseError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise _sqlite_store_failure(
                 "modeled integrity enrollment failed",
                 exc,
             ) from exc
+        except BaseException:
+            self._rollback_quietly()
+            raise
 
     def diagnostics(self) -> StoreDiagnostics:
         """Return fixed diagnostics without exposing a writable SQL connection."""
@@ -5080,23 +5080,19 @@ class SQLiteEventStore:
             self._connection.execute("COMMIT")
             return event
         except (StaleHeadError, ClosedStreamError, EventStoreError):
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
         except sqlite3.IntegrityError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             message = str(exc)
             if "terminal" in message:
                 raise ClosedStreamError(message) from exc
             raise EventStoreError(f"SQLite rejected event append: {message}") from exc
         except sqlite3.DatabaseError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise _sqlite_store_failure("event append failed", exc) from exc
         except BaseException:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
 
     def append(self, event: EventV1, *, expected_head: str) -> EventV1:
@@ -6184,11 +6180,17 @@ class SQLiteEventStore:
         return profile
 
     def _rollback_quietly(self) -> None:
-        if self._connection.in_transaction:
-            try:
+        """Discard speculative validation and leave no usable uncommitted handle.
+
+        Preserve the caller's original failure. If SQL rollback itself is refused,
+        closing the connection rolls back and forces subsequent access to reopen.
+        """
+        self._integrity_validation_cache = None
+        try:
+            if self._connection.in_transaction:
                 self._connection.execute("ROLLBACK")
-            except sqlite3.DatabaseError:
-                pass
+        except sqlite3.DatabaseError:
+            self._connection.close()
 
     def retain_integrity_anchor_statement(
         self,
@@ -6294,22 +6296,22 @@ class SQLiteEventStore:
             PendingIntegrityTransitionError,
             IntegrityTransitionConflictError,
         ):
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
         except sqlite3.IntegrityError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise IntegrityTransitionConflictError(
                 f"SQLite rejected anchor statement retention: {exc}"
             ) from exc
         except sqlite3.DatabaseError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise _sqlite_store_failure(
                 "anchor statement retention failed",
                 exc,
             ) from exc
+        except BaseException:
+            self._rollback_quietly()
+            raise
 
     def retain_integrity_checkpoint_candidate(
         self,
@@ -6447,22 +6449,22 @@ class SQLiteEventStore:
             PendingIntegrityTransitionError,
             IntegrityTransitionConflictError,
         ):
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
         except sqlite3.IntegrityError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise IntegrityTransitionConflictError(
                 f"SQLite rejected checkpoint candidate retention: {exc}"
             ) from exc
         except sqlite3.DatabaseError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise _sqlite_store_failure(
                 "checkpoint candidate retention failed",
                 exc,
             ) from exc
+        except BaseException:
+            self._rollback_quietly()
+            raise
 
     def finalize_integrity_transition(
         self,
@@ -6599,22 +6601,22 @@ class SQLiteEventStore:
             PendingIntegrityTransitionError,
             IntegrityTransitionConflictError,
         ):
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
         except sqlite3.IntegrityError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise IntegrityTransitionConflictError(
                 f"SQLite rejected integrity finalization: {exc}"
             ) from exc
         except sqlite3.DatabaseError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise _sqlite_store_failure(
                 "integrity finalization failed",
                 exc,
             ) from exc
+        except BaseException:
+            self._rollback_quietly()
+            raise
 
     def store_checkpoint(self, checkpoint: SignedCheckpoint) -> SignedCheckpoint:
         """Retain opaque signed-head data without claiming that it has been verified."""
@@ -6694,17 +6696,17 @@ class SQLiteEventStore:
             self._connection.execute("COMMIT")
             return checkpoint
         except EventStoreError:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
         except sqlite3.IntegrityError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise EventStoreError(f"SQLite rejected checkpoint: {exc}") from exc
         except sqlite3.DatabaseError as exc:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise _sqlite_store_failure("checkpoint storage failed", exc) from exc
+        except BaseException:
+            self._rollback_quietly()
+            raise
 
     def load_checkpoints(self, mission_id: str) -> tuple[SignedCheckpoint, ...]:
         """Load retained signature data in deterministic order."""

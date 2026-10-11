@@ -112,6 +112,30 @@ While a pending transition exists, every later append path is refused before lif
 progression, including ordinary append, evidence-retaining append, and receipt-admission
 append. This barrier is a store invariant even if a caller bypasses the facade.
 
+### Escaping exceptions and transaction cleanup
+
+Clarification, 2026-10-11: runtime write methods must end their transaction before an
+exception escapes, including `KeyboardInterrupt` and other `BaseException` subclasses.
+An interrupted, uncommitted phase must not remain visible as retained progress through
+the same store connection. In particular, uncommitted finalization cannot release the
+instance-global barrier or permit ordinary event replay after the caller catches an
+interruption.
+
+Cleanup invalidates the integrity validation cache and rolls back an active transaction.
+If SQLite refuses rollback, close the connection so further access requires a fresh
+opening and full reconstruction. Preserve the original failure classification when this
+cleanup succeeds. An exception after a completed commit does not undo that commit:
+recovery inspects retained bytes and reconciles the exact phase. These requirements also
+cover profile enrollment and legacy checkpoint retention; signed-fixture acceptance uses
+the same transaction boundary. They change no schema, authority or recovery disposition.
+
+This is an application exception guarantee under a functioning Python/SQLite cleanup
+path. It is not a proof against repeated interruption during cleanup, process termination,
+power loss or device failure. Those remain separate qualification experiments. SQLite's
+[transaction contract](https://www.sqlite.org/lang_transaction.html) allows explicitly
+opened transactions to remain active after some errors; Python exception propagation
+alone is not rollback.
+
 ### Four immutable local phases
 
 Progress is represented by four immutable, append-only local records. A mutable status row

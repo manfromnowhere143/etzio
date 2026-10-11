@@ -1,0 +1,153 @@
+{
+  "schema": "etzio.interruption-cleanup-correction.v1",
+  "date": "2026-10-11",
+  "status": "implemented_correction_full_release_results_separate",
+  "baseline_commit": "e8918d13ea364e1604b7c3187120a68a5c188d56",
+  "baseline_release": {
+    "path": "artifacts/checkpoints/2026-10-11-effect-evidence/release-validation.json",
+    "size_bytes": 5604,
+    "sha256": "17ec719864020f878a9286f73e85fba58b23788e64dc77959119e327e44f5c09"
+  },
+  "baseline_reused": "Unchanged fully validated release earlier in this same session; not a new-candidate pass.",
+  "contract": "docs/decisions/0011-crash-safe-modeled-integrity-finality.md",
+  "implementation": {
+    "path": "etzio/kernel/store.py",
+    "size_bytes": 281223,
+    "sha256": "985e4c26fbb88c9b5a7f73335e14d4a1ae96b52ae2deadc6c0d37edba85ef7b3"
+  },
+  "tests": {
+    "path": "tests/test_store_interruption_cleanup.py",
+    "size_bytes": 8263,
+    "sha256": "3858685d7adb7127e683ebd12ee98e8d186dcece379c765c0295b02d8d6120ea"
+  },
+  "owned_precommit_reproduction": {
+    "runtime": "CPython 3.11.15",
+    "transaction_left_open": true,
+    "same_connection_reports_finalized": true,
+    "same_connection_barrier_released": true,
+    "same_connection_raw_load_succeeds": true,
+    "cold_reports_finalized": false,
+    "cold_barrier_released": false
+  },
+  "before_correction": {
+    "failed": 16,
+    "passed": 2,
+    "seconds": 25.94,
+    "log": {
+      "path": "artifacts/checkpoints/2026-10-11-interruption-cleanup/before-fix-3.11.log",
+      "size_bytes": 26647,
+      "sha256": "29a2403aa31010d8afc9b258030f3a577b3ffd35b905db92409177f0b91084fb"
+    },
+    "interpretation": "Eight case-matrix failures left transactions open, two pending-append cases already rolled back but retained speculative caches; three unexpected finalization failures and three rollback-refusal failures. Two post-commit controls already passed."
+  },
+  "focused_results": [
+    {
+      "runtime": "CPython 3.11.15",
+      "passed": 18,
+      "seconds": 35.03,
+      "log": {
+        "path": "artifacts/checkpoints/2026-10-11-interruption-cleanup/focused-3.11.log",
+        "size_bytes": 100,
+        "sha256": "20d68eae0ddacf902601336a40193634a3a2f70f5e825afa7f56ef325adb9a89"
+      }
+    },
+    {
+      "runtime": "CPython 3.14.2",
+      "passed": 18,
+      "seconds": 36.17,
+      "log": {
+        "path": "artifacts/checkpoints/2026-10-11-interruption-cleanup/focused-3.14.log",
+        "size_bytes": 100,
+        "sha256": "ae1a0348fa8614460e9aad9c380e8b6b51c16437ac6c50c42f334a16b8163444"
+      }
+    }
+  ],
+  "full_suite_collection_target": 2504,
+  "release_validation_record": "artifacts/checkpoints/2026-10-11-interruption-cleanup/release-validation.json",
+  "review_coverage": {
+    "whole_repository_audit": false,
+    "fully_read": [
+      "etzio/kernel/qualified_lifecycle_v1.py",
+      "tests/test_store_interruption_cleanup.py"
+    ],
+    "sampled": [
+      "etzio/kernel/store.py",
+      "etzio/kernel/qualified_evidence_v1.py",
+      "etzio/qualification/acquisition_custody_v1.py",
+      "tests/test_qualified_cold_replay_v1.py",
+      "tests/test_qualified_fixture_lifecycle_v1.py",
+      "tests/test_integrity_recovery_matrix_v1.py",
+      "tests/test_blocked_finality_storage_v3.py"
+    ],
+    "question": "Can an escaping application exception leave a usable connection presenting uncommitted lifecycle state?",
+    "missing_handlers": [
+      "enroll_modeled_integrity",
+      "retain_integrity_anchor_statement",
+      "retain_integrity_checkpoint_candidate",
+      "finalize_integrity_transition",
+      "store_checkpoint"
+    ],
+    "scope_note": "Runtime write boundary correction; schema initialization/migration and unrelated parsers were not requalified."
+  },
+  "sources": [
+    {
+      "url": "https://www.sqlite.org/lang_transaction.html",
+      "final_url": "https://www.sqlite.org/lang_transaction.html",
+      "path": "artifacts/checkpoints/2026-10-11-interruption-cleanup/sqlite-transactions.html",
+      "size_bytes": 27068,
+      "sha256": "b65dc308fd9e0ce471844c97366a4f5ad3a1f42833a3b19486ad7d6555a8e24e",
+      "retrieved_host_utc": "2026-10-11T18:13:14.898233+00:00",
+      "title": "Transaction",
+      "publisher": "SQLite project",
+      "version_date": "Page updated 2026-02-18; mutable retrieved snapshot",
+      "review_depth": "Sections 2 and 3, explicit transaction lifetime and error response",
+      "supporting_claim": "An explicit transaction can survive an error; cleanup must inspect and end it.",
+      "access_license": "Public HTML documentation; no third-party code executed."
+    },
+    {
+      "url": "https://docs.python.org/3.11/library/sqlite3.html",
+      "final_url": "https://docs.python.org/3.11/library/sqlite3.html",
+      "path": "artifacts/checkpoints/2026-10-11-interruption-cleanup/python311-sqlite.html",
+      "size_bytes": 271807,
+      "sha256": "9f7e343ab76722d13236b22e647e9dfac76f06dc4c49d336a7220a92ed7a1a9d",
+      "retrieved_host_utc": "2026-10-11T18:13:15.440002+00:00",
+      "title": "sqlite3 transaction control",
+      "publisher": "Python Software Foundation",
+      "version_date": "Displayed Python 3.11.17 documentation, updated 2026-10-01; not the pinned 3.11.15 runtime",
+      "review_depth": "Connection close/rollback, context manager and transaction-control sections",
+      "supporting_claim": "Explicit SQL controls transactions with isolation_level=None; closing does not implicitly commit.",
+      "access_license": "PSF License Version 2; examples additionally Zero Clause BSD."
+    },
+    {
+      "url": "https://www.sqlite.org/c3ref/total_changes.html",
+      "final_url": "https://www.sqlite.org/c3ref/total_changes.html",
+      "path": "artifacts/checkpoints/2026-10-11-interruption-cleanup/sqlite-total-changes.html",
+      "size_bytes": 6277,
+      "sha256": "706417b79feebb3ff9ab19df50c13ac499c932106dbfe0607a8cacc3b6fd14dd",
+      "retrieved_host_utc": "2026-10-11T18:13:16.297743+00:00",
+      "title": "Total Number Of Rows Modified",
+      "publisher": "SQLite project",
+      "version_date": "Mutable C API documentation; no publication date established",
+      "review_depth": "Complete short API description",
+      "supporting_claim": "The counter records completed modification statements, not commit authority; invalidate speculative cache explicitly.",
+      "access_license": "Public HTML documentation; no third-party code executed."
+    }
+  ],
+  "claim_boundaries": [
+    "Owned deterministic fault injection, not independent operational verification or an external vulnerability.",
+    "Pre-commit rollback restores exact logical rows; no assertion that SQLite physical file bytes are identical.",
+    "Post-commit exception preserves committed state; exact retry checks retained bytes.",
+    "Rollback refusal closes the handle under a functioning cleanup path; repeated interruption, OS termination and failed connection close remain outside this proof.",
+    "No native profile admission, external latest-head proof, power-fault/storage qualification, target execution or income."
+  ],
+  "original_spent_journal": {
+    "path": "artifacts/acquisition-preparation/2026-10-10-freetsa/custody.sqlite3",
+    "size_bytes": 16384,
+    "sha256": "76eaae2a66fed624ad5d053edf085159be4dbdf84674b11ac76c6ed03c36749d"
+  },
+  "pending_acquisition_changed": false,
+  "provider_protocol_dispatches": 0,
+  "target_executions": 0,
+  "new_cloud_resources": 0,
+  "next_falsifying_experiment": "Complete explicitly admitted native packages and independent administration through cold lifecycle recovery; this local correction is not permission or evidence for that experiment."
+}
