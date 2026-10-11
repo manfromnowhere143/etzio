@@ -1,0 +1,843 @@
+{
+  "schema": "etzio.paid-findings-research.v1",
+  "date": "2026-10-11",
+  "baseline_commit": "7d186fab8295d55ddabbc74f9ac92133159fc8a3",
+  "status": "research_not_admission",
+  "sources": [
+    {
+      "id": "reevm",
+      "title": "Re-Evaluating EVMBench: Are AI Agents Ready for Smart Contract Security?",
+      "authors_or_publisher": [
+        "Chaoyuan Peng",
+        "Lei Wu",
+        "Yajin Zhou"
+      ],
+      "version": "arXiv:2603.10795v1; code af878a75d628599736c78e8fe9655a57b041206e",
+      "publication_date": "2026-03-11",
+      "revision_date": null,
+      "review_depth": "Metadata/history; full-text sections 1, 3.1-3.3, 5.2, 8; pinned README and license.",
+      "supporting_claim": "Reported incident exploitation and scaffold sensitivity challenge transfer from curated contest scores.",
+      "contrary_evidence_and_limits": "Single trials, limited incidents, model-based recall grading, third-party model routing; date split does not establish all contamination absent. No local execution.",
+      "proposed_etzio_experiment": "Compare fixed-state, equal-information EVM tasks with independent mechanical effects, false-positive controls and target-clustered repeats.",
+      "license_and_access": "Paper arXiv perpetual non-exclusive; code Apache-2.0. Underlying tasks and dependencies require separate license review.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "reevm-meta",
+          "requested_url": "https://arxiv.org/abs/2603.10795",
+          "status": 200,
+          "final_url": "https://arxiv.org/abs/2603.10795",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": "Mon, 24 Aug 2026 21:39:46 GMT",
+          "etag": null,
+          "sha256": "761a82fcdc5be9494ddee2c5ac77075cc7170409bc5a71f693396694f819e183",
+          "size_bytes": 43178,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/reevm-meta.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.227279+00:00"
+        },
+        {
+          "id": "reevm-full",
+          "requested_url": "https://arxiv.org/html/2603.10795v1",
+          "status": 200,
+          "final_url": "https://arxiv.org/html/2603.10795v1",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": "Mon, 24 Aug 2026 19:39:45 GMT",
+          "etag": "\"CKKm2q+CupYDEAE=\"",
+          "sha256": "555253b9668a8961db408734fbeddd43253b6211fd4650e59b55779542874f66",
+          "size_bytes": 233691,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/reevm-full.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.226844+00:00"
+        },
+        {
+          "id": "reevm-head",
+          "requested_url": "https://api.github.com/repos/blocksecteam/ReEVMBench/commits/main",
+          "status": 200,
+          "final_url": "https://api.github.com/repos/blocksecteam/ReEVMBench/commits/main",
+          "content_type": "application/json; charset=utf-8",
+          "last_modified": "Sat, 14 Mar 2026 16:53:30 GMT",
+          "etag": "W/\"b32cef852273559cbf61bc9de4c30a8270bdb7852884ac4411ef58bff00ff3a2\"",
+          "sha256": "b32cef852273559cbf61bc9de4c30a8270bdb7852884ac4411ef58bff00ff3a2",
+          "size_bytes": 5659,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/reevm-head.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:23:36.321304+00:00"
+        },
+        {
+          "id": "reevm-readme",
+          "requested_url": "https://raw.githubusercontent.com/blocksecteam/ReEVMBench/af878a75d628599736c78e8fe9655a57b041206e/README.md",
+          "status": 200,
+          "final_url": "https://raw.githubusercontent.com/blocksecteam/ReEVMBench/af878a75d628599736c78e8fe9655a57b041206e/README.md",
+          "content_type": "text/plain; charset=utf-8",
+          "last_modified": null,
+          "etag": "\"ea3fa5d999638196ca62f5290edb509f56324493d703653529266f0546090c1c\"",
+          "sha256": "973e596e166fe6af0efe6df2981b20ba7984ec8800abf69247dcb5022f0716a8",
+          "size_bytes": 5546,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/reevm-readme.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:24:25.008409+00:00"
+        },
+        {
+          "id": "reevm-license",
+          "requested_url": "https://raw.githubusercontent.com/blocksecteam/ReEVMBench/af878a75d628599736c78e8fe9655a57b041206e/LICENSE",
+          "status": 200,
+          "final_url": "https://raw.githubusercontent.com/blocksecteam/ReEVMBench/af878a75d628599736c78e8fe9655a57b041206e/LICENSE",
+          "content_type": "text/plain; charset=utf-8",
+          "last_modified": null,
+          "etag": "\"f2330301683e208ad7e764243e1045ad81f34016520edadd9ee5f7ad1432591a\"",
+          "sha256": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
+          "size_bytes": 11356,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/reevm-license.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:24:25.027764+00:00"
+        }
+      ]
+    },
+    {
+      "id": "avri",
+      "title": "Where Do the Tokens Go? Understanding and Reducing Costs in LLM Agents for Vulnerability Discovery",
+      "authors_or_publisher": [
+        "Li Lu",
+        "Yanjie Zhao",
+        "Hongjie Chen",
+        "Haoyu Wang"
+      ],
+      "version": "arXiv:2610.11602v1",
+      "publication_date": "2026-10-08",
+      "revision_date": null,
+      "review_depth": "Metadata/history; full-text sections 2.4, 4.4, 5.1, 6.",
+      "supporting_claim": "Source-supported records can reduce repeated reasoning; auxiliary model cost belongs in totals.",
+      "contrary_evidence_and_limits": "Fixed harness C/C++ tasks, small reused diagnostic task set, single trials and no component ablations. Artifact implementation/license not qualified.",
+      "proposed_etzio_experiment": "Ablate source evidence reuse under identical tasks, model and total cost; retain failed runs and reviewer effort.",
+      "license_and_access": "Paper arXiv perpetual non-exclusive; no released implementation license established.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "avri-meta",
+          "requested_url": "https://arxiv.org/abs/2610.11602",
+          "status": 200,
+          "final_url": "https://arxiv.org/abs/2610.11602",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": "Fri, 09 Oct 2026 00:54:39 GMT",
+          "etag": null,
+          "sha256": "8fc4c89ecd7b3fa16f29bc9d4cbfeb3e128dcc6e0ad4a87d8783ae200dd77562",
+          "size_bytes": 42850,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/avri-meta.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.227643+00:00"
+        },
+        {
+          "id": "avri-full",
+          "requested_url": "https://arxiv.org/html/2610.11602v1",
+          "status": 200,
+          "final_url": "https://arxiv.org/html/2610.11602v1",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": "Fri, 09 Oct 2026 00:54:41 GMT",
+          "etag": "\"CImxl9ncq5cDEAE=\"",
+          "sha256": "80dc9f336a01dadb6e9fbc827a29c6e4b0870626f85fb57c42b6579598a9c0f7",
+          "size_bytes": 252266,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/avri-full.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.227476+00:00"
+        }
+      ]
+    },
+    {
+      "id": "osscrs",
+      "title": "OSS-CRS: Liberating AIxCC Cyber Reasoning Systems for Real-World Open-Source Security",
+      "authors_or_publisher": [
+        "Andrew Chin",
+        "Dongkwan Kim",
+        "Yu-Fu Fu",
+        "Fabian Fleischer",
+        "Youngjoon Kim",
+        "HyungSeok Han",
+        "Cen Zhang",
+        "Brian Junekyu Lee",
+        "Hanqing Zhao",
+        "Taesoo Kim"
+      ],
+      "version": "arXiv:2603.08566v2; code 4037c51c6d22bb7f2fc47a2ecf9efd4d3ba84e82",
+      "publication_date": "2026-03-09",
+      "revision_date": "2026-03-25",
+      "review_depth": "Metadata/history; full-text III-D, IV-C, VI-B; pinned README/license; no system audit.",
+      "supporting_claim": "A port makes AIxCC techniques accessible with resource budgets and modular execution.",
+      "contrary_evidence_and_limits": "Single port and selected OSS-Fuzz projects; concolic components omitted. Docker, host setup and credentials are not an accepted Etzio isolation boundary.",
+      "proposed_etzio_experiment": "After isolation, compare plain libFuzzer and a single admitted CRS component on the same licensed tasks.",
+      "license_and_access": "Paper CC-BY-4.0; framework MIT. Component, target, model and dependency rights remain separate.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "osscrs-meta",
+          "requested_url": "https://arxiv.org/abs/2603.08566",
+          "status": 200,
+          "final_url": "https://arxiv.org/abs/2603.08566",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": "Mon, 24 Aug 2026 20:33:19 GMT",
+          "etag": null,
+          "sha256": "bb5bb7110b6585d92e2d2f7e83be7911155f6bde357a4fd0f2b87854d7e3e481",
+          "size_bytes": 41743,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/osscrs-meta.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.672262+00:00"
+        },
+        {
+          "id": "osscrs-full",
+          "requested_url": "https://arxiv.org/html/2603.08566v2",
+          "status": 200,
+          "final_url": "https://arxiv.org/html/2603.08566v2",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": "Mon, 24 Aug 2026 20:33:19 GMT",
+          "etag": "\"CKuJoKyOupYDEAE=\"",
+          "sha256": "1d3c76dd2562a8180e48ed4e35559fb3568e3a9950d1bcdc3ca108bd63987bec",
+          "size_bytes": 460436,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/osscrs-full.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.668041+00:00"
+        },
+        {
+          "id": "osscrs-head",
+          "requested_url": "https://api.github.com/repos/ossf/oss-crs/commits/main",
+          "status": 200,
+          "final_url": "https://api.github.com/repos/ossf/oss-crs/commits/main",
+          "content_type": "application/json; charset=utf-8",
+          "last_modified": "Fri, 09 Oct 2026 17:25:28 GMT",
+          "etag": "W/\"f8d68efcbe696739a8028a86b104c0c9bbb336d24552f407e42670cb716ede17\"",
+          "sha256": "f8d68efcbe696739a8028a86b104c0c9bbb336d24552f407e42670cb716ede17",
+          "size_bytes": 5761,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/osscrs-head.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:23:36.264547+00:00"
+        },
+        {
+          "id": "osscrs-readme",
+          "requested_url": "https://raw.githubusercontent.com/ossf/oss-crs/4037c51c6d22bb7f2fc47a2ecf9efd4d3ba84e82/README.md",
+          "status": 200,
+          "final_url": "https://raw.githubusercontent.com/ossf/oss-crs/4037c51c6d22bb7f2fc47a2ecf9efd4d3ba84e82/README.md",
+          "content_type": "text/plain; charset=utf-8",
+          "last_modified": null,
+          "etag": "\"b49f83cd0e8e2aa9cc3caba9f22edeaceee36d61ca7e11f31e0cb2d1acaf5502\"",
+          "sha256": "983e0d91e20e45f0651c2456498baaed1914caf1aa50870f2b53b420cf8d948d",
+          "size_bytes": 8039,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/osscrs-readme.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:24:24.931418+00:00"
+        },
+        {
+          "id": "osscrs-license",
+          "requested_url": "https://raw.githubusercontent.com/ossf/oss-crs/4037c51c6d22bb7f2fc47a2ecf9efd4d3ba84e82/LICENSE",
+          "status": 200,
+          "final_url": "https://raw.githubusercontent.com/ossf/oss-crs/4037c51c6d22bb7f2fc47a2ecf9efd4d3ba84e82/LICENSE",
+          "content_type": "text/plain; charset=utf-8",
+          "last_modified": null,
+          "etag": "\"43dd9b4abfddc5084f6f0976f0c66fa6b26e96ae3144f9635589787f72fa1ffe\"",
+          "sha256": "4af87415e94564cfec9312984fa0318eaa4ba677850c978d7b2ad1b8f327d093",
+          "size_bytes": 1077,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/osscrs-license.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:24:24.943401+00:00"
+        }
+      ]
+    },
+    {
+      "id": "atlantis",
+      "title": "ATLANTIS: AI-driven Threat Localization, Analysis, and Triage Intelligence System",
+      "authors_or_publisher": [
+        "Taesoo Kim et al.",
+        "Team Atlanta"
+      ],
+      "version": "arXiv:2509.14589v1; technical report 1.0 dated 2025-09-17",
+      "publication_date": "2025-09-18",
+      "revision_date": null,
+      "review_depth": "Metadata and abstract only; HTML full-text request returned 404.",
+      "supporting_claim": "Hybrid program analysis is a candidate comparison method.",
+      "contrary_evidence_and_limits": "No fresh full-paper review; competition outcomes do not establish deployment cost or EVM transfer.",
+      "proposed_etzio_experiment": "Use an accessible pinned port as a later comparator; do not claim full ATLANTIS reproduction.",
+      "license_and_access": "Abstract public; full artifact license/dependency review incomplete.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "atlantis-meta",
+          "requested_url": "https://arxiv.org/abs/2509.14589",
+          "status": 200,
+          "final_url": "https://arxiv.org/abs/2509.14589",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": "Fri, 19 Sep 2025 00:18:28 GMT",
+          "etag": null,
+          "sha256": "f33900e8bb14f731893cfcd8a17f81374a6f77789b509bed7ed9e2f9549ed440",
+          "size_bytes": 48317,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/atlantis-meta.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.557966+00:00"
+        },
+        {
+          "id": "atlantis-full",
+          "requested_url": "https://arxiv.org/html/2509.14589v1",
+          "capture_status": "retrieval_failed",
+          "error": "HTTPError: HTTP Error 404: Not Found",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.557430+00:00"
+        }
+      ]
+    },
+    {
+      "id": "code4rena",
+      "title": "Code4rena current availability and historical awarding",
+      "authors_or_publisher": [
+        "Code4rena"
+      ],
+      "version": "Mutable pages captured 2026-10-11",
+      "publication_date": null,
+      "revision_date": null,
+      "review_depth": "Current homepage/listing and historical award-rule page.",
+      "supporting_claim": "Homepage announces wind-down and completion of existing work.",
+      "contrary_evidence_and_limits": "Historical rules and concluded audits do not establish an available new engagement; closure date not established.",
+      "proposed_etzio_experiment": "Exclude from current campaign ranking; retain historical datasets separately.",
+      "license_and_access": "Public reading only; redistribution, service access and execution rights not inferred.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "c4-current",
+          "requested_url": "https://code4rena.com/",
+          "status": 200,
+          "final_url": "https://code4rena.com/",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "55952ff98e682835578877e962889f2bd755c878fae758a262a934541e0d9bcb",
+          "size_bytes": 271328,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/c4-current.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:23:34.925476+00:00"
+        },
+        {
+          "id": "c4-audits",
+          "requested_url": "https://code4rena.com/audits",
+          "status": 200,
+          "final_url": "https://code4rena.com/audits",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "60fa19e66bb8bef4fee4349a2a8d74dbedb8303b086f43d144db62d6e9c9362a",
+          "size_bytes": 356170,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/c4-audits.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:28.430703+00:00"
+        },
+        {
+          "id": "c4-awarding",
+          "requested_url": "https://docs.code4rena.com/awarding",
+          "status": 200,
+          "final_url": "https://docs.code4rena.com/awarding",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": "W/\"kycgme684mi2sk\"",
+          "sha256": "a9dff959fb95e01cc14d9b8029e9cc1c572135b8f681ba39b52b199341796d3f",
+          "size_bytes": 843618,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/c4-awarding.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:28.151734+00:00"
+        }
+      ]
+    },
+    {
+      "id": "sherlock",
+      "title": "Sherlock Audit Engine participation and payout rules",
+      "authors_or_publisher": [
+        "Sherlock"
+      ],
+      "version": "Mutable October 2026 documentation; exact capture digests",
+      "publication_date": null,
+      "revision_date": null,
+      "review_depth": "Current participant, judging, workflow and engagement pages; deprecated payout page and incomplete contest listing.",
+      "supporting_claim": "Selective Audit Engine replaces old contests; minimum valid-issue and ratio thresholds may prevent first-report cash.",
+      "contrary_evidence_and_limits": "No invitation or specific scope verified. Rewrite/resubmit numerator descriptions conflict; specific engagement terms needed. Empty rendered listing is not proof of no engagements.",
+      "proposed_etzio_experiment": "Before any campaign, bind invitation, revision, confidentiality, exact scoring, payout eligibility and finite budget.",
+      "license_and_access": "Public documentation; no account, NDA, agreement or engagement accepted.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "sherlock-index",
+          "requested_url": "https://docs.sherlock.xyz/llms.txt",
+          "status": 200,
+          "final_url": "https://docs.sherlock.xyz/llms.txt",
+          "content_type": "text/markdown; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "6a941763679ca9fef2b493815a50898319a0d8f64a5d22635d1bf7dd432bfed0",
+          "size_bytes": 10083,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/sherlock-index.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:23:34.926082+00:00"
+        },
+        {
+          "id": "sherlock-participants",
+          "requested_url": "https://docs.sherlock.xyz/audit-engine/for-participants",
+          "status": 200,
+          "final_url": "https://docs.sherlock.xyz/audit-engine/for-participants",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": "W/\"7n4q36rbarkb\"",
+          "sha256": "8371c68161c3ce9008b9c0ab074729aae771cf3cc8d8bd95e38348a568a172c1",
+          "size_bytes": 502357,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/sherlock-participants.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:24:24.164276+00:00"
+        },
+        {
+          "id": "sherlock-engine",
+          "requested_url": "https://docs.sherlock.xyz/audit-engine/how-audit-engine-works",
+          "status": 200,
+          "final_url": "https://docs.sherlock.xyz/audit-engine/how-audit-engine-works",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": "W/\"uxi6j1xbg5ai86\"",
+          "sha256": "4694a8d0a38f19dc27e5a069b425a9003cdf334ad8adb9c11cde45b9295db184",
+          "size_bytes": 490268,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/sherlock-engine.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:24:24.164729+00:00"
+        },
+        {
+          "id": "sherlock-judging",
+          "requested_url": "https://docs.sherlock.xyz/audit-engine/judging",
+          "status": 200,
+          "final_url": "https://docs.sherlock.xyz/audit-engine/judging",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": "W/\"5nbg92ndr79pac\"",
+          "sha256": "376070a7fb7c9a5565de74090a85c101fa8ea3798aed07dbefd7569382a7ea11",
+          "size_bytes": 452726,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/sherlock-judging.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:24:24.164934+00:00"
+        },
+        {
+          "id": "sherlock-types",
+          "requested_url": "https://docs.sherlock.xyz/audit-engine/engagement-types",
+          "status": 200,
+          "final_url": "https://docs.sherlock.xyz/audit-engine/engagement-types",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": "W/\"2kcct3vq8za2i7\"",
+          "sha256": "b3492e4014f44e5d87853702ca2a2ea021657dfcaac60f168e06399cf02adc48",
+          "size_bytes": 469887,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/sherlock-types.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:24:24.165111+00:00"
+        },
+        {
+          "id": "sherlock-payouts",
+          "requested_url": "https://docs.sherlock.xyz/audits/watsons/meeting-the-payout-criteria",
+          "status": 200,
+          "final_url": "https://docs.sherlock.xyz/audit-contests-deprecated-replaced-by-audit-engine/watsons/meeting-the-payout-criteria",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": "W/\"vunmn0mw9y9pui\"",
+          "sha256": "5461afeb4399d1f0382c0d84b4c658ac4d6597a4dc053ae767ad0784f92b0c88",
+          "size_bytes": 453424,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/sherlock-payouts.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:23:34.925897+00:00"
+        },
+        {
+          "id": "sherlock-contests",
+          "requested_url": "https://audits.sherlock.xyz/contests",
+          "status": 200,
+          "final_url": "https://audits.sherlock.xyz/contests",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "8734ffc0cb6722464222cfb2f5875f9cb642c31faf00134a2355c8075c339381",
+          "size_bytes": 47345,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/sherlock-contests.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:28.495776+00:00"
+        }
+      ]
+    },
+    {
+      "id": "cow",
+      "title": "CoW Protocol current program brief",
+      "authors_or_publisher": [
+        "CoW Protocol",
+        "Immunefi"
+      ],
+      "version": "Header last updated 2026-09-24; captured 2026-10-11",
+      "publication_date": "2021-06-15",
+      "revision_date": "2026-09-24",
+      "review_depth": "Information, contracts scope and resource links; source dossier separately retains code.",
+      "supporting_claim": "Named contracts revision and impact/exclusion rules provide a bounded dossier candidate.",
+      "contrary_evidence_and_limits": "Addresses are publisher statements until independently mapped. Private duplicates, personal eligibility, payout timing and exact current state remain unresolved.",
+      "proposed_etzio_experiment": "Pin listed source files/import closure and public deployment records; reject readiness without complete build/state/audit mapping.",
+      "license_and_access": "Public brief is documentary; no target grant or submission authority inferred.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "cow-info",
+          "requested_url": "https://immunefi.com/bug-bounty/cowprotocol/information/",
+          "status": 200,
+          "final_url": "https://immunefi.com/bug-bounty/cowprotocol/information/",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "5f455ec331f95a89dcbde09310ecb04003cbafdd9a4143dadfe80745bdd7b010",
+          "size_bytes": 169104,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/cow-info.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.827949+00:00"
+        },
+        {
+          "id": "cow-scope",
+          "requested_url": "https://immunefi.com/bug-bounty/cowprotocol/scope/",
+          "status": 200,
+          "final_url": "https://immunefi.com/bug-bounty/cowprotocol/scope/",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "fafe2e4b1b8e48b9c8eef3b780753952faa4be3fed811aa927c80e8e7140b45f",
+          "size_bytes": 204106,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/cow-scope.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:25.850497+00:00"
+        },
+        {
+          "id": "cow-resources",
+          "requested_url": "https://immunefi.com/bug-bounty/cowprotocol/resources/",
+          "status": 200,
+          "final_url": "https://immunefi.com/bug-bounty/cowprotocol/resources/",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "422085f542773a0613ea958975e98d6e55948e94e9f092a424537efee9fc851f",
+          "size_bytes": 152110,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/cow-resources.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:26.049996+00:00"
+        }
+      ]
+    },
+    {
+      "id": "immutable",
+      "title": "Immutable Immunefi brief and bridge scope",
+      "authors_or_publisher": [
+        "Immutable",
+        "Immunefi"
+      ],
+      "version": "Mutable snapshot; displayed update and asset dates may differ",
+      "publication_date": null,
+      "revision_date": null,
+      "review_depth": "Information and bridge asset scope; no code or chain replay.",
+      "supporting_claim": "Bridge/proxy boundaries are a second possible dossier.",
+      "contrary_evidence_and_limits": "Multi-chain state and implementation mappings add unmeasured setup; no target admission.",
+      "proposed_etzio_experiment": "Revisit only if first dossier fails its setup/eligibility criteria or external evidence improves expected value.",
+      "license_and_access": "Public reading only; redistribution, service access and execution rights not inferred.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "immutable-info",
+          "requested_url": "https://immunefi.com/bug-bounty/immutable/information/",
+          "status": 200,
+          "final_url": "https://immunefi.com/bug-bounty/immutable/information/",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "ba90ae2ba83f36a83317cad8421b706d411870b6d342714ebda47b03e811581e",
+          "size_bytes": 148214,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/immutable-info.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:26.111127+00:00"
+        },
+        {
+          "id": "immutable-scope",
+          "requested_url": "https://immunefi.com/bug-bounty/immutable/scope/",
+          "status": 200,
+          "final_url": "https://immunefi.com/bug-bounty/immutable/scope/",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "89a6975770b512dfbd64fb73f81d6d4bf677176d52752fd9128b7f85e7938db6",
+          "size_bytes": 171077,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/immutable-scope.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:28.050517+00:00"
+        }
+      ]
+    },
+    {
+      "id": "google-cyber",
+      "title": "Gemini 4 Argon with cybersecurity defense capabilities",
+      "authors_or_publisher": [
+        "Google DeepMind"
+      ],
+      "version": "Mutable page captured 2026-10-11",
+      "publication_date": null,
+      "revision_date": null,
+      "review_depth": "Capability and Fairwind access statements.",
+      "supporting_claim": "Current named vendor comparator differs from historical July page.",
+      "contrary_evidence_and_limits": "No available access, matched evaluation or independently reproduced performance.",
+      "proposed_etzio_experiment": "Compare only accessible models under a frozen Etzio protocol; do not import vendor headline scores.",
+      "license_and_access": "Public reading only; redistribution, service access and execution rights not inferred.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "google-cyber",
+          "requested_url": "https://deepmind.google/models/gemini/cyber/",
+          "status": 200,
+          "final_url": "https://deepmind.google/models/gemini/cyber/",
+          "content_type": "text/html",
+          "last_modified": null,
+          "etag": "\"lxbLTg\"",
+          "sha256": "c82412715c8a85b2b3fc82da0a2f0945c5bbf32a7bc7b2a456ddd0c537e76dd4",
+          "size_bytes": 139354,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/google-cyber.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:29.586965+00:00"
+        }
+      ]
+    },
+    {
+      "id": "codemender",
+      "title": "Introducing CodeMender: an AI agent for code security",
+      "authors_or_publisher": [
+        "Google DeepMind"
+      ],
+      "version": "Vendor publication",
+      "publication_date": "2025-10-06",
+      "revision_date": null,
+      "review_depth": "Analysis, differential checks, repair and review descriptions.",
+      "supporting_claim": "Discovery and repair combine multiple mechanical tools and human review.",
+      "contrary_evidence_and_limits": "Vendor report does not establish Etzio quality or a commercially available baseline.",
+      "proposed_etzio_experiment": "Measure exploit refusal plus legitimate regression preservation for proposed patches.",
+      "license_and_access": "Public reading only; redistribution, service access and execution rights not inferred.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "codemender",
+          "requested_url": "https://deepmind.google/blog/introducing-codemender-an-ai-agent-for-code-security/",
+          "status": 200,
+          "final_url": "https://deepmind.google/blog/introducing-codemender-an-ai-agent-for-code-security/",
+          "content_type": "text/html",
+          "last_modified": null,
+          "etag": "\"lxbLTg\"",
+          "sha256": "feca23bdf0f9387fac6c3f9ba5a7e2c9fa4bde70473f122c01ae0756dc91eca7",
+          "size_bytes": 163118,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/codemender.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:29.773803+00:00"
+        }
+      ]
+    },
+    {
+      "id": "big-sleep",
+      "title": "From Naptime to Big Sleep: Using Large Language Models To Catch Vulnerabilities In Real-World Code",
+      "authors_or_publisher": [
+        "Big Sleep team",
+        "Google Project Zero"
+      ],
+      "version": "Vendor research report",
+      "publication_date": "2024-11-01",
+      "revision_date": null,
+      "review_depth": "Methodology and reported outcome; initially guessed November URL failed, corrected October URL succeeded.",
+      "supporting_claim": "Patch-seeded variant analysis can narrow a research question.",
+      "contrary_evidence_and_limits": "One reported success is not a comparative discovery rate; no source payload executed.",
+      "proposed_etzio_experiment": "Compare finite variant hypotheses with open-ended search under matched cost.",
+      "license_and_access": "Public reading only; redistribution, service access and execution rights not inferred.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "big-sleep",
+          "requested_url": "https://googleprojectzero.blogspot.com/2024/11/from-naptime-to-big-sleep.html",
+          "capture_status": "retrieval_failed",
+          "error": "HTTPError: HTTP Error 404: Not Found",
+          "retrieved_at_host_clock": "2026-10-11T05:22:31.831808+00:00"
+        },
+        {
+          "id": "big-sleep-corrected",
+          "requested_url": "https://googleprojectzero.blogspot.com/2024/10/from-naptime-to-big-sleep.html",
+          "status": 200,
+          "final_url": "https://projectzero.google/2024/10/from-naptime-to-big-sleep.html",
+          "content_type": "text/html",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "2e5baf7b2dbc26a960a4c30689bd584625e8a7aed1672340554ada96086d4439",
+          "size_bytes": 56257,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/big-sleep-corrected.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:23:35.509747+00:00"
+        }
+      ]
+    },
+    {
+      "id": "anthropic-service",
+      "title": "An opt-in vulnerability-finding service for open-source software",
+      "authors_or_publisher": [
+        "Anthropic"
+      ],
+      "version": "Vendor publication",
+      "publication_date": "2026-10-08",
+      "revision_date": null,
+      "review_depth": "Service boundary, opt-in process and review bottleneck; no enrollment.",
+      "supporting_claim": "Human validation capacity remains a bottleneck; optional untriaged reports are explicitly distinguished.",
+      "contrary_evidence_and_limits": "Vendor-selected validation samples and testimonials do not establish general error rates or Etzio performance.",
+      "proposed_etzio_experiment": "Measure independent reproduction/triage as a potential customer deliverable before building a scanning product.",
+      "license_and_access": "Public reading only; redistribution, service access and execution rights not inferred.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "anthropic-service",
+          "requested_url": "https://www.anthropic.com/research/launching-opt-in-vuln-finding-service-for-open-source",
+          "status": 200,
+          "final_url": "https://www.anthropic.com/research/launching-opt-in-vuln-finding-service-for-open-source",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "etag": null,
+          "sha256": "5a998120f0b6c76fd625259f83f2961d2fd944d3ba84e174822b48298932a22b",
+          "size_bytes": 124641,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/anthropic-service.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:23:34.926253+00:00"
+        }
+      ]
+    },
+    {
+      "id": "roughtime",
+      "title": "Roughtime: A Protocol for Rough Time Synchronization",
+      "authors_or_publisher": [
+        "Watson Ladd",
+        "Marcus Dansarie",
+        "IETF"
+      ],
+      "version": "RFC 10049, Experimental, wire version 1",
+      "publication_date": "2026-10",
+      "revision_date": null,
+      "review_depth": "Protocol identity/version, trust bootstrap, interval and security sections; prior retained passive review consulted.",
+      "supporting_claim": "A native alternative for rough authenticated time has explicit trust and version semantics.",
+      "contrary_evidence_and_limits": "Not a revocation/catalog provider, a qualified server roster or a drop-in timestamp codec. No protocol request.",
+      "proposed_etzio_experiment": "Compare pinned deployed protocol/key contexts and entire-use interval evidence before choosing another native parser.",
+      "license_and_access": "IETF Trust terms; public specification does not grant a service request.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "roughtime-rfc",
+          "requested_url": "https://www.rfc-editor.org/rfc/rfc10049.txt",
+          "status": 200,
+          "final_url": "https://www.rfc-editor.org/rfc/rfc10049.txt",
+          "content_type": "text/plain;charset=utf-8",
+          "last_modified": null,
+          "etag": "W/\"4e4d30ad501c37e827189e594a6342c9\"",
+          "sha256": "4932fb066c9681860b81aeacbe1a263729339e553c14056243ec721feae14fc4",
+          "size_bytes": 64390,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/roughtime-rfc.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:31.873040+00:00"
+        }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "title": "Atomic Commit In SQLite",
+      "authors_or_publisher": [
+        "SQLite project"
+      ],
+      "version": "Mutable primary engineering documentation",
+      "publication_date": null,
+      "revision_date": null,
+      "review_depth": "Storage assumptions and failure model sections.",
+      "supporting_claim": "Atomic durability relies on VFS/filesystem/device assumptions.",
+      "contrary_evidence_and_limits": "Process kills and integrity_check cannot alone establish power-fault durability or external latest-head freshness.",
+      "proposed_etzio_experiment": "Exercise interrupted recovery, quota exhaustion and stale restore under one accepted device profile.",
+      "license_and_access": "Public reading only; redistribution, service access and execution rights not inferred.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "sqlite-atomic",
+          "requested_url": "https://sqlite.org/atomiccommit.html",
+          "status": 200,
+          "final_url": "https://sqlite.org/atomiccommit.html",
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": "Fri, 09 Oct 2026 16:36:04 GMT",
+          "etag": "\"m6ac917f4s13090\"",
+          "sha256": "5a5be7b660217c9408c8a81eaf2faa2d08832ed3790f895a0a713916ad856ea1",
+          "size_bytes": 77968,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/sqlite-atomic.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:32.300709+00:00"
+        }
+      ]
+    },
+    {
+      "id": "firecracker",
+      "title": "Firecracker production host setup",
+      "authors_or_publisher": [
+        "Firecracker project"
+      ],
+      "version": "Git fd9fc7a9f164b73002d22065d17c150d8c262d91",
+      "publication_date": null,
+      "revision_date": null,
+      "review_depth": "Pinned host/jailer/resource and mitigation guidance; same pinned source as prior qualification packet.",
+      "supporting_claim": "Host confinement and configuration are part of the execution boundary.",
+      "contrary_evidence_and_limits": "Pinned guidance is not an Etzio host qualification; no VMM built or run.",
+      "proposed_etzio_experiment": "Measure denied egress, identity/path separation, resource accounting and out-of-band kill with owned workloads.",
+      "license_and_access": "Primary source inspection only; full release/dependency review not completed.",
+      "independently_reproduced": false,
+      "captures": [
+        {
+          "id": "firecracker-host",
+          "requested_url": "https://raw.githubusercontent.com/firecracker-microvm/firecracker/fd9fc7a9f164b73002d22065d17c150d8c262d91/docs/prod-host-setup.md",
+          "status": 200,
+          "final_url": "https://raw.githubusercontent.com/firecracker-microvm/firecracker/fd9fc7a9f164b73002d22065d17c150d8c262d91/docs/prod-host-setup.md",
+          "content_type": "text/plain; charset=utf-8",
+          "last_modified": null,
+          "etag": "\"c318c438b8536c43cffc0ae560bb283ef13c305654c5f28627a2ee3957befdcc\"",
+          "sha256": "19cf9cf9965fb4fdd36c0f55ceb7165e06efd8601629e956827069d9f1a3de16",
+          "size_bytes": 21548,
+          "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/firecracker-host.source.txt",
+          "capture_status": "retained",
+          "retrieved_at_host_clock": "2026-10-11T05:22:32.471590+00:00"
+        }
+      ]
+    }
+  ],
+  "retention_boundary": "Exact source captures are ignored local artifacts; fresh clones retain identities only. Retrieval timestamps are unqualified host observations. Failed captures remain missing. No downloaded build or payload was run.",
+  "web_reader_failures": "Web reader could not load Sherlock Audit Engine pages; ordinary public HTTPS GET succeeded and exact bytes were inspected locally. ATLANTIS HTML and initial Big Sleep November URL returned 404; no full ATLANTIS review claimed.",
+  "deferred_seed_leads": [
+    "MobileCybench full text",
+    "CyberChainBench new reproduction",
+    "EVMbench/SCONE updated empirical runs",
+    "AVRI implementation availability"
+  ],
+  "capture_count": 39,
+  "retained_capture_count": 37,
+  "continuation_dossier": "docs/evidence/cow-source-dossier-2026-10-11.json",
+  "auxiliary_captures": [
+    {
+      "id": "cow-tree",
+      "requested_url": "https://api.github.com/repos/cowprotocol/contracts/git/trees/6ebbd810ff2da635fb6f88e9a15fde196f8c852a?recursive=1",
+      "status": 200,
+      "final_url": "https://api.github.com/repos/cowprotocol/contracts/git/trees/6ebbd810ff2da635fb6f88e9a15fde196f8c852a?recursive=1",
+      "content_type": "application/json; charset=utf-8",
+      "last_modified": "Sat, 26 Sep 2026 07:18:56 GMT",
+      "etag": "W/\"b526463fe77ee81ab11d88815dc947e1bfcfe1de739232f449651791a262c255\"",
+      "sha256": "b526463fe77ee81ab11d88815dc947e1bfcfe1de739232f449651791a262c255",
+      "size_bytes": 42744,
+      "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/cow-tree.source.txt",
+      "capture_status": "retained",
+      "retrieved_at_host_clock": "2026-10-11T05:23:35.707221+00:00"
+    },
+    {
+      "id": "cow-commit",
+      "requested_url": "https://api.github.com/repos/cowprotocol/contracts/commits/6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+      "status": 200,
+      "final_url": "https://api.github.com/repos/cowprotocol/contracts/commits/6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+      "content_type": "application/json; charset=utf-8",
+      "last_modified": "Thu, 29 Apr 2021 10:39:09 GMT",
+      "etag": "W/\"0222e636f03ea94f307414298191f484246981c6c26071097ee52c3c277edd5c\"",
+      "sha256": "0222e636f03ea94f307414298191f484246981c6c26071097ee52c3c277edd5c",
+      "size_bytes": 6371,
+      "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/sources/cow-commit.source.txt",
+      "capture_status": "retained",
+      "retrieved_at_host_clock": "2026-10-11T05:23:36.198264+00:00"
+    }
+  ]
+}

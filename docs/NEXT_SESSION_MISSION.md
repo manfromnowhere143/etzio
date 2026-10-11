@@ -5,6 +5,17 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
+## Completed research tranche and current pickup
+
+The [2026-10-11 decision packet](PAID_FINDINGS_DECISION_2026-10-11.md) fulfills the initial
+research/decision assignment below and records its source and review coverage. Its
+[CoW continuation](COW_SOURCE_DOSSIER.md) retained the source import closure and exposed an
+unresolved historical-deployment/address mapping. It did not admit or execute a target.
+Resume the bounded audit/source/deployment reconciliation and foundation critical path;
+do not repeat the full survey or treat conditional revenue routes as accepted exceptions.
+The FreeTSA diagnostic follow-up remains unaccepted with no journal or dispatch. Resolve
+current exact-head release evidence from the latest handoff before changing bytes.
+
 ## Founder objective and engineering verdict
 
 Build an enterprise-grade, target-neutral engine for authorized vulnerability discovery,

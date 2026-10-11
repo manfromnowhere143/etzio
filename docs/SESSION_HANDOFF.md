@@ -2,6 +2,53 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-11, Asia/Jerusalem.
 
+## Decision packet and source-dossier continuation, 2026-10-11
+
+This is the latest recovery summary. The requested repository review, fresh primary-source
+and arXiv comparison, decision packet and authorized continuation are retained in
+[PAID_FINDINGS_DECISION_2026-10-11](PAID_FINDINGS_DECISION_2026-10-11.md). Start there and
+at the [CoW source dossier](COW_SOURCE_DOSSIER.md); the older research assignment below
+remains context, not an instruction to repeat the whole survey.
+
+Entry was clean `main` at `7d186fab8295d55ddabbc74f9ac92133159fc8a3`, the published
+[PR #39 handoff](https://github.com/manfromnowhere143/etzio/pull/39). The unchanged baseline
+passed `2246` tests in `857.00` seconds on CPython 3.11.15. This tranche changes documentary
+evidence and recovery guidance only. Resolve its final local/both-runtime CI/package results
+from the exact candidate PR and
+`artifacts/checkpoints/2026-10-11-decision-packet/release-validation.json`; old checks or
+absence of that record are not a pass for a new candidate.
+
+**Decision:** preserve native admission/lifecycle → external latest-head recovery → storage
+→ independent isolated execution → measured domain → exact target admission. Prepare one
+commercial dossier beside that critical path. Customer-paid reproduction/remediation is the
+strongest conditional route to earlier cash if a real buyer and expert reviewer appear;
+neither exists in retained evidence. Code4rena is winding down and Sherlock's Audit Engine
+is selective with payout thresholds, so the old open-contest shortcut is not established.
+No roadmap exception, engagement, execution profile or target is accepted by this packet.
+
+**Concrete continuation:** retained all 12 advertised CoW sources and their 19-file import
+closure, 33 pinned blobs, build/license records and a public audit index. Exact-byte controls
+pass and three altered/missing-source controls refuse. The four advertised addresses have
+zero overlap with the historical commit's deployment/network records. That refuses a
+source-to-deployed-identity claim; it does not prove deployed source differs. No build,
+chain request, target execution or finding occurred. Next read the two indexed audits and
+reconcile public source/deployment records under a proposed one-engineer-day cap, then
+re-rank if unresolved. Audit content, live byte/state mapping and duplicate clearance remain
+open. Foundation contract work can continue without the optional acquisition.
+
+The [research ledger](evidence/paid-findings-research-2026-10-11.json) records review depth,
+versions and failures; the [coverage record](evidence/repository-review-2026-10-11.json)
+describes a sampled review, not a full audit. Raw evidence is ignored/private under
+`artifacts/checkpoints/2026-10-11-decision-packet/`; preserve it across sessions.
+
+**Pending decision unchanged:** the original FreeTSA journal's hash matches the previous
+cold readback; it remains spent and must never be reset, copied, rearmed or resent. Follow-up
+plan `sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713` remains
+unaccepted, with no new journal or dispatch. This research request did not accept it.
+No new cloud resources, provider-protocol requests or external submissions were made.
+Public-document work needs no renewed general permission. Sole-human authorship, exact-head
+release checks and linear fast-forward publication rules below remain in force.
+
 ## Current pickup and operator research mandate, 2026-10-11
 
 This section is the current recovery summary. Read

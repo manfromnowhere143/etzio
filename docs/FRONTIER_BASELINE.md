@@ -7,6 +7,19 @@ Sources are primary project, research, program, or vendor publications where ava
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
 
+## Decision and full-text follow-through, 2026-10-11
+
+The [decision packet](PAID_FINDINGS_DECISION_2026-10-11.md) and
+[source ledger](evidence/paid-findings-research-2026-10-11.json) extend the seed review with
+selected methods/results/limitations sections of ReEVMBench v1, AVRI v1 and OSS-CRS v2,
+pinned code README/license inspection, current program/platform rules and specifications.
+Exact review depth and failed retrievals remain explicit; no benchmark was executed.
+Code4rena's wind-down and Sherlock's selective Audit Engine change the earlier contest
+assumption. Preserve the foundation path and test finite source/effect hypotheses; do not
+infer local capability or earnings from external reports. The CoW documentary continuation
+has a retained source closure but an unresolved deployment mapping. This update does not
+refresh all historical scores or claim a complete frontier survey.
+
 ## Handoff research refresh, 2026-10-11
 
 The [next-session brief](NEXT_SESSION_MISSION.md) and its

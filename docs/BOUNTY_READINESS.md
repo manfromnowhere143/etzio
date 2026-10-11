@@ -5,6 +5,15 @@ No target is admitted, no external code was executed, and no finding or income e
 This is a dated research decision, not a replacement for a program's current terms or an
 Etzio `TargetContract`. The engine remains limited to repository-owned fixtures.
 
+The [2026-10-11 decision packet](PAID_FINDINGS_DECISION_2026-10-11.md) supersedes the
+revenue-route assumptions below where updated. The [CoW source dossier](COW_SOURCE_DOSSIER.md)
+now retains all 12 listed files and their 19-file import closure, but the advertised four
+addresses do not match the pinned historical deployment/network records. The phrase
+"source-to-deployment boundary" below is a candidate boundary, not established equivalence.
+CoW remains first for bounded documentary preparation; investment in a campaign is refused
+until that mapping and the other gates close. The dossier also retains the audit index;
+audit contents and full duplicate review remain open. No scope or execution grant changed.
+
 The operator requested continued foundation work with paid research as soon as the engine
 is ready. Preserve ADR-0001's ordering. Public scope research can proceed now; a campaign
 depends on the integrity, Linux/KVM isolation, independent execution, benchmark and exact

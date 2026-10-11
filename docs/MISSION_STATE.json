@@ -35,7 +35,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Start on canonical main after validated handoff publication; verify actual Git state first. Read docs/NEXT_SESSION_MISSION.md after mandatory recovery/core documents. Independently review repository coverage and current primary/arXiv research, compare routes to an earlier authorized paid finding, publish a bounded decision packet, then continue the highest-value authorized dependency-complete tranche. PR 38 diagnostics are released at c8c8627f01c78807f41361b4e101c8c173e8ff9e with 2246 passing tests on both CI runtimes. Original FreeTSA custody is spent; the diagnostic proposal remains unaccepted with no journal/dispatch. Its pending decision does not block public research or offline preparation. Preserve existing gate order unless an explicit reviewed change is accepted.",
+    "next_session_pickup": "Verify current Git and exact-head release dossier, then read docs/PAID_FINDINGS_DECISION_2026-10-11.md and docs/COW_SOURCE_DOSSIER.md. Research comparison and documentary continuation are complete; do not repeat the broad survey. Continue bounded public audit/source/deployment reconciliation and the existing native-provider foundation path. CoW source closure is retained but historical deployment addresses differ from the public brief, so campaign readiness is refused. Original FreeTSA journal remains spent; follow-up remains unaccepted with no journal or dispatch. No roadmap exception, engagement or target has been accepted.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority",
     "next_session_brief": "docs/NEXT_SESSION_MISSION.md"
   },
@@ -1229,5 +1229,48 @@
       "make_verify_exit": 0,
       "log_sha256": "e4d2c6dbe4c6b596399479664e03f2d7a58e17cd198d4dd6f222a659eedaaeaf"
     }
+  },
+  "decision_packet": {
+    "status": "research_and_documentary_continuation_complete",
+    "date": "2026-10-11",
+    "packet": "docs/PAID_FINDINGS_DECISION_2026-10-11.md",
+    "source_ledger": "docs/evidence/paid-findings-research-2026-10-11.json",
+    "repository_review": "docs/evidence/repository-review-2026-10-11.json",
+    "cow_dossier": "docs/COW_SOURCE_DOSSIER.md",
+    "cow_evidence": "docs/evidence/cow-source-dossier-2026-10-11.json",
+    "baseline_commit": "7d186fab8295d55ddabbc74f9ac92133159fc8a3",
+    "unchanged_baseline": {
+      "runtime": "CPython 3.11.15",
+      "passed": 2246,
+      "seconds": 857.0,
+      "exit": 0
+    },
+    "release_validation_record": "artifacts/checkpoints/2026-10-11-decision-packet/release-validation.json",
+    "validation_boundary": "Resolve final results from the exact candidate PR and local dossier; no new-candidate pass is inferred from baseline or previous release.",
+    "architectural_decision": "Preserve native lifecycle, external latest-head, storage, isolated independent execution, measured domain and exact target gates.",
+    "conditional_cash_route": "Customer-paid reproduction/remediation if a real buyer, expert reviewer, exact engagement and any required scoped roadmap exception are established. None is currently established.",
+    "authorized_continuation": "Public CoW source/import/deployment/build/audit-index dossier retained; next bounded public audit/source/deployment reconciliation.",
+    "documentary_result": {
+      "listed_sources": 12,
+      "source_closure_files": 19,
+      "import_edges": 33,
+      "pinned_blob_files": 33,
+      "mutated_controls_refused": 3,
+      "historical_deployment_matches_to_advertised_addresses": 0,
+      "campaign_ready": false
+    },
+    "roadmap_exception_accepted": false,
+    "customer_engagement_accepted": false,
+    "target_admitted": false,
+    "new_target_executions": 0,
+    "new_provider_protocol_requests": 0,
+    "new_cloud_resources": 0,
+    "accepted_findings": 0,
+    "settled_bounty_payments": 0,
+    "pending_freetsa_plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
+    "pending_freetsa_accepted": false,
+    "followup_journal_created": false,
+    "followup_dispatches": 0,
+    "immediate_public_document_work_requires_new_user_input": false
   }
 }

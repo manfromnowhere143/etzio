@@ -1,0 +1,298 @@
+{
+  "schema": "etzio.repository-review.v1",
+  "date": "2026-10-11",
+  "baseline_commit": "7d186fab8295d55ddabbc74f9ac92133159fc8a3",
+  "scope": "Tracked-file inventory, mission/contract review and sampled consequential paths; not a complete security audit.",
+  "inventory": {
+    "files": 209,
+    "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/baseline-tracked-inventory.json",
+    "sha256": "35edccca2dbd50d54fd8626a2e70b06fd7189d90010bdb855a8f290ac77fff07"
+  },
+  "reviewed": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "b8164f771e690f132679e3d158f4cfe6f6b0276593db697b346eb1d3e6c14458",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "README.md",
+      "sha256": "8cb85191cd73db249e41c409d71791295ff73113970b4c6a6f737ac36f28897e",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "CHARTER.md",
+      "sha256": "405fd8605a7575064b12bc1a746eadee7d7b4029d2bf0ea2a79e31020cb765f6",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "sha256": "af0aa7fe8fc913c1e552eb8bd4c08256f35a062195933302c0b76f88bd746fae",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "docs/ROADMAP.md",
+      "sha256": "96731d6134951d1d008cb5b1e892f5bc676926b63b27b25492aca02182d4eecc",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "docs/FRONTIER_BASELINE.md",
+      "sha256": "21ee37a54e9dd62f48f97a45a5c2720b2b9320d68e4ea5eaea2db716f2d69325",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "docs/NEXT_SESSION_MISSION.md",
+      "sha256": "3d2ce84dd6373cb87d00bddf064926db3bd252a7e01e76ac223da8baf4c9fd59",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "docs/PRESENTATION.md",
+      "sha256": "b02f2689bf0b2ecf076e7ba599150467409ef24abb17c06f4e76b9c2bcab2df0",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "docs/QUALIFICATION_NEXT_STEPS.md",
+      "sha256": "317c9c4f0f3c7499cae43f4665a09f8bcec4d37eae72ca40d386ccda5b74284c",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "docs/BOUNTY_READINESS.md",
+      "sha256": "85446f6165767cc4cf852fc3c959468edb135d368129d8f50fb0c0cb7c14af50",
+      "depth": "document read before this tranche changes",
+      "reviewed_lines": "full",
+      "observation": "Mission, implementation limits and current versus historical authority compared.",
+      "unresolved": "Historical counts and broad claims are not independently audited."
+    },
+    {
+      "path": "docs/SESSION_HANDOFF.md",
+      "sha256": "474e2b03667be89d5a8fd1cfff17b90c34ae92089bb0280fe3fe31cfd685242a",
+      "depth": "current recovery sections and historical indexed/chunked review",
+      "reviewed_lines": "current sections; historical sections sampled/indexed",
+      "observation": "Current pending proposal and release evidence distinguished from old states.",
+      "unresolved": "Not every historical claim independently reconstructed."
+    },
+    {
+      "path": "docs/MISSION_STATE.json",
+      "sha256": "4b8c40d5b3b2f5dd46268af84489d5efd120228c9b32c512788694b198121a07",
+      "depth": "current recovery sections and historical indexed/chunked review",
+      "reviewed_lines": "current sections; historical sections sampled/indexed",
+      "observation": "Current pending proposal and release evidence distinguished from old states.",
+      "unresolved": "Not every historical claim independently reconstructed."
+    },
+    {
+      "path": "docs/decisions/0001-foundation-integrity-before-breadth.md",
+      "sha256": "588bb109da879822bb2854d607cfade5b50a3176b8a2c1c53486d1f3e62fa66b",
+      "depth": "contract read",
+      "reviewed_lines": "full",
+      "observation": "Foundation order and native observation/acquisition limits retained.",
+      "unresolved": "Contract review is not full implementation verification."
+    },
+    {
+      "path": "docs/decisions/0019-qualified-evidence-lifecycle-consumption.md",
+      "sha256": "561d8a4fc1fe2050a4cd289ea6501a5922749bb90fb643689b7aac602cc7dfb8",
+      "depth": "contract read",
+      "reviewed_lines": "full",
+      "observation": "Foundation order and native observation/acquisition limits retained.",
+      "unresolved": "Contract review is not full implementation verification."
+    },
+    {
+      "path": "docs/decisions/0020-offline-native-time-qualification.md",
+      "sha256": "0b2bdbf7b16b6123912d3d6fa38daa41047dddefa80aa9ab2dcf59fd3775197e",
+      "depth": "contract read",
+      "reviewed_lines": "full",
+      "observation": "Foundation order and native observation/acquisition limits retained.",
+      "unresolved": "Contract review is not full implementation verification."
+    },
+    {
+      "path": "docs/decisions/0021-offline-rsa-timestamp-chains.md",
+      "sha256": "0fb59fc778e318307270cb26ef6590d19d9a183a236aa2b28d27930ef0582548",
+      "depth": "contract read",
+      "reviewed_lines": "full",
+      "observation": "Foundation order and native observation/acquisition limits retained.",
+      "unresolved": "Contract review is not full implementation verification."
+    },
+    {
+      "path": "docs/decisions/0022-native-time-consumption-bounds.md",
+      "sha256": "dce058499ee754eca6371471944dcc1e27083d7fcddeaa64dc277b2063a76a46",
+      "depth": "contract read",
+      "reviewed_lines": "full",
+      "observation": "Foundation order and native observation/acquisition limits retained.",
+      "unresolved": "Contract review is not full implementation verification."
+    },
+    {
+      "path": "docs/decisions/0023-offline-acquisition-custody.md",
+      "sha256": "d298eb5ee6503e6752d6683b4b01f86da39fc888cf8f8e0a313ca74c6df70bfe",
+      "depth": "contract read",
+      "reviewed_lines": "full",
+      "observation": "Foundation order and native observation/acquisition limits retained.",
+      "unresolved": "Contract review is not full implementation verification."
+    },
+    {
+      "path": "docs/decisions/0024-bounded-https-material-capture.md",
+      "sha256": "8c4c917231f8dc2df246726d72181c36ae38157fe2a5d2960554c898863bf79e",
+      "depth": "contract read",
+      "reviewed_lines": "full",
+      "observation": "Foundation order and native observation/acquisition limits retained.",
+      "unresolved": "Contract review is not full implementation verification."
+    },
+    {
+      "path": "etzio/analysis/python_sast.py",
+      "sha256": "a38634e7ea15d8ce15223fc0fc9786c88b3003c9c439c8f0a6e525c94eafb24b",
+      "depth": "full source",
+      "reviewed_lines": "1-195",
+      "observation": "Six AST rule classes produce candidates, not executed effects.",
+      "unresolved": "No interprocedural or EVM discovery capability established."
+    },
+    {
+      "path": "etzio/scan.py",
+      "sha256": "d5ef8304752d0fed89d520a9fbc10b9826e7a89d81c0aabbc576eac1665908c5",
+      "depth": "sampled source",
+      "reviewed_lines": "1-210",
+      "observation": "Fixture-only CLI and modeled workflow.",
+      "unresolved": "No alternate entrypoint audit."
+    },
+    {
+      "path": "etzio/authority.py",
+      "sha256": "accca37d13b9e4bde9fe385f4e7db88e764695c4352eec75e6a407e5821c4225",
+      "depth": "sampled source",
+      "reviewed_lines": "766-852",
+      "observation": "Signed grant checks include scope, actions and time; underlying real authority is external.",
+      "unresolved": "Crypto implementation and all coercion paths not re-audited."
+    },
+    {
+      "path": "etzio/kernel/receipt_admission.py",
+      "sha256": "e6dc30270c3b1b02d2aac688a710ae1d4b63e8d4a5c9c619fed36b3976f39d04",
+      "depth": "sampled source",
+      "reviewed_lines": "630-735",
+      "observation": "Active lease, authenticated receipt and retained artifacts bind modeled result.",
+      "unresolved": "No independently observed target execution."
+    },
+    {
+      "path": "etzio/kernel/qualified_lifecycle_v1.py",
+      "sha256": "7cff73b4a3f3c96cfe1ed33c9e60d72d77a6d29521018a655b200ac250ef7f81",
+      "depth": "sampled source",
+      "reviewed_lines": "1-95,129-192,336-450",
+      "observation": "Signed fixture provider reconstruction and scope; native formats remain separate.",
+      "unresolved": "Whole composition/state space not re-proved."
+    },
+    {
+      "path": "etzio/kernel/store.py",
+      "sha256": "724e1258f156200d0c74cd9b7cd23924fefd18244f4b1985ac81bd7ca4b08ccc",
+      "depth": "sampled source",
+      "reviewed_lines": "330-365,5155-5225,5920-5988,6467-6540",
+      "observation": "Explicit pathname limitation, pending enrollment and profile/finalization checks.",
+      "unresolved": "Same-user pathname race and coherent offline rewrite remain documented open boundaries."
+    },
+    {
+      "path": "tests/test_scan_cli.py",
+      "sha256": "03019f00601866a0d08c870cbe9580230ef54f0af27acb034581e5a9e0a5e87f",
+      "depth": "full test source",
+      "reviewed_lines": "full",
+      "observation": "Arbitrary target selection refused; owned fixture behavior tested.",
+      "unresolved": "Not a third-party scanner test."
+    },
+    {
+      "path": "tests/test_qualified_cold_replay_v1.py",
+      "sha256": "04ea688e119d34a59553b7617591b78175f952a31eb6c872fe43d01cfdbccd5b",
+      "depth": "test inventory plus selected controls",
+      "reviewed_lines": "150-172 and test names",
+      "observation": "Forged fixture provider/coherent rewritten mappings refused.",
+      "unresolved": "Not external witness independence."
+    },
+    {
+      "path": "tests/test_blocked_finality_composition_v1.py",
+      "sha256": "c66cfc62df3cb690ed3c631fa2110e93e1b179b8c82bbac06821fc154e45ee5e",
+      "depth": "test inventory plus selected control",
+      "reviewed_lines": "140-178 and test names",
+      "observation": "Interruption requires a new current-phase recovery decision.",
+      "unresolved": "Process injection does not qualify physical durability."
+    },
+    {
+      "path": "tests/test_https_capture_v1.py",
+      "sha256": "a9bae59cc0ad53a40db8136cd8e27795b9f3dc31ec9863301fd6dc1481bcca05",
+      "depth": "test inventory plus selected controls",
+      "reviewed_lines": "154-175,340-353 and test names",
+      "observation": "Owned TLS once-only behavior and unacknowledged-plan refusal.",
+      "unresolved": "Owned TLS success does not diagnose spent external transport failure."
+    },
+    {
+      "path": "scripts/ci/verify.sh",
+      "sha256": "a66bf65cf5bbbcec774b1a72715e3a8dea1348be902523bd3667dc7c30d48de9",
+      "depth": "full source",
+      "reviewed_lines": "full",
+      "observation": "Runtime identity, policy, lint, tests, state model and owned fixtures.",
+      "unresolved": "No target/discovery benchmark in this result."
+    },
+    {
+      "path": "Makefile",
+      "sha256": "490e139bf70b5f3c4c658dce69d3a9ee587a3db1352ba00b4223b7248516de61",
+      "depth": "full source",
+      "reviewed_lines": "full",
+      "observation": "Verification entrypoint and build targets.",
+      "unresolved": "Build entrypoint not executed for third-party code."
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "f110b62c6db370326ed8b8ec242e3a48ea9bb8b3f804ea1db4c9eb92ec14eaf9",
+      "depth": "full workflow",
+      "reviewed_lines": "full",
+      "observation": "Exact candidate two-runtime jobs, wheel smoke and retained logs.",
+      "unresolved": "Remote candidate success must be checked after publication."
+    },
+    {
+      "path": "scripts/validate_repository.py",
+      "sha256": "712542ab02f372b6196749d2bddb10aa69c7086fd09a892609723e6ef324374c",
+      "depth": "search and selected policy logic",
+      "reviewed_lines": "link/artifact policy search",
+      "observation": "Policy also sees ignored markdown; raw external documents retained as inert text.",
+      "unresolved": "Not a full policy validator audit."
+    }
+  ],
+  "locked_environment": {
+    "python": "3.11.15",
+    "locked_distributions_checked": 37,
+    "pip_check": "pass"
+  },
+  "unchanged_baseline": {
+    "passed": 2246,
+    "seconds": 857.0,
+    "exit": 0,
+    "log": "artifacts/checkpoints/2026-10-11-decision-packet/baseline-verify.log",
+    "sha256": "f5664e305ca8b3fb58e178fd0ddca56f3c61da522c369bc96e0fcbd926b377c9"
+  },
+  "unreviewed_or_partial": [
+    "Complete protocol/crypto/schema source audit and exhaustive alternate-entrypoint analysis.",
+    "All native qualification codec internals and dependency source code.",
+    "Formal model completeness versus implementation and every failure interleaving.",
+    "Physical power loss, production devices, provider administration and live external latest-head recovery.",
+    "Target discovery performance and end-to-end independent execution."
+  ],
+  "conclusion": "Architecture retained; native/external evidence is next bottleneck. No new Etzio vulnerability or performance advantage established.",
+  "new_runtime_behavior": false
+}

@@ -1,0 +1,940 @@
+{
+  "schema": "etzio.cow-source-dossier.v1",
+  "date": "2026-10-11",
+  "status": "documentary_not_admitted",
+  "source_manifest": {
+    "schema": "etzio.cow-source-capture.v1",
+    "status": "documentary_only",
+    "date": "2026-10-11",
+    "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+    "listed_contract_paths": [
+      "src/contracts/GPv2AllowListAuthentication.sol",
+      "src/contracts/GPv2Settlement.sol",
+      "src/contracts/interfaces/GPv2Authentication.sol",
+      "src/contracts/interfaces/GPv2EIP1271.sol",
+      "src/contracts/libraries/GPv2EIP1967.sol",
+      "src/contracts/libraries/GPv2Interaction.sol",
+      "src/contracts/libraries/GPv2Order.sol",
+      "src/contracts/libraries/GPv2SafeERC20.sol",
+      "src/contracts/libraries/GPv2Trade.sol",
+      "src/contracts/libraries/GPv2Transfer.sol",
+      "src/contracts/mixins/GPv2Signing.sol",
+      "src/contracts/mixins/StorageAccessible.sol"
+    ],
+    "source_paths": [
+      "src/contracts/GPv2AllowListAuthentication.sol",
+      "src/contracts/GPv2Settlement.sol",
+      "src/contracts/GPv2VaultRelayer.sol",
+      "src/contracts/interfaces/GPv2Authentication.sol",
+      "src/contracts/interfaces/GPv2EIP1271.sol",
+      "src/contracts/interfaces/IERC20.sol",
+      "src/contracts/interfaces/IVault.sol",
+      "src/contracts/libraries/GPv2EIP1967.sol",
+      "src/contracts/libraries/GPv2Interaction.sol",
+      "src/contracts/libraries/GPv2Order.sol",
+      "src/contracts/libraries/GPv2SafeERC20.sol",
+      "src/contracts/libraries/GPv2Trade.sol",
+      "src/contracts/libraries/GPv2Transfer.sol",
+      "src/contracts/libraries/SafeCast.sol",
+      "src/contracts/libraries/SafeMath.sol",
+      "src/contracts/mixins/GPv2Signing.sol",
+      "src/contracts/mixins/Initializable.sol",
+      "src/contracts/mixins/ReentrancyGuard.sol",
+      "src/contracts/mixins/StorageAccessible.sol"
+    ],
+    "imports": [
+      {
+        "from": "src/contracts/GPv2AllowListAuthentication.sol",
+        "import": "./interfaces/GPv2Authentication.sol",
+        "resolved_path": "src/contracts/interfaces/GPv2Authentication.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2AllowListAuthentication.sol",
+        "import": "./libraries/GPv2EIP1967.sol",
+        "resolved_path": "src/contracts/libraries/GPv2EIP1967.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2AllowListAuthentication.sol",
+        "import": "./mixins/Initializable.sol",
+        "resolved_path": "src/contracts/mixins/Initializable.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2AllowListAuthentication.sol",
+        "import": "./mixins/StorageAccessible.sol",
+        "resolved_path": "src/contracts/mixins/StorageAccessible.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./GPv2VaultRelayer.sol",
+        "resolved_path": "src/contracts/GPv2VaultRelayer.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./interfaces/GPv2Authentication.sol",
+        "resolved_path": "src/contracts/interfaces/GPv2Authentication.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./interfaces/IERC20.sol",
+        "resolved_path": "src/contracts/interfaces/IERC20.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./interfaces/IVault.sol",
+        "resolved_path": "src/contracts/interfaces/IVault.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./libraries/GPv2Interaction.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Interaction.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./libraries/GPv2Order.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Order.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./libraries/GPv2Trade.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Trade.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./libraries/GPv2Transfer.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Transfer.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./libraries/SafeCast.sol",
+        "resolved_path": "src/contracts/libraries/SafeCast.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./libraries/SafeMath.sol",
+        "resolved_path": "src/contracts/libraries/SafeMath.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./mixins/GPv2Signing.sol",
+        "resolved_path": "src/contracts/mixins/GPv2Signing.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./mixins/ReentrancyGuard.sol",
+        "resolved_path": "src/contracts/mixins/ReentrancyGuard.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2Settlement.sol",
+        "import": "./mixins/StorageAccessible.sol",
+        "resolved_path": "src/contracts/mixins/StorageAccessible.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2Order.sol",
+        "import": "../interfaces/IERC20.sol",
+        "resolved_path": "src/contracts/interfaces/IERC20.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2SafeERC20.sol",
+        "import": "../interfaces/IERC20.sol",
+        "resolved_path": "src/contracts/interfaces/IERC20.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2Trade.sol",
+        "import": "../interfaces/IERC20.sol",
+        "resolved_path": "src/contracts/interfaces/IERC20.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2Trade.sol",
+        "import": "../mixins/GPv2Signing.sol",
+        "resolved_path": "src/contracts/mixins/GPv2Signing.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2Trade.sol",
+        "import": "./GPv2Order.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Order.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2Transfer.sol",
+        "import": "../interfaces/IERC20.sol",
+        "resolved_path": "src/contracts/interfaces/IERC20.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2Transfer.sol",
+        "import": "../interfaces/IVault.sol",
+        "resolved_path": "src/contracts/interfaces/IVault.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2Transfer.sol",
+        "import": "./GPv2Order.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Order.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/libraries/GPv2Transfer.sol",
+        "import": "./GPv2SafeERC20.sol",
+        "resolved_path": "src/contracts/libraries/GPv2SafeERC20.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/mixins/GPv2Signing.sol",
+        "import": "../interfaces/GPv2EIP1271.sol",
+        "resolved_path": "src/contracts/interfaces/GPv2EIP1271.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/mixins/GPv2Signing.sol",
+        "import": "../libraries/GPv2Order.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Order.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/mixins/GPv2Signing.sol",
+        "import": "../libraries/GPv2Trade.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Trade.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2VaultRelayer.sol",
+        "import": "./interfaces/IERC20.sol",
+        "resolved_path": "src/contracts/interfaces/IERC20.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2VaultRelayer.sol",
+        "import": "./interfaces/IVault.sol",
+        "resolved_path": "src/contracts/interfaces/IVault.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/GPv2VaultRelayer.sol",
+        "import": "./libraries/GPv2Transfer.sol",
+        "resolved_path": "src/contracts/libraries/GPv2Transfer.sol",
+        "present_in_tree": true
+      },
+      {
+        "from": "src/contracts/interfaces/IVault.sol",
+        "import": "./IERC20.sol",
+        "resolved_path": "src/contracts/interfaces/IERC20.sol",
+        "present_in_tree": true
+      }
+    ],
+    "captures": [
+      {
+        "upstream_path": "src/contracts/GPv2AllowListAuthentication.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/GPv2AllowListAuthentication.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:16.776884+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 3683,
+        "sha256": "e2ac5672b4a9cb9133bc609341b0cac7be09f9e6f50a49bd5853aba6b6448013",
+        "git_blob_sha1": "205ca0bb7fb413305c7b00a275a0ee0e7d384082",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__GPv2AllowListAuthentication.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/GPv2Settlement.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/GPv2Settlement.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:17.266543+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 18363,
+        "sha256": "b1d281fc7934ce0baae7169cd6208d646486ed437b5f17d0d8b19fad9496c84c",
+        "git_blob_sha1": "55166d39f23f5d5c2054acac0fd761634eac4c12",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__GPv2Settlement.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/interfaces/GPv2Authentication.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/interfaces/GPv2Authentication.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:17.742138+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 506,
+        "sha256": "f4278cb9688dd720ceca6bf5ed83d8793c05ca439352542c4e3a3fe7aa6dc335",
+        "git_blob_sha1": "37ee0c7a0afb556ca141fae15974dca336941d74",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__interfaces__GPv2Authentication.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/interfaces/GPv2EIP1271.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/interfaces/GPv2EIP1271.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:18.214130+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 1285,
+        "sha256": "0205c5d6dbaac3d08da135e7dede23130767899a588fa29dda61da0cfaca4c48",
+        "git_blob_sha1": "79f5b4391d2cb87e591b55c18107c066d6221d3a",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__interfaces__GPv2EIP1271.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/libraries/GPv2EIP1967.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/libraries/GPv2EIP1967.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:18.677109+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 1243,
+        "sha256": "af859c78d3a45b8a28407d2450aec39073622de9abf09ad449332b63af10b01a",
+        "git_blob_sha1": "d74008d39f6032536a6cd852aa5495a8fa69db24",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__libraries__GPv2EIP1967.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/libraries/GPv2Interaction.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/libraries/GPv2Interaction.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:19.294480+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 2941,
+        "sha256": "571eec47e6ba6fc30d45b9551e9118e85c71a27027dfe747ab40736b21d0de40",
+        "git_blob_sha1": "0c247f9a4f084c94657e6662bb9477f4230ca532",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__libraries__GPv2Interaction.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/libraries/GPv2Order.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/libraries/GPv2Order.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:19.866156+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 10152,
+        "sha256": "3a981f33f50f0ac34f8aacd04d038ab16e33aa5402d97788022f2d64a25de089",
+        "git_blob_sha1": "a7eee11582503173628382e5e203a054c6393877",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__libraries__GPv2Order.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/libraries/GPv2SafeERC20.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/libraries/GPv2SafeERC20.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:20.332033+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 5616,
+        "sha256": "cc9b9d515302b2a20e2a9c9509f1c07c27ef2ffcdf44a951bc35c391a36e627d",
+        "git_blob_sha1": "ff7ff6461ee4e00e4d21da9b03be17760e57e98f",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__libraries__GPv2SafeERC20.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/libraries/GPv2Trade.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/libraries/GPv2Trade.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:20.772385+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 5406,
+        "sha256": "8c6412cbe6427027471057737c332c7be93192f93a473498ce82ba87318502dc",
+        "git_blob_sha1": "b914eed5123d087b4e1a71fe9432f2022e927877",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__libraries__GPv2Trade.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/libraries/GPv2Transfer.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/libraries/GPv2Transfer.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:21.221061+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 7899,
+        "sha256": "b7684a5369f99bda309695a783f091f5e79c0a7571a95b5af2a7feec99a75c73",
+        "git_blob_sha1": "f30d53798036ece80a245cb72753f12e77c25981",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__libraries__GPv2Transfer.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/mixins/GPv2Signing.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/mixins/GPv2Signing.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:21.668973+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 12253,
+        "sha256": "dc678895f9eb4cef3910f88621d99496da0daa5d14866e23a16b7cbb4e847a19",
+        "git_blob_sha1": "7839ae8e83a3320f56fa96720cd01f07bb5b9395",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__mixins__GPv2Signing.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/mixins/StorageAccessible.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/mixins/StorageAccessible.sol",
+        "category": "listed_scope",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:22.139399+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 4560,
+        "sha256": "b5addb6d45ce3f8761a6ed313d6fc19d70e16ee90842cf4b4e0cbc892cf575ea",
+        "git_blob_sha1": "0dd466fbc80def2e2f8bb550e7b622d0c0b524a9",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__mixins__StorageAccessible.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/mixins/Initializable.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/mixins/Initializable.sol",
+        "category": "source_import",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:22.579058+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 2410,
+        "sha256": "28985eaa767edab912d7d510dedb4fa959fb8c9826214ad4a4becb2297372225",
+        "git_blob_sha1": "51aa400a1ee6b1f3500bce8ff35db4d88dffebc2",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__mixins__Initializable.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/GPv2VaultRelayer.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/GPv2VaultRelayer.sol",
+        "category": "source_import",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:23.023797+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 4607,
+        "sha256": "46ea87f97de75f0c10defc36c6f42eb35e9f7aa9013d9870f9084cc31a714290",
+        "git_blob_sha1": "0da28bf76bb66b46ce045d19483c611ea828d781",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__GPv2VaultRelayer.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/interfaces/IERC20.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/interfaces/IERC20.sol",
+        "category": "source_import",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:23.460905+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 3457,
+        "sha256": "4383de120427ca057b6f4460f0bd4efd1af61a2426c8de61df7d4222b6fe9875",
+        "git_blob_sha1": "002841cb7d1709c7a300f83287b4f513f61d34ae",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__interfaces__IERC20.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/interfaces/IVault.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/interfaces/IVault.sol",
+        "category": "source_import",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:23.896105+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 1799,
+        "sha256": "36a1e773c29d623a9a0a8eb4359f78cd1884a6b3d0c73ec0b67da2bf1b62edd3",
+        "git_blob_sha1": "bacffd76da831422fb9862ce8e94b473c95c00df",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__interfaces__IVault.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/libraries/SafeCast.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/libraries/SafeCast.sol",
+        "category": "source_import",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:24.350456+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 1825,
+        "sha256": "dcd4a0cdbae1d30111d4ab7461ad40f39cff1976bd670f5c09f3f4acc044af71",
+        "git_blob_sha1": "14d0547e5b810ebf98e842623eaac6154518e947",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__libraries__SafeCast.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/libraries/SafeMath.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/libraries/SafeMath.sol",
+        "category": "source_import",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:24.807799+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 2843,
+        "sha256": "124d9a33d584294a084934d0e75b9b4f281521cb98854ac52ae5be6390885c2f",
+        "git_blob_sha1": "e2a650b6853edf080d4f196a2a67236ced252610",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__libraries__SafeMath.sol.source.txt"
+      },
+      {
+        "upstream_path": "src/contracts/mixins/ReentrancyGuard.sol",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/src/contracts/mixins/ReentrancyGuard.sol",
+        "category": "source_import",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:25.266001+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 2820,
+        "sha256": "c78e860bcacb5cbd1243c08fb7a2f5a89e26aa82e6418d78d13fde3704d22409",
+        "git_blob_sha1": "0363b9d0171c0aa284aaaf214859845691b775c9",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/src__contracts__mixins__ReentrancyGuard.sol.source.txt"
+      },
+      {
+        "upstream_path": "LICENSE",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/LICENSE",
+        "category": "build_or_license",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:25.718515+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 7652,
+        "sha256": "e3a994d82e644b03a792a930f574002658412f62407f5fee083f2555c5f23118",
+        "git_blob_sha1": "0a041280bd00a9d068f503b8ee7ce35214bd24a1",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/LICENSE.source.txt"
+      },
+      {
+        "upstream_path": "package.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/package.json",
+        "category": "build_or_license",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:26.176004+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 2855,
+        "sha256": "91e74e56e4ac7579b8b9ac86a73741981273a47fa64cb4c477116cc5ca25029f",
+        "git_blob_sha1": "6db8e12072c6cf5b0b3f5a3d876a440e6ebe1722",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/package.json.source.txt"
+      },
+      {
+        "upstream_path": "yarn.lock",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/yarn.lock",
+        "category": "build_or_license",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:26.634058+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 647764,
+        "sha256": "d52720ead0bafb132817ecfb69cfb07a7420bc936678b875f415ae7badc26875",
+        "git_blob_sha1": "df7394246357c9e2e23428a28e423a29ea8ad55e",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/yarn.lock.source.txt"
+      },
+      {
+        "upstream_path": "hardhat.config.ts",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/hardhat.config.ts",
+        "category": "build_or_license",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:27.492315+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 3221,
+        "sha256": "8d9aa1a8db582130926527b81f07deac1b90c500fe8a605319dc0ca1582438fc",
+        "git_blob_sha1": "cb0356131665be31abc58fe4558732a7fd4a3ee2",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/hardhat.config.ts.source.txt"
+      },
+      {
+        "upstream_path": "deployments/mainnet/.chainId",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/mainnet/.chainId",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:27.950223+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 1,
+        "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        "git_blob_sha1": "56a6051ca2b02b04ef92d5150c9ef600403cb1de",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__mainnet__.chainId.source.txt"
+      },
+      {
+        "upstream_path": "deployments/mainnet/GPv2AllowListAuthentication.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/mainnet/GPv2AllowListAuthentication.json",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:28.399709+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 82787,
+        "sha256": "a6a3cafe53a7319aca01fb883c25301234fc3cec76a8f6778aa14743e52e7f75",
+        "git_blob_sha1": "a305598178b77899c1b262e64939327c8f17084a",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__mainnet__GPv2AllowListAuthentication.json.source.txt"
+      },
+      {
+        "upstream_path": "deployments/mainnet/GPv2AllowListAuthentication_Implementation.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/mainnet/GPv2AllowListAuthentication_Implementation.json",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:28.994140+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 58421,
+        "sha256": "9ebe2179251e7380e24177cbd667439e525b863e3872da5d01261d32f219e128",
+        "git_blob_sha1": "be660172c59fc7b60653700752be94fa5bf00f09",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__mainnet__GPv2AllowListAuthentication_Implementation.json.source.txt"
+      },
+      {
+        "upstream_path": "deployments/mainnet/GPv2AllowListAuthentication_Proxy.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/mainnet/GPv2AllowListAuthentication_Proxy.json",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:29.562441+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 23215,
+        "sha256": "7ebb8254b5c995745cb3941e3181c89b027505c87b3b12e0231805d0210089c6",
+        "git_blob_sha1": "f44897629ac14d09ec74143050304c94a267681a",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__mainnet__GPv2AllowListAuthentication_Proxy.json.source.txt"
+      },
+      {
+        "upstream_path": "deployments/mainnet/GPv2Settlement.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/mainnet/GPv2Settlement.json",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:30.042928+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 154263,
+        "sha256": "9ee875b229d184789fd9b5d71e0a28ae01d704cb84d171eddc8a2690f76a7a04",
+        "git_blob_sha1": "0582c43839b24a0f654fb23dbce7a6cb597e048d",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__mainnet__GPv2Settlement.json.source.txt"
+      },
+      {
+        "upstream_path": "deployments/xdai/.chainId",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/xdai/.chainId",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:30.765284+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 3,
+        "sha256": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+        "git_blob_sha1": "105d7d9ad3afc7bb78a0dec4d829880831605dfb",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__xdai__.chainId.source.txt"
+      },
+      {
+        "upstream_path": "deployments/xdai/GPv2AllowListAuthentication.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/xdai/GPv2AllowListAuthentication.json",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:31.234832+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 85401,
+        "sha256": "695926f083ccc2466af8c7ad1c0bc44b566c60f694cba09942efe04c94029ae4",
+        "git_blob_sha1": "208f09ea0096a414e840664da96061b671f1a221",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__xdai__GPv2AllowListAuthentication.json.source.txt"
+      },
+      {
+        "upstream_path": "deployments/xdai/GPv2AllowListAuthentication_Implementation.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/xdai/GPv2AllowListAuthentication_Implementation.json",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:31.828478+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 58419,
+        "sha256": "507a99dbd67f3d7ff34ea1eaeff04ff505ac8600c04b796a8627e0afee17c2ce",
+        "git_blob_sha1": "b60ac487cc1d28828b7a96ee0af392d2aece2cc1",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__xdai__GPv2AllowListAuthentication_Implementation.json.source.txt"
+      },
+      {
+        "upstream_path": "deployments/xdai/GPv2AllowListAuthentication_Proxy.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/xdai/GPv2AllowListAuthentication_Proxy.json",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:32.394347+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 23208,
+        "sha256": "18860472b4e6b98c9f986ca32d52eec19ccfbf7e2fd57998816fe6e6c996ea15",
+        "git_blob_sha1": "df4cb865ca5d38a62a0497156100afd967071e53",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__xdai__GPv2AllowListAuthentication_Proxy.json.source.txt"
+      },
+      {
+        "upstream_path": "deployments/xdai/GPv2Settlement.json",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/deployments/xdai/GPv2Settlement.json",
+        "category": "published_deployment_record",
+        "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+        "retrieved_at_host_clock": "2026-10-11T05:38:32.865544+00:00",
+        "http_status": 200,
+        "status": "retained_git_blob_matches",
+        "size_bytes": 154263,
+        "sha256": "fde9d633d9daf8e052c4c897944ce5711e9dfe5dde02bf9399f9b9c406110cd6",
+        "git_blob_sha1": "30ae248c62fca6311eae0b3ecaab30181e12462c",
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/deployments__xdai__GPv2Settlement.json.source.txt"
+      }
+    ],
+    "no_code_executed": true,
+    "deployed_state_independently_verified": false
+  },
+  "index_manifest": {
+    "main_commit": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+    "audit_index": [
+      {
+        "path": "audits",
+        "mode": "040000",
+        "type": "tree",
+        "sha": "4af7276d5756372545ebcf6b47625cd90c09fa48",
+        "url": "https://api.github.com/repos/cowprotocol/contracts/git/trees/4af7276d5756372545ebcf6b47625cd90c09fa48"
+      },
+      {
+        "path": "audits/GnosisProtocolV2May2021.pdf",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "45079a56d05d069c1b7e597447d9d3c639535f0e",
+        "size": 321918,
+        "url": "https://api.github.com/repos/cowprotocol/contracts/git/blobs/45079a56d05d069c1b7e597447d9d3c639535f0e"
+      },
+      {
+        "path": "audits/[Cowswap_10122021]SCAudit_Report_2.pdf",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0a97c3a861a420dbe1d90a423645c3c2eae2de18",
+        "size": 304503,
+        "url": "https://api.github.com/repos/cowprotocol/contracts/git/blobs/0a97c3a861a420dbe1d90a423645c3c2eae2de18"
+      }
+    ],
+    "captures": [
+      {
+        "name": "current-main",
+        "url": "https://api.github.com/repos/cowprotocol/contracts/commits/main",
+        "retrieved_at_host_clock": "2026-10-11T05:40:08.039177+00:00",
+        "http_status": 200,
+        "status": "retained",
+        "sha256": "7e6855490ac18b9771df1a0495c546c53968ec3099b59637dff01519efe14de8",
+        "size_bytes": 33375,
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/current-main.source.txt"
+      },
+      {
+        "name": "current-tree",
+        "url": "https://api.github.com/repos/cowprotocol/contracts/git/trees/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8?recursive=1",
+        "retrieved_at_host_clock": "2026-10-11T05:40:08.615975+00:00",
+        "http_status": 200,
+        "status": "retained",
+        "sha256": "adc40c06139de82ff8ac6d51a62e8a6cd202eb5552e34d87d5c95528a1e113cc",
+        "size_bytes": 71658,
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/current-tree.source.txt"
+      },
+      {
+        "name": "current-readme",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/c07a93e3596194c5e3cf331c755a3f9f0e4a17d8/README.md",
+        "retrieved_at_host_clock": "2026-10-11T05:40:09.215259+00:00",
+        "http_status": 200,
+        "status": "retained",
+        "sha256": "48fe2b565c89b902cd4392cce82e09a1ff9a5f2171ad403202d0561d0534a7f2",
+        "size_bytes": 4634,
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/current-readme.source.txt"
+      },
+      {
+        "name": "issues-first-100",
+        "url": "https://api.github.com/repos/cowprotocol/contracts/issues?state=all&per_page=100&sort=updated&direction=desc",
+        "retrieved_at_host_clock": "2026-10-11T05:40:09.689143+00:00",
+        "http_status": 200,
+        "status": "retained",
+        "sha256": "2c8648404c68d88578dbfa17ba51c4c4f7a8e05888105eecff87165eef4c2bf2",
+        "size_bytes": 696815,
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/issues-first-100.source.txt"
+      },
+      {
+        "name": "historical-networks",
+        "url": "https://raw.githubusercontent.com/cowprotocol/contracts/6ebbd810ff2da635fb6f88e9a15fde196f8c852a/networks.json",
+        "retrieved_at_host_clock": "2026-10-11T05:40:10.694096+00:00",
+        "http_status": 200,
+        "status": "retained",
+        "sha256": "37ece3e40ee5ecb5e3fd6ec28b5cf92e71409d424c43e71ae70bb21f5e428915",
+        "size_bytes": 2833,
+        "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/historical-networks.source.txt"
+      }
+    ]
+  },
+  "results": {
+    "schema": "etzio.cow-documentary-results.v1",
+    "date": "2026-10-11",
+    "status": "source_closure_retained_deployment_mapping_unresolved",
+    "commit": "6ebbd810ff2da635fb6f88e9a15fde196f8c852a",
+    "listed_paths": 12,
+    "source_closure_files": 19,
+    "parsed_import_edges": 33,
+    "pinned_blob_files": 33,
+    "all_pinned_blobs_match": true,
+    "documentary_controls": [
+      {
+        "case": "unmodified_pinned_material",
+        "result": "retained_source_closure_pass"
+      },
+      {
+        "case": "changed_source_byte",
+        "result": "retained_identity_mismatch",
+        "expected_refusal": true
+      },
+      {
+        "case": "missing_imported_dependency",
+        "result": "missing_retained_file",
+        "expected_refusal": true
+      },
+      {
+        "case": "source_path_substitution",
+        "result": "retained_identity_mismatch",
+        "expected_refusal": true
+      }
+    ],
+    "control_limit": "One-off local evidence checks; not a Solidity parser, target execution, kernel admission or independent reproduction. Regex imports checked against these concrete source lines.",
+    "advertised_unique_addresses": [
+      "0x9008d19f58aabd9ed0d60971565aa8510560ab41",
+      "0x9e7ae8bdba9aa346739792d219a808884996db67",
+      "0xc92e8bdf79f0507f65a392b0ab4667716bfe0110",
+      "0x2c4c28ddbdac9c5e7055b4c863b72ea0149d8afe"
+    ],
+    "historical_deployment_records": [
+      {
+        "path": "deployments/mainnet/GPv2AllowListAuthentication.json",
+        "address": "0xbbfB9a525ACdd2aB3A5Eb5fc9Ab8CF53b881000e",
+        "compiler": {
+          "version": "0.7.1+commit.f4a555be"
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 2000
+        },
+        "runtime_bytes": 1830
+      },
+      {
+        "path": "deployments/mainnet/GPv2AllowListAuthentication_Implementation.json",
+        "address": "0xFeDbc87123caF3925145e1bD1Be844c03b36722f",
+        "compiler": {
+          "version": "0.7.6+commit.7338295f"
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 1000000
+        },
+        "runtime_bytes": 3677
+      },
+      {
+        "path": "deployments/mainnet/GPv2AllowListAuthentication_Proxy.json",
+        "address": "0xbbfB9a525ACdd2aB3A5Eb5fc9Ab8CF53b881000e",
+        "compiler": {
+          "version": "0.7.1+commit.f4a555be"
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 2000
+        },
+        "runtime_bytes": 1830
+      },
+      {
+        "path": "deployments/mainnet/GPv2Settlement.json",
+        "address": "0x3328f5f2cEcAF00a2443082B657CedEAf70bfAEf",
+        "compiler": {
+          "version": "0.7.6+commit.7338295f"
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 1000000
+        },
+        "runtime_bytes": 11175
+      },
+      {
+        "path": "deployments/xdai/GPv2AllowListAuthentication.json",
+        "address": "0xbbfB9a525ACdd2aB3A5Eb5fc9Ab8CF53b881000e",
+        "compiler": {
+          "version": "0.7.1+commit.f4a555be"
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 2000
+        },
+        "runtime_bytes": 1830
+      },
+      {
+        "path": "deployments/xdai/GPv2AllowListAuthentication_Implementation.json",
+        "address": "0xFeDbc87123caF3925145e1bD1Be844c03b36722f",
+        "compiler": {
+          "version": "0.7.6+commit.7338295f"
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 1000000
+        },
+        "runtime_bytes": 3677
+      },
+      {
+        "path": "deployments/xdai/GPv2AllowListAuthentication_Proxy.json",
+        "address": "0xbbfB9a525ACdd2aB3A5Eb5fc9Ab8CF53b881000e",
+        "compiler": {
+          "version": "0.7.1+commit.f4a555be"
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 2000
+        },
+        "runtime_bytes": 1830
+      },
+      {
+        "path": "deployments/xdai/GPv2Settlement.json",
+        "address": "0x3328f5f2cEcAF00a2443082B657CedEAf70bfAEf",
+        "compiler": {
+          "version": "0.7.6+commit.7338295f"
+        },
+        "optimizer": {
+          "enabled": true,
+          "runs": 1000000
+        },
+        "runtime_bytes": 11175
+      }
+    ],
+    "historical_address_overlap": [],
+    "address_comparison_result": "refuse_source_to_deployed_identity_claim",
+    "comparison_limit": "Historical repository records only; mismatch does not prove contract source differs or that program scope is invalid. No chain query or bytecode build.",
+    "audit_index_at": "c07a93e3596194c5e3cf331c755a3f9f0e4a17d8",
+    "audit_files": [
+      {
+        "path": "audits/GnosisProtocolV2May2021.pdf",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "45079a56d05d069c1b7e597447d9d3c639535f0e",
+        "size": 321918,
+        "url": "https://api.github.com/repos/cowprotocol/contracts/git/blobs/45079a56d05d069c1b7e597447d9d3c639535f0e"
+      },
+      {
+        "path": "audits/[Cowswap_10122021]SCAudit_Report_2.pdf",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0a97c3a861a420dbe1d90a423645c3c2eae2de18",
+        "size": 304503,
+        "url": "https://api.github.com/repos/cowprotocol/contracts/git/blobs/0a97c3a861a420dbe1d90a423645c3c2eae2de18"
+      }
+    ],
+    "audit_pdf_contents_reviewed": false,
+    "issue_page_records": 100,
+    "issue_page_non_pr_records": 27,
+    "issue_review_limit": "Single unauthenticated first page, titles and state only. Not complete issue history or deduplication.",
+    "target_code_executions": 0,
+    "chain_requests": 0,
+    "finding_count": 0,
+    "campaign_ready": false
+  },
+  "documentary_checker": {
+    "local_path": "artifacts/checkpoints/2026-10-11-decision-packet/cow/check_documentary_evidence.py",
+    "sha256": "e0da3a0ac63efe76f66304234d8de15f476de92f2f9973195074a412d5072845",
+    "runtime": "Python standard library; own inspection script only",
+    "authority": "Read retained inert bytes and manipulate in-memory documentary controls; no target execution"
+  },
+  "limitations": [
+    "Private ignored bytes are absent from a fresh clone.",
+    "Git blob identity and SHA-256 retain publisher bytes, not source independence or deployment equivalence.",
+    "Source import review covers concrete quoted relative imports, not arbitrary Solidity syntax.",
+    "Audit PDF contents not reviewed; first 100 issue/PR records are incomplete.",
+    "No current chain query, build or independent reproduction."
+  ],
+  "next_step": "Bounded public audit and deployment/source reconciliation; re-rank if not closed within a proposed engineer-day."
+}
