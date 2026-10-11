@@ -1,0 +1,247 @@
+{
+  "schema": "etzio.native-checkpoint-documentary-evidence.v1",
+  "date": "2026-10-11",
+  "status": "implemented_offline_inspection_full_release_results_separate",
+  "baseline_commit": "d076c752c7f1573a60986438f81e1935781ae745",
+  "baseline_release": {
+    "path": "artifacts/checkpoints/2026-10-11-canonicalization-bounds/release-validation.json",
+    "size": 5236,
+    "sha256": "76d1cae968f5ad1e55a1e46c689b2daf0426ae56fd5c0af688c66e5c284b7e05"
+  },
+  "contract": "docs/NATIVE_CHECKPOINT_INSPECTION.md",
+  "implementation": "scripts/inspect_native_checkpoint.py",
+  "tests": "tests/test_native_checkpoint_inspection.py",
+  "focused_test_count": 105,
+  "focused_passes": {
+    "CPython 3.11.15": 105,
+    "CPython 3.14.2": 105
+  },
+  "full_suite_collection_target": 2473,
+  "release_validation_record": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/release-validation.json",
+  "published_note": {
+    "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/published-checkpoint.note",
+    "size": 511,
+    "sha256": "730aceb7d0b32c320eb95ebe5a1d0dd14f2cc24741d9be3ae72bb081e2e24f45"
+  },
+  "caller_pins": {
+    "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/published-pins.json",
+    "size": 383,
+    "sha256": "6d1714dcf314bc70979ff107480cf369cc30ee8212e454f7f379352afc47e1ca"
+  },
+  "key_derivation": "Publisher witness entries are type 0x01. Preserve their exact 32-byte Ed25519 public keys; derive type 0x04 verifier strings and IDs using SHA256(name UTF-8 || LF || 0x04 || public key)[:4]. This encoding conversion is not a new trust enrollment.",
+  "result": {
+    "body_sha256": "3afe4521c05dcd7dccf6260087ca35a8721f2627d15514e674c80f82b4ce5775",
+    "clock_qualified": false,
+    "consistency_checked": false,
+    "expected_origin": "transparency.dev/armored-witness/firmware_transparency/ci/3",
+    "ignored_signature_count": 0,
+    "inclusion_checked": false,
+    "independent_administration_established": false,
+    "input_sha256": "730aceb7d0b32c320eb95ebe5a1d0dd14f2cc24741d9be3ae72bb081e2e24f45",
+    "input_size_bytes": 511,
+    "kernel_authority": false,
+    "latest_head_authority": false,
+    "origin": "transparency.dev/armored-witness/firmware_transparency/ci/3",
+    "provider_admitted": false,
+    "required_signatures": [
+      {
+        "key_id": "3f689522",
+        "name": "transparency.dev-aw-ftlog-ci-3",
+        "public_key_sha256": "b9e2ce2f2a6bdc722dba774080bfd7492ef47431cc756152dd8b83e3c7459fa0",
+        "signature_type": 1,
+        "signature_valid": true,
+        "timestamp_claim": null,
+        "verifier_sha256": "e1c02e77460fb54795b6622dd87fbef88e17727bad687bf4814cd71184da1a28"
+      },
+      {
+        "key_id": "0a78df20",
+        "name": "ArmoredWitness-weathered-rain",
+        "public_key_sha256": "768c9aac6ea5ee9b9c75dd862b70dcb693a2cb37c4ae2f15064e34a1ab260b01",
+        "signature_type": 4,
+        "signature_valid": true,
+        "timestamp_claim": 1729698503,
+        "verifier_sha256": "87de5a57a8eda07a350997001b9cb3a90973bb6f97076a06b67b0ac3b00029d1"
+      },
+      {
+        "key_id": "c7cf0b6d",
+        "name": "ArmoredWitness-floral-sky",
+        "public_key_sha256": "cd02db1cc0488c28245d7c3ff50b3e214334c067f2571e849425146bb6bd173d",
+        "signature_type": 4,
+        "signature_valid": true,
+        "timestamp_claim": 1729698499,
+        "verifier_sha256": "aeb9d9e6fafa70cd7582a0e9153682d752f9595e381849d0c5ca861c8046c005"
+      }
+    ],
+    "root_sha256_hex": "90e14c91e6a621dad814bc79cdb58585f95a93a7651040ce53ef9fc58119301c",
+    "schema": "etzio.offline-native-checkpoint-inspection.v1",
+    "tree_size": 59
+  },
+  "public_note_negative_controls": {
+    "body_changed": {
+      "input_sha256": "00b7dd06f14753609cbe8819d524c6daaf493bc126f50abb1ef030e02bcdeb26",
+      "reason": "signature_invalid"
+    },
+    "required_witness_missing": {
+      "input_sha256": "64323cd661dd7b09027f0c7e60f74c06b3748a1ac96e9e93b5538e5a01590986",
+      "reason": "required_signature_missing"
+    },
+    "witness_signature_changed": {
+      "input_sha256": "1a424b2e0f1c8d664f44713856a1235b8a2850940be3072da8d967f53ee29230",
+      "reason": "signature_invalid"
+    }
+  },
+  "replay_recipe": {
+    "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/replay.py",
+    "size": 2082,
+    "sha256": "ded7861141042d684625820364052d6ad74e99d683ac17d06750862db6d114a2"
+  },
+  "replay_records": [
+    {
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/replay-3.11.15.json",
+      "size": 2587,
+      "sha256": "dbd04b8c4f1ba0578decdd70639cfe70787595901bb494ece89e63b7f3423dc1"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/replay-3.14.2.json",
+      "size": 2586,
+      "sha256": "db1d3b94eb9fa9bef66cf422c56485080a1fed3396da2d52b286657b041aa853"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/config/logs.yaml",
+      "retrieved_host_utc": "2026-10-11T12:40:32.142679+00:00",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/config/logs.yaml",
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/distributor-logs.source.txt",
+      "size": 2695,
+      "sha256": "635349e16e7d0a409a82588efaad742c3271ac2b67347030a80ba5d1212ac04d",
+      "review_depth": "Complete configuration text; selected Ed25519 keys extracted",
+      "publisher": "transparency-dev",
+      "version": "2425092797d5deda65c496d470cf3805558a0b35",
+      "access_boundary": "Public read-only document GET; exact bytes retained privately, no upstream code executed or vendored"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/config/witnesses-ci.yaml",
+      "retrieved_host_utc": "2026-10-11T12:40:32.652700+00:00",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/config/witnesses-ci.yaml",
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/distributor-witnesses-ci.source.txt",
+      "size": 436,
+      "sha256": "bdff634aed3a2fc564eb7de2292dab2200af582f9de4d8c80d251e0fb3750dd0",
+      "review_depth": "Complete configuration text; selected Ed25519 keys extracted",
+      "publisher": "transparency-dev",
+      "version": "2425092797d5deda65c496d470cf3805558a0b35",
+      "access_boundary": "Public read-only document GET; exact bytes retained privately, no upstream code executed or vendored"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/config/witnesses-dev.yaml",
+      "retrieved_host_utc": "2026-10-11T12:40:33.072640+00:00",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/config/witnesses-dev.yaml",
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/distributor-witnesses-dev.source.txt",
+      "size": 505,
+      "sha256": "67dd2f69737f40e74525424b787c889e0a464de5a61f350894573c2f713dc6de",
+      "review_depth": "Complete configuration text; selected Ed25519 keys extracted",
+      "publisher": "transparency-dev",
+      "version": "2425092797d5deda65c496d470cf3805558a0b35",
+      "access_boundary": "Public read-only document GET; exact bytes retained privately, no upstream code executed or vendored"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/config/witnesses-prod.yaml",
+      "retrieved_host_utc": "2026-10-11T12:40:33.470805+00:00",
+      "status": 200,
+      "final_url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/config/witnesses-prod.yaml",
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/distributor-witnesses-prod.source.txt",
+      "size": 1378,
+      "sha256": "5250ada865d9f9860846d8ba8d6dd3fe1d6595070609019005ab604c6e3e72e9",
+      "review_depth": "Complete configuration text; selected Ed25519 keys extracted",
+      "publisher": "transparency-dev",
+      "version": "2425092797d5deda65c496d470cf3805558a0b35",
+      "access_boundary": "Public read-only document GET; exact bytes retained privately, no upstream code executed or vendored"
+    },
+    {
+      "url": "https://c2sp.org/signed-note@v1.1.0",
+      "retrieved_host_utc": "2026-10-11T12:40:34.065789+00:00",
+      "status": 200,
+      "final_url": "https://c2sp.org/signed-note@v1.1.0",
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/signed-note.source.txt",
+      "size": 11228,
+      "sha256": "353c15cb3463149e56e32f2f6b8505179421f99b206d1ea6a6094b4bbbed2976",
+      "review_depth": "Full stable specification text",
+      "publisher": "C2SP",
+      "version": "v1.1.0",
+      "access_boundary": "Public read-only document GET; exact bytes retained privately, no upstream code executed or vendored"
+    },
+    {
+      "url": "https://c2sp.org/tlog-checkpoint@v1.1.0",
+      "retrieved_host_utc": "2026-10-11T12:40:39.785816+00:00",
+      "status": 200,
+      "final_url": "https://c2sp.org/tlog-checkpoint@v1.1.0",
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/tlog-checkpoint.source.txt",
+      "size": 9484,
+      "sha256": "94056be00db3394157836a4275b1511e81ee5f5092505ba238eeb630738a8355",
+      "review_depth": "Full stable specification text",
+      "publisher": "C2SP",
+      "version": "v1.1.0",
+      "access_boundary": "Public read-only document GET; exact bytes retained privately, no upstream code executed or vendored"
+    },
+    {
+      "url": "https://c2sp.org/tlog-cosignature@v1.1.0",
+      "retrieved_host_utc": "2026-10-11T12:40:40.588345+00:00",
+      "status": 200,
+      "final_url": "https://c2sp.org/tlog-cosignature@v1.1.0",
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/tlog-cosignature.source.txt",
+      "size": 14741,
+      "sha256": "1550af3bad33d6edfc3542d5ca173f7d6f09cf8ea089a730289ee01ce7282695",
+      "review_depth": "Full stable specification text",
+      "publisher": "C2SP",
+      "version": "v1.1.0",
+      "access_boundary": "Public read-only document GET; exact bytes retained privately, no upstream code executed or vendored"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/distributor-readme.source.txt",
+      "size": 4133,
+      "sha256": "944d5fada1717e46dbcfcc64928ea11366d66c394523962e26c6b069a17e295e",
+      "url": "https://raw.githubusercontent.com/transparency-dev/distributor/2425092797d5deda65c496d470cf3805558a0b35/README.md",
+      "publisher": "transparency-dev",
+      "version": "2425092797d5deda65c496d470cf3805558a0b35",
+      "revision_committed_at": "2026-10-06T15:34:41Z",
+      "retrieved_host_date": "2026-10-11",
+      "precise_retrieval_time_retained": false,
+      "review_depth": "Complete README; first published checkpoint extracted and all three signatures replayed",
+      "access_boundary": "Public read-only GET; text retained privately, no upstream build or program executed"
+    }
+  ],
+  "research_decisions": [
+    "Use only the stable v1.1.0 Ed25519 historical compatibility subset. The current C2SP recommendation for new deployments is ML-DSA; this does not select a deployment algorithm.",
+    "Pin complete keys and exact origin; require the complete configured roster. Four-byte IDs and unknown signatures confer no authority.",
+    "Timestamped signatures make a historical cosigner declaration, not qualified UTC, independent administration or an external latest-head floor.",
+    "No Merkle proof accompanies this inspection. Existing inclusion/consistency machinery and retained predecessor binding remain separate dependencies.",
+    "ArXiv 1503.08768 was discovered at abstract depth only in this tranche and is not an implementation source. The prior full research/paid-route packet remains docs/PAID_FINDINGS_DECISION_2026-10-11.md."
+  ],
+  "development_observations": [
+    "Initial private signature exploration applied the Ed25519 identifier rule to every configuration key and stopped on an ECDSA entry. Restricted extraction to selected type-0x01 keys; no upstream key defect was established. ECDSA identifiers follow a different rule.",
+    "Initial 102 owned controls passed; three additional resource/order controls bring the final focused suite to 105 on both runtimes.",
+    "Sampled review of native timestamp DER tree/collection/input bounds and typed refusal handling found no new confirmed defect. This was not a complete audit or a demonstrated process-resource bound."
+  ],
+  "claim_boundaries": [
+    "The checkpoint and key material share publisher repository custody; no independent bootstrap or administration proof.",
+    "Historical timestamp claims 1729698503 and 1729698499 are retained exactly; no ambient-time freshness decision.",
+    "An owned validly signed fork passes signature mathematics while consistency and latest-head flags remain false.",
+    "Parser/retention caps are finite subset restrictions, not process isolation or total memory/CPU bounds.",
+    "No native adapter, trust enrollment, lifecycle integration, kernel change, provider-protocol request, inclusion proof or consistency proof.",
+    "Raw public captures and reports are ignored local evidence; a fresh clone lacks those bytes. Tests use repository-owned deterministic fixtures only."
+  ],
+  "original_spent_journal": {
+    "path": "artifacts/acquisition-preparation/2026-10-10-freetsa/custody.sqlite3",
+    "size": 16384,
+    "sha256": "76eaae2a66fed624ad5d053edf085159be4dbdf84674b11ac76c6ed03c36749d"
+  },
+  "followup_accepted": false,
+  "followup_journal_created": false,
+  "provider_protocol_dispatches": 0,
+  "provider_admitted": false,
+  "target_executions": 0,
+  "findings": 0
+}

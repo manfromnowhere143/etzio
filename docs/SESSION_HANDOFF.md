@@ -2,9 +2,44 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-11, Asia/Jerusalem.
 
+## Offline native checkpoint inspection, 2026-10-11
+
+This is the latest recovery summary. The [bounded checkpoint inspector](NATIVE_CHECKPOINT_INSPECTION.md)
+authenticates a published native C2SP Ed25519 checkpoint and timestamped witness
+cosignatures under complete caller pins. All three signatures in the retained 511-byte
+publisher example verify identically on both supported runtimes. Changed body, altered
+witness signature and missing required witness controls refuse. The 105 owned controls
+cover complete-roster enforcement, name/ID collisions, reused keys, framing, resource
+bounds and signed conflicting roots. The [evidence record](evidence/native-checkpoint-inspection-2026-10-11.json)
+preserves stable source versions, exact raw-byte identities and review limitations.
+
+**Boundary:** this is historical signature compatibility. The note and key material share
+publisher repository custody; witness names do not establish independent administration.
+No inclusion/consistency proof, qualified clock, current external floor, provider admission
+or kernel authority follows. The explicit false authority flags also survive a correctly
+signed fork. Existing lifecycle and recovery policy are unchanged. A sampled native DER
+parser review found no new confirmed defect; it was not a complete audit.
+
+Entry was clean published `main` at `d076c752c7f1573a60986438f81e1935781ae745`
+([PR #43](https://github.com/manfromnowhere143/etzio/pull/43)). Its full local/both-runtime CI
+validation was retained earlier in this same session and is reused as the unchanged
+baseline. The new full collection target is `2473`. Resolve completed release validation
+from the exact candidate PR and
+`artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/release-validation.json`.
+Focused passes and collection targets are not full-release passes. Raw documents and
+replay reports remain in that ignored directory; a fresh clone lacks those local bytes.
+
+**Next dependency:** complete native observations, independent provider administration,
+explicit profile admission and retained lifecycle replay still precede external latest-head
+recovery, storage and execution. Do not repeat this historical signature replay as a new
+milestone or infer currentness from more signatures. The spent FreeTSA journal is unchanged;
+the exact follow-up diagnostic remains unaccepted, with no new journal or dispatch.
+No provider-protocol request, new cloud resource, target execution or finding occurred.
+The paid-findings decision packet and broader enterprise mission remain unchanged.
+
 ## Canonicalization resource correction, 2026-10-11
 
-This is the latest recovery summary. The continuation found a concrete gap in the
+This earlier recovery summary records a concrete gap found in the
 offline trusted-list inspector: its canonical-byte limit was checked after allocating
 the full output. An owned `8732`-byte XML example expands to `2113549` bytes through
 repeated namespace rendering. This is a correction to Etzio's documentary tool, not an
@@ -714,7 +749,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2368 tests expected;
+- 2473 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

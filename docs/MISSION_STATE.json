@@ -204,9 +204,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and one indeterminate finite discovery observation; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and one indeterminate finite discovery observation; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2368,
+    "test_count": 2473,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -221,9 +221,10 @@
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
     "validated_implementation_commit": "c8c8627f01c78807f41361b4e101c8c173e8ff9e",
-    "release_evidence_pointer": "/canonicalization_resource_correction/release_validation_record",
+    "release_evidence_pointer": "/native_checkpoint_inspection/release_validation_record",
     "focused_source_provenance_tests": 52,
-    "focused_trusted_list_signature_tests": 70
+    "focused_trusted_list_signature_tests": 70,
+    "focused_native_checkpoint_tests": 105
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -1354,5 +1355,30 @@
     "real_document_reports_unchanged_both_runtimes": true,
     "process_resource_isolation_qualified": false,
     "validation_boundary": "Resolve full local and exact-head supported-runtime CI, package/wheel, policy and GitGuardian results from the candidate release record; focused passes and collection targets are not full release validation."
+  },
+  "native_checkpoint_inspection": {
+    "status": "implemented_offline_inspection_full_release_results_separate",
+    "date": "2026-10-11",
+    "contract": "docs/NATIVE_CHECKPOINT_INSPECTION.md",
+    "implementation": "scripts/inspect_native_checkpoint.py",
+    "tests": "tests/test_native_checkpoint_inspection.py",
+    "evidence": "docs/evidence/native-checkpoint-inspection-2026-10-11.json",
+    "baseline_commit": "d076c752c7f1573a60986438f81e1935781ae745",
+    "focused_test_count": 105,
+    "published_checkpoint_size_bytes": 511,
+    "published_signatures_verified": 3,
+    "published_reports_identical_both_runtimes": true,
+    "full_suite_collection_target": 2473,
+    "release_validation_record": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/release-validation.json",
+    "provider_admitted": false,
+    "independent_administration_established": false,
+    "clock_qualified": false,
+    "inclusion_checked": false,
+    "consistency_checked": false,
+    "latest_head_authority": false,
+    "kernel_authority": false,
+    "followup_accepted": false,
+    "followup_journal_created": false,
+    "validation_boundary": "Resolve completed local and exact-head supported-runtime CI, package/wheel, policy and GitGuardian results from the candidate release record. Focused passes and collection targets are not full release validation."
   }
 }

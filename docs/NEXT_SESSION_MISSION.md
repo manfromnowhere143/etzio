@@ -37,6 +37,15 @@ unchanged on both runtimes. See the [correction evidence](evidence/canonicalizat
 and latest handoff for exact release validation. This closes a local ingestion defect;
 it does not close native qualification or create a process-wide resource bound.
 
+The [offline native checkpoint tranche](NATIVE_CHECKPOINT_INSPECTION.md) now verifies a
+published C2SP Ed25519 log signature and two timestamped cosignatures on both runtimes,
+with 105 owned controls. Full pins and exact origin are required; the entire configured
+roster must authenticate. This proves historical wire compatibility, with explicit false
+inclusion, consistency, currentness and provider-authority claims. The note and keys share
+publisher custody. Continue toward independent administration and an admitted complete
+native lifecycle; repeating this published signature example does not close those gates.
+The acquisition decision is still pending. See the latest handoff for exact release evidence.
+
 ## Founder objective and engineering verdict
 
 Build an enterprise-grade, target-neutral engine for authorized vulnerability discovery,
