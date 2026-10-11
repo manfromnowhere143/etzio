@@ -1,6 +1,93 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-10, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-11, Asia/Jerusalem.
+
+## Current pickup and operator research mandate, 2026-10-11
+
+This section is the current recovery summary. Read
+[NEXT_SESSION_MISSION](NEXT_SESSION_MISSION.md) for the operator's renewed ambition,
+independent research assignment, revenue-path comparison and first-session sequence.
+Older dated sections below preserve historical observations; their pending statuses,
+branch names and authority snapshots are not current instructions. Revalidate Git and
+retained evidence. This documentation handoff does not admit any new execution surface.
+
+**Verified implementation release:** `main` was clean at
+`c8c8627f01c78807f41361b4e101c8c173e8ff9e` on entry.
+[PR #38](https://github.com/manfromnowhere143/etzio/pull/38) merged by linear fast-forward
+on 2026-10-10; its task branch is deleted. The diagnostics are released, not awaiting
+implementation or release validation. Local full `make verify` passed `2246` tests in
+`862.06` seconds, exit `0`.
+[Exact-head CI run 38064196909](https://github.com/manfromnowhere143/etzio/actions/runs/38064196909)
+passed `2246` tests on CPython 3.11.15 (`883.18` seconds) and 3.14.2 (`1577.85`
+seconds), plus policy, package/installed-wheel and GitGuardian checks. The release dossier
+is `artifacts/checkpoints/2026-10-10-capture-diagnostics/release-validation.json`.
+These results belong to that exact implementation release. Validation of this documentation
+tranche is retained under `artifacts/checkpoints/2026-10-11-session-handoff/` and the
+matching exact-head pull request; inspect its `release-validation.json` when present.
+Do not attach old CI evidence to a different commit.
+
+**Implementation boundary:** signed authority, evidence retention, fixture lifecycle,
+governed recovery and offline/native-format qualification exist. The detector remains six
+Python rule classes on two owned fixtures. Native providers, trustworthy UTC, production
+storage, hard isolation, independently observed execution and competitive discovery are
+not qualified. There is no accepted finding or bounty-income evidence.
+
+**Immediate next work:** after mandatory bootstrap, review the repository and current
+primary literature independently, refresh the critical path and compare earlier legitimate
+revenue routes. Produce a concrete decision packet and advance the highest-value authorized,
+dependency-complete tranche. Preserve native admission/lifecycle → external latest-head
+recovery → storage → independent isolated execution → benchmarked domain discovery →
+exact target admission. Research can recommend a scoped roadmap change with evidence;
+this handoff does not accept one. The historical claim that contests are the faster path
+is an unmeasured hypothesis to compare, not a finding or authorization to reverse ADR-0001.
+
+**One pending scoped decision, not a mission-wide block:**
+
+- The first FreeTSA discovery is spent: one collector invocation,
+  `capture_indeterminate` / `transport_error`, zero retained response bytes.
+  Delivery and underlying cause remain unknown. The attempt is
+  `sha256:2063f3e0914b541f16a6cf04241270261ecd121208cb21ff209334661b5b684b`.
+  Never reset, copy, replace, rearm or resend its journal.
+- [The diagnostic follow-up](FREETSA_DIAGNOSTIC_PROPOSAL.md) remains prepared but
+  **not accepted**. Plan:
+  `sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713`.
+  Its seven input files and released runtime binding were rechecked; no new journal
+  exists and no follow-up was dispatched. The 2026-10-11 request is to prepare a handoff,
+  not to accept that request. Exact acceptance of the proposal and finite assumptions
+  must precede journal creation and its single bounded acquisition.
+- Public literature, program-document research, experiment design and authorized offline
+  foundation work can proceed. Do not repeatedly ask for general permission or wait idle
+  solely because the optional provider experiment is pending.
+
+Preserve these local paths across sessions:
+
+| Record | Location and meaning |
+| --- | --- |
+| Original spent journal | `artifacts/acquisition-preparation/2026-10-10-freetsa/custody.sqlite3`; authoritative one-attempt custody, never reconstruct from the historical proposal |
+| Original acquisition receipts | `artifacts/acquisition-results/2026-10-10-freetsa/`; private acceptance, invocation, outcome and manifest |
+| Public acquisition outcome | [FreeTSA result](evidence/freetsa-discovery-result-2026-10-10.json); preparation JSON remains a historical pre-attempt snapshot |
+| Unaccepted follow-up inputs | `artifacts/acquisition-preparation/2026-10-10-freetsa-diagnostic/`; exact inputs/manifest, no journal |
+| Released diagnostics evidence | `artifacts/checkpoints/2026-10-10-capture-diagnostics/`; complete release, failed intermediate checks and passive Roughtime review |
+| Handoff research and validation | `artifacts/checkpoints/2026-10-11-session-handoff/`; raw public-source captures and logs; [tracked seed ledger](evidence/next-session-research-seeds-2026-10-11.json) records identities and review depth |
+
+`artifacts/` is ignored and local; a fresh clone does not contain these records. Missing
+local evidence is a recovery dependency, not permission to recreate an unused attempt or
+infer a pass. Public source snapshots can be reacquired with a new identity; spent custody
+cannot. Preserve raw private artifacts rather than adding them to the public repository.
+
+Repository work and publication remain authorized under the established process: Daniel
+Wahnich is the sole author, exact-head validation on both declared runtimes, linear
+fast-forward preserving commits, then task-branch deletion. Public visibility is source
+visibility under the proprietary license. Existing bounded benign Google Cloud qualification
+authority persists; prior temporary probes have retained cleanup readbacks. It does not
+admit providers, storage or execution. No new cloud resources or provider requests are part
+of this handoff. No new hardware details or login are needed for the next research step.
+
+The seed review adds October/September arXiv leads and a current Google vendor-page
+snapshot. Read the caveats in NEXT_SESSION_MISSION: abstract review is not full-paper
+review, external results are not Etzio results, and platform AI documentation does not
+replace an engagement's testing rules. No superiority, payout schedule or continuous
+unattended operation is established.
 
 ## Approved discovery outcome and bounded diagnostics, 2026-10-10
 

@@ -1,0 +1,295 @@
+{
+  "schema": "etzio.next-session-research-seeds.v1",
+  "date": "2026-10-11",
+  "status": "research_leads_not_acceptance_evidence",
+  "review_scope": "Eight primary-source leads; selected full-text methods/limitations for AVRI and CyberChainBench, metadata/abstract or page-level inspection for other leads. Not a complete frontier survey.",
+  "authority": "Public-document research only. No third-party build/payload, provider protocol request, target execution or account interaction.",
+  "timestamp_boundary": "Retrieval timestamps are the host clock, not qualified UTC.",
+  "retention_boundary": "Exact public source bytes remain in ignored local artifacts; tracked metadata does not make them available in a fresh clone. New retrievals receive new identities.",
+  "peer_review_boundary": "arXiv version metadata is retained; peer-reviewed publication was not independently established. Vendor claims remain attributed.",
+  "sources": [
+    {
+      "id": "avri",
+      "title": "Where Do the Tokens Go? Understanding and Reducing Costs in LLM Agents for Vulnerability Discovery",
+      "authors_or_publisher": [
+        "Li Lu",
+        "Yanjie Zhao",
+        "Hongjie Chen",
+        "Haoyu Wang"
+      ],
+      "version": "arXiv:2610.11602v1",
+      "publication_date": "2026-10-08",
+      "source_type": "preprint",
+      "review_depth": "abstract, version metadata, selected full-text methods and limitations; no reproduction",
+      "captures": [
+        {
+          "id": "avri-abstract",
+          "requested_url": "https://arxiv.org/abs/2610.11602v1",
+          "retrieved_at_host_clock": "2026-10-11T04:37:14.794524+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://arxiv.org/abs/2610.11602v1",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/avri-abstract.html.source.txt",
+          "size": 42864,
+          "sha256": "afbe818bb7e7e734e1e6e23eef3325cdf905200175e57f3ea0446ed21a78f23d"
+        },
+        {
+          "id": "avri-fulltext",
+          "requested_url": "https://arxiv.org/html/2610.11602v1",
+          "retrieved_at_host_clock": "2026-10-11T04:37:14.794915+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://arxiv.org/html/2610.11602v1",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/avri-fulltext.html.source.txt",
+          "size": 252266,
+          "sha256": "80dc9f336a01dadb6e9fbc827a29c6e4b0870626f85fb57c42b6579598a9c0f7"
+        }
+      ],
+      "observation": "Studies repeated analysis and billed model cost. The initial 200 traces reuse ten tasks; supplied harness entrypoints and crash-based criteria limit transfer.",
+      "proposed_etzio_question": "Can source-bound reusable evidence improve independently reproduced results per total cost under the same target and budget?",
+      "limitations": "Auxiliary costs and hardware/reviewer costs need separate accounting; no repeated-run generality or bounty-income evidence follows.",
+      "next_review": "Inspect full methodology, artifact release, exact model/scaffold identities, licenses and statistical validity before a bounded comparison.",
+      "retrieved_date": "2026-10-11",
+      "license_and_artifact_execution_review": "not completed; inspect before reuse or execution",
+      "independently_reproduced": false
+    },
+    {
+      "id": "mobilecybench",
+      "title": "MobileCybench: Evaluating Agent Vulnerability Discovery via Executable Probes",
+      "authors_or_publisher": [
+        "Andy K. Zhang et al."
+      ],
+      "version": "arXiv:2609.23980v1",
+      "publication_date": "2026-09-21",
+      "source_type": "preprint",
+      "review_depth": "abstract and version metadata only",
+      "captures": [
+        {
+          "id": "mobilecybench-abstract",
+          "requested_url": "https://arxiv.org/abs/2609.23980v1",
+          "retrieved_at_host_clock": "2026-10-11T04:37:14.795061+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://arxiv.org/abs/2609.23980v1",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/mobilecybench-abstract.html.source.txt",
+          "size": 46289,
+          "sha256": "9c98a9303a978e4931e9e001936d286342cee294ca78e6f4ae54327f8f2beba8"
+        }
+      ],
+      "observation": "Proposes executable probes of security properties to evaluate replayed vulnerability reports.",
+      "proposed_etzio_question": "Can independently controlled security-property oracles complement fixed vulnerability labels?",
+      "limitations": "Full paper, probe soundness/completeness and implementation not reviewed; no Etzio mobile implementation or generality claim.",
+      "next_review": "Read full paper and inspect probe/grader ownership, known-bads, dataset and license.",
+      "retrieved_date": "2026-10-11",
+      "license_and_artifact_execution_review": "not completed; inspect before reuse or execution",
+      "independently_reproduced": false
+    },
+    {
+      "id": "cyberchainbench",
+      "title": "CyberChainBench: Can AI Agents Secure Smart Contracts Against Real-World On-Chain Vulnerabilities?",
+      "authors_or_publisher": [
+        "Jintao Huang",
+        "Fengqing Jiang",
+        "Radha Poovendran",
+        "Zhiqiang Lin"
+      ],
+      "version": "arXiv:2606.26216v1",
+      "publication_date": "2026-06-24",
+      "source_type": "preprint",
+      "review_depth": "abstract, version metadata, selected full-text methods and limitations; no reproduction",
+      "captures": [
+        {
+          "id": "cyberchainbench-abstract",
+          "requested_url": "https://arxiv.org/abs/2606.26216v1",
+          "retrieved_at_host_clock": "2026-10-11T04:37:15.316593+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://arxiv.org/abs/2606.26216v1",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/cyberchainbench-abstract.html.source.txt",
+          "size": 41721,
+          "sha256": "1a492790c8763f933d776c9ca31d1b856aaa8125999ea3116f21d75309322976"
+        },
+        {
+          "id": "cyberchainbench-fulltext",
+          "requested_url": "https://arxiv.org/html/2606.26216v1",
+          "retrieved_at_host_clock": "2026-10-11T04:37:15.316828+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://arxiv.org/html/2606.26216v1",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/cyberchainbench-fulltext.html.source.txt",
+          "size": 353086,
+          "sha256": "7edff57f49a19b73d18c9db36fff9824369998ef3d45b6165fe02840d8485f24"
+        }
+      ],
+      "observation": "Evaluates historical chain-state detect/exploit/patch tasks; limitations acknowledge contamination, restricted patch coverage and mostly single-transaction incidents.",
+      "proposed_etzio_question": "What exact state capture, oracle and licensing requirements make a small subset an independent comparator?",
+      "limitations": "Remote data/tool dependencies require explicit handling; local simulated asset changes are not bounties or received cash.",
+      "next_review": "Inspect full task manifest, subset denominators, withholding, remote dependencies and vulnerable/fixed/legitimate-transaction oracles.",
+      "retrieved_date": "2026-10-11",
+      "license_and_artifact_execution_review": "not completed; inspect before reuse or execution",
+      "independently_reproduced": false
+    },
+    {
+      "id": "reevmbench",
+      "title": "Re-Evaluating EVMBench: Are AI Agents Ready for Smart Contract Security?",
+      "authors_or_publisher": [
+        "Chaoyuan Peng",
+        "Lei Wu",
+        "Yajin Zhou"
+      ],
+      "version": "arXiv:2603.10795v1",
+      "publication_date": "2026-03-11",
+      "source_type": "preprint",
+      "review_depth": "abstract and version metadata refreshed; existing repository baseline retained",
+      "captures": [
+        {
+          "id": "reevmbench-abstract",
+          "requested_url": "https://arxiv.org/abs/2603.10795v1",
+          "retrieved_at_host_clock": "2026-10-11T04:37:15.317725+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://arxiv.org/abs/2603.10795v1",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/reevmbench-abstract.html.source.txt",
+          "size": 43376,
+          "sha256": "2d824fae10b360be83a20521408781651c318a3182e3b58cac7cef37018c8534"
+        }
+      ],
+      "observation": "Raises scaffold sensitivity and transfer/contamination concerns for contest-derived smart-contract results.",
+      "proposed_etzio_question": "How does target and scaffold selection change measured discovery and independently reproduced effect?",
+      "limitations": "A post-release split is not proof of zero indirect contamination; vendor and paper task populations must remain distinct.",
+      "next_review": "Inspect full methods, released code, incident selection and equal-information comparisons.",
+      "retrieved_date": "2026-10-11",
+      "license_and_artifact_execution_review": "not completed; inspect before reuse or execution",
+      "independently_reproduced": false
+    },
+    {
+      "id": "oss-crs",
+      "title": "OSS-CRS: Liberating AIxCC Cyber Reasoning Systems for Real-World Open-Source Security",
+      "authors_or_publisher": [
+        "Andrew Chin et al."
+      ],
+      "version": "arXiv:2603.08566v2",
+      "publication_date": "2026-03-09",
+      "revision_date": "2026-03-25",
+      "source_type": "preprint_technical_report",
+      "review_depth": "abstract and version metadata only",
+      "captures": [
+        {
+          "id": "oss-crs-abstract",
+          "requested_url": "https://arxiv.org/abs/2603.08566v2",
+          "retrieved_at_host_clock": "2026-10-11T04:37:15.669073+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://arxiv.org/abs/2603.08566v2",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/oss-crs-abstract.html.source.txt",
+          "size": 41755,
+          "sha256": "5a0208cf06dcf41605e863972f6648e7f501173122c55d24631a31d3801acccb"
+        }
+      ],
+      "observation": "Describes locally deployable composition of cyber reasoning techniques with budget management.",
+      "proposed_etzio_question": "Which existing analysis tools can be admitted as versioned adapters without importing policy authority or competition infrastructure?",
+      "limitations": "Usability, independent confirmation, dependency closure, license and compute needs not locally verified.",
+      "next_review": "Read full report and inspect released adapter interfaces, dependencies and resource measurements without building.",
+      "retrieved_date": "2026-10-11",
+      "license_and_artifact_execution_review": "not completed; inspect before reuse or execution",
+      "independently_reproduced": false
+    },
+    {
+      "id": "atlantis",
+      "title": "ATLANTIS: AI-driven Threat Localization, Analysis, and Triage Intelligence System",
+      "authors_or_publisher": [
+        "Taesoo Kim et al.",
+        "Team Atlanta"
+      ],
+      "version": "arXiv:2509.14589v1; report version 1.0",
+      "publication_date": "2025-09-18",
+      "report_date": "2025-09-17",
+      "source_type": "preprint_technical_report",
+      "review_depth": "abstract and version metadata only",
+      "captures": [
+        {
+          "id": "atlantis-abstract",
+          "requested_url": "https://arxiv.org/abs/2509.14589v1",
+          "retrieved_at_host_clock": "2026-10-11T04:37:15.673664+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://arxiv.org/abs/2509.14589v1",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/atlantis-abstract.html.source.txt",
+          "size": 48329,
+          "sha256": "4594b0c9fc20a11a155c4455ae78692fb8f7293f61406b8f21021cdad77edf7f"
+        }
+      ],
+      "observation": "Describes a hybrid system combining language models and program analysis for discovery and repair.",
+      "proposed_etzio_question": "Which hybrid components have useful marginal value beyond simple baselines on Etzio's selected domain?",
+      "limitations": "Competition results do not establish broad deployment suitability or Etzio performance.",
+      "next_review": "Read full technical report and examine independent baselines, ablations, failure modes and operational cost.",
+      "retrieved_date": "2026-10-11",
+      "license_and_artifact_execution_review": "not completed; inspect before reuse or execution",
+      "independently_reproduced": false
+    },
+    {
+      "id": "google-cyber",
+      "title": "Gemini 4 Argon with cybersecurity defense capabilities",
+      "authors_or_publisher": [
+        "Google DeepMind"
+      ],
+      "version": "mutable public page captured 2026-10-11",
+      "publication_date": null,
+      "publication_date_status": "not established from inspected page",
+      "source_type": "vendor_capability_page",
+      "review_depth": "current page capability and access statements",
+      "captures": [
+        {
+          "id": "google-cyber",
+          "requested_url": "https://deepmind.google/models/gemini/cyber/",
+          "retrieved_at_host_clock": "2026-10-11T04:37:15.821157+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://deepmind.google/models/gemini/cyber/",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/google-cyber.html.source.txt",
+          "size": 139354,
+          "sha256": "c82412715c8a85b2b3fc82da0a2f0945c5bbf32a7bc7b2a456ddd0c537e76dd4"
+        }
+      ],
+      "observation": "Vendor page describes Gemini 4 Argon cyber capabilities and rollout to selected trusted defenders through Fairwind.",
+      "proposed_etzio_question": "Which current comparator protocols and tools are independently accessible, and which claims remain private/vendor-only?",
+      "limitations": "No access established; no comparable local reproduction; no publication date inferred from retrieval.",
+      "next_review": "Resolve current technical reports, exact benchmark protocols, access conditions and available models before selection.",
+      "retrieved_date": "2026-10-11",
+      "license_and_artifact_execution_review": "not completed; inspect before reuse or execution",
+      "independently_reproduced": false
+    },
+    {
+      "id": "bugcrowd-ai",
+      "title": "AI Trust, Privacy, and Security",
+      "authors_or_publisher": [
+        "Bugcrowd"
+      ],
+      "version": "mutable public documentation captured 2026-10-11",
+      "publication_date": null,
+      "publication_date_status": "not established from inspected page",
+      "source_type": "platform_documentation",
+      "review_depth": "page purpose and provider data/control statements",
+      "captures": [
+        {
+          "id": "bugcrowd-ai",
+          "requested_url": "https://docs.bugcrowd.com/researchers/onboarding/ai-privacy-security/",
+          "retrieved_at_host_clock": "2026-10-11T04:37:15.997534+00:00",
+          "status": "retained",
+          "http_status": 200,
+          "final_url": "https://docs.bugcrowd.com/researchers/onboarding/ai-privacy-security/",
+          "path": "artifacts/checkpoints/2026-10-11-session-handoff/research-sources/bugcrowd-ai.html.source.txt",
+          "size": 119521,
+          "sha256": "102dd95315573e103b605366c78a63114b3037845ad4a6df0e132f378b207bf7"
+        }
+      ],
+      "observation": "Primarily describes Bugcrowd's own user-facing AI features and governance.",
+      "proposed_etzio_question": "What exact researcher automation, confidentiality and target-testing rules govern one chosen engagement?",
+      "limitations": "This page is not an asset allowlist or a general researcher automation grant; earlier broader interpretations require source correction.",
+      "next_review": "Read current researcher terms and exact engagement information/scope/method exclusions; account-specific eligibility remains unverified.",
+      "retrieved_date": "2026-10-11",
+      "license_and_artifact_execution_review": "not completed; inspect before reuse or execution",
+      "independently_reproduced": false
+    }
+  ]
+}

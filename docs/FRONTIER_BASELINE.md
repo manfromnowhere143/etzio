@@ -7,6 +7,23 @@ Sources are primary project, research, program, or vendor publications where ava
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
 
+## Handoff research refresh, 2026-10-11
+
+The [next-session brief](NEXT_SESSION_MISSION.md) and its
+[seed ledger](evidence/next-session-research-seeds-2026-10-11.json) add dated primary-source
+leads, exact retained source identities and explicit review depth. The next session must
+perform its own review and compare earlier authorized revenue paths; these seeds are not
+an independently reproduced frontier evaluation. This update does not refresh every
+historical score below.
+
+Source correction: the linked [Bugcrowd AI page](https://docs.bugcrowd.com/researchers/onboarding/ai-privacy-security/)
+principally documents Bugcrowd's own AI features and data controls. The broader researcher
+scope/manual-verification wording in the October 9 table is not established by that page
+alone. Verify current researcher rules and the exact engagement brief; no automation grant
+or asset allowlist follows from this source. Current Google cyber-model leads also differ
+from the historical July comparison; the seed ledger records a mutable vendor snapshot,
+not access to that model or comparable Etzio performance.
+
 ## Research update, 2026-10-09
 
 The engineering recommendation remains an independently verifiable research-and-remediation
