@@ -7,6 +7,15 @@ Sources are primary project, research, program, or vendor publications where ava
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
 
+## Effect-evidence falsification, 2026-10-11
+
+The [execution decision](FRONTIER_EXECUTION_DECISION_2026-10-11.md) adds selected primary
+research on property probes, attribution, external triage and containment. Its owned finite
+experiment produces seven counterexamples to accepting a repair from a single disappearing
+effect. The required distinction is effect, cause, repair and preserved legitimate behavior.
+This is an evaluation-design result, not competitive discovery or a closed foundation gate.
+The native-provider critical path and the exact pending acquisition remain unchanged.
+
 ## Decision and full-text follow-through, 2026-10-11
 
 The [decision packet](PAID_FINDINGS_DECISION_2026-10-11.md) and

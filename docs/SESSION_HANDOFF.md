@@ -2,6 +2,41 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-11, Asia/Jerusalem.
 
+## Effect-evidence falsification and execution decision, 2026-10-11
+
+This is the latest recovery summary. The [execution decision](FRONTIER_EXECUTION_DECISION_2026-10-11.md)
+connects selected fresh primary/arXiv research to a concrete evaluation requirement. The
+[owned experiment](EFFECT_EVIDENCE_EXPERIMENT.md) enumerates all `16` permission policies
+and `256` transitions of a benign bit store. A single disappearing-effect differential
+accepts `8` policies, but `7` violate the complete authored specification. Three break
+legitimate use and four leave a second unauthorized route. Only one is a complete repair.
+Both supported runtimes produce identical reports and pass `13` focused controls.
+
+This result separates effect, causal attribution, repair and preserved legitimate behavior.
+It is a finite research counterexample, not a new production gate, actual CATO execution,
+independent operational verification, discovery benchmark or vulnerability finding. The
+current modeled receipt semantics and foundation order are unchanged. The
+[evidence record](evidence/effect-evidence-2026-10-11.json) preserves source identities,
+review coverage and limits. No external benchmark code was executed.
+
+Entry was clean published `main` at `4d3d8dea00a24081fb39895f9e8f22b05d0ed519`
+([PR #44](https://github.com/manfromnowhere143/etzio/pull/44)); its full local/both-runtime
+CI validation was retained earlier in this same session and is reused unchanged. The new
+full collection target is `2486`. Resolve completed release validation from the exact
+candidate PR and `artifacts/checkpoints/2026-10-11-effect-evidence/release-validation.json`.
+Focused controls and collection are not full-release passes. Private raw source captures,
+reports and release logs remain in that ignored directory; a fresh clone lacks those bytes.
+
+**Next dependency:** complete native material, independently evidenced administration and
+an explicitly admitted lifecycle, then external latest-head recovery and storage. No more
+optional parsers or repeated toy demonstrations count as closing this dependency. The
+seven prepared FreeTSA diagnostic inputs and runtime still match. Its exact scoped decision
+was presented, but no acceptance has arrived; no diagnostic journal or dispatch exists.
+The original spent journal is unchanged. The paid-findings ranking and CoW dossier remain
+the current commercial decision; no early-lane exception, new cloud resource, target
+execution, disclosure or income occurred. Publication under Daniel's sole identity remains
+authorized after the exact candidate's required checks.
+
 ## Offline native checkpoint inspection, 2026-10-11
 
 This is the latest recovery summary. The [bounded checkpoint inspector](NATIVE_CHECKPOINT_INSPECTION.md)
@@ -749,7 +784,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2473 tests expected;
+- 2486 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

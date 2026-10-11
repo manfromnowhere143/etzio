@@ -46,6 +46,14 @@ publisher custody. Continue toward independent administration and an admitted co
 native lifecycle; repeating this published signature example does not close those gates.
 The acquisition decision is still pending. See the latest handoff for exact release evidence.
 
+The [execution decision](FRONTIER_EXECUTION_DECISION_2026-10-11.md) now includes an owned
+finite falsification experiment: a disappearing effect alone accepts seven policies that
+violate the authored security/legitimate-behavior specification. Keep effect, attribution,
+repair and legitimate-use evidence separate in the later structured receipt contract.
+This is research preparation only; do not repeat it as a discovery milestone or build CATO
+ahead of the existing gates. The next dependency is still complete native material and
+an explicitly admitted lifecycle with independent administration evidence.
+
 ## Founder objective and engineering verdict
 
 Build an enterprise-grade, target-neutral engine for authorized vulnerability discovery,

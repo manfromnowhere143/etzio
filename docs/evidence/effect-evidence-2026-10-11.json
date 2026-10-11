@@ -1,0 +1,156 @@
+{
+  "schema": "etzio.research.effect-evidence.v1",
+  "date": "2026-10-11",
+  "status": "owned_finite_experiment_completed_release_validation_separate",
+  "baseline_commit": "4d3d8dea00a24081fb39895f9e8f22b05d0ed519",
+  "baseline_evidence": "artifacts/checkpoints/2026-10-11-native-checkpoint-inspection/release-validation.json",
+  "sources": [
+    {
+      "id": "mobilecybench",
+      "url": "https://arxiv.org/html/2609.23980v1",
+      "retrieved_host_utc": "2026-10-11T14:22:53.108288+00:00",
+      "final_url": "https://arxiv.org/html/2609.23980v1",
+      "content_type": "text/html; charset=utf-8",
+      "path": "mobilecybench.html",
+      "size": 1575344,
+      "sha256": "f354e7a3d37dfaeace846b068a8dc4c73977ff6ed662f4b437276b7135f3797c",
+      "retained": true,
+      "title": "MobileCybench: Evaluating Agent Vulnerability Discovery via Executable Probes",
+      "authors": "Andy K. Zhang et al. (Stanford University and UC Berkeley)",
+      "version": "arXiv:2609.23980v1",
+      "publication_date": "2026-09-21",
+      "license": "CC BY 4.0 for the paper; target/harness licenses not evaluated for execution",
+      "review_depth": "Read abstract, introduction, framework, setup and results, discussion, ethics, A.2, A.4-A.6, B.3-B.8 selected text and D.2-D.5; not every appendix, figure, artifact or target source. No benchmark executed.",
+      "support": "Property observation and patch attribution are distinct. Trusted state and separate health checks matter.",
+      "limits": "Authored application selection/properties; partial release; no general recall. Reviewed source reports post-run probe corrections.",
+      "experiment": "Separately challenge effect, attribution and legitimate-use preservation in an owned finite model.",
+      "publication_status": "preprint; separate peer-reviewed publication not established",
+      "http_status": 200
+    },
+    {
+      "id": "vcao",
+      "url": "https://arxiv.org/html/2604.08291v1",
+      "retrieved_host_utc": "2026-10-11T14:22:55.635415+00:00",
+      "final_url": "https://arxiv.org/html/2604.08291v1",
+      "content_type": "text/html; charset=utf-8",
+      "path": "vcao.html",
+      "size": 291818,
+      "sha256": "4cf5c6ef7f994209b7f37d9e932fd8951cf827340f74be6e5ffb498cd3db423e",
+      "retained": true,
+      "title": "VCAO: Verifier-Centered Agentic Orchestration for Strategic OS Vulnerability Discovery",
+      "authors": "Suyash Mishra",
+      "version": "arXiv:2604.08291v1",
+      "publication_date": "2026-04-09",
+      "license": "CC BY 4.0 for the paper",
+      "review_depth": "Abstract, introduction, selected algorithm text, evaluation section 6 and discussion/limitations section 7; HTML artifact-link inspection. Formal regret proof not audited; no code run.",
+      "support": "Proposes adaptive tool allocation and reports replay comparisons.",
+      "limits": "Inspected HTML has no project artifact URL. Exact task manifests and per-run evidence not established by the reviewed evaluation.",
+      "experiment": "Require budget-matched simple allocation baselines before considering a new optimizer.",
+      "publication_status": "preprint; results not independently reproduced here",
+      "http_status": 200
+    },
+    {
+      "id": "cvd",
+      "url": "https://red.anthropic.com/2026/cvd/",
+      "retrieved_host_utc": "2026-10-11T14:22:57.351979+00:00",
+      "final_url": "https://red.anthropic.com/2026/cvd/",
+      "content_type": "text/html; charset=utf-8",
+      "path": "cvd.html",
+      "size": 124082,
+      "sha256": "07570f8dffddefd8a8ee27a5870aa90331eff2cdad13a64a1f35a71d57f93b64",
+      "retained": true,
+      "title": "Anthropic's coordinated vulnerability disclosure dashboard",
+      "publisher": "Anthropic",
+      "version": "mutable publisher snapshot retrieved 2026-10-11; displayed counts as of 2026-10-02",
+      "publication_date": null,
+      "license": "Publicly readable; redistribution license not established; raw bytes retained privately",
+      "review_depth": "Process and interpretation text and displayed dated aggregation; ledger rows not individually verified; About page not reviewed.",
+      "support": "Candidate triage, maintainer acknowledgement, patches and eligibility require distinct denominators.",
+      "limits": "Reviewed subset is selected; validity includes duplicates and some out-of-threat-model cases. Vendor/human judgment remains fallible.",
+      "experiment": "Keep a stage-specific funnel and review costs for all attempts.",
+      "publication_status": "vendor process and outcome report",
+      "http_status": 200
+    },
+    {
+      "id": "eval-incidents",
+      "url": "https://www.anthropic.com/research/investigating-incidents-cybersecurity-evals",
+      "retrieved_host_utc": "2026-10-11T14:23:00.686805+00:00",
+      "final_url": "https://www.anthropic.com/research/investigating-incidents-cybersecurity-evals",
+      "content_type": "text/html; charset=utf-8",
+      "path": "eval-incidents.html",
+      "size": 164681,
+      "sha256": "eaa54fa07702e1dc56d9ba024ce3b7967eca25cc3155bfd5e67940a654f09675",
+      "retained": true,
+      "title": "Investigating three real-world incidents in our cybersecurity evaluations",
+      "publisher": "Anthropic",
+      "version": "mutable publisher snapshot retrieved 2026-10-11",
+      "publication_date": "2026-07-30",
+      "license": "Publicly readable; redistribution license not established; raw bytes retained privately",
+      "review_depth": "Introductory incident account, environment misconfiguration and response; no attack reproduction or independent log audit.",
+      "support": "Prompt-described isolation can differ from actual reachability.",
+      "limits": "Vendor account is not a qualification of Etzio containment.",
+      "experiment": "Retain actual denied-egress and controller-death evidence at the existing isolation gate.",
+      "publication_status": "vendor incident account",
+      "http_status": 200
+    }
+  ],
+  "repository_review": {
+    "scope": "Targeted continuation, not a whole-repository audit",
+    "read": "Current handoff, mission state, next-session brief, paid-findings decision, FreeTSA diagnostic contract/preparation, presentation; sampled frontier/roadmap and analyzer/receipt boundary; build and CI configuration. Earlier session architecture review remains historical.",
+    "inference": "Current receipt admission authenticates modeled output bytes; the finite experiment tests a proposed future semantic acceptance condition, not an existing receipt vulnerability."
+  },
+  "experiment": {
+    "contract": "docs/EFFECT_EVIDENCE_EXPERIMENT.md",
+    "implementation": {
+      "path": "scripts/replay_effect_evidence_experiment.py",
+      "size_bytes": 4607,
+      "sha256": "1a0576a286a7afd825fcf05f4cbbc2f7cf561e4d78c6960caaefd95257fbb7cc"
+    },
+    "controls": {
+      "path": "tests/test_effect_evidence_experiment.py",
+      "size_bytes": 3247,
+      "sha256": "e3d0fdb1ca2a73322c880ba095f2a5285ff9eef1052354ac8ecc2cb7e393c7d9"
+    },
+    "policy_count": 16,
+    "transitions": 256,
+    "single_differential_acceptances": 8,
+    "false_acceptances_against_complete_authored_specification": 7,
+    "legitimate_behavior_failures_without_security_failure": 3,
+    "remaining_other_route_security_failures": 4,
+    "full_specification_policies": [
+      3
+    ],
+    "both_runtime_reports_identical": true,
+    "reports": [
+      {
+        "path": "artifacts/checkpoints/2026-10-11-effect-evidence/replay-3.11.json",
+        "size_bytes": 40666,
+        "sha256": "2a800756a040706c610536f1dd8adab5a3ff09810cad1917f0bfe60e6a947c4d"
+      },
+      {
+        "path": "artifacts/checkpoints/2026-10-11-effect-evidence/replay-3.14.json",
+        "size_bytes": 40666,
+        "sha256": "2a800756a040706c610536f1dd8adab5a3ff09810cad1917f0bfe60e6a947c4d"
+      }
+    ],
+    "focused_tests": 13,
+    "claim_boundary": "Complete only for the authored finite model. One implementation team; no operational independence, external target, production gate, real repair, discovery score or novel research claim."
+  },
+  "pending_acquisition": {
+    "plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
+    "runtime_id": "sha256:19835576a12ce027c3b6c798fb0451ac8fbff7c5ea5a606c1c0e8b1390bf5f8d",
+    "seven_inputs_match": true,
+    "accepted": false,
+    "new_journal_exists": false,
+    "dispatches_this_tranche": 0,
+    "spent_original_journal_sha256": "76eaae2a66fed624ad5d053edf085159be4dbdf84674b11ac76c6ed03c36749d"
+  },
+  "release_validation_record": "artifacts/checkpoints/2026-10-11-effect-evidence/release-validation.json",
+  "full_collection_target": 2486,
+  "limitations": [
+    "Raw source captures and report logs are local ignored evidence; a fresh clone lacks them. The experiment itself is reproducible from tracked owned code.",
+    "Source retrieval timestamps are host observations, not qualified time.",
+    "No native provider, qualified storage or isolation, target campaign, benchmark execution, submission, paid finding or endorsement established."
+  ],
+  "raw_source_directory": "artifacts/checkpoints/2026-10-11-effect-evidence"
+}
