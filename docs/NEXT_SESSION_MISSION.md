@@ -30,6 +30,13 @@ This does not establish currentness, legal qualification, the current TSA leaf o
 admission. Continue toward complete native material and retained lifecycle recovery;
 do not repeat the signed-document investigation as unfinished or promote it to kernel trust.
 
+A subsequent resource review corrected the inspector's post-allocation canonical-size
+check. Capped streaming output and namespace-work limits now refuse expansion during
+processing. The focused suite has `70` controls, and the exact EU/Spain reports remain
+unchanged on both runtimes. See the [correction evidence](evidence/canonicalization-bounds-2026-10-11.json)
+and latest handoff for exact release validation. This closes a local ingestion defect;
+it does not close native qualification or create a process-wide resource bound.
+
 ## Founder objective and engineering verdict
 
 Build an enterprise-grade, target-neutral engine for authorized vulnerability discovery,

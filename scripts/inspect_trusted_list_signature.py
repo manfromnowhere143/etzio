@@ -29,6 +29,9 @@ MAX_BYTES = 4 * 1024 * 1024
 MAX_NODES = 50000
 MAX_DEPTH = 64
 MAX_CANONICAL = 8 * 1024 * 1024
+MAX_NAMESPACE_BINDINGS = 64
+MAX_NAMESPACE_BYTES = 2048
+MAX_NAMESPACE_WORK = 16 * 1024 * 1024
 
 
 def require(condition: bool, reason: str) -> None:
@@ -61,10 +64,20 @@ def value(node, maximum: int, *, allow_id: bool = False) -> bytes:
     return decoded
 
 
+class _CanonicalBuffer:
+    def __init__(self):
+        self.buffer = bytearray()
+
+    def write(self, chunk: bytes) -> int:
+        require(len(self.buffer) + len(chunk) <= MAX_CANONICAL, "canonical output bound")
+        self.buffer.extend(chunk)
+        return len(chunk)
+
+
 def canonical(node) -> bytes:
-    wire = etree.tostring(node, method="c14n", exclusive=True, with_comments=False)
-    require(len(wire) <= MAX_CANONICAL, "canonical output bound")
-    return wire
+    sink = _CanonicalBuffer()
+    etree.ElementTree(node).write(sink, method="c14n", exclusive=True, with_comments=False)
+    return bytes(sink.buffer)
 
 
 def without_signature(root):
@@ -94,11 +107,19 @@ def parse(wire: bytes):
     ids = set()
     stack = [(root, 1)]
     count = 0
+    namespace_work = 0
     while stack:
         node, depth = stack.pop()
         count += 1
         require(count <= MAX_NODES and depth <= MAX_DEPTH, "XML structural bound")
         require(type(node.tag) is str, "comments, processing instructions or entities refused")
+        namespaces = node.nsmap
+        require(len(namespaces) <= MAX_NAMESPACE_BINDINGS, "namespace context bound")
+        for prefix, uri in namespaces.items():
+            prefix_size, uri_size = len((prefix or "").encode("utf-8")), len(uri.encode("utf-8"))
+            require(max(prefix_size, uri_size) <= MAX_NAMESPACE_BYTES, "namespace spelling bound")
+            namespace_work += prefix_size + uri_size
+            require(namespace_work <= MAX_NAMESPACE_WORK, "namespace work bound")
         for key, item in node.attrib.items():
             if etree.QName(key).localname.lower() == "id":
                 require(key == "Id" and re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.-]{0,127}", item), "ID spelling")
@@ -157,13 +178,13 @@ def inspect_xml(wire: bytes, signer_sha256: str) -> dict:
     require(cert.public_bytes(serialization.Encoding.DER) == cert_wire, "canonical certificate DER required")
     key = cert.public_key()
     require(isinstance(key, rsa.RSAPublicKey) and key.key_size in (2048, 3072, 4096), "unsupported signing key")
+    key.verify(value(signature_value, 512, allow_id=True), canonical(info), padding.PKCS1v15(), hashes.SHA512())
     references = []
     for ref, node in ((document_ref, without_signature(root)), (properties_ref, properties)):
         canonical_wire = canonical(node)
         digest = hashlib.sha512(canonical_wire).digest()
         require(digest == value(ref[2], 64), "reference digest differs")
         references.append({"uri": ref.get("URI"), "canonical_size": len(canonical_wire), "sha512": digest.hex()})
-    key.verify(value(signature_value, 512, allow_id=True), canonical(info), padding.PKCS1v15(), hashes.SHA512())
     return {
         "schema": "etzio.trusted-list-signature.inspection.v1",
         "input_sha256": hashlib.sha256(wire).hexdigest(),

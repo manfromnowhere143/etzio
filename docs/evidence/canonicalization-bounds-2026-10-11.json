@@ -1,0 +1,122 @@
+{
+  "schema": "etzio.canonicalization-bound-correction.v1",
+  "date": "2026-10-11",
+  "status": "implemented_offline_correction_full_release_results_separate",
+  "baseline_commit": "f89b35306bc805fbe08939d7076a2fd40afe99c6",
+  "baseline_release": {
+    "path": "artifacts/checkpoints/2026-10-11-native-provider-continuation/release-validation.json",
+    "size": 5004,
+    "sha256": "cbbd2acd2e6ab5048fc9dc058f7100a8e1d66e13424827e984f10f19cfdcc337"
+  },
+  "contract": "docs/TRUSTED_LIST_BOOTSTRAP.md",
+  "implementation": "scripts/inspect_trusted_list_signature.py",
+  "tests": "tests/test_trusted_list_signature_inspection.py",
+  "defect": "Canonical size was checked only after allocating the entire output. Namespace fanout makes input bounds insufficient. No process exhaustion experiment or external vulnerability claim.",
+  "owned_reproduction": {
+    "input_size": 8732,
+    "canonical_size": 2113549,
+    "input_sha256": "35e8453b75bcb71f2ec3731ee8a062e3cee1acb5ed8863b00b001956a7f37883",
+    "canonical_sha256": "e35ee16c4e6c7e52cd3d54d9365ad0a706a37306bf72c54294980be3fdda90d8",
+    "tracemalloc_peak_bytes": 2113582,
+    "boundary": "Owned canonicalizer experiment, not a signed trusted-list document or an external finding. Tracemalloc excludes native allocations."
+  },
+  "writer_probe": {
+    "cap": 8192,
+    "calls": [
+      4123,
+      4128
+    ],
+    "retained": 4123,
+    "aborted": true
+  },
+  "recipe": {
+    "path": "artifacts/checkpoints/2026-10-11-canonicalization-bounds/replay.py",
+    "size": 3447,
+    "sha256": "d946915b144e58df01a9a31edd008fd2751a9910807e8ca026184e7ab124da67"
+  },
+  "real_documents": {
+    "lotl": {
+      "identical_to_previous_report": true,
+      "namespace_work": 366462,
+      "maximum_bindings": 8,
+      "maximum_spelling_bytes": 71
+    },
+    "spain": {
+      "identical_to_previous_report": true,
+      "namespace_work": 5640042,
+      "maximum_bindings": 8,
+      "maximum_spelling_bytes": 71
+    }
+  },
+  "replay_records": [
+    {
+      "path": "artifacts/checkpoints/2026-10-11-canonicalization-bounds/replay-3.11.15.json",
+      "size": 3605,
+      "sha256": "0271c6995bfe7a52150fffa894fac395669ca10b4f850efa3874292b75c59019"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-11-canonicalization-bounds/replay-3.14.2.json",
+      "size": 3604,
+      "sha256": "1e1dc65ce28f7cb262094e786dda4b10ecab9218c21e2ed800a0bca8f9d19b7b"
+    }
+  ],
+  "limits": {
+    "canonical_retained_bytes": 8388608,
+    "namespace_bindings_per_context": 64,
+    "prefix_or_uri_utf8_bytes": 2048,
+    "total_namespace_context_bytes": 16777216
+  },
+  "focused_test_count": 70,
+  "added_controls": 15,
+  "focused_passes": {
+    "CPython 3.11.15": 70,
+    "CPython 3.14.2": 70
+  },
+  "full_suite_collection_target": 2368,
+  "release_validation_record": "artifacts/checkpoints/2026-10-11-canonicalization-bounds/release-validation.json",
+  "sources": [
+    {
+      "url": "https://lxml.de/apidoc/lxml.etree.html",
+      "retrieved_host_utc": "2026-10-11T10:10:55.740310+00:00",
+      "status": 200,
+      "path": "artifacts/checkpoints/2026-10-11-canonicalization-bounds/lxml-api.source.txt",
+      "size": 2269555,
+      "sha256": "f4acdf64708f0733c4a6e0f6fd6c4857d1b647cf6c08a2584c2b887ead738d01",
+      "final_url": "https://lxml.de/apidoc/lxml.etree.html"
+    },
+    {
+      "url": "https://www.w3.org/TR/2013/NOTE-xmldsig-bestpractices-20130411/",
+      "retrieved_host_utc": "2026-10-11T10:10:57.036027+00:00",
+      "status": 200,
+      "path": "artifacts/checkpoints/2026-10-11-canonicalization-bounds/w3c-best-practices.source.txt",
+      "size": 116619,
+      "sha256": "f2e97d3da2a095ffd9444756998b8f4ba99f0c3f61fb16bb1ec5da17a0c265c7",
+      "final_url": "https://www.w3.org/TR/2013/NOTE-xmldsig-bestpractices-20130411/"
+    }
+  ],
+  "review_depth": {
+    "lxml_api": "Selected ElementTree.write C14N API and local pinned lxml 6.1.3 docstring. Exclusive C14N 1.0 without comments, not C14N 2.0. Actual callback abortion measured on both runtimes.",
+    "w3c": "2013-04-11 Working Group Note, sections on verification ordering and costly namespace/transform work. No XPath transform is admitted here; the owned example measures exclusive C14N namespace repetition."
+  },
+  "development_observations": [
+    "Initial added-control run: 68 passed, 2 failed because default ASCII fixture serialization emitted invalid character references inside a non-ASCII namespace prefix. Explicit UTF-8 fixture serialization fixed both without changing parser policy.",
+    "First private real-source replay script failed on both runtimes by unpacking the three-value parse result as two values. Corrected the helper; final reports match the retained baseline exactly."
+  ],
+  "claim_boundaries": [
+    "Writer cap limits retained canonical bytes; parser/native writer allocations and final bounded copy are additional. No total process-memory or CPU guarantee.",
+    "Namespace ceilings are explicit subset restrictions and can refuse valid XML.",
+    "Both document mathematics reports are unchanged; publication bootstrap assumptions and missing currentness/native admission remain.",
+    "No dependency, acquisition collector, native codec, kernel policy or lifecycle change."
+  ],
+  "original_spent_journal": {
+    "path": "artifacts/acquisition-preparation/2026-10-10-freetsa/custody.sqlite3",
+    "size": 16384,
+    "sha256": "76eaae2a66fed624ad5d053edf085159be4dbdf84674b11ac76c6ed03c36749d"
+  },
+  "followup_accepted": false,
+  "followup_journal_created": false,
+  "provider_protocol_dispatches": 0,
+  "provider_admitted": false,
+  "target_executions": 0,
+  "findings": 0
+}

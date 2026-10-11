@@ -345,3 +345,120 @@ def test_cli_agrees_and_refuses_wrong_pin(owned, tmp_path, capsys):
     assert json.loads(capsys.readouterr().out) == inspect.inspect_xml(wire, pin)
     assert inspect.main([str(path), "--signer-sha256", "0" * 64]) == 2
     assert "pin differs" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("part", ["document", "signed-info", "properties"])
+def test_streamed_canonical_bytes_equal_previous_c14n(owned, part):
+    root, _ = signed(owned, tail="\n  ")
+    nodes = {
+        "document": root,
+        "signed-info": root.find(D + "Signature")[0],
+        "properties": root.find(".//" + X + "SignedProperties"),
+    }
+    assert inspect.canonical(nodes[part]) == c14n(nodes[part])
+
+
+@pytest.mark.parametrize("extra_capacity", [0, -1])
+def test_canonical_exact_byte_ceiling(owned, monkeypatch, extra_capacity):
+    root, _ = signed(owned)
+    expected = c14n(root)
+    monkeypatch.setattr(inspect, "MAX_CANONICAL", len(expected) + extra_capacity)
+    if extra_capacity == 0:
+        assert inspect.canonical(root) == expected
+    else:
+        with pytest.raises(ValueError, match="canonical output bound"):
+            inspect.canonical(root)
+
+
+def test_namespace_expansion_stops_real_writer_before_retention(owned, monkeypatch):
+    root, pin = signed(owned)
+    uri = "urn:" + "a" * 512
+    payload = etree.SubElement(root[0], "payload", nsmap={"p": uri})
+    for _ in range(18000):
+        etree.SubElement(payload, "{" + uri + "}item")
+    wire = etree.tostring(root)
+    assert len(wire) < 256 * 1024  # Short input; canonical output would exceed 8 MiB.
+    calls = []
+    original_write = inspect._CanonicalBuffer.write
+
+    def observe(self, chunk):
+        before = len(self.buffer)
+        try:
+            result = original_write(self, chunk)
+        except ValueError:
+            calls.append((before, len(chunk), len(self.buffer), "refused"))
+            raise
+        calls.append((before, len(chunk), len(self.buffer), "retained"))
+        return result
+
+    monkeypatch.setattr(inspect._CanonicalBuffer, "write", observe)
+    # The retained SignedInfo is still correctly signed. Its old document digest
+    # cannot authorize the expanded body; limits must fire before allocating it all.
+    with pytest.raises(ValueError, match="canonical output bound"):
+        inspect.inspect_xml(wire, pin)
+    assert len(calls) > 2
+    before, chunk_size, after, status = calls[-1]
+    assert status == "refused" and before == after <= inspect.MAX_CANONICAL < before + chunk_size
+    assert all(row[2] <= inspect.MAX_CANONICAL for row in calls)
+
+
+def with_namespaces(root, additional):
+    result = etree.Element(root.tag, nsmap={**root.nsmap, **additional}, **root.attrib)
+    result.text = root.text
+    result.extend(copy.deepcopy(list(root)))
+    return result
+
+
+@pytest.mark.parametrize("count", [64, 65])
+def test_namespace_context_count_boundary(owned, count):
+    root, pin = signed(owned)
+    root = with_namespaces(root, {f"n{i}": f"urn:owned:{i}" for i in range(count - len(root.nsmap))})
+    wire = etree.tostring(root)
+    if count == 64:
+        assert inspect.inspect_xml(wire, pin)["signature_under_supplied_pin"] == "verified"
+    else:
+        with pytest.raises(ValueError, match="namespace context bound"):
+            inspect.inspect_xml(wire, pin)
+
+
+@pytest.mark.parametrize("role", ["prefix", "uri"])
+@pytest.mark.parametrize("extra", [0, 1])
+def test_namespace_spelling_byte_boundary(owned, role, extra):
+    root, pin = signed(owned)
+    # Non-ASCII letters in prefixes prove the ceiling is UTF-8 bytes, not characters.
+    prefix = "π" * 1024 + "a" * extra if role == "prefix" else "unused"
+    uri = "urn:" + "a" * (2044 + extra) if role == "uri" else "urn:owned:unused"
+    wire = etree.tostring(with_namespaces(root, {prefix: uri}), encoding="utf-8")
+    if extra == 0:
+        assert inspect.inspect_xml(wire, pin)["signature_under_supplied_pin"] == "verified"
+    else:
+        with pytest.raises(ValueError, match="namespace spelling bound"):
+            inspect.inspect_xml(wire, pin)
+
+
+@pytest.mark.parametrize("extra_capacity", [0, -1])
+def test_inherited_unused_namespace_work_is_charged(owned, monkeypatch, extra_capacity):
+    root, pin = signed(owned)
+    root = with_namespaces(root, {"unused": "urn:" + "a" * 1024})
+    work = sum(
+        len((prefix or "").encode()) + len(uri.encode()) for node in root.iter() for prefix, uri in node.nsmap.items()
+    )
+    assert c14n(root) == c14n(signed(owned)[0])  # Invisible in exclusive output, still work to inspect.
+    monkeypatch.setattr(inspect, "MAX_NAMESPACE_WORK", work + extra_capacity)
+    if extra_capacity == 0:
+        assert inspect.inspect_xml(etree.tostring(root), pin)["signature_under_supplied_pin"] == "verified"
+    else:
+        with pytest.raises(ValueError, match="namespace work bound"):
+            inspect.inspect_xml(etree.tostring(root), pin)
+
+
+def test_invalid_signature_refuses_before_document_copy_or_transform(owned, monkeypatch):
+    root, pin = signed(owned)
+    root.find(D + "Signature")[1].text = encoded(b"\0" * 256)
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("invalid signature reached a document transform")
+
+    monkeypatch.setattr(inspect, "without_signature", forbidden)
+    with pytest.raises(InvalidSignature):
+        inspect.inspect_xml(etree.tostring(root), pin)

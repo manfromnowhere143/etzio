@@ -41,6 +41,32 @@ unrecognized transforms and algorithm parameters. References resolve only to the
 structurally bound nodes. Signature removal preserves tail text. No schema validation,
 XSLT, XPath supplied by input, URL fetching, subprocess or ambient clock is used.
 
+Resource correction, 2026-10-11: input size alone does not bound canonical output.
+Repeated namespace rendering expanded an owned 8,732-byte document to 2,113,549 bytes.
+The initial implementation checked the 8 MiB canonical ceiling after full allocation;
+that was a refusal limit, not an enforced allocation limit. Preserve that distinction.
+
+Canonical output now goes through [lxml's C14N 1.0 file-like writer](https://lxml.de/apidoc/lxml.etree.html)
+to a capped buffer.
+Each write is checked before retention; the write that would cross 8 MiB raises and
+aborts processing. The complete oversized output is never materialized by the inspector.
+The library's own parser/writer buffers and the final bounded byte copy are additional
+allocations; this is not a process-wide memory limit or hard isolation.
+
+Before canonicalization, each element may have at most 64 in-scope namespace bindings;
+each prefix and URI is at most 2,048 UTF-8 bytes. Sum their prefix-plus-URI bytes over
+all element contexts, including inherited bindings, and refuse above 16 MiB. This is a
+conservative work counter, not an estimate of exact C14N output or a CPU-time guarantee.
+It bounds namespace fanout even when the namespaces are unused and would not appear in
+exclusive canonical output. Existing byte/node/depth limits still apply. These explicit
+subset restrictions can refuse otherwise valid XML; no general XML conformance is claimed.
+
+After structural checks and supplied-certificate pinning, verify the SignatureValue over
+bounded canonical SignedInfo before canonicalizing the two references. Reusing a valid
+SignedInfo can still accompany altered document bytes, so authentication ordering does
+not replace either expansion bound. Reports are emitted only after all reference and
+signer-binding checks pass. Existing real-document reports must remain byte-equivalent.
+
 Only after both reference digests, the signer binding and SignatureValue verify does the
 inspector emit a deterministic report. It emits no parsed service claims and no trusted
 tree for consequential use. It is a narrow signature-mathematics inspector, not a general
@@ -64,6 +90,14 @@ instructions, unsupported algorithms/transforms/parameters and resource limits. 
 real documents are inspected offline only. Their original captures, parser observations,
 pin provenance and failures remain separately identified; tests do not execute third-party
 code or contact providers.
+
+Additional controls require equality with the previous canonicalizer on accepted fixtures,
+exact-cap acceptance and cap-minus-one refusal, real writer abortion on namespace fanout,
+namespace count/length/work ceilings, inherited unused namespaces, signature verification
+before document transforms, and unchanged reports for the retained EU/Spain snapshots.
+The [resource correction record](evidence/canonicalization-bounds-2026-10-11.json) retains
+the owned reproduction, source identities and both-runtime comparison. The focused suite
+now has `70` controls; the original `55`-control result below remains historical evidence.
 
 The [W3C security guidance](https://www.w3.org/TR/2013/NOTE-xmldsig-bestpractices-20130411/)
 motivates binding what is consumed to what is signed and refusing unnecessary transform

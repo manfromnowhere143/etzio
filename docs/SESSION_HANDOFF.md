@@ -2,9 +2,47 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-11, Asia/Jerusalem.
 
+## Canonicalization resource correction, 2026-10-11
+
+This is the latest recovery summary. The continuation found a concrete gap in the
+offline trusted-list inspector: its canonical-byte limit was checked after allocating
+the full output. An owned `8732`-byte XML example expands to `2113549` bytes through
+repeated namespace rendering. This is a correction to Etzio's documentary tool, not an
+external vulnerability, demonstrated resource exhaustion or paid finding.
+
+The [updated contract](TRUSTED_LIST_BOOTSTRAP.md) requires a capped streaming C14N writer,
+namespace count/spelling/work ceilings and SignatureValue verification before document
+transforms. Fifteen additional controls bring the focused suite to `70`; all pass on
+both declared runtimes. The oversized writer control refuses before retaining the
+crossing chunk. Both retained EU/Spain reports are exactly unchanged on both runtimes.
+The [correction evidence](evidence/canonicalization-bounds-2026-10-11.json) preserves the
+owned reproduction, primary-source review, comparison and development failures. This
+does not qualify total process memory, isolation, currentness or a native provider.
+
+Entry was clean published `main` at `f89b35306bc805fbe08939d7076a2fd40afe99c6`
+([PR #42](https://github.com/manfromnowhere143/etzio/pull/42)). Its unchanged bytes had
+passed both full local suites and exact-head CI in this same session; that retained
+baseline is reused. The new full collection target is `2368`. Resolve final validation
+from the exact candidate PR and
+`artifacts/checkpoints/2026-10-11-canonicalization-bounds/release-validation.json`.
+Collection targets and focused passes are not full-release passes. Raw documents remain
+in the earlier checkpoint; the new ignored checkpoint retains the owned fixture,
+replay script, source captures and logs. A fresh clone lacks these private records.
+
+**Next dependency and pending decision:** complete native observations, a compatible
+versioned profile and retained lifecycle replay remain ahead of external latest-head
+recovery, storage and execution. Public FreeTSA certificates/CRL were already inspected
+in the October 10 dossier; do not repeat that work as new progress. The exact diagnostic
+plan was presented again for a scoped decision, but no acceptance has arrived. The
+original journal is unchanged and spent; no follow-up journal or dispatch exists.
+No provider-protocol request, new cloud resource, target execution or submission occurred.
+Do not infer acceptance from broad continuation. The decision packet and broader
+enterprise mission remain unchanged.
+
 ## Native-provider documentary bootstrap, 2026-10-11
 
-This is the latest recovery summary. The architectural and revenue decision remains
+This earlier recovery summary records the document bootstrap. The architectural and
+revenue decision remains
 [PAID_FINDINGS_DECISION_2026-10-11](PAID_FINDINGS_DECISION_2026-10-11.md); the CoW dossier
 is complete. This continuation advances a specific native-provider provenance gap.
 
@@ -676,7 +714,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2353 tests expected;
+- 2368 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
