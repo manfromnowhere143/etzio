@@ -165,6 +165,13 @@ the complete new schema. A fresh opening must authenticate either retained state
 These owned, injected call-boundary tests are not power-fault or production-device
 qualification and do not alter schema versions, migration authority or provider admission.
 
+The descriptor acquired before SQLite connects follows the same ownership rule. A
+pre-connect interruption attempts descriptor closure without replacing its original error.
+After connection, descriptor cleanup must not mask an opening failure. If descriptor close
+itself fails after an otherwise successful opening, construction fails and discards the
+SQLite connection. Never retry a failed descriptor close: its numeric identifier may
+already have been released. A failed close does not establish physical resource release.
+
 ### Four immutable local phases
 
 Progress is represented by four immutable, append-only local records. A mutable status row

@@ -1,5 +1,6 @@
 """Failed construction must release owned handles and preserve committed schema."""
 
+import os
 import sqlite3
 from contextlib import contextmanager
 
@@ -237,4 +238,92 @@ def test_connect_failure_before_handle_assignment_preserves_error(tmp_path, monk
             SQLiteEventStore(tmp_path / "owned.sqlite3")
     assert caught.value is original
     with SQLiteEventStore(tmp_path / "owned.sqlite3") as fresh:
+        assert fresh.load(GENESIS_DIGEST) == ()
+
+
+@contextmanager
+def _descriptor_faults(monkeypatch, *, preparation_error=None, close_error=None, after_close=False):
+    real_close, real_fchmod = os.close, os.fchmod
+    observed = {"fd": None, "closed": False, "close_calls": 0}
+
+    def fchmod(fd, mode):
+        observed["fd"] = fd
+        if preparation_error is not None:
+            raise preparation_error
+        return real_fchmod(fd, mode)
+
+    def close(fd):
+        if fd != observed["fd"]:
+            return real_close(fd)
+        observed["close_calls"] += 1
+        if close_error is None or after_close:
+            real_close(fd)
+            observed["closed"] = True
+        if close_error is not None:
+            raise close_error
+
+    try:
+        with monkeypatch.context() as patch:
+            patch.setattr(os, "fchmod", fchmod)
+            patch.setattr(os, "close", close)
+            yield observed
+    finally:
+        if observed["fd"] is not None and not observed["closed"]:
+            real_close(observed["fd"])
+
+
+@pytest.mark.parametrize("fault", ["interruption", "close_before", "close_after"])
+def test_path_preparation_cleans_descriptor_without_masking_failure(tmp_path, monkeypatch, fault):
+    original = (KeyboardInterrupt if fault == "interruption" else RuntimeError)("owned preparation failure")
+    close_error = MemoryError("owned descriptor close failure") if fault != "interruption" else None
+    with _descriptor_faults(monkeypatch, preparation_error=original, close_error=close_error,
+                            after_close=fault == "close_after") as observed:
+        with pytest.raises(BaseException) as caught:
+            SQLiteEventStore(tmp_path / "owned.sqlite3")
+        assert caught.value is original
+        assert observed["close_calls"] == 1
+        assert observed["closed"] == (fault != "close_before")
+        if observed["closed"]:
+            with pytest.raises(OSError):
+                os.fstat(observed["fd"])
+
+
+@pytest.mark.parametrize("after_close", [False, True])
+@pytest.mark.parametrize("database_error", [False, True])
+def test_descriptor_cleanup_preserves_opening_failure(tmp_path, monkeypatch, after_close, database_error):
+    original = (sqlite3.OperationalError if database_error else RuntimeError)("owned opening failure")
+
+    def fail(store, prepared):
+        raise original
+
+    with _fault_connection(monkeypatch) as connections:
+        with _descriptor_faults(monkeypatch, close_error=KeyboardInterrupt("owned descriptor close"),
+                                after_close=after_close) as observed:
+            with monkeypatch.context() as patch:
+                patch.setattr(SQLiteEventStore, "_verify_post_connect_identity", fail)
+                with pytest.raises(BaseException) as caught:
+                    SQLiteEventStore(tmp_path / "owned.sqlite3")
+            if database_error:
+                assert type(caught.value) is StoreOperationalError
+                assert caught.value.__cause__ is original
+            else:
+                assert caught.value is original
+            assert observed["close_calls"] == 1
+            with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+                connections[0].execute("SELECT 1")
+
+
+@pytest.mark.parametrize("after_close", [False, True])
+def test_descriptor_close_failure_after_successful_opening_discards_connection(tmp_path, monkeypatch, after_close):
+    path = tmp_path / "owned.sqlite3"
+    original = KeyboardInterrupt("owned final descriptor close")
+    with _fault_connection(monkeypatch) as connections:
+        with _descriptor_faults(monkeypatch, close_error=original, after_close=after_close) as observed:
+            with pytest.raises(KeyboardInterrupt) as caught:
+                SQLiteEventStore(path)
+            assert caught.value is original
+            assert observed["close_calls"] == 1
+            with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+                connections[0].execute("SELECT 1")
+    with SQLiteEventStore(path) as fresh:
         assert fresh.load(GENESIS_DIGEST) == ()

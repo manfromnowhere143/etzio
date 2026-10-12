@@ -9,22 +9,24 @@
     "single_interruption_unclosed_handles": 4,
     "rollback_interruption_active_transactions": 4,
     "rollback_interruption_peer_writer_blocks": 4,
-    "regression_failures": 22,
+    "regression_failures": 31,
     "positive_control_passes": 1,
-    "test_file_sha256": "4a40bdbd77f9518166db9e9dd99ff729a6e0351064d1075dc2f610ce78a3e497"
+    "test_file_sha256": "83fc24085c6233786bf3f6cdae8af2006a0de4f09bd550a42043d27b38bbc0fb",
+    "preconnect_descriptor_leak_reproduced": true
   },
-  "correction": "All failed openings discard the connection before close. All four schema creation/migration paths use existing rollback/discard cleanup. Original failures and SQLite store-domain classification survive cleanup failure.",
+  "correction": "All failed openings discard the connection before close. All four schema creation/migration paths use existing rollback/discard cleanup. Original failures and SQLite store-domain classification survive cleanup failure. Pre-connect descriptor failure attempts closure once. Descriptor cleanup preserves an opening failure; a descriptor-close failure after otherwise successful opening discards the SQLite connection.",
   "validation": {
-    "focused_controls": 72,
-    "new_controls": 23,
+    "focused_controls": 81,
+    "new_controls": 32,
     "runtimes": [
       "3.11.15",
       "3.14.2"
     ],
-    "full_suite_collection_target": 2562,
+    "full_suite_collection_target": 2571,
     "release_record": "artifacts/checkpoints/2026-10-12-store-opening/release-validation.json"
   },
   "review_coverage": [
+    "Pre-connect descriptor acquisition, validation and final descriptor release",
     "SQLiteEventStore constructor and schema opening/migration paths",
     "integrity-state validation cache and coherent read wrapper",
     "runtime rollback/discard, close and selected append/read callers",
@@ -32,7 +34,7 @@
   ],
   "limits": [
     "Repository-owned injected call-boundary failures only; no external vulnerability or bounty finding.",
-    "No guarantee of physical lock release when close itself is interrupted; the store is unusable in that case.",
+    "No guarantee of physical handle or descriptor release when its close itself fails; descriptors are never retried and a constructed store is discarded.",
     "Logical schema equality, not physical database-byte identity.",
     "No arbitrary-instruction asynchronous safety, process/power/device fault qualification or external current-head authority.",
     "No whole-repository audit; no provider SDK, account, credit balance or hosted execution verified."
@@ -165,7 +167,26 @@
       "supporting_observation": "Vendor states per-sandbox Firecracker microVMs; not an Etzio qualification result.",
       "publication_date": "not established; exact tag where supplied, otherwise retrieved mutable documentation",
       "license_access": "Public primary source; source bytes retained privately for review, not republished as Etzio code"
+    },
+    {
+      "title": "PEP 475: Retry system calls failing with EINTR",
+      "publisher": "Python Enhancement Proposals",
+      "url": "https://peps.python.org/pep-0475/",
+      "publication_date": "2014-07-29 creation; accepted for Python 3.5",
+      "retrieved_host_utc": "2026-10-12T18:10:49.586135+00:00",
+      "path": "artifacts/checkpoints/2026-10-12-store-opening/sources/pep-0475.html",
+      "size": 45158,
+      "sha256": "3d550f57dcf492dd9626900a85195af6957583fd1c9c6315e6436b02f3a97b46",
+      "review_depth": "Proposal and modified-functions sections, especially close/dup2 exception",
+      "supporting_observation": "close is not retried because the descriptor may already have been released; this does not promise immunity to arbitrary Python exceptions.",
+      "license_access": "Public primary source retained privately; no source implementation copied"
     }
   ],
-  "provider_options": "docs/QUALIFICATION_NEXT_STEPS.md#available-provider-credits-operator-clarification-2026-10-12"
+  "provider_options": "docs/QUALIFICATION_NEXT_STEPS.md#available-provider-credits-operator-clarification-2026-10-12",
+  "superseded_candidate": {
+    "commit": "2b4289e993b505ecca7a631c538fc6e520c9b1f5",
+    "ci_run": 38288090403,
+    "status": "full_checks_cancelled_for_demonstrated_descriptor_extension",
+    "passing_full_release_claim": false
+  }
 }

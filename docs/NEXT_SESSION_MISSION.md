@@ -9,8 +9,8 @@ The latest dated recovery section governs current status; older sections retain 
 
 The [opening correction](evidence/store-opening-cleanup-2026-10-12.json) extends bounded
 cleanup to failed construction and all admitted schema migrations. It preserves primary
-errors and actual pre/post-commit schema state. All 72 focused controls pass on both
-declared runtimes; resolve the 2562-test full release separately from
+errors and actual pre/post-commit schema state. All 81 focused controls pass on both
+declared runtimes; resolve the 2571-test full release separately from
 `artifacts/checkpoints/2026-10-12-store-opening/release-validation.json`.
 
 Daniel authorizes using existing Neon, Sentry and E2B credits when materially useful,

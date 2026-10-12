@@ -173,7 +173,7 @@
     "bounded offline trusted-list signature mathematics under an externally supplied certificate pin, with exact whole-document and SignedProperties references and no kernel or trust-admission effect",
     "runtime SQLite write exception cleanup covers BaseException, invalidates speculative validation and closes a handle on rollback refusal while preserving committed post-response-loss finality",
     "coherent deferred SQLite read transactions spanning state authentication pending-barrier evaluation and full readout with nested caller transaction preservation and interruption cleanup",
-    "failed SQLite openings discard connections before close and all four schema construction/migration paths use primary-error-preserving rollback/discard cleanup"
+    "failed SQLite openings discard connections before close and all four schema construction/migration paths use primary-error-preserving rollback/discard cleanup with one-attempt pre-connect descriptor cleanup and original-error preservation"
   ],
   "modeled_only": [
     "original in-memory ten-unit behavior loop",
@@ -209,7 +209,7 @@
   "current_evidence": {
     "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2562,
+    "test_count": 2571,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -1570,9 +1570,9 @@
     "date": "2026-10-12",
     "status": "implemented_release_validation_record_separate",
     "evidence": "docs/evidence/store-opening-cleanup-2026-10-12.json",
-    "new_controls": 23,
-    "focused_controls": 72,
-    "full_suite_collection_target": 2562,
+    "new_controls": 32,
+    "focused_controls": 81,
+    "full_suite_collection_target": 2571,
     "release_validation_record": "artifacts/checkpoints/2026-10-12-store-opening/release-validation.json",
     "production_storage_qualified": false,
     "finding": false

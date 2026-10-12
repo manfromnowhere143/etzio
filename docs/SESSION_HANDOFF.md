@@ -11,18 +11,24 @@ left an active transaction blocking a peer writer. The
 [ADR-0011 extension](decisions/0011-crash-safe-modeled-integrity-finality.md#escaping-exceptions-and-transaction-cleanup)
 now applies the existing rollback/discard rule to these four paths and discards every
 failed opening before attempting close. Cleanup failures preserve the initiating error;
-SQLite errors retain their store-domain classification.
+SQLite errors retain their store-domain classification. Pre-connect interruptions also
+attempt descriptor closure; cleanup preserves an earlier error, and a descriptor-close
+failure after otherwise successful opening discards the SQLite connection. Failed descriptor
+close is never retried because its number may already have been released.
 
 The [correction record](evidence/store-opening-cleanup-2026-10-12.json) retains source review,
-coverage, limits and the baseline reproduction. Twenty-two of the 23 new controls fail
-against the original implementation; one already passes. All `72` focused opening,
+coverage, limits and the baseline reproduction. Thirty-one of the 32 new controls fail
+against the original implementation; one already passes. All `81` focused opening,
 runtime-interruption, coherent-read and cleanup controls pass on CPython `3.11.15` and
 `3.14.2`. Tests retain the raw connection and caught traceback deliberately, check actual
 peer-writer access, and verify old/new logical schema recovery on either side of commit.
 An interrupted close still has no physical resource-release guarantee; the discarded
 store cannot be used. This is local correctness work, not production storage qualification.
 
-The complete collection target is `2562`. Resolve full local/CI/package validation for
+Review found the descriptor gap while the first candidate was validating. Its incomplete
+full checks were cancelled and retained as superseded, not passing validation.
+
+The complete collection target is `2571`. Resolve full local/CI/package validation for
 the exact candidate from `artifacts/checkpoints/2026-10-12-store-opening/release-validation.json`
 and its PR. The unchanged `ffbe903d1ca6b4ea5fd7ddabeecd0bed5f4a32b8` baseline was fully
 validated in this session; all 48 files in its retained release index were reauthenticated.
@@ -1109,7 +1115,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2562 tests expected;
+- 2571 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

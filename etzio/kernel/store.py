@@ -453,15 +453,31 @@ class SQLiteEventStore:
             self._verify_post_connect_identity(prepared)
         except sqlite3.DatabaseError as exc:
             self._discard_connection_quietly()
+            self._close_descriptor_quietly(prepared.descriptor)
             raise _sqlite_store_failure(
                 "could not initialize event store",
                 exc,
             ) from exc
         except BaseException:
             self._discard_connection_quietly()
+            self._close_descriptor_quietly(prepared.descriptor)
             raise
-        finally:
-            os.close(prepared.descriptor)
+        else:
+            try:
+                os.close(prepared.descriptor)
+            except BaseException:
+                self._discard_connection_quietly()
+                raise
+
+    @staticmethod
+    def _close_descriptor_quietly(descriptor: int) -> None:
+        """Attempt release once without replacing an already escaping failure."""
+
+        try:
+            os.close(descriptor)
+        except BaseException:
+            # A failing close may already have released this descriptor. Do not retry.
+            pass
 
     @staticmethod
     def _refuse_preexisting_wal(descriptor: int) -> None:
@@ -529,8 +545,8 @@ class SQLiteEventStore:
                 device=metadata.st_dev,
                 inode=metadata.st_ino,
             )
-        except Exception:
-            os.close(fd)
+        except BaseException:
+            cls._close_descriptor_quietly(fd)
             raise
 
     @staticmethod
