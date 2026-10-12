@@ -2,6 +2,46 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-12, Asia/Jerusalem.
 
+## Approved FreeTSA diagnostic outcome, 2026-10-12
+
+Daniel explicitly accepted the prepared one-request diagnostic and its finite local-host
+assumptions. On released `ef151a9527e2b2cdc0d20587c283c7ec6f06b485`, one new journal and
+one collector invocation retained `capture_indeterminate` / `transport_error`. The advisory
+observation is `response_read` / `tls_eof`, with `6314` decrypted bytes counted before
+refusal. No response bytes were retained. The operation took about 1.16 seconds including
+local startup/custody; that is operational timing, not qualified time. Exit zero records
+the outcome, not acquisition success. Cold replay agrees; the original spent journal is
+unchanged. Both attempts remain spent. No second external dispatch occurred.
+
+The [result record](evidence/freetsa-diagnostic-result-2026-10-12.json) and updated
+[scope](FREETSA_DIAGNOSTIC_PROPOSAL.md) supersede earlier diagnostic-pending statements.
+The historical preparation records remain unchanged. Private acceptance, raw CLI output,
+invocation, cold state, source bytes and experiments are under
+`artifacts/checkpoints/2026-10-12-freetsa-diagnostic/`.
+
+A three-case owned loopback experiment passes on both declared runtimes. A complete and
+a one-byte-truncated HTTP message each produce the same TLS EOF classification and
+6314-byte count after abrupt closure; clean closure allows retention of the complete
+message. All cold states agree and all spent-journal redispatches refuse before network.
+The byte count cannot establish external HTTP completeness, timestamp validity or signer
+identity. RFC 9112 permits a distinct framing-aware completion policy, but the accepted
+Etzio profile requires clean TLS closure and behaved accordingly. No runtime change,
+new parser, source admission or external vulnerability follows. Do not repeat the same
+acquisition or weaken its historical interpretation.
+
+Entry was clean published `main` at the PR #50 head above. Its same-session complete local,
+dual-runtime Linux CI and package evidence remains the unchanged baseline. This is an
+evidence and mission-state update; the suite count remains `2535`. Resolve final checks
+for this exact documentation candidate from its PR and private `release-validation.json`.
+
+**Next dependency:** actual catalog/monitor commitments and the complete native operating
+dossier remain necessary before integration. The six existing inquiry threads had no human
+replies at the retained approximately 15:43 UTC readback. Do not resend or substitute
+optional adapters. A new framing-aware acquisition profile is proposed only and would
+need contract/negative-control qualification and a separate exact acquisition decision.
+Daybreak remains prepared and unsubmitted; the early paid-lane exception remains unaccepted.
+Integrity, storage, isolation, benchmark and exact-target gates still precede bounty work.
+
 ## Cleanup interruption hardening and operator pickup, 2026-10-12
 
 An owned two-failure experiment reproduced the explicitly excluded cleanup-interruption

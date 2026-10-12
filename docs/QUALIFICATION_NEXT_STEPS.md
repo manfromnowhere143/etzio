@@ -3,6 +3,13 @@
 Status: research and preparation, 2026-10-12. No native provider, storage profile,
 execution profile or bounty target is admitted by this record.
 
+The [diagnostic result](evidence/freetsa-diagnostic-result-2026-10-12.json) now resolves
+the FreeTSA decision: accepted and attempted once, then spent with a TLS EOF observation
+after 6314 counted bytes and no retained response. Both journals remain spent. Owned
+complete/truncated-message controls explain why the count alone cannot establish a
+timestamp. The strict collector met its contract; no profile was relaxed or provider
+admitted. Earlier pending statements in the historical sections below are superseded.
+
 The [2026-10-12 assessment](MISSION_REVIEW_2026-10-12.md) now retains a concrete
 provider-feasibility result. Published keys match, but the reviewed services do not supply
 a complete admitted Etzio roster. Resolve the named catalog operator and full source

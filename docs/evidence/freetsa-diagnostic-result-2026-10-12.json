@@ -1,0 +1,158 @@
+{
+  "schema": "etzio.freetsa-diagnostic-result.v1",
+  "date": "2026-10-12",
+  "status": "capture_indeterminate",
+  "accepted_release_commit": "ef151a9527e2b2cdc0d20587c283c7ec6f06b485",
+  "plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
+  "operator_acceptance": {
+    "basis": "Explicit conversational approval of the prepared one-request diagnostic and finite local-host assumptions",
+    "record": {
+      "path": "artifacts/checkpoints/2026-10-12-freetsa-diagnostic/operator-acceptance.json",
+      "size": 925,
+      "sha256": "d8b331d1fb1faaef89ad298114ecbe2042fcea8420a2e273fa471fad172e4538"
+    },
+    "assumptions_reference_id": "sha256:eb6a99c2ca187766ea3d93d77b4bb1d239105462c28ebcc80f4d32e5f51089c5"
+  },
+  "collector_invocations": 1,
+  "retained_attempts": 1,
+  "additional_external_attempts": 0,
+  "intent_id": "sha256:b86e2ff7098fa2e4fdbda52cf637bb495e257ce9711a1c43aabeb40f52fe9e99",
+  "attempt_id": "sha256:bbe505aec5416a8ac06e4d36cbf85a14ac4118defd8f12d4cbce72e3abab2164",
+  "request_size": 93,
+  "request_sha256": "20ac6d0164269afc4ed8b2882fe6574a68d0d436a216202d80ab4093c5a189ba",
+  "outcome": {
+    "attempt_id": "sha256:bbe505aec5416a8ac06e4d36cbf85a14ac4118defd8f12d4cbce72e3abab2164",
+    "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "body_size": 0,
+    "intent_id": "sha256:b86e2ff7098fa2e4fdbda52cf637bb495e257ce9711a1c43aabeb40f52fe9e99",
+    "kind": "capture_indeterminate",
+    "reason": "transport_error",
+    "schema": "etzio.acquisition-custody.outcome.v1"
+  },
+  "outcome_wire_base64": "eyJhdHRlbXB0X2lkIjoic2hhMjU2OmJiZTUwNWFlYzU0MTZhOGFjMDZlNGQzNmNiZjg1YTE0YWM0MTE4ZGVmZDhmMTJkNGNiY2U3MmUzYWJhYjIxNjQiLCJib2R5X3NoYTI1NiI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJib2R5X3NpemUiOjAsImludGVudF9pZCI6InNoYTI1NjpiODZlMmZmNzA5OGZhMmU0ZmRiZGE1MmNmNjM3YmI0OTVlMjU3Y2U5NzExYTFjNDNhYWJlYjQwZjUyZmU5ZTk5Iiwia2luZCI6ImNhcHR1cmVfaW5kZXRlcm1pbmF0ZSIsInJlYXNvbiI6InRyYW5zcG9ydF9lcnJvciIsInNjaGVtYSI6ImV0emlvLmFjcXVpc2l0aW9uLWN1c3RvZHkub3V0Y29tZS52MSJ9",
+  "transport_observation": {
+    "attempt_id": "sha256:bbe505aec5416a8ac06e4d36cbf85a14ac4118defd8f12d4cbce72e3abab2164",
+    "authority": "advisory_local_observation_only",
+    "category": "tls_eof",
+    "intent_id": "sha256:b86e2ff7098fa2e4fdbda52cf637bb495e257ce9711a1c43aabeb40f52fe9e99",
+    "phase": "response_read",
+    "plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
+    "received_bytes": 6314,
+    "schema": "etzio.https-capture.transport-observation.v1",
+    "source": "collector",
+    "tls_verify_code": null
+  },
+  "complete_response_retained": false,
+  "response_size": 0,
+  "partial_response_retained": false,
+  "http_status": "unobserved",
+  "http_framing": "unobserved",
+  "timestamp_body": "not_retained",
+  "provider_processing": "unknown",
+  "invocation": {
+    "schema": "etzio.finite-acquisition.invocation.v1",
+    "command": [
+      ".venv/bin/python",
+      "scripts/capture_timestamp_once.py",
+      "--capture",
+      "--journal",
+      "artifacts/acquisition-preparation/2026-10-10-freetsa-diagnostic/custody.sqlite3",
+      "--plan",
+      "artifacts/acquisition-preparation/2026-10-10-freetsa-diagnostic/plan.json",
+      "--ca",
+      "artifacts/acquisition-preparation/2026-10-10-freetsa-diagnostic/transport-ca.pem",
+      "--acknowledged-plan-id",
+      "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713"
+    ],
+    "started_host_utc": "2026-10-12T15:56:18.461438+00:00",
+    "completed_host_utc": "2026-10-12T15:56:19.617650+00:00",
+    "local_elapsed_ns": 1156243083,
+    "returncode": 0,
+    "outer_timeout": false,
+    "elapsed_authority": "Operational only; includes local custody/startup/cleanup; not trusted time."
+  },
+  "cold_state": {
+    "status": "capture_indeterminate",
+    "intent_id": "sha256:b86e2ff7098fa2e4fdbda52cf637bb495e257ce9711a1c43aabeb40f52fe9e99",
+    "attempt_id": "sha256:bbe505aec5416a8ac06e4d36cbf85a14ac4118defd8f12d4cbce72e3abab2164",
+    "journal_sha256": "25891baabcfb6e49c1275d0018d4ec5921e5b56dd00be71091ae284338ff622d",
+    "journal_size": 16384,
+    "original_journal_unchanged": true
+  },
+  "original_spent_journal_unchanged": true,
+  "owned_counterexample": {
+    "script": {
+      "path": "artifacts/checkpoints/2026-10-12-freetsa-diagnostic/owned-closure-experiment.py",
+      "size": 3681,
+      "sha256": "a12dadf16f97a71712fa2ee8d39e839e43d050e9ca4930c263bcd1edd4453a9f"
+    },
+    "reports": [
+      {
+        "path": "artifacts/checkpoints/2026-10-12-freetsa-diagnostic/owned-closure-3.11.15/report.json",
+        "size": 3360,
+        "sha256": "885396e86ee32dc47a713193202c39911386dbd3373f9b34ca6c03720bfff507"
+      },
+      {
+        "path": "artifacts/checkpoints/2026-10-12-freetsa-diagnostic/owned-closure-3.14.2/report.json",
+        "size": 3378,
+        "sha256": "84fdd4196ba227d4feda5df2e99cced7fd6a7c72b9999bb23be9519c4a0ab76c"
+      }
+    ],
+    "cases_per_runtime": 3,
+    "external_requests": 0,
+    "result": "Authored complete and one-byte-truncated HTTP responses both produce response_read/tls_eof with the same 6314-byte count under abrupt TLS closure; the complete response with clean TLS closure is retained. All three cases retain cold state and refuse a second dispatch before network.",
+    "limitation": "This falsifies an inference from count to HTTP completeness. It does not reconstruct the external bytes or establish a FreeTSA defect."
+  },
+  "sources": [
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc9112.html#section-9.8",
+      "title": "HTTP/1.1",
+      "publisher": "IETF",
+      "published": "2022-06",
+      "reviewed": "2026-10-12",
+      "depth": "Sections 6.3, 8 and 9.8",
+      "bytes": {
+        "path": "artifacts/checkpoints/2026-10-12-freetsa-diagnostic/rfc9112.source.txt",
+        "size": 109913,
+        "sha256": "e4f426bac6206b67fdf9e0da826154f70588db2133a0a86b15cde4ff725d8937"
+      },
+      "claim": "Explicit HTTP framing can establish message completion despite incomplete TLS closure; close-delimited messages require valid TLS closure."
+    },
+    {
+      "url": "https://www.rfc-editor.org/rfc/rfc8446.html#section-6.1",
+      "title": "The Transport Layer Security (TLS) Protocol Version 1.3",
+      "publisher": "IETF",
+      "published": "2018-08",
+      "reviewed": "2026-10-12",
+      "depth": "Section 6.1",
+      "bytes": {
+        "path": "artifacts/checkpoints/2026-10-12-freetsa-diagnostic/rfc8446.source.txt",
+        "size": 337736,
+        "sha256": "47871bc8820a2c3b6ea89f061055577058862cf543686b82d10131239702b3bd"
+      },
+      "claim": "Transport EOF before close_notify does not establish receipt of all sent data."
+    },
+    {
+      "url": "https://docs.python.org/3.11/library/ssl.html#ssl.SSLEOFError",
+      "title": "ssl Python 3.11 documentation",
+      "publisher": "Python Software Foundation",
+      "reviewed": "2026-10-12",
+      "depth": "SSLEOFError and ragged EOF behavior; displayed documentation version 3.11.17 differs from executing 3.11.15",
+      "claim": "SSLEOFError identifies abrupt TLS termination; not an HTTP completeness judgment."
+    }
+  ],
+  "decision": {
+    "runtime_change": false,
+    "repeat_unchanged_acquisition": false,
+    "legacy_clean_tls_closure_preserved": true,
+    "new_capture_profile": "Proposed only: an explicitly versioned framing-aware profile would require its own contract, exact runtime/plan, bounded parser and truncation/ambiguity controls before any separately accepted external use. No such profile is implemented or dispatched here.",
+    "critical_path": "Accountable catalog/monitor commitments and full source administration/custody dossier still precede native integration; no survey or optional codec substitutes."
+  },
+  "provider_admitted": false,
+  "kernel_authority": false,
+  "paid_resources_created": 0,
+  "bounty_target_admitted": false,
+  "finding": false,
+  "income": false,
+  "claim_boundary": "One spent diagnostic with an advisory count and TLS EOF classification. No retained HTTP bytes, CMS/signature/request-binding inspection or clock qualification. The old attempt remains spent; no resend, reclassification or new authority follows."
+}

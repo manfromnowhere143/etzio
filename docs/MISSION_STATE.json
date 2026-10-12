@@ -35,7 +35,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Read the latest cleanup-interruption handoff and exact candidate release evidence. Etzio identity is confirmed. The five-organization inquiry batch is complete with one failed delivery rerouted; no human reply or operating commitment was observed at the retained 2026-10-12 14:16 UTC check. Assess later replies before native integration. Do not repeat the completed survey or optional parsers. Individual Daybreak Blue remains prepared and unsubmitted with onboarding incomplete. Preserve FreeTSA and early-lane pending decisions.",
+    "next_session_pickup": "Read the latest FreeTSA diagnostic outcome and exact release evidence. The diagnostic was accepted and spent once: response_read/tls_eof after 6314 counted bytes, no retained HTTP bytes. Both spent journals are immutable; do not redispatch or weaken historical interpretation. Obtain actual catalog/monitor commitments and complete source administration/custody before native integration. Existing inquiries have no retained human reply at approximately 15:43 UTC October 12. Do not repeat the completed survey or optional parsers. Daybreak remains prepared/unsubmitted; early paid-lane exception remains unaccepted.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority",
     "next_session_brief": "docs/NEXT_SESSION_MISSION.md"
   },
@@ -206,7 +206,7 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and one indeterminate finite discovery observation; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption",
     "validation_status": "resolve_exact_candidate_release_record",
     "test_count": 2535,
     "python_rule_classes": 6,
@@ -1149,9 +1149,9 @@
     "kernel_authority": false,
     "followup_proposal": "docs/FREETSA_DIAGNOSTIC_PROPOSAL.md",
     "followup_plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
-    "followup_accepted": false,
-    "followup_journal_created": false,
-    "followup_dispatches": 0,
+    "followup_accepted": true,
+    "followup_journal_created": true,
+    "followup_dispatches": 1,
     "release_validation": {
       "commit": "c8c8627f01c78807f41361b4e101c8c173e8ff9e",
       "pull_request": "https://github.com/manfromnowhere143/etzio/pull/38",
@@ -1195,7 +1195,9 @@
       },
       "local_checkpoint": "artifacts/checkpoints/2026-10-10-capture-diagnostics/"
     },
-    "development_corrections": "Initial baseline failed repository link policy on inert ignored source capture; renamed to .source.txt with bytes preserved. Draft replay had 143 passed and one fixture failure; macOS non-listening bound socket timed out. Corrected to closed reserved port; 144 passed. Neither observation establishes the FreeTSA failure cause. Initial complete verification and CI 38064097752 stopped before tests on stale shared count declarations (2202 versus 2246); corrected those declarations only."
+    "development_corrections": "Initial baseline failed repository link policy on inert ignored source capture; renamed to .source.txt with bytes preserved. Draft replay had 143 passed and one fixture failure; macOS non-listening bound socket timed out. Corrected to closed reserved port; 144 passed. Neither observation establishes the FreeTSA failure cause. Initial complete verification and CI 38064097752 stopped before tests on stale shared count declarations (2202 versus 2246); corrected those declarations only.",
+    "followup_status": "spent_capture_indeterminate",
+    "followup_result": "docs/evidence/freetsa-diagnostic-result-2026-10-12.json"
   },
   "session_handoff": {
     "date": "2026-10-11",
@@ -1517,5 +1519,31 @@
     "provider_admitted": false,
     "production_storage_qualified": false,
     "pending_acquisition_changed": false
+  },
+  "freetsa_diagnostic_result": {
+    "date": "2026-10-12",
+    "status": "accepted_attempted_once_spent_capture_indeterminate",
+    "result": "docs/evidence/freetsa-diagnostic-result-2026-10-12.json",
+    "proposal": "docs/FREETSA_DIAGNOSTIC_PROPOSAL.md",
+    "plan_id": "sha256:2f88665e266eef130e510324594ea3bf839449a1b41b7a2a9fd5eb539eb5d713",
+    "accepted": true,
+    "journal_created": true,
+    "collector_invocations": 1,
+    "additional_external_attempts": 0,
+    "phase": "response_read",
+    "category": "tls_eof",
+    "advisory_received_bytes": 6314,
+    "retained_response_bytes": 0,
+    "original_journal_unchanged": true,
+    "cold_state_reproduced": true,
+    "owned_cases_per_runtime": 3,
+    "runtime_changed": false,
+    "provider_admitted": false,
+    "kernel_authority": false,
+    "target_admitted": false,
+    "private_checkpoint": "artifacts/checkpoints/2026-10-12-freetsa-diagnostic/",
+    "release_validation": "Resolve exact candidate full local checks and dual-runtime CI/package results from the checkpoint and matching PR.",
+    "supersedes": "Earlier dated records that described this exact diagnostic as pending; historical observations remain historical.",
+    "next_dependency": "Actual catalog/monitor commitments and complete operating dossier. A distinct framing-aware capture profile remains proposed only, with no implementation or external-use grant."
   }
 }

@@ -5,6 +5,23 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
+## Diagnostic decision resolved, 2026-10-12
+
+The [FreeTSA diagnostic](FREETSA_DIAGNOSTIC_PROPOSAL.md) was accepted and attempted once.
+It is spent: `capture_indeterminate` with advisory `response_read` / `tls_eof` after
+counting `6314` bytes. No HTTP bytes survived, so timestamp inspection cannot proceed.
+Both spent journals are retained unchanged. Earlier pending statements below are historical.
+The [result](evidence/freetsa-diagnostic-result-2026-10-12.json) includes three owned
+loopback cases on both runtimes showing why the count cannot establish HTTP completeness.
+No collector defect or service vulnerability was established. Do not resend or suppress
+the closure refusal. A different acquisition profile would require its own reviewed
+contract and scoped acceptance; no such implementation is admitted here.
+
+Continue from actual catalog/monitor operating commitments and the complete source dossier.
+The existing inquiry batch has no retained human response. Read later replies without
+repeating dispatch. Native integration, storage, isolation and exact-target gates remain
+open; Daybreak and the earlier paid-lane exception keep their recorded status.
+
 ## Cleanup hardening, outreach and current pickup
 
 Read the latest handoff and [cleanup evidence](evidence/cleanup-interruption-2026-10-12.json).
