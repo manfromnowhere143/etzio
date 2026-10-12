@@ -5,14 +5,14 @@ finding only when a separately authorized verifier reproduces a material effect 
 retained bytes and the kernel accepts the receipt — proof by reproduction, not by
 confidence.**
 
-> **Honest status — 2026-10-09. Phase: foundation integrity. This is the courtroom, not
+> **Honest status — 2026-10-12. Phase: foundation integrity. This is the courtroom, not
 > yet the detective.**
 >
-> Etzio has built an evidence and adjudication kernel to a high standard. It has *not* built
+> Etzio has built a tested evidence and adjudication kernel. It has *not* built
 > the part that finds vulnerabilities. The entire detection surface today is **six Python
 > rule classes over two repository fixtures** — `7` planted candidates on the vulnerable
-> fixture, `0` on the clean one, and **never a finding**. The kernel can prove a claim; it
-> cannot yet make one worth proving.
+> fixture, `0` on the clean one, and **never a finding**. The kernel authenticates and
+> retains modeled statements; independent proof of a real security effect remains blocked.
 >
 > The engine execution surface remains repository-owned deterministic fixtures. Separately,
 > public-source research and operator-authorized, bounded Google Cloud host preflight prepare
@@ -35,14 +35,18 @@ confidence.**
 > through the complete lifecycle and reconstructs them from retained bytes on cold replay.
 > Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
-> The published-material release passes `1794` tests on both declared Python runtimes
-> in Linux CI. The next elapsed-time tranche has `129` focused tests passing on both
-> local runtimes; its full release checks are recorded in the [handoff](docs/SESSION_HANDOFF.md).
-> `22` accepted architecture
-> decisions define the contracts and their refusal cases.
+> The [published recovery release](https://github.com/manfromnowhere143/etzio/pull/46)
+> passes `2504` tests on both declared Python runtimes locally and in Linux CI, including
+> `18` new interruption-cleanup controls. Exact release evidence is recorded in the
+> [handoff](docs/SESSION_HANDOFF.md). `24` architecture decision records define the
+> contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
 > [Open gates and next mission](#open-gates-and-next-mission).
+
+The [2026-10-12 mission assessment](docs/MISSION_REVIEW_2026-10-12.md) reviews the
+implemented boundary, fresh research, provider feasibility and conditional paid routes.
+Competitive discovery, independent external reproduction and income remain undemonstrated.
 
 ## The system in one view
 

@@ -1,13 +1,21 @@
 # Next-session mission: evidence, frontier review, and first paid research
 
-Status: operator-requested continuation brief, 2026-10-11. This is a research and execution
+Status: operator-requested continuation brief, 2026-10-12. This is a research and execution
 plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
 ## Completed research tranche and current pickup
 
-The latest continuation corrected an existing lifecycle defect: a caught pre-commit
+The latest [mission assessment](MISSION_REVIEW_2026-10-12.md) completes the bounded
+provider-feasibility review and refreshes the architectural and paid-route verdict. Its
+offline key comparison is documentary only. The next concrete dependency is a named
+catalog operator and complete source administration/custody dossier; no complete public
+roster, production profile or early paid lane is admitted. Follow the assessment's bounded
+feasibility stop rule and existing gate order rather than repeating the survey, CoW dossier
+or optional parser work. The exact acquisition decision remains pending.
+
+The preceding continuation corrected an existing lifecycle defect: a caught pre-commit
 interruption could expose uncommitted finality through the same connection. Runtime write
 cleanup now rolls back, invalidates speculative validation and closes the handle if rollback
 is refused. Eighteen controls cover both fixture modes and distinguish pre-commit failure

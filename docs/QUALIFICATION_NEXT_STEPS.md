@@ -1,7 +1,15 @@
 # Provider and host qualification next steps
 
-Status: research and preparation, 2026-10-11. No native provider, storage profile,
+Status: research and preparation, 2026-10-12. No native provider, storage profile,
 execution profile or bounty target is admitted by this record.
+
+The [2026-10-12 assessment](MISSION_REVIEW_2026-10-12.md) now retains a concrete
+provider-feasibility result. Published keys match, but the reviewed services do not supply
+a complete admitted Etzio roster. Resolve the named catalog operator and full source
+administration, custody, freshness and revocation obligations before another native
+adapter. The assessment's stop rule prevents repeated documentary or parser work from
+substituting for this external dependency. Existing gate order and acquisition decisions
+remain unchanged.
 
 The next useful result is one reproducible native-provider observation carried through
 retained lifecycle recovery, followed by an external latest-head recovery experiment.
