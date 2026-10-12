@@ -5,6 +5,24 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
+## Engineering priority and fence obligation, 2026-10-12
+
+Daniel rejected shortening the mission in favor of the strongest engineering path. Keep
+the complete enterprise mission and existing gates. Read the
+[fence boundary review](CATALOG_RECOVERY_DECISION.md#recovery-fence-proof-obligation-2026-10-12)
+and [finite replay result](evidence/recovery-fence-model-2026-10-12.json): catalog publication,
+local finalization and downstream acceptance require separate, enforceable epoch bindings.
+Repeated remote checks before a commit do not establish atomicity with it. The `914`
+owned schedules expose a native-contract proof obligation, not a provider/kernel defect
+or completed implementation. Do not repeat the model or implement an imagined atomic
+cross-service check. Require exact native operations and implementation conformance.
+
+Actual operator commitments and the complete roster remain the integration dependency.
+The inquiry batch still has no retained human reply; do not resend it. Recover current
+release validation from `artifacts/checkpoints/2026-10-12-recovery-fence/`. The later
+FreeTSA outcome below remains spent and unchanged. Daybreak, storage, isolation, benchmark
+and exact-target gates retain their recorded status; no early paid-lane exception is accepted.
+
 ## Diagnostic decision resolved, 2026-10-12
 
 The [FreeTSA diagnostic](FREETSA_DIAGNOSTIC_PROPOSAL.md) was accepted and attempted once.

@@ -4,6 +4,96 @@ Status: proposed operating design and completed bounded feasibility pass, 2026-1
 This advances the [mission assessment](MISSION_REVIEW_2026-10-12.md). It admits no
 provider, deployment, new protocol write, target or roadmap exception.
 
+## Recovery fence proof obligation, 2026-10-12
+
+The operator requested the strongest engineering path, without shortening the mission.
+The preferred design and independent operating roster remain unchanged. This continuation
+tests one unproved statement below: that external writer fencing prevents an old writer
+from finalizing after recovery acquires its fence.
+
+Separate three boundaries: catalog publication, local SQLite finalization, and a later
+consequential action. A fence ordered with catalog publication can refuse an old-epoch
+publication. It cannot retroactively withdraw a previously issued response or atomically
+guard an unrelated database or recipient. A writer can publish, receive acknowledgment,
+pause, then finalize locally after the recovery fence. An extra remote epoch read before
+the local commit still leaves a pause between the read and commit. Neither observation
+establishes a defect in the existing fixture kernel, which has no external fence contract.
+
+The proposed native requirement remains strong: every consequential acceptance boundary
+needs an enforceable relationship to the recovery epoch. Do not silently replace it with
+the weaker promise that only catalog publications are fenced. If strict exclusion of old
+local commits is required, the storage qualification must identify how fence acquisition
+and commit admission are ordered without a check/use gap. If an obsolete process can
+finish a historical local record, treating it as historical only, with all subsequent
+effects fenced at their recipients, would be a separate explicitly reviewed native
+contract. This document selects neither implementation and changes no released lifecycle.
+
+The owned experiment in `scripts/replay_recovery_fence_experiment.py` enumerates every
+interleaving of two finite chains: one old writer's publication, response, zero, one or three
+epoch reads, local commit and effect; and recovery's fence, read and new-epoch publication.
+Publication is assumed durable and atomic with its epoch check. Recovery reads the complete
+cut after its fence. Signatures, monitor consensus, data reconstruction, faults, retries,
+seals and actual storage are outside this model. Pauses are represented by interleaving;
+all finite prefixes are inspected without assuming eventual progress.
+
+It compares catalog-only fencing, separated epoch reads, and hypothetical atomic checks
+at the actual local/effect boundaries. The latter are specification assumptions, not a
+proposed network implementation. Deliberately removing the publication check must expose
+an old publication after the fence and an omitted recovery head. A separate positional
+calculation cross-checks each trace; it is a second calculation in this same owned program,
+not independent verification. Report counterexamples and successful cases separately.
+No test may equate an acknowledgment with local finality or a model result with a provider.
+
+The [retained result](evidence/recovery-fence-model-2026-10-12.json) covers `914`
+schedules over `14` policies. All positional cross-checks agree. Zero, one and three
+pre-commit reads each leave a counterexample to local-finalization exclusion. Even an
+atomic local-commit check leaves a later effect vulnerable unless its own recipient
+enforces the epoch. The fully guarded abstraction has successful old-epoch operations
+before the fence and no violations of these four predicates in the finite domain.
+Removing catalog enforcement exposes both late publication and a head omitted from the
+already-read recovery cut. Counts are structural examples, not probabilities or reliability.
+
+One retained counterexample is:
+
+```text
+old publication → old acknowledgment → current-epoch read
+  → recovery fence → complete recovery read → new publication
+  → old local commit → old effect
+```
+
+The catalog's order is consistent in this trace. Completion of an overlapping old call
+after the fence does not alone violate linearizability: its publication can precede the
+fence in the abstract order. It does violate a stronger promise about when old local
+commits or effects may occur. Keeping these properties distinct avoids demanding the
+wrong guarantee from a log operator or incorrectly accusing a provider of a defect.
+
+In the current fixture code, `ModeledIntegrityFinalizingEventStoreV1` calls
+`publish_checkpoint` and only later calls `SQLiteEventStore.finalize_integrity_transition`,
+which owns a separate `BEGIN IMMEDIATE`/`COMMIT`. This source mapping motivates the native
+integration obligation; it is not a conformance proof of this toy model against the kernel.
+Native recovery and effect-recipient fences have no released implementation to qualify.
+The [research ledger](evidence/recovery-fence-research-2026-10-12.json) records source
+versions, review limits, source captures and exact baseline code bindings.
+
+This directly follows the recipient-side sequencer obligation in
+[Chubby, section 2.4 (2006)](https://www.usenix.org/legacy/event/osdi06/tech/full_papers/burrows/burrows_html/).
+[Raft, section 8 (extended paper)](https://raft.github.io/raft.pdf) likewise separates
+committed requests, replies and current reads. These are foundational boundary arguments,
+not evidence of current Etzio provider behavior.
+[Ouyang et al., v3 (2024-09-27), sections 2.2 and 3.4](https://arxiv.org/html/2409.14301v3)
+explain why assumed atomicity and model/code gaps require implementation conformance checks.
+[Kent et al., v1 (2025-09-08), sections 1 and 3](https://arxiv.org/html/2509.06872v1)
+mechanize a linearizability proof method in Rocq. Our finite enumeration is not such a
+proof, does not implement that method, and has no code refinement result. The articles'
+artifacts were not executed. Selected sections, not every proof, were reviewed.
+
+Before native integration, map each modeled boundary to an exact service operation,
+transaction or recipient check; replay the delayed-response and check/use schedules
+against that implementation. Preserve the four local phases, pending barrier, exact retry
+authority, terminal seals and provider roster. Actual operator commitments and a complete
+native dossier remain the next integration dependency. Repeating this finite model or
+adding an optional codec will not supply them.
+
 ## Decision
 
 **A public witness network is not a ready Etzio head catalog.** Select an application-aware
@@ -202,8 +292,10 @@ acknowledgment with its byte identity; retain both positive and negative outcome
    revoked/rotated keys, unknown trust epoch and a replayed recovery marker. Refuse rather
    than reduce the roster or reset history.
 5. Race a surviving writer against fence acquisition; interrupt before and after each
-   external acknowledgment and local phase commit. No old-epoch write may finalize after
-   the fence. An ambiguous committed response is reconciled from retained state.
+   external acknowledgment, epoch recheck, local phase commit and consequential recipient
+   acceptance. Catalog fencing alone does not prove the stronger local-finality or effect
+   exclusion requirements; close the boundary proof obligation above before claiming them.
+   An ambiguous committed response is reconciled from retained state.
 6. Remove mirror data or decryption keys after a valid head response. This may block
    recovery; it must not promote a digest into reconstructed evidence or silently use H0.
 

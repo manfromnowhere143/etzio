@@ -2,6 +2,42 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-12, Asia/Jerusalem.
 
+## Recovery fencing boundary review, 2026-10-12
+
+Daniel explicitly prioritized the strongest engineering path over shortening the mission.
+The [catalog contract clarification](CATALOG_RECOVERY_DECISION.md#recovery-fence-proof-obligation-2026-10-12)
+retains the preferred architecture, independent roster and existing gate order. It exposes
+an unproved native integration obligation: catalog fencing cannot alone prevent delayed
+local finalization or a later consequential action. Even an extra current-epoch read can
+be separated from the action by recovery. This is a proposed-contract gap, not an observed
+defect in the fixture kernel or an external service.
+
+The owned replay script enumerates `914` finite schedules across `14` policies, retaining
+short counterexamples, positive cases and an order-inequality cross-check. It tests catalog,
+local commit and effect acceptance separately; atomic consumer checks are explicit model
+assumptions, not an implemented solution. Four regression controls verify enumeration,
+the two concrete races and exact retained-report replay. All four pass on both runtimes.
+The full collection target is `2539`; resolve completed local and exact-head CI/package
+results from `artifacts/checkpoints/2026-10-12-recovery-fence/release-validation.json`
+and the matching PR. Baseline `56d1752368b7ad6fa08a07d69b5ce5f8e01c8beb` was already
+fully verified in this same session; its 64-file evidence index and both spent journals
+were reauthenticated before this change.
+
+Fresh Chubby/Raft primary-source and two arXiv section reviews are retained with exact
+versions and limits in the [research ledger](evidence/recovery-fence-research-2026-10-12.json).
+No third-party artifact was executed. The model is neither an unbounded theorem nor a
+model/code refinement proof. No kernel bytes or authority grants change.
+
+**Next dependency:** actual catalog/monitor commitments, complete native administration
+and custody, and a concrete mapping of fence enforcement to each consequential boundary.
+The six existing inquiry threads remain unchanged at this turn's retained readback, with
+no human response or commitment. Do not resend, repeat the bounded model or add optional
+codecs. On an actual operator reply, assess the exact operations against these retained
+counterexamples before proposing integration. Storage qualification must close the local
+commit boundary; later isolation/effect consumers must close their own acceptance boundary.
+FreeTSA attempts remain spent, Daybreak prepared/unsubmitted, and the early paid lane
+unaccepted. No finding, bounty income or state-of-the-art comparison is established.
+
 ## Approved FreeTSA diagnostic outcome, 2026-10-12
 
 Daniel explicitly accepted the prepared one-request diagnostic and its finite local-host
@@ -1035,7 +1071,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2535 tests expected;
+- 2539 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

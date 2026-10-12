@@ -1,0 +1,110 @@
+{
+  "schema": "etzio.recovery-fence-research.v1",
+  "date": "2026-10-12",
+  "baseline_commit": "56d1752368b7ad6fa08a07d69b5ce5f8e01c8beb",
+  "status": "proposed_contract_gap_demonstrated_in_owned_finite_model",
+  "sources": [
+    {
+      "url": "https://www.usenix.org/legacy/event/osdi06/tech/full_papers/burrows/burrows_html/",
+      "version": "2006 OSDI; manuscript dated 2006-09-06",
+      "review_coverage": "Section 2.4 sequencers, delayed requests and recipient enforcement",
+      "retained": {
+        "path": "artifacts/checkpoints/2026-10-12-recovery-fence/sources/chubby-web-extract.json",
+        "size": 39587,
+        "sha256": "a4d6c24c2dc42af957ef117993d6aaf7fd5d4a2a780d61b948c0b1325931e7f0"
+      },
+      "capture_form": "web_tool_extract",
+      "artifact_executed": false
+    },
+    {
+      "url": "https://raft.github.io/raft.pdf",
+      "version": "Extended Raft paper, retrieved 2026-10-12; exact bytes pinned",
+      "review_coverage": "Section 8 committed operations, response loss, current read requirements",
+      "retained": {
+        "path": "artifacts/checkpoints/2026-10-12-recovery-fence/sources/raft.pdf",
+        "size": 567533,
+        "sha256": "5a5c679b6a7c88007faeff8c3eef19a77e9e5caa8bd7390922584fe8ecf0ce1f"
+      },
+      "capture_form": "https_response_body",
+      "artifact_executed": false
+    },
+    {
+      "url": "https://arxiv.org/html/2409.14301v3",
+      "version": "arXiv:2409.14301v3, 2024-09-27",
+      "review_coverage": "Sections 2.2, 3.4 and selected conformance discussion; no artifact execution",
+      "retained": {
+        "path": "artifacts/checkpoints/2026-10-12-recovery-fence/sources/multigrained-v3.html",
+        "size": 428863,
+        "sha256": "b89eaa9f420607a7da8c283e7ca2c1d79c0dfa14837100e75b58ebda804fb204"
+      },
+      "capture_form": "https_response_body",
+      "artifact_executed": false
+    },
+    {
+      "url": "https://arxiv.org/html/2509.06872v1",
+      "version": "arXiv:2509.06872v1, 2025-09-08",
+      "review_coverage": "Sections 1 and 3 model definitions; proofs and artifact not reproduced",
+      "retained": {
+        "path": "artifacts/checkpoints/2026-10-12-recovery-fence/sources/metatheory-v1.html",
+        "size": 374722,
+        "sha256": "9019a160469aabbcd57589a204420b87bd5b0b2c44deafb5abb43eabca769d95"
+      },
+      "capture_form": "https_response_body",
+      "artifact_executed": false
+    }
+  ],
+  "capture_note": "Direct urllib retrieval of the USENIX page returned HTTP 403. Its web-tool extraction was retained instead; the other three files are exact HTTPS body captures. No access restriction was bypassed. Earlier v2 multi-grained material was discovered before reviewing and pinning current v3.",
+  "model": {
+    "path": "scripts/replay_recovery_fence_experiment.py",
+    "size": 8809,
+    "sha256": "679b522eb528bce9023e7b84ec314258e6aa22f0c11de57f395fbd136a064512"
+  },
+  "result": {
+    "path": "docs/evidence/recovery-fence-model-2026-10-12.json",
+    "size": 19023,
+    "sha256": "42f8b473dd2e3809fffc6e8c5898d7142987f3f9ec8c2d77f65bc9318ead4fbc"
+  },
+  "model_results": {
+    "policies": 14,
+    "schedules": 914,
+    "new_regression_controls": 4,
+    "focused_passed_on": [
+      "3.11.15",
+      "3.14.2"
+    ],
+    "reports_identical_across_runtimes": true
+  },
+  "current_code_mapping": [
+    {
+      "path": "etzio/kernel/integrity_transition.py",
+      "baseline_lines": [
+        4617,
+        4618,
+        4642
+      ],
+      "meaning": "provider publication response is consumed before the separate store finalization call"
+    },
+    {
+      "path": "etzio/kernel/store.py",
+      "baseline_lines": [
+        6536,
+        6554,
+        6581,
+        6664
+      ],
+      "meaning": "local finalization owns a separate SQLite transaction; no native fence is enrolled"
+    }
+  ],
+  "decision": "Preserve the independent catalog/monitor design and strong native acceptance obligations. Qualify separate publication, local commit and downstream effect boundaries; do not infer cross-service atomicity from remote rechecks.",
+  "claims": {
+    "native_profile_selected": false,
+    "runtime_behavior_changed": false,
+    "live_target_admitted": false,
+    "kernel_defect_established": false,
+    "finding": false,
+    "income": false,
+    "unbounded_proof": false,
+    "model_code_refinement": false
+  },
+  "next_dependency": "Actual accountable operator commitments and complete native operating dossier, followed by exact boundary mapping and implementation conformance; no repeated survey, optional codec, or repeated model as progress."
+}

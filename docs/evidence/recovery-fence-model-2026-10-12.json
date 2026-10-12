@@ -1,0 +1,775 @@
+{
+  "all_expected_counterexamples_present": true,
+  "all_positional_crosschecks_agree": true,
+  "all_positive_controls_present": true,
+  "bounds": {
+    "fences": 1,
+    "old_writers": 1,
+    "precommit_reads": [
+      0,
+      1,
+      3
+    ],
+    "recovery_writers": 1
+  },
+  "claims": {
+    "external_execution": false,
+    "finding": false,
+    "implementation_refinement": false,
+    "kernel_defect_established": false,
+    "native_fencing_implemented": false,
+    "provider_qualification": false,
+    "unbounded_proof": false
+  },
+  "policies": [
+    {
+      "old_effects": 20,
+      "old_local_commits": 20,
+      "old_publications": 20,
+      "policy": {
+        "effect_atomic_fence": false,
+        "local_atomic_fence": false,
+        "publication_fenced": true,
+        "reads": 0
+      },
+      "policy_id": "reads_0_publication_1_local_0_effect_0",
+      "positional_crosscheck_agrees": true,
+      "schedules": 35,
+      "shortest_counterexamples": {
+        "old_effect_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_effect",
+            "epoch": 1
+          }
+        ],
+        "old_local_commit_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_effect_after_fence": 19,
+        "old_local_commit_after_fence": 16
+      }
+    },
+    {
+      "old_effects": 1,
+      "old_local_commits": 20,
+      "old_publications": 20,
+      "policy": {
+        "effect_atomic_fence": true,
+        "local_atomic_fence": false,
+        "publication_fenced": true,
+        "reads": 0
+      },
+      "policy_id": "reads_0_publication_1_local_0_effect_1",
+      "positional_crosscheck_agrees": true,
+      "schedules": 35,
+      "shortest_counterexamples": {
+        "old_local_commit_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_local_commit_after_fence": 16
+      }
+    },
+    {
+      "old_effects": 4,
+      "old_local_commits": 4,
+      "old_publications": 20,
+      "policy": {
+        "effect_atomic_fence": false,
+        "local_atomic_fence": true,
+        "publication_fenced": true,
+        "reads": 0
+      },
+      "policy_id": "reads_0_publication_1_local_1_effect_0",
+      "positional_crosscheck_agrees": true,
+      "schedules": 35,
+      "shortest_counterexamples": {
+        "old_effect_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_effect",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_effect_after_fence": 3
+      }
+    },
+    {
+      "old_effects": 1,
+      "old_local_commits": 4,
+      "old_publications": 20,
+      "policy": {
+        "effect_atomic_fence": true,
+        "local_atomic_fence": true,
+        "publication_fenced": true,
+        "reads": 0
+      },
+      "policy_id": "reads_0_publication_1_local_1_effect_1",
+      "positional_crosscheck_agrees": true,
+      "schedules": 35,
+      "shortest_counterexamples": {},
+      "violating_schedule_counts": {}
+    },
+    {
+      "old_effects": 10,
+      "old_local_commits": 10,
+      "old_publications": 35,
+      "policy": {
+        "effect_atomic_fence": false,
+        "local_atomic_fence": false,
+        "publication_fenced": true,
+        "reads": 1
+      },
+      "policy_id": "reads_1_publication_1_local_0_effect_0",
+      "positional_crosscheck_agrees": true,
+      "schedules": 56,
+      "shortest_counterexamples": {
+        "old_effect_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_0",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_effect",
+            "epoch": 1
+          }
+        ],
+        "old_local_commit_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_0",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_effect_after_fence": 9,
+        "old_local_commit_after_fence": 6
+      }
+    },
+    {
+      "old_effects": 1,
+      "old_local_commits": 10,
+      "old_publications": 35,
+      "policy": {
+        "effect_atomic_fence": true,
+        "local_atomic_fence": false,
+        "publication_fenced": true,
+        "reads": 1
+      },
+      "policy_id": "reads_1_publication_1_local_0_effect_1",
+      "positional_crosscheck_agrees": true,
+      "schedules": 56,
+      "shortest_counterexamples": {
+        "old_local_commit_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_0",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_local_commit_after_fence": 6
+      }
+    },
+    {
+      "old_effects": 4,
+      "old_local_commits": 4,
+      "old_publications": 35,
+      "policy": {
+        "effect_atomic_fence": false,
+        "local_atomic_fence": true,
+        "publication_fenced": true,
+        "reads": 1
+      },
+      "policy_id": "reads_1_publication_1_local_1_effect_0",
+      "positional_crosscheck_agrees": true,
+      "schedules": 56,
+      "shortest_counterexamples": {
+        "old_effect_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_0",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_effect",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_effect_after_fence": 3
+      }
+    },
+    {
+      "old_effects": 1,
+      "old_local_commits": 4,
+      "old_publications": 35,
+      "policy": {
+        "effect_atomic_fence": true,
+        "local_atomic_fence": true,
+        "publication_fenced": true,
+        "reads": 1
+      },
+      "policy_id": "reads_1_publication_1_local_1_effect_1",
+      "positional_crosscheck_agrees": true,
+      "schedules": 56,
+      "shortest_counterexamples": {},
+      "violating_schedule_counts": {}
+    },
+    {
+      "old_effects": 10,
+      "old_local_commits": 10,
+      "old_publications": 84,
+      "policy": {
+        "effect_atomic_fence": false,
+        "local_atomic_fence": false,
+        "publication_fenced": true,
+        "reads": 3
+      },
+      "policy_id": "reads_3_publication_1_local_0_effect_0",
+      "positional_crosscheck_agrees": true,
+      "schedules": 120,
+      "shortest_counterexamples": {
+        "old_effect_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_0",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_1",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_2",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_effect",
+            "epoch": 1
+          }
+        ],
+        "old_local_commit_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_0",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_1",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_2",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_effect_after_fence": 9,
+        "old_local_commit_after_fence": 6
+      }
+    },
+    {
+      "old_effects": 1,
+      "old_local_commits": 10,
+      "old_publications": 84,
+      "policy": {
+        "effect_atomic_fence": true,
+        "local_atomic_fence": false,
+        "publication_fenced": true,
+        "reads": 3
+      },
+      "policy_id": "reads_3_publication_1_local_0_effect_1",
+      "positional_crosscheck_agrees": true,
+      "schedules": 120,
+      "shortest_counterexamples": {
+        "old_local_commit_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_0",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_1",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_2",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_local_commit_after_fence": 6
+      }
+    },
+    {
+      "old_effects": 4,
+      "old_local_commits": 4,
+      "old_publications": 84,
+      "policy": {
+        "effect_atomic_fence": false,
+        "local_atomic_fence": true,
+        "publication_fenced": true,
+        "reads": 3
+      },
+      "policy_id": "reads_3_publication_1_local_1_effect_0",
+      "positional_crosscheck_agrees": true,
+      "schedules": 120,
+      "shortest_counterexamples": {
+        "old_effect_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_0",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_1",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "read_2",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_effect",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_effect_after_fence": 3
+      }
+    },
+    {
+      "old_effects": 1,
+      "old_local_commits": 4,
+      "old_publications": 84,
+      "policy": {
+        "effect_atomic_fence": true,
+        "local_atomic_fence": true,
+        "publication_fenced": true,
+        "reads": 3
+      },
+      "policy_id": "reads_3_publication_1_local_1_effect_1",
+      "positional_crosscheck_agrees": true,
+      "schedules": 120,
+      "shortest_counterexamples": {},
+      "violating_schedule_counts": {}
+    },
+    {
+      "old_effects": 35,
+      "old_local_commits": 35,
+      "old_publications": 35,
+      "policy": {
+        "effect_atomic_fence": false,
+        "local_atomic_fence": false,
+        "publication_fenced": false,
+        "reads": 0
+      },
+      "policy_id": "reads_0_publication_0_local_0_effect_0",
+      "positional_crosscheck_agrees": true,
+      "schedules": 35,
+      "shortest_counterexamples": {
+        "old_effect_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_effect",
+            "epoch": 1
+          }
+        ],
+        "old_local_commit_after_fence": [
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "old_reply",
+            "epoch": 0
+          },
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_local_commit",
+            "epoch": 1
+          }
+        ],
+        "old_publication_after_fence": [
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 1
+          }
+        ],
+        "old_publication_missing_from_recovery_cut": [
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "recover_read",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_effect_after_fence": 34,
+        "old_local_commit_after_fence": 31,
+        "old_publication_after_fence": 15,
+        "old_publication_missing_from_recovery_cut": 5
+      }
+    },
+    {
+      "old_effects": 1,
+      "old_local_commits": 4,
+      "old_publications": 35,
+      "policy": {
+        "effect_atomic_fence": true,
+        "local_atomic_fence": true,
+        "publication_fenced": false,
+        "reads": 0
+      },
+      "policy_id": "reads_0_publication_0_local_1_effect_1",
+      "positional_crosscheck_agrees": true,
+      "schedules": 35,
+      "shortest_counterexamples": {
+        "old_publication_after_fence": [
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 1
+          }
+        ],
+        "old_publication_missing_from_recovery_cut": [
+          {
+            "accepted": true,
+            "action": "fence",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "recover_read",
+            "epoch": 1
+          },
+          {
+            "accepted": true,
+            "action": "old_publish",
+            "epoch": 1
+          }
+        ]
+      },
+      "violating_schedule_counts": {
+        "old_publication_after_fence": 15,
+        "old_publication_missing_from_recovery_cut": 5
+      }
+    }
+  ],
+  "policy_count": 14,
+  "schedule_count": 914,
+  "schema": "etzio.owned-recovery-fence-experiment.v1",
+  "scope": "complete_finite_interleavings_only"
+}

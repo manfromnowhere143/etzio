@@ -35,7 +35,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Read the latest FreeTSA diagnostic outcome and exact release evidence. The diagnostic was accepted and spent once: response_read/tls_eof after 6314 counted bytes, no retained HTTP bytes. Both spent journals are immutable; do not redispatch or weaken historical interpretation. Obtain actual catalog/monitor commitments and complete source administration/custody before native integration. Existing inquiries have no retained human reply at approximately 15:43 UTC October 12. Do not repeat the completed survey or optional parsers. Daybreak remains prepared/unsubmitted; early paid-lane exception remains unaccepted.",
+    "next_session_pickup": "Prioritize rigorous enterprise capability without shortening the mission. Read the recovery fence boundary review: catalog publication alone cannot fence delayed local commits or effects; 914 owned schedules retain counterexamples. Actual catalog/monitor commitments and the complete native dossier remain necessary. Map each consequential boundary to enforceable epoch ordering before integration. No repeated survey, model or optional codec. Both FreeTSA attempts remain spent; Daybreak prepared/unsubmitted; early paid lane unaccepted.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority",
     "next_session_brief": "docs/NEXT_SESSION_MISSION.md"
   },
@@ -206,9 +206,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2535,
+    "test_count": 2539,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -223,7 +223,7 @@
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
     "validated_implementation_commit": "2653fdc39b4ce5cf95309ad4481be3799ee573f6",
-    "release_evidence_pointer": "/cleanup_interruption_hardening/release_validation_record",
+    "release_evidence_pointer": "/recovery_fence_experiment/release_validation_record",
     "focused_source_provenance_tests": 52,
     "focused_trusted_list_signature_tests": 70,
     "focused_native_checkpoint_tests": 105,
@@ -1498,10 +1498,10 @@
     "provider_admissions": 0,
     "purchase_or_deployment_committed": false,
     "private_evidence": "artifacts/operator-inquiries/2026-10-12/",
-    "fresh_thread_readback": "artifacts/checkpoints/2026-10-12-engine-continuation/",
+    "fresh_thread_readback": "artifacts/checkpoints/2026-10-12-recovery-fence/provider-thread-readback.json",
     "engine_project_clarification_pending": false,
     "follow_up_scheduled": false,
-    "thread_readback_retained_host_utc": "2026-10-12T14:16:10.149833+00:00"
+    "thread_readback_retained_host_utc": "2026-10-12 17:09:21 UTC"
   },
   "cleanup_interruption_hardening": {
     "date": "2026-10-12",
@@ -1545,5 +1545,24 @@
     "release_validation": "Resolve exact candidate full local checks and dual-runtime CI/package results from the checkpoint and matching PR.",
     "supersedes": "Earlier dated records that described this exact diagnostic as pending; historical observations remain historical.",
     "next_dependency": "Actual catalog/monitor commitments and complete operating dossier. A distinct framing-aware capture profile remains proposed only, with no implementation or external-use grant."
+  },
+  "recovery_fence_experiment": {
+    "date": "2026-10-12",
+    "status": "owned_finite_research_model_implemented_native_obligations_open",
+    "operator_priority": "strongest_engineering_path_without_shortening_mission",
+    "contract": "docs/CATALOG_RECOVERY_DECISION.md",
+    "research": "docs/evidence/recovery-fence-research-2026-10-12.json",
+    "result": "docs/evidence/recovery-fence-model-2026-10-12.json",
+    "baseline_commit": "56d1752368b7ad6fa08a07d69b5ce5f8e01c8beb",
+    "policy_count": 14,
+    "schedule_count": 914,
+    "new_regression_controls": 4,
+    "full_suite_collection_target": 2539,
+    "release_validation_record": "artifacts/checkpoints/2026-10-12-recovery-fence/release-validation.json",
+    "native_integration": false,
+    "runtime_changed": false,
+    "stronger_local_fence_contract_weakened": false,
+    "provider_admitted": false,
+    "finding": false
   }
 }
