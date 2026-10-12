@@ -206,9 +206,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and one indeterminate finite discovery observation; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and one indeterminate finite discovery observation; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2521,
+    "test_count": 2535,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -222,13 +222,14 @@
     "focused_archived_timestamp_and_clock_capture_tests_passed": 68,
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
-    "validated_implementation_commit": "0c060602dc2cbcb3e5025802b926065bb80f3cd3",
-    "release_evidence_pointer": "/read_snapshot_correction/release_validation_record",
+    "validated_implementation_commit": "2653fdc39b4ce5cf95309ad4481be3799ee573f6",
+    "release_evidence_pointer": "/cleanup_interruption_hardening/release_validation_record",
     "focused_source_provenance_tests": 52,
     "focused_trusted_list_signature_tests": 70,
     "focused_native_checkpoint_tests": 105,
     "focused_effect_evidence_tests": 13,
-    "focused_interruption_cleanup_tests": 18
+    "focused_interruption_cleanup_tests": 18,
+    "focused_cleanup_failure_tests": 14
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",

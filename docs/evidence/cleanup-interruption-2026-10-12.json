@@ -116,5 +116,13 @@
     "No proof against interruption at every Python instruction, process termination, power loss or device faults.",
     "No native provider, latest external head, production storage, isolated execution, external vulnerability finding or paid result established.",
     "Provider survey and arXiv tranche not repeated; native operating commitments remain missing."
+  ],
+  "development_observations": [
+    {
+      "status": "full_verification_refused_before_tests",
+      "head": "4e83ad962ae08adc62844cbd2fbae6a27b3dbdc9",
+      "cause": "Two shared expected-test declarations still said 2521 while collection found 2535. Local verification and Linux CI correctly refused.",
+      "correction": "Synchronize shared count declarations and the current release pointer; leave verification guard and runtime behavior unchanged. Preserve failed logs privately and repeat on the corrected exact commit."
+    }
   ]
 }
