@@ -2,6 +2,44 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-12, Asia/Jerusalem.
 
+## Failed opening and migration cleanup, 2026-10-12
+
+An owned experiment reproduced a constructor resource leak across fresh schema creation
+and all three supported forward migrations. A caught interruption left the raw SQLite
+handle open. A second interruption during rollback replaced the initiating failure and
+left an active transaction blocking a peer writer. The
+[ADR-0011 extension](decisions/0011-crash-safe-modeled-integrity-finality.md#escaping-exceptions-and-transaction-cleanup)
+now applies the existing rollback/discard rule to these four paths and discards every
+failed opening before attempting close. Cleanup failures preserve the initiating error;
+SQLite errors retain their store-domain classification.
+
+The [correction record](evidence/store-opening-cleanup-2026-10-12.json) retains source review,
+coverage, limits and the baseline reproduction. Twenty-two of the 23 new controls fail
+against the original implementation; one already passes. All `72` focused opening,
+runtime-interruption, coherent-read and cleanup controls pass on CPython `3.11.15` and
+`3.14.2`. Tests retain the raw connection and caught traceback deliberately, check actual
+peer-writer access, and verify old/new logical schema recovery on either side of commit.
+An interrupted close still has no physical resource-release guarantee; the discarded
+store cannot be used. This is local correctness work, not production storage qualification.
+
+The complete collection target is `2562`. Resolve full local/CI/package validation for
+the exact candidate from `artifacts/checkpoints/2026-10-12-store-opening/release-validation.json`
+and its PR. The unchanged `ffbe903d1ca6b4ea5fd7ddabeecd0bed5f4a32b8` baseline was fully
+validated in this session; all 48 files in its retained release index were reauthenticated.
+
+Daniel also authorized justified use of existing Neon, Sentry and E2B credits, with keys
+available through Aweb or Google Cloud. The [provider comparison](QUALIFICATION_NEXT_STEPS.md#available-provider-credits-operator-clarification-2026-10-12)
+records proposed roles and verification requirements. Credentials were not needed or
+retrieved, and no resource was provisioned. This conditional authority persists; no
+repeated approval is needed solely because a suitable existing credit would be used.
+
+**Next dependency:** actual catalog/monitor operating commitments and a complete native
+roster remain unresolved. Provider credits do not establish independent administration.
+Read replies to the existing inquiries when appropriate; do not resend the batch or repeat
+the finite fence model. Both FreeTSA attempts remain spent; Daybreak is prepared/unsubmitted,
+and the early paid-lane exception remains unaccepted. No execution profile, target, finding,
+bounty income or comparative state-of-the-art result is established.
+
 ## Recovery fencing boundary review, 2026-10-12
 
 Daniel explicitly prioritized the strongest engineering path over shortening the mission.
@@ -1071,7 +1109,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2539 tests expected;
+- 2562 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

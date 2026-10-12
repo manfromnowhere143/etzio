@@ -23,6 +23,37 @@ retained lifecycle recovery, followed by an external latest-head recovery experi
 More fixture gates alone cannot establish independent administration. Cloud access is
 available for qualification work; hardware procurement is not the immediate dependency.
 
+## Available provider credits, operator clarification 2026-10-12
+
+Daniel authorizes using Neon, Sentry and E2B when they materially serve Etzio, with
+credentials available through Aweb or Google Cloud. This is persistent conditional
+resource authority; do not ask again merely to use an appropriate existing credit.
+Account ownership, project scope, available credit and overage controls still need to be
+observed before provisioning. Preserve Aweb workloads and use separate Etzio resources.
+No credential was needed or retrieved for the current local store-opening repair.
+
+| Provider | Proposed use and decision | Required evidence before consequential use |
+| --- | --- | --- |
+| Neon | Candidate managed Postgres backend for a later control plane or catalog. Keep the current SQLite repair; no storage migration is selected. | Exact transaction/fencing design, identity separation, restore/branch rollback handling, export and retention, bounded cost. Storage replication is not independently administered semantic monitoring. |
+| E2B | Candidate managed execution substrate for later MARCELLUS/CATO qualification. No execution profile is admitted. | Exact image and host profile, separate verifier authority, denied ingress/egress, credential exclusion, kill/resource limits, retained run evidence and cleanup. |
+| Sentry | Optional operational telemetry after a deployed service needs it. Local retained logs serve this repair. | Explicit event allowlist and a captured outbound-payload negative test; no source, evidence BLOBs, credentials or stack-local values. Telemetry is not the canonical evidence vault. |
+
+The reviewed [Neon architecture](https://neon.com/docs/introduction/architecture-overview)
+separates compute and storage and acknowledges commits through a safekeeper quorum.
+[E2B's security description](https://e2b.dev/security) states Firecracker isolation, while
+its [network contract](https://docs.e2b.dev/network/internet-access) enables outbound access
+by default. Denied TCP connections can appear connected locally, so qualification needs
+application-level and owned receiver observations. [Sentry's Python guidance](https://docs.sentry.io/platforms/python/data-management/sensitive-data/)
+supports scrubbing before transmission; defaults alone are not an Etzio disclosure policy.
+These are vendor descriptions reviewed on October 12, not reproduced service guarantees.
+Exact source bytes are retained with the [opening-repair research record](evidence/store-opening-cleanup-2026-10-12.json).
+
+Current decision: finish the demonstrated local repair, retain these provider options,
+and keep actual independent catalog/monitor commitments on the integration critical path.
+Credits do not satisfy that administrative dependency or authorize an unspecified bounty
+target. Prepare a bounded, owned-data experiment when one of these services resolves a
+named question; do not provision infrastructure solely because credit exists.
+
 ## Catalog recovery operating decision 2026-10-12
 
 The [completed continuation](CATALOG_RECOVERY_DECISION.md) separates checkpoint consistency,

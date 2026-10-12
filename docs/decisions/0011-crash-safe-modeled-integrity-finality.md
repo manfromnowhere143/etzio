@@ -151,6 +151,20 @@ process kill, power loss or device faults. Native provider authority and recover
 dispositions are unchanged. Python's [signal documentation](https://docs.python.org/3.14/library/signal.html#note-on-signal-handlers-and-exceptions)
 explains why asynchronous exceptions need a narrower claim than general crash safety.
 
+Opening-boundary clarification, 2026-10-12: this cleanup obligation also applies before
+the constructor returns. Fresh schema creation and each admitted forward migration must
+use the same rollback/discard path as runtime writes. Every failed opening must discard
+its connection, including a caught `KeyboardInterrupt` or a failure after schema commit.
+An error during rollback or close must not replace the initiating failure. SQLite failures
+retain their existing store-domain classification. An interrupted close may still retain
+physical resources; the discarded store cannot expose them as a usable connection.
+
+The committed schema determines recovery, not whether construction returned successfully.
+A pre-commit failure leaves the previous logical schema; a lost response after commit leaves
+the complete new schema. A fresh opening must authenticate either retained state normally.
+These owned, injected call-boundary tests are not power-fault or production-device
+qualification and do not alter schema versions, migration authority or provider admission.
+
 ### Four immutable local phases
 
 Progress is represented by four immutable, append-only local records. A mutable status row

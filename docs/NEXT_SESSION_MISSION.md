@@ -5,6 +5,22 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
+## Opening cleanup and available credits, 2026-10-12
+
+The [opening correction](evidence/store-opening-cleanup-2026-10-12.json) extends bounded
+cleanup to failed construction and all admitted schema migrations. It preserves primary
+errors and actual pre/post-commit schema state. All 72 focused controls pass on both
+declared runtimes; resolve the 2562-test full release separately from
+`artifacts/checkpoints/2026-10-12-store-opening/release-validation.json`.
+
+Daniel authorizes using existing Neon, Sentry and E2B credits when materially useful,
+with credential locations in Aweb or Google Cloud. Read the
+[provider role decision](QUALIFICATION_NEXT_STEPS.md#available-provider-credits-operator-clarification-2026-10-12).
+No keys were retrieved or resources created for this local repair. Preserve this authority
+without converting credits into native trust, independent monitors or target authorization.
+Actual operating commitments remain the next integration dependency; do not substitute an
+unselected storage migration, telemetry integration or sandbox deployment for that input.
+
 ## Engineering priority and fence obligation, 2026-10-12
 
 Daniel rejected shortening the mission in favor of the strongest engineering path. Keep

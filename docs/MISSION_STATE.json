@@ -172,7 +172,8 @@
     "bounded offline exact-byte source provenance inspector with missing/literal-unavailable states; documentary only, outside kernel admission",
     "bounded offline trusted-list signature mathematics under an externally supplied certificate pin, with exact whole-document and SignedProperties references and no kernel or trust-admission effect",
     "runtime SQLite write exception cleanup covers BaseException, invalidates speculative validation and closes a handle on rollback refusal while preserving committed post-response-loss finality",
-    "coherent deferred SQLite read transactions spanning state authentication pending-barrier evaluation and full readout with nested caller transaction preservation and interruption cleanup"
+    "coherent deferred SQLite read transactions spanning state authentication pending-barrier evaluation and full readout with nested caller transaction preservation and interruption cleanup",
+    "failed SQLite openings discard connections before close and all four schema construction/migration paths use primary-error-preserving rollback/discard cleanup"
   ],
   "modeled_only": [
     "original in-memory ten-unit behavior loop",
@@ -206,9 +207,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2539,
+    "test_count": 2562,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -223,7 +224,7 @@
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
     "validated_implementation_commit": "2653fdc39b4ce5cf95309ad4481be3799ee573f6",
-    "release_evidence_pointer": "/recovery_fence_experiment/release_validation_record",
+    "release_evidence_pointer": "/store_opening_cleanup/release_validation_record",
     "focused_source_provenance_tests": 52,
     "focused_trusted_list_signature_tests": 70,
     "focused_native_checkpoint_tests": 105,
@@ -1564,5 +1565,34 @@
     "stronger_local_fence_contract_weakened": false,
     "provider_admitted": false,
     "finding": false
+  },
+  "store_opening_cleanup": {
+    "date": "2026-10-12",
+    "status": "implemented_release_validation_record_separate",
+    "evidence": "docs/evidence/store-opening-cleanup-2026-10-12.json",
+    "new_controls": 23,
+    "focused_controls": 72,
+    "full_suite_collection_target": 2562,
+    "release_validation_record": "artifacts/checkpoints/2026-10-12-store-opening/release-validation.json",
+    "production_storage_qualified": false,
+    "finding": false
+  },
+  "provider_credit_authority": {
+    "date": "2026-10-12",
+    "providers": [
+      "Neon",
+      "Sentry",
+      "E2B"
+    ],
+    "status": "operator_authorized_when_materially_needed",
+    "credential_locations": [
+      "Aweb repository",
+      "Google Cloud"
+    ],
+    "account_and_credit_verification": "not_performed_not_needed_for_local_repair",
+    "credential_retrieval": false,
+    "resource_creation": false,
+    "decision": "docs/QUALIFICATION_NEXT_STEPS.md#available-provider-credits-operator-clarification-2026-10-12",
+    "scope": "Use existing credits for justified Etzio work after verifying account/resource boundaries. Preserve sibling workloads. No target or execution profile admitted."
   }
 }

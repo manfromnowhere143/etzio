@@ -452,17 +452,13 @@ class SQLiteEventStore:
                     )
             self._verify_post_connect_identity(prepared)
         except sqlite3.DatabaseError as exc:
-            connection = getattr(self, "_connection", None)
-            if connection is not None:
-                connection.close()
+            self._discard_connection_quietly()
             raise _sqlite_store_failure(
                 "could not initialize event store",
                 exc,
             ) from exc
-        except Exception:
-            connection = getattr(self, "_connection", None)
-            if connection is not None:
-                connection.close()
+        except BaseException:
+            self._discard_connection_quietly()
             raise
         finally:
             os.close(prepared.descriptor)
@@ -1365,8 +1361,7 @@ class SQLiteEventStore:
             self._require_writer_transaction()
             self._connection.execute("COMMIT")
         except BaseException:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
 
     def _migrate_vault_v1_to_integrity_v2(self) -> None:
@@ -1403,8 +1398,7 @@ class SQLiteEventStore:
             self._require_writer_transaction()
             self._connection.execute("COMMIT")
         except BaseException:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
 
     def _migrate_integrity_v2_to_blocked_v3(self) -> None:
@@ -1440,8 +1434,7 @@ class SQLiteEventStore:
             self._require_writer_transaction()
             self._connection.execute("COMMIT")
         except BaseException:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
 
     def _create_schema(self) -> None:
@@ -1878,8 +1871,7 @@ class SQLiteEventStore:
             self._require_writer_transaction()
             self._connection.execute("COMMIT")
         except BaseException:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
+            self._rollback_quietly()
             raise
 
     def _schema_contract_locked(
@@ -6251,7 +6243,15 @@ class SQLiteEventStore:
             if connection.in_transaction:
                 connection.execute("ROLLBACK")
         except BaseException:
-            self._connection = _DISCARDED_SQLITE_CONNECTION
+            self._discard_connection_quietly()
+
+    def _discard_connection_quietly(self) -> None:
+        """Invalidate even a partially constructed store before attempting close."""
+
+        self._integrity_validation_cache = None
+        connection = getattr(self, "_connection", None)
+        self._connection = _DISCARDED_SQLITE_CONNECTION
+        if connection is not None:
             try:
                 connection.close()
             except BaseException:
