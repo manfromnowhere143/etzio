@@ -2,6 +2,48 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-12, Asia/Jerusalem.
 
+## Coherent replay correction, 2026-10-12
+
+A two-connection owned reproduction found a local read race. After generic replay checked
+an empty pending barrier, a normal second connection committed an event plus its pending
+dossier. The first reader then returned that unfinalized event; cold replay refused it.
+Both modeled and qualified signed-fixture modes reproduced the defect. Related schedules
+mixed a pending lookup with later finalization or returned a finalized mission head without
+its corresponding global head.
+
+The [ADR-0011 clarification](decisions/0011-crash-safe-modeled-integrity-finality.md#coherent-local-reads)
+now requires authentication and readout in one SQLite snapshot. Fourteen read boundaries
+and post-schema opening validation use deferred read transactions. Nested reads preserve
+the caller's transaction. Failed outer reads invalidate validation and roll back; rollback
+refusal closes the handle. The writer policy remains DELETE/EXTRA. A coherent older local
+snapshot is admissible during an overlapping write; this establishes no current external
+head, storage fault tolerance or native-provider authority.
+
+The [correction record](evidence/read-snapshot-correction-2026-10-12.json) retains the
+counterexamples, source review and limits. The final `17` new controls yield `14` failures
+and `3` passes against the original code: `8` race failures and `6` read-cleanup failures.
+With the correction, all `17` plus the earlier `18` interruption controls pass on both
+runtimes. The complete suite now collects `2521` tests; full candidate release results are
+separate in `artifacts/checkpoints/2026-10-12-replay-snapshot/release-validation.json` and
+the matching PR. A collection or focused pass is not a full-release pass.
+
+Entry was clean published `main` at `0599557b2675c3db4501ed5d880ce2bcd1597097`
+([PR #48](https://github.com/manfromnowhere143/etzio/pull/48)). Its unchanged full local and
+exact-head CI results from this same session are retained as baseline, and all `86` prior
+index entries were verified. Raw logs, source captures and release artifacts remain private
+under the new checkpoint directory.
+
+**Next dependency:** accountable catalog/monitor commitments or an explicit alternative
+architecture/scope decision remain necessary. Do not repeat the completed operating survey
+or add optional fixture parsers as a substitute. The user separately authorized applying
+for OpenAI Daybreak if appropriate. Official requirements were reviewed and an internal
+Blue use case drafted privately in `artifacts/daybreak/2026-10-12/`; applicant route/legal
+entity facts are not established, no browser backend is available, and no application or
+account-security change occurred. Daybreak would not supply external provider operators
+or authorize a customer-facing integration. The FreeTSA diagnostic remains unaccepted;
+its original journal is spent. No new provider-protocol request, target execution,
+cloud resource, finding or income occurred. Gate order and publication rules are unchanged.
+
 ## Catalog operation and recovery decision, 2026-10-12
 
 The [catalog decision](CATALOG_RECOVERY_DECISION.md) completes the bounded operating
@@ -900,7 +942,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2504 tests expected;
+- 2521 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

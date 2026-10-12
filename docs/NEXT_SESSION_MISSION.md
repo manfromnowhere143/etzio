@@ -5,7 +5,21 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Catalog operating decision and current pickup
+## Local replay correction and current pickup
+
+The [coherent read correction](evidence/read-snapshot-correction-2026-10-12.json) closes a
+reproduced two-connection race: authentication, barrier evaluation and returned state now
+share one SQLite read transaction. Both fixture modes have deterministic refusal controls;
+this is local consistency, not external freshness or production storage qualification.
+Resolve the complete release from the latest handoff and exact candidate evidence.
+
+The operating dependency below is unchanged. A conditional Daybreak application is prepared
+privately for internal defensive engineering, with applicant identity/route clarification
+and browser access pending. No application was submitted or account security changed.
+Do not represent the research project as a verified legal entity or downstream Daybreak
+product. The operator has not accepted the FreeTSA diagnostic or an early paid lane.
+
+## Catalog operating decision
 
 The [catalog recovery decision](CATALOG_RECOVERY_DECISION.md) completes the bounded next
 feasibility pass. It recommends an application-aware catalog, separately administered

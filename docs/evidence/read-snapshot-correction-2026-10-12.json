@@ -1,0 +1,145 @@
+{
+  "schema": "etzio.read-snapshot-correction.v1",
+  "date": "2026-10-12",
+  "status": "implemented_correction_full_release_results_separate",
+  "baseline_commit": "0599557b2675c3db4501ed5d880ce2bcd1597097",
+  "baseline_release": {
+    "path": "artifacts/checkpoints/2026-10-12-catalog-decision/release-validation.json",
+    "size_bytes": 8611,
+    "sha256": "8c6a61cefbe980ec1bb110f58a015200aac16a16d2235b213a7bc386689f829a"
+  },
+  "baseline_reused": "Unchanged full both-runtime local and exact-head CI release from this same session; all 86 retained index entries verified. This is not new-candidate validation.",
+  "contract": "docs/decisions/0011-crash-safe-modeled-integrity-finality.md",
+  "implementation": {
+    "path": "etzio/kernel/store.py",
+    "size_bytes": 282532,
+    "sha256": "9c58b158938a94aaf957e36d8ba5284fb3d8763f34493028b2c14359c42a454d"
+  },
+  "tests": {
+    "path": "tests/test_store_read_snapshot.py",
+    "size_bytes": 9225,
+    "sha256": "4513ceaaa3a5e56ee005fe40bfe862abb18e70e5eb58e58b9ffdf2988546caf4"
+  },
+  "owned_reproduction": {
+    "record": {
+      "path": "artifacts/checkpoints/2026-10-12-replay-snapshot/before-reproduction.json",
+      "size_bytes": 645,
+      "sha256": "bf5a3b095631431721b383609438382dac91f4e70e4c5871f9b08b0c059bf8d6"
+    },
+    "modes": [
+      "modeled_unsigned_code_derived",
+      "qualified_signed_fixture"
+    ],
+    "result": "A second ordinary connection commits event plus pending dossier between the first connection barrier check and event read. Generic replay returns the unfinalized event; cold replay refuses.",
+    "additional_counterexamples": "Unresolved inspection can combine a pending digest with finalized phase and report corruption; latest-head inspection can return no global head with a finalized mission head."
+  },
+  "before_correction": {
+    "failed": 14,
+    "passed": 3,
+    "seconds": 8.9,
+    "log": {
+      "path": "artifacts/checkpoints/2026-10-12-replay-snapshot/before-final-controls.log",
+      "size_bytes": 29293,
+      "sha256": "1dc92ea5cd110c1c804d3e3abe696d946f0497acd6ff128b269d9469859eec72"
+    },
+    "interpretation": "Eight failures exercise three two-connection race families in both fixture modes (generic load/head, unresolved lineage, global/mission head pair); six concern required read cleanup; three compatibility controls already pass. These are not fourteen distinct vulnerabilities."
+  },
+  "focused_results": [
+    {
+      "runtime": "CPython 3.11.15",
+      "passed": 35,
+      "new_controls": 17,
+      "previous_interruption_controls": 18,
+      "seconds": 50.67,
+      "log": {
+        "path": "artifacts/checkpoints/2026-10-12-replay-snapshot/after-focused-311.log",
+        "size_bytes": 100,
+        "sha256": "7d4de59e5382eb2ed6cefe19b0dde3c00580eca7e85a5d32b252c38b80e049b4"
+      }
+    },
+    {
+      "runtime": "CPython 3.14.2",
+      "passed": 35,
+      "new_controls": 17,
+      "previous_interruption_controls": 18,
+      "seconds": 52.76,
+      "log": {
+        "path": "artifacts/checkpoints/2026-10-12-replay-snapshot/after-focused-314.log",
+        "size_bytes": 100,
+        "sha256": "dd660d5e04ca5603c574e105aaeaa1022eba14a56e515ca9ace017436be6e6ea"
+      }
+    }
+  ],
+  "full_suite_collection_target": 2521,
+  "release_validation_record": "artifacts/checkpoints/2026-10-12-replay-snapshot/release-validation.json",
+  "review_coverage": {
+    "whole_repository_audit": false,
+    "question": "Can validation, pending-barrier evaluation and readout observe different committed states?",
+    "reviewed_store_sections": [
+      "opening validation",
+      "validation cache and connection security settings",
+      "vault batch readers",
+      "generic replay and head",
+      "integrity event/lineage/predecessor readers",
+      "recovery/profile readers",
+      "transaction cleanup and phase writers"
+    ],
+    "changed_read_boundaries": 14,
+    "also_changed": "Opening post-schema validation now uses one read transaction.",
+    "sampled_supporting_files": [
+      "tests/test_store_interruption_cleanup.py",
+      "tests/test_integrity_recovery_matrix_v1.py",
+      "tests/test_qualified_cold_replay_v1.py",
+      "tests/test_qualified_fixture_lifecycle_v1.py"
+    ],
+    "limits": "No complete repository, SQLite, VFS or provider audit."
+  },
+  "sources": [
+    {
+      "url": "https://sqlite.org/isolation.html",
+      "final_url": "https://sqlite.org/isolation.html",
+      "status": 200,
+      "path": "artifacts/checkpoints/2026-10-12-replay-snapshot/sources/sqlite-isolation.raw",
+      "size_bytes": 17364,
+      "sha256": "23395653f04984e4310b287ed548202d874e06ecd2cba17f32b2714e5b7ebef7",
+      "retrieved_host_utc": "2026-10-12T10:36:34.866201+00:00",
+      "review_depth": "Relevant transaction and connection isolation sections; no SQLite source or VFS audit",
+      "publisher": "SQLite project",
+      "access_license": "Public HTML documentation; retained privately for research; no third-party executable code run",
+      "supporting_claim": "An explicit read transaction preserves one database view across statements; separate completed implicit statements do not define a common snapshot.",
+      "version_date": "Mutable documentation captured 2026-10-12; isolation page last updated 2022-04-18, transaction page 2026-02-18."
+    },
+    {
+      "url": "https://sqlite.org/lang_transaction.html",
+      "final_url": "https://sqlite.org/lang_transaction.html",
+      "status": 200,
+      "path": "artifacts/checkpoints/2026-10-12-replay-snapshot/sources/sqlite-transactions.raw",
+      "size_bytes": 27068,
+      "sha256": "b65dc308fd9e0ce471844c97366a4f5ad3a1f42833a3b19486ad7d6555a8e24e",
+      "retrieved_host_utc": "2026-10-12T10:36:35.844462+00:00",
+      "review_depth": "Relevant transaction and connection isolation sections; no SQLite source or VFS audit",
+      "publisher": "SQLite project",
+      "access_license": "Public HTML documentation; retained privately for research; no third-party executable code run",
+      "supporting_claim": "An explicit read transaction preserves one database view across statements; separate completed implicit statements do not define a common snapshot.",
+      "version_date": "Mutable documentation captured 2026-10-12; isolation page last updated 2022-04-18, transaction page 2026-02-18."
+    }
+  ],
+  "claim_boundaries": [
+    "Owned deterministic schedules across two real SQLite connections; no external target or finding.",
+    "One coherent local snapshot may precede an overlapping writer; latest external-head authority remains unproved.",
+    "DELETE-mode readers can delay commits and yield ordinary typed contention; no availability or latency qualification.",
+    "Nested reads share the existing caller transaction and leave its commit/rollback authority intact.",
+    "Cleanup tests cover one escaping interruption or SQL rollback refusal under working connection close; repeated interruption, OS termination, device faults and power loss remain outside the proof.",
+    "Native-provider, external recovery, protected storage and execution gates remain open."
+  ],
+  "pending_acquisition_changed": false,
+  "provider_protocol_dispatches": 0,
+  "target_executions": 0,
+  "new_cloud_resources": 0,
+  "development_observations": [
+    "Initial fifteen controls: twelve fail and three pass against baseline; two additional head-pair controls bring the final baseline result to fourteen fail and three pass.",
+    "Initial lint refused imported pytest fixture argument shadowing; explicit usefixtures marking and import ordering corrected before validation.",
+    "Related-test filename glob found no matching cache test; used rg --files to locate actual suites."
+  ],
+  "daybreak": "Conditional application request reviewed; internal Blue use case drafted privately; applicant route and verification unavailable, no form submission or account-security change."
+}

@@ -7,7 +7,9 @@ import os
 import re
 import sqlite3
 import stat
+from contextlib import contextmanager
 from dataclasses import dataclass
+from functools import wraps
 from pathlib import Path
 from types import TracebackType
 from typing import Final
@@ -323,6 +325,17 @@ class _IntegrityValidationCacheKey:
     writable_schema: int
 
 
+def _snapshot_read(method):
+    """Keep authentication and the complete returned read in one local snapshot."""
+
+    @wraps(method)
+    def read(self, *args, **kwargs):
+        with self._read_transaction():
+            return method(self, *args, **kwargs)
+
+    return read
+
+
 class SQLiteEventStore:
     """Mission-local compare-and-append streams in one explicit SQLite database.
 
@@ -407,20 +420,21 @@ class SQLiteEventStore:
             if str(journal_mode[0]).lower() == "wal":
                 raise EventStoreError("Etzio does not admit WAL under the declared runtime matrix")
             self._initialize_schema()
-            self._refresh_validated_schema_version_locked()
-            retained_vault_bytes = self._vault_used_bytes_locked()
-            if retained_vault_bytes > self._max_vault_bytes:
-                raise EvidenceVaultCapacityError(
-                    "retained unique evidence exceeds the configured database vault byte ceiling"
-                )
-            self._validate_integrity_state_locked()
-            if (
-                self._logical_evidence_storage_used_locked()
-                > self._max_vault_bytes
-            ):
-                raise EvidenceVaultCapacityError(
-                    "retained vault plus integrity evidence exceeds the configured byte ceiling"
-                )
+            with self._read_transaction():
+                self._refresh_validated_schema_version_locked()
+                retained_vault_bytes = self._vault_used_bytes_locked()
+                if retained_vault_bytes > self._max_vault_bytes:
+                    raise EvidenceVaultCapacityError(
+                        "retained unique evidence exceeds the configured database vault byte ceiling"
+                    )
+                self._validate_integrity_state_locked()
+                if (
+                    self._logical_evidence_storage_used_locked()
+                    > self._max_vault_bytes
+                ):
+                    raise EvidenceVaultCapacityError(
+                        "retained vault plus integrity evidence exceeds the configured byte ceiling"
+                    )
             self._verify_post_connect_identity(prepared)
         except sqlite3.DatabaseError as exc:
             connection = getattr(self, "_connection", None)
@@ -3338,6 +3352,7 @@ class SQLiteEventStore:
             maximum_total=request.effective_maximum,
         )[0]
 
+    @_snapshot_read
     def resolve_evidence_artifacts(
         self,
         requests: tuple[VaultArtifactResolutionRequestV1, ...],
@@ -3897,6 +3912,7 @@ class SQLiteEventStore:
             maximum_total=DEFAULT_MAX_VAULT_BYTES_V1,
         )[0]
 
+    @_snapshot_read
     def load_event_artifacts(
         self,
         selectors: tuple[VaultEventArtifactSelectorV1, ...],
@@ -4052,6 +4068,7 @@ class SQLiteEventStore:
             events.append(event)
         return tuple(events)
 
+    @_snapshot_read
     def load(self, mission_id: str) -> tuple[EventV1, ...]:
         """Load and fully verify one mission-local event stream and lifecycle."""
 
@@ -5219,6 +5236,7 @@ class SQLiteEventStore:
                 ) from exc
             raise
 
+    @_snapshot_read
     def load_integrity_event(
         self,
         event_digest: str,
@@ -5249,6 +5267,7 @@ class SQLiteEventStore:
             return None
         return self._event_for_integrity_digest_locked(event_digest)
 
+    @_snapshot_read
     def load_latest_finalized_integrity_lineages(
         self,
         mission_id: str,
@@ -5269,6 +5288,7 @@ class SQLiteEventStore:
             )
         return self._previous_integrity_lineages_locked(mission_id)
 
+    @_snapshot_read
     def load_integrity_predecessor_lineages(
         self,
         event_digest: str,
@@ -5362,6 +5382,7 @@ class SQLiteEventStore:
             )
         return previous_global, previous_mission
 
+    @_snapshot_read
     def load_integrity_lineage(self, event_digest: str) -> object | None:
         """Load and reconstruct one exact append-only integrity lineage."""
 
@@ -5372,6 +5393,7 @@ class SQLiteEventStore:
         self._validate_integrity_state_locked()
         return self._load_integrity_lineage_locked(event_digest)
 
+    @_snapshot_read
     def load_unresolved_integrity_transition(self) -> object | None:
         """Return the singleton unresolved lineage, if present."""
 
@@ -5795,6 +5817,7 @@ class SQLiteEventStore:
             self._rollback_quietly()
             raise
 
+    @_snapshot_read
     def load_blocked_finality_observations(self, event_digest: str) -> tuple[object, ...]:
         """Return one transition's retained blocked observations in ordinal order."""
 
@@ -5895,6 +5918,7 @@ class SQLiteEventStore:
             self._rollback_quietly()
             raise
 
+    @_snapshot_read
     def resolve_acceptance_mode(self) -> str:
         """Return the enrolled provider-evidence acceptance mode.
 
@@ -5913,6 +5937,7 @@ class SQLiteEventStore:
             )
         return _ACCEPTANCE_MODE_QUALIFIED_SIGNED_V1
 
+    @_snapshot_read
     def load_qualified_acceptance_profiles(self) -> tuple[object, object] | None:
         """Return the exact retained qualified time and head-authority profiles, if any."""
 
@@ -6133,6 +6158,7 @@ class SQLiteEventStore:
             claimed_evidence_blobs=finalization_record.provider_evidence,
         )
 
+    @_snapshot_read
     def load_governed_recovery_decision(self, observation_id: str) -> object | None:
         """Return the retained decision answering one observation, if present."""
 
@@ -6150,6 +6176,7 @@ class SQLiteEventStore:
             return None
         return SignedGovernedRecoveryDecisionV1.from_canonical_bytes(bytes(row[0]))
 
+    @_snapshot_read
     def instance_is_sealed(self) -> bool:
         """Return whether a terminal sealing decision is retained."""
 
@@ -6178,6 +6205,24 @@ class SQLiteEventStore:
                 "the retained recovery profile differs from its identity or enrolled authority"
             )
         return profile
+
+    @contextmanager
+    def _read_transaction(self):
+        """Own an outer deferred read; nested reads leave caller cleanup alone."""
+
+        if self._connection.in_transaction:
+            yield
+            return
+        try:
+            self._connection.execute("BEGIN")
+            yield
+            self._connection.execute("COMMIT")
+        except sqlite3.DatabaseError as exc:
+            self._rollback_quietly()
+            raise _sqlite_store_failure("snapshot read failed", exc) from exc
+        except BaseException:
+            self._rollback_quietly()
+            raise
 
     def _rollback_quietly(self) -> None:
         """Discard speculative validation and leave no usable uncommitted handle.
@@ -6708,6 +6753,7 @@ class SQLiteEventStore:
             self._rollback_quietly()
             raise
 
+    @_snapshot_read
     def load_checkpoints(self, mission_id: str) -> tuple[SignedCheckpoint, ...]:
         """Load retained signature data in deterministic order."""
 

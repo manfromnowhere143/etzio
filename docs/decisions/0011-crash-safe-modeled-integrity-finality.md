@@ -230,6 +230,29 @@ Between those points every later append path and generic replay is refused acros
 mission. Only explicit integrity inspection and recovery may read or advance the retained
 lineage, and the facade cannot return command success.
 
+### Coherent local reads
+
+Every store read that combines authenticated state with subsequent row or BLOB reads
+must use one SQLite read transaction. In particular, generic replay authenticates the
+state, checks the database-global pending barrier, reads events and verifies their evidence
+in the same snapshot. A concurrent pending append cannot enter the returned stream after
+the reader has checked the barrier. Explicit integrity inspection similarly reconstructs
+one retained phase instead of mixing a pending lookup with a later finalized lineage.
+
+A read that overlaps a writer may return the complete earlier snapshot. This is local
+snapshot consistency, not latest external-head authority. Under the admitted DELETE journal
+policy, a writer may begin while readers exist but cannot commit until their read locks
+are released; ordinary typed contention remains possible. Reads use deferred transactions,
+not writer reservations. A nested read shares its caller's existing transaction and never
+commits or rolls it back. Store-owned outer writes retain responsibility for their cleanup.
+
+An outer read ends its transaction before returning. If it fails, including an escaping
+interruption or a failed read commit, cleanup invalidates speculative validation and rolls
+back; a rollback failure closes the connection. No service-port call is introduced inside
+a transaction. Schema, admission, pending-barrier scope and recovery dispositions do not
+change. The owned two-connection counterexample and refusal controls qualify this boundary;
+they do not qualify process-kill, power-loss, filesystem or external recovery behavior.
+
 ### At-least-once semantic idempotence
 
 Etzio makes no exactly-once network or provider claim. Both modeled protocol writes are
