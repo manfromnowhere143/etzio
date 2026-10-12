@@ -2,6 +2,59 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-12, Asia/Jerusalem.
 
+## Cleanup interruption hardening and operator pickup, 2026-10-12
+
+An owned two-failure experiment reproduced the explicitly excluded cleanup-interruption
+case: a failed finalization followed by an interruption at rollback left the same handle
+able to return uncommitted finality. Cold replay correctly retained the pending barrier.
+Both modeled and qualified signed-fixture modes reproduced this result. This is a local
+hardening opportunity beyond the earlier single-failure guarantee, not an external finding.
+
+The [ADR-0011 extension](decisions/0011-crash-safe-modeled-integrity-finality.md#escaping-exceptions-and-transaction-cleanup)
+now requires any failed rollback to discard the store's usable connection before attempting
+closure. If close also raises, the handle stays unusable and the original operation failure
+escapes. Successful rollback keeps normal retry available. Fourteen new controls cover
+rollback exceptions, failed reads, and interruption before or after physical close; all
+fourteen fail against the original implementation. With hardening, all `49` focused controls
+pass on both declared runtimes. The
+[evidence record](evidence/cleanup-interruption-2026-10-12.json) retains the experiment,
+primary-source review and explicit limits. The full collection target is `2535`; resolve
+completed local and exact-head CI results separately from
+`artifacts/checkpoints/2026-10-12-engine-continuation/release-validation.json` and its PR.
+Discarding a handle does not prove lock release after a failed close or immunity to arbitrary
+asynchronous interruption, process kill, power loss or device faults.
+
+Entry was clean published `main` at `2653fdc39b4ce5cf95309ad4481be3799ee573f6`
+([PR #49](https://github.com/manfromnowhere143/etzio/pull/49)). Its unchanged full local and
+exact-head Linux CI results on both declared runtimes are retained from this same session
+as the baseline. All `62` release-index files and `101` files across the two correspondence
+indexes were verified. Private raw logs and correspondence remain outside tracked bytes.
+
+Daniel explicitly resolved the project-name ambiguity in favor of Etzio. Separately scoped
+outreach is complete: five organizations, six outgoing messages including one definitive
+bounce and its reroute to a published alternate address. Sent-copy readback is verified;
+it does not establish recipient delivery or agreement. The six retained threads were
+checked again at approximately 14:16 UTC on October 12: no human reply or operating
+commitment was observed. Read any later replies in those exact threads and assess actual
+catalog/monitor duties, independent custody, fresh recovery reads, fencing, retained data
+and terms. Do not resend the inquiries or infer permission for a purchase or deployment.
+Private evidence and current pointers are under `artifacts/operator-inquiries/2026-10-12/`.
+This supersedes earlier unsent-outreach statements as current pickup, preserving their
+historical meaning.
+
+The Daybreak application remains prepared and unsubmitted. The individual Blue route is
+identified; required onboarding is incomplete. Current official requirements and a support
+inquiry are retained privately. No agent account-security change or application submission
+occurred. Earlier route uncertainty is historical. Daybreak supplies neither Etzio's
+external operators nor authority for customer-facing use.
+
+**Next dependency:** accountable native catalog/monitor commitments or an explicit alternate
+architecture/scope decision remain necessary. Do not repeat the completed operating survey
+or substitute optional fixture adapters. Repository-owned hardening remains authorized;
+no native integration, production storage, isolated target execution, finding or income is
+established here. The original FreeTSA journal remains spent, its diagnostic remains
+unaccepted, and no early paid-lane exception was accepted. Gate order is unchanged.
+
 ## Coherent replay correction, 2026-10-12
 
 A two-connection owned reproduction found a local read race. After generic replay checked

@@ -129,12 +129,27 @@ recovery inspects retained bytes and reconciles the exact phase. These requireme
 cover profile enrollment and legacy checkpoint retention; signed-fixture acceptance uses
 the same transaction boundary. They change no schema, authority or recovery disposition.
 
-This is an application exception guarantee under a functioning Python/SQLite cleanup
-path. It is not a proof against repeated interruption during cleanup, process termination,
-power loss or device failure. Those remain separate qualification experiments. SQLite's
+The original application exception guarantee assumed a functioning Python/SQLite cleanup
+path. Repeated interruption during cleanup was outside that guarantee. Process termination,
+power loss and device failure remain separate qualification experiments. SQLite's
 [transaction contract](https://www.sqlite.org/lang_transaction.html) allows explicitly
 opened transactions to remain active after some errors; Python exception propagation
 alone is not rollback.
+
+Clarification, 2026-10-12: a bounded second failure at the rollback call is now covered.
+Any exception from rollback, including a Python interruption or allocation failure, must
+invalidate the store handle before attempting connection closure. If that close call also
+raises, the discarded handle must remain unusable and the original operation failure must
+escape. Successful rollback keeps the connection available for normal reconstruction and
+retry. Reads use this same cleanup path.
+
+Discarding a handle is not proof of resource release. An interrupted close may leave the
+underlying connection and its locks alive until it is released; availability is not
+promised in that case. These injected call-boundary controls do not establish immunity to
+arbitrary asynchronous exceptions between every Python instruction, interpreter failure,
+process kill, power loss or device faults. Native provider authority and recovery
+dispositions are unchanged. Python's [signal documentation](https://docs.python.org/3.14/library/signal.html#note-on-signal-handlers-and-exceptions)
+explains why asynchronous exceptions need a narrower claim than general crash safety.
 
 ### Four immutable local phases
 

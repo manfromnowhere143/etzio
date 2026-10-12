@@ -1,0 +1,120 @@
+{
+  "schema_version": "etzio.research_evidence.v1",
+  "date": "2026-10-12",
+  "status": "bounded_cleanup_hardening_focused_verified",
+  "baseline_commit": "2653fdc39b4ce5cf95309ad4481be3799ee573f6",
+  "contract": "docs/decisions/0011-crash-safe-modeled-integrity-finality.md",
+  "hypothesis": "A second exception at rollback can expose uncommitted finality through the surviving connection, even though cold replay refuses it.",
+  "prior_boundary": "Repeated interruption during cleanup was explicitly outside the earlier guarantee. This tranche extends that boundary.",
+  "reproduction": {
+    "modes": [
+      "modeled_unsigned_code_derived",
+      "qualified_signed_fixture"
+    ],
+    "observations": [
+      {
+        "mode": "modeled",
+        "original_error_preserved": false,
+        "escaped_exception": "KeyboardInterrupt",
+        "transaction_open_after_failure": true,
+        "same_connection_returns_event": true,
+        "cold_replay_refuses_pending": true
+      },
+      {
+        "mode": "qualified",
+        "original_error_preserved": false,
+        "escaped_exception": "KeyboardInterrupt",
+        "transaction_open_after_failure": true,
+        "same_connection_returns_event": true,
+        "cold_replay_refuses_pending": true
+      }
+    ],
+    "script": {
+      "path": "artifacts/checkpoints/2026-10-12-engine-continuation/reproduce_rollback_interruption.py",
+      "size_bytes": 2346,
+      "sha256": "445f9b0ce20996be6764bc203b2ae2c5cfc736b02537f1a9f0c281e7d592946e"
+    },
+    "result": {
+      "path": "artifacts/checkpoints/2026-10-12-engine-continuation/rollback-reproduction.json",
+      "size_bytes": 493,
+      "sha256": "54375e597f93400e8ff6f8948509eb4d3520a2d8ad140ddc0692df5a9c9a07a7"
+    }
+  },
+  "implementation": "Discard the store connection before closing after any rollback exception. Preserve the original operation error even if close raises. Successful rollback retains normal connection behavior.",
+  "tests": {
+    "new_controls": 14,
+    "baseline_failed": 14,
+    "baseline_log": {
+      "path": "artifacts/checkpoints/2026-10-12-engine-continuation/before-cleanup-controls.log",
+      "size_bytes": 22304,
+      "sha256": "cc8829d4c465979729cac8f34af3ca0e973294c1f85abb06359d13dfd3254692"
+    },
+    "with_existing_interruption_and_snapshot_controls": 49,
+    "runtimes": [
+      {
+        "version": "3.11.15",
+        "passed": 49,
+        "log": {
+          "path": "artifacts/checkpoints/2026-10-12-engine-continuation/focused-0.log",
+          "size_bytes": 110,
+          "sha256": "184dc924d2d889b5f743b76985f43471d670c5dccff36dedcb5f72c5ebf7c541"
+        }
+      },
+      {
+        "version": "3.14.2",
+        "passed": 49,
+        "log": {
+          "path": "artifacts/checkpoints/2026-10-12-engine-continuation/focused-1.log",
+          "size_bytes": 110,
+          "sha256": "2ccbd8ba1ef412c6f13ec780bbbeef30edb0d8b06ecb17f6dd143e578946f936"
+        }
+      }
+    ],
+    "full_suite_collection_target": 2535,
+    "full_release_results_separate": "artifacts/checkpoints/2026-10-12-engine-continuation/release-validation.json"
+  },
+  "sources": [
+    {
+      "url": "https://www.sqlite.org/lang_transaction.html",
+      "retrieved_host_utc": "2026-10-12T14:24:56.997346+00:00",
+      "status": 200,
+      "final_url": "https://www.sqlite.org/lang_transaction.html",
+      "path": "artifacts/checkpoints/2026-10-12-engine-continuation/sqlite-transactions.html",
+      "size_bytes": 27068,
+      "sha256": "b65dc308fd9e0ce471844c97366a4f5ad3a1f42833a3b19486ad7d6555a8e24e"
+    },
+    {
+      "url": "https://docs.python.org/3.14/library/signal.html",
+      "retrieved_host_utc": "2026-10-12T14:24:58.424723+00:00",
+      "status": 200,
+      "final_url": "https://docs.python.org/3.14/library/signal.html",
+      "path": "artifacts/checkpoints/2026-10-12-engine-continuation/python-signals.html",
+      "size_bytes": 113017,
+      "sha256": "2efd7f412465da14210b17eef2ef48b7edaab47c5f3c9b78bc479b2e3d485e70"
+    },
+    {
+      "url": "https://docs.python.org/3.14/builtins/exceptions.html",
+      "retrieved_host_utc": "2026-10-12T14:24:58.904581+00:00",
+      "status": 200,
+      "final_url": "https://docs.python.org/3.14/builtins/exceptions.html",
+      "path": "artifacts/checkpoints/2026-10-12-engine-continuation/python-exceptions.html",
+      "size_bytes": 144074,
+      "sha256": "1f69e0ef9728a827ac8e989aaf408093d582ab3f6ceca30945e3a6109ffa1fca"
+    }
+  ],
+  "review_depth": "Selected official transaction, exception and asynchronous signal sections. Python 3.14 documentation is mutable and was served as 3.14.8; test runtimes remain pinned 3.11.15 and 3.14.2. Documentation does not establish observed behavior without the owned controls.",
+  "review_coverage": [
+    "store transaction cleanup and coherent reads",
+    "pending append reconciliation",
+    "governed phase write fencing",
+    "validation-cache invalidation",
+    "prior cleanup and snapshot controls"
+  ],
+  "limits": [
+    "Injected Python call-boundary failures only; no real signal-delivery or allocator-exhaustion campaign.",
+    "The store becomes unusable after failed rollback; failed physical close may retain locks/resources until the raw connection is released.",
+    "No proof against interruption at every Python instruction, process termination, power loss or device faults.",
+    "No native provider, latest external head, production storage, isolated execution, external vulnerability finding or paid result established.",
+    "Provider survey and arXiv tranche not repeated; native operating commitments remain missing."
+  ]
+}

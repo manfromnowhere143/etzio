@@ -336,6 +336,21 @@ def _snapshot_read(method):
     return read
 
 
+class _DiscardedSQLiteConnection:
+    """Keep a failed store unusable even when closing its real handle fails."""
+
+    __slots__ = ()
+
+    def __getattr__(self, name):
+        raise sqlite3.ProgrammingError("Cannot operate on a closed database.")
+
+    def close(self) -> None:
+        pass
+
+
+_DISCARDED_SQLITE_CONNECTION: Final = _DiscardedSQLiteConnection()
+
+
 class SQLiteEventStore:
     """Mission-local compare-and-append streams in one explicit SQLite database.
 
@@ -6227,15 +6242,22 @@ class SQLiteEventStore:
     def _rollback_quietly(self) -> None:
         """Discard speculative validation and leave no usable uncommitted handle.
 
-        Preserve the caller's original failure. If SQL rollback itself is refused,
-        closing the connection rolls back and forces subsequent access to reopen.
+        Preserve the caller's original failure. Discard the handle before attempting
+        close after any rollback failure; an interrupted close cannot restore access.
         """
         self._integrity_validation_cache = None
+        connection = self._connection
         try:
-            if self._connection.in_transaction:
-                self._connection.execute("ROLLBACK")
-        except sqlite3.DatabaseError:
-            self._connection.close()
+            if connection.in_transaction:
+                connection.execute("ROLLBACK")
+        except BaseException:
+            self._connection = _DISCARDED_SQLITE_CONNECTION
+            try:
+                connection.close()
+            except BaseException:
+                # The operation's original failure must escape. The store remains
+                # unusable; physical handle/lock release is not promised here.
+                pass
 
     def retain_integrity_anchor_statement(
         self,

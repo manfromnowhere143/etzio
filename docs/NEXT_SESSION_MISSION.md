@@ -5,19 +5,25 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Local replay correction and current pickup
+## Cleanup hardening, outreach and current pickup
 
-The [coherent read correction](evidence/read-snapshot-correction-2026-10-12.json) closes a
-reproduced two-connection race: authentication, barrier evaluation and returned state now
-share one SQLite read transaction. Both fixture modes have deterministic refusal controls;
-this is local consistency, not external freshness or production storage qualification.
-Resolve the complete release from the latest handoff and exact candidate evidence.
+Read the latest handoff and [cleanup evidence](evidence/cleanup-interruption-2026-10-12.json).
+The current tranche extends local cleanup to fail closed when rollback itself raises, even
+if the subsequent close call is interrupted. It preserves the earlier coherent-read and
+single-failure controls. It establishes no production storage or native-provider authority.
+Resolve the complete release from the exact candidate validation, not test collection.
 
-The operating dependency below is unchanged. A conditional Daybreak application is prepared
-privately for internal defensive engineering, with applicant identity/route clarification
-and browser access pending. No application was submitted or account security changed.
-Do not represent the research project as a verified legal entity or downstream Daybreak
-product. The operator has not accepted the FreeTSA diagnostic or an early paid lane.
+Daniel confirmed Etzio as the active engine. The separately authorized nonbinding inquiry
+batch is complete: five organizations, six outbound messages, one definitive bounce and a
+verified reroute. At the retained October 12 14:16 UTC check there were no human replies or
+operating commitments. The exact threads and delivery evidence are private under
+`artifacts/operator-inquiries/2026-10-12/`. Read later replies there; do not repeat outreach
+or confuse a sent copy with delivery, agreement or provider admission.
+
+The individual Daybreak Blue application remains prepared and unsubmitted, with required
+onboarding incomplete. A support inquiry is prepared privately; no exemption, organization
+eligibility or account-security change by the agent is claimed. This replaces the previous
+current-pickup route uncertainty. The FreeTSA diagnostic and early paid lane remain unaccepted.
 
 ## Catalog operating decision
 
