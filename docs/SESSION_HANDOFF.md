@@ -2,6 +2,43 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-12, Asia/Jerusalem.
 
+## Catalog operation and recovery decision, 2026-10-12
+
+The [catalog decision](CATALOG_RECOVERY_DECISION.md) completes the bounded operating
+feasibility continuation. Public checkpoint witnessing does not supply Etzio's semantic
+head catalog, current-state reads, writer fencing or full evidence recovery. The preferred
+proposal is a dedicated application catalog using a reviewed log substrate with separately
+administered required monitors and retained data. Tessera is a candidate library, not an
+admitted service or operator. Glasklar and Geomys are named inquiry prospects only; no Etzio
+operating commitment from either is retained. Their technical/commercial relationships
+require review. No complete native roster exists in the retained evidence.
+
+The new [source and operating dossier](evidence/catalog-recovery-decision-2026-10-12.json)
+pins C2SP witness/cosignature v1.1.0 and mirror v0.1.0, selected Tessera source, and relevant
+arXiv revisions. It distinguishes recent historical signatures, fresh challenge responses,
+current application state and recoverable payloads. The H0/H1 counterexample is analytical,
+not a provider test. The proposed recovery requires an externally ordered fence, fresh
+responses from every required monitor and complete canonical reconstruction or a block.
+It introduces no runtime protocol, trust root, codec, authority or gate-order change.
+
+Entry was clean `main` at `7d6c38dcf1db9b45809047cc71834544b44baa2b`
+([PR #47](https://github.com/manfromnowhere143/etzio/pull/47)). All `94` prior release
+index files and all seven diagnostic inputs were checked. The unchanged CPython 3.11.15
+baseline passes `2504` tests. This documentation tranche adds no tests; its exact candidate
+release is recorded separately in
+`artifacts/checkpoints/2026-10-12-catalog-decision/release-validation.json` and the matching
+PR. Raw captures, retrieval failures and release checks remain in that ignored directory.
+
+**Next dependency:** obtain accountable catalog/monitor operating commitments using the
+concrete inquiry requirements, or make an explicit architecture/roadmap-scope decision.
+The finite public-document pass is complete; do not restart the survey or substitute new
+fixture parsers for operator commitments. External outreach still requires an explicit
+instruction. No inquiry, provider-protocol request, cloud resource, target execution,
+finding or payment occurred. The original FreeTSA journal remains spent, its diagnostic
+is unaccepted with no new journal, and no early paid-lane exception was accepted. Existing
+native lifecycle → external recovery → protected storage → isolated independent execution
+→ measured EVM → exact target admission order and release rules remain in force.
+
 ## Mission assessment and provider feasibility, 2026-10-12
 
 The [current assessment](MISSION_REVIEW_2026-10-12.md) concludes that Etzio's tested

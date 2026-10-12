@@ -16,6 +16,17 @@ retained lifecycle recovery, followed by an external latest-head recovery experi
 More fixture gates alone cannot establish independent administration. Cloud access is
 available for qualification work; hardware procurement is not the immediate dependency.
 
+## Catalog recovery operating decision 2026-10-12
+
+The [completed continuation](CATALOG_RECOVERY_DECISION.md) separates checkpoint consistency,
+fresh request binding, current semantic state and data recovery. It proposes an externally
+ordered recovery fence plus complete authenticated monitor reads and canonical reconstruction.
+The [operating dossier](evidence/catalog-recovery-decision-2026-10-12.json) has no admitted
+bindings: catalog and monitor commitments must be obtained before another native adapter.
+C2SP mirror semantics and pinned Tessera support are candidate building blocks, not an
+operational profile. The bounded survey is complete; the next decision concerns actual
+operators or an explicitly changed scope, with all existing gates and pending grants intact.
+
 ## Provider evidence and a corrected assumption
 
 Follow-up, 2026-10-11: the [bounded trusted-list inspection](TRUSTED_LIST_BOOTSTRAP.md)

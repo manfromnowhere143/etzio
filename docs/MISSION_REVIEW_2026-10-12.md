@@ -5,6 +5,11 @@ Baseline: `0c060602dc2cbcb3e5025802b926065bb80f3cd3`, published in
 [PR #46](https://github.com/manfromnowhere143/etzio/pull/46).
 No native profile, roadmap exception, target, execution or disclosure is admitted here.
 
+The subsequent [catalog operating decision](CATALOG_RECOVERY_DECISION.md) completes the
+bounded feasibility continuation below. It specifies the recovery cut, writer fencing,
+data custody and concrete operator inquiry. No complete roster or operator commitment was
+found in the reviewed record; native integration awaits that operating decision.
+
 ## Engineering verdict
 
 Etzio has a substantial, tested foundation for authorization, evidence retention and

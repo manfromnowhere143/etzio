@@ -5,7 +5,23 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Completed research tranche and current pickup
+## Catalog operating decision and current pickup
+
+The [catalog recovery decision](CATALOG_RECOVERY_DECISION.md) completes the bounded next
+feasibility pass. It recommends an application-aware catalog, separately administered
+required monitors and retained recovery data, with explicit fresh-read and writer-fencing
+obligations. It identifies software and inquiry prospects without inventing a willing
+operator or accepting a profile. The machine-readable dossier retains every unbound role.
+
+The next input is an accountable operating commitment or an explicit alternative scope
+choice. The technical inquiry and recovery/refusal experiment are concrete and reviewable;
+external messaging is not authorized by this document. Do not repeat the completed public
+survey, build another optional parser or treat a synthetic deployment as administrative
+independence. Repository repair remains authorized when an actual defect is demonstrated.
+Native integration, recovery, storage, isolation and target gates retain their order.
+The FreeTSA diagnostic and early paid-lane exception remain unaccepted.
+
+## Completed research tranche and preceding pickup
 
 The latest [mission assessment](MISSION_REVIEW_2026-10-12.md) completes the bounded
 provider-feasibility review and refreshes the architectural and paid-route verdict. Its
