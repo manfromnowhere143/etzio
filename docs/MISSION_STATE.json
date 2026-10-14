@@ -207,9 +207,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption; legacy fixture metrics preserving undefined denominators and unresolved outcome coverage",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2571,
+    "test_count": 2592,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -223,8 +223,8 @@
     "focused_archived_timestamp_and_clock_capture_tests_passed": 68,
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
-    "validated_implementation_commit": "2653fdc39b4ce5cf95309ad4481be3799ee573f6",
-    "release_evidence_pointer": "/store_opening_cleanup/release_validation_record",
+    "validated_implementation_commit": "05d2e770205301823a9ab445ca0ec79a275a9316",
+    "release_evidence_pointer": "/fixture_metric_accounting/release_validation_record",
     "focused_source_provenance_tests": 52,
     "focused_trusted_list_signature_tests": 70,
     "focused_native_checkpoint_tests": 105,
@@ -1594,5 +1594,21 @@
     "resource_creation": false,
     "decision": "docs/QUALIFICATION_NEXT_STEPS.md#available-provider-credits-operator-clarification-2026-10-12",
     "scope": "Use existing credits for justified Etzio work after verifying account/resource boundaries. Preserve sibling workloads. No target or execution profile admitted."
+  },
+  "fixture_metric_accounting": {
+    "date": "2026-10-14",
+    "status": "implemented_correction_focused_validation_full_release_separate",
+    "baseline_commit": "05d2e770205301823a9ab445ca0ec79a275a9316",
+    "contract": "docs/FRONTIER_BASELINE.md#modeled-fixture-accounting-correction-2026-10-14",
+    "full_suite_collection_target": 2592,
+    "release_validation_record": "artifacts/checkpoints/2026-10-14-fixture-metrics/release-validation.json",
+    "provider_admitted": false,
+    "target_admitted": false,
+    "finding": false,
+    "evidence": "docs/evidence/fixture-metrics-2026-10-14.json",
+    "new_controls": 21,
+    "focused_controls": 25,
+    "future_campaign_evaluator_implemented": false,
+    "default_fixture_counts_changed": false
   }
 }

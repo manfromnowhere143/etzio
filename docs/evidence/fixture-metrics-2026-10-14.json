@@ -1,0 +1,102 @@
+{
+  "status": "implemented_correction_focused_validation_full_release_separate",
+  "date": "2026-10-14",
+  "scope": "Legacy owned modeled CATO fixture harness only",
+  "baseline_commit": "05d2e770205301823a9ab445ca0ec79a275a9316",
+  "baseline_release": "artifacts/checkpoints/2026-10-12-store-opening/release-validation.json",
+  "baseline_index_files_verified": 90,
+  "defects": [
+    "Empty corpus returned precision=recall=1 and exit status 0.",
+    "All missing-PoC or out-of-scope verdicts became four true negatives and four false negatives, with precision=1 and exit status 0.",
+    "An unrelated candidate verdict could be scored against the current fixture."
+  ],
+  "contract": "docs/FRONTIER_BASELINE.md#modeled-fixture-accounting-correction-2026-10-14",
+  "controls": {
+    "new": 21,
+    "baseline_failed": 20,
+    "baseline_passed": 1,
+    "focused_total": 25,
+    "runtimes": [
+      "CPython 3.11.15",
+      "CPython 3.14.2"
+    ],
+    "after_reports_byte_identical": true
+  },
+  "default_fixture_result": {
+    "tp": 3,
+    "fp": 0,
+    "tn": 4,
+    "fn": 1,
+    "unresolved": 0,
+    "precision": 1,
+    "recall": 0.75,
+    "assigned": 8,
+    "resolved": 8
+  },
+  "correction": "Undefined denominators remain None; inconclusive and out-of-scope remain unresolved by class and original reason; reports expose fractions and coverage; incomplete/empty runs cannot pass; unknown or misbound verdicts are errors.",
+  "source_review": [
+    {
+      "url": "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html",
+      "retrieved_date": "2026-10-14",
+      "review": "Definitions, zero_division and undefined-denominator notes; not an imported runtime dependency.",
+      "path": "artifacts/checkpoints/2026-10-14-fixture-metrics/sklearn-metrics.html",
+      "size": 131523,
+      "sha256": "e76a7536ca63139f83e5c70cb2adfe54309988f9b74d41b350f9e45b63835330"
+    },
+    {
+      "url": "https://arxiv.org/abs/2610.10150v1",
+      "review": "Abstract/version refreshed; selected full text previously retained in waiting-strategy. Motivation for evaluator audit, not independent confirmation of an Etzio defect.",
+      "prior_evidence": "artifacts/checkpoints/2026-10-14-waiting-strategy/"
+    }
+  ],
+  "retained_files": [
+    {
+      "path": "artifacts/checkpoints/2026-10-14-fixture-metrics/reproduce.py",
+      "size": 1249,
+      "sha256": "1665b20d3b97df8c5b6b72477563abd899e8909011c20e872b9a04df45031723"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-14-fixture-metrics/before.json",
+      "size": 10922,
+      "sha256": "45130778e22624db53ed42df2d17b078e8ee02400a32eab0c5e8b1308942a053"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-14-fixture-metrics/before-tests.log",
+      "size": 17443,
+      "sha256": "2d8f9c0b279b3981272589cde52ba929d146cbfc62d0ebdd9391f337a085286e"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-14-fixture-metrics/after-0.json",
+      "size": 16069,
+      "sha256": "bfef7be19a812e05c3f1eee02aaaaa25e17d7b568fae773b758404016c02e3bb"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-14-fixture-metrics/after-1.json",
+      "size": 16069,
+      "sha256": "bfef7be19a812e05c3f1eee02aaaaa25e17d7b568fae773b758404016c02e3bb"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-14-fixture-metrics/focused-0.log",
+      "size": 99,
+      "sha256": "219c883e8a6342e96c8601106d1d395810da82b83194a4a0aa8249e344a39278"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-14-fixture-metrics/focused-1.log",
+      "size": 99,
+      "sha256": "a891ad32de10b87e8bfa16cb704b52e46b88dfcbad5b1cf5db40884d92d2a1a0"
+    }
+  ],
+  "full_suite_collection_target": 2592,
+  "release_validation_record": "artifacts/checkpoints/2026-10-14-fixture-metrics/release-validation.json",
+  "limitations": [
+    "No native execution, independent reproduction or finding established.",
+    "Default eight-case counts were correct before the change; no earlier complete-run score is retracted.",
+    "This is not the proposed campaign reporting compiler, benchmark admission or a comparative performance result.",
+    "Catalog/monitor commitments, complete native dossier, storage, isolation and exact-target gates remain open."
+  ],
+  "pending_acquisition_changed": false,
+  "provider_admitted": false,
+  "target_admitted": false,
+  "finding": false,
+  "paid_outcomes": 0
+}

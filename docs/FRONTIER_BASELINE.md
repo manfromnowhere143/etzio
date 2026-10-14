@@ -310,6 +310,33 @@ token, compute, wall-time, and human-review cost
 Training, tuning, and promotion data remain separated from final holdouts. Benchmark graders
 receive adversarial tests, and a model is never allowed to rewrite its evaluator or label.
 
+### Modeled fixture accounting correction, 2026-10-14
+
+The legacy `etzio.harness.fpr` harness obeys the same missingness rule, within its tiny
+owned corpus. Only `confirmed` and `not_reproduced` enter its confusion matrix. An
+`inconclusive` or `out_of_scope` verdict remains unresolved, with its original kind and
+reasons retained per case. `not_reproduced` is a negative prediction under this fixture
+oracle, not proof that a real target is safe. A verdict for another candidate or an unknown
+verdict kind is an evaluation error; verifier exceptions propagate without a success report.
+
+Precision is TP/(TP+FP), recall is TP/(TP+FN), FPR is FP/(FP+TN), and FDR is FP/(TP+FP),
+conditional on resolved fixture verdicts. Every zero denominator returns `None` and prints
+`undefined`, never a favorable default. Counts must be nonnegative integers. Reports include
+each fraction, resolved/assigned coverage overall and for each ground-truth class, and
+TP/all-assigned-positive yield. Unresolved positives receive no yield credit and are not
+relabeled false negatives. Empty-class coverage and yield are also undefined.
+
+The command succeeds only for a nonempty, completely resolved corpus with zero false
+positives. A false positive takes precedence as `FAIL`; otherwise missing coverage or an
+empty corpus is `INCOMPLETE`, with nonzero exit status. This remains a fixture regression
+condition, not a detector-quality threshold: the separate positive and recall regression
+tests still apply. Neither this correction nor a perfect conditional rate establishes
+independent execution, statistical confidence, a finding or comparative capability.
+
+The [correction record](evidence/fixture-metrics-2026-10-14.json) retains the concrete
+before/after cases. The broader campaign assignment, joint-stage, cost and uncertainty
+contract remains proposed; this repair does not implement the future benchmark evaluator.
+
 ## Isolation baseline
 
 The initial candidates are:

@@ -1,6 +1,35 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-12, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-14, Asia/Jerusalem.
+
+## Fixture metric accounting, 2026-10-14
+
+Research on evaluation reliability prompted an audit of the existing modeled CATO harness.
+The retained reproduction shows that an empty corpus returned perfect precision and recall,
+while all-inconclusive and all-out-of-scope runs counted four true negatives and exited
+successfully. The [accounting contract](FRONTIER_BASELINE.md#modeled-fixture-accounting-correction-2026-10-14)
+now preserves undefined rates, unresolved counts by ground-truth class, original reasons,
+and explicit denominators and coverage. Incomplete or empty runs cannot pass. Wrong-candidate
+and unknown-kind verdicts are refused before scoring. The ordinary eight-case result remains
+TP=3, FP=0, TN=4, FN=1; its previous complete-run score was not incorrect.
+
+The [correction evidence](evidence/fixture-metrics-2026-10-14.json) retains 21 new controls:
+20 fail on the original code and one already passes. All 25 focused controls pass on both
+declared runtimes, with byte-identical corrected experiment reports. The full collection
+target is 2592; resolve full local, exact-head CI and
+package validation from `artifacts/checkpoints/2026-10-14-fixture-metrics/release-validation.json`.
+The unchanged baseline's 90-file release index was reauthenticated. This is a correction
+to the legacy fixture report, not a production evaluator, independent execution or finding.
+
+The latest private review remains discoverable at `artifacts/checkpoints/latest-review.json`.
+October 14 research records retain EVM benchmark source reconciliation, selected competitor
+code review, and proposed matched-cost reporting rules. The campaign has 18 unbound
+registration inputs; no comparator run or superiority claim is established. At the last
+retained mail check, October 14 06:35:17–06:35:19 UTC, six inquiry threads contained no human
+reply or operating commitment. No new inquiry or provider request was sent in this tranche.
+Actual catalog/monitor commitments and the complete native dossier remain the next
+integration dependency. Both FreeTSA attempts remain spent, Daybreak unsubmitted and the
+early paid lane unaccepted. Do not repeat the finite research experiments or bypass gates.
 
 ## Failed opening and migration cleanup, 2026-10-12
 
@@ -1115,7 +1144,7 @@ scope; this correction takes precedence over broader recovery-completeness claim
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2571 tests expected;
+- 2592 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,

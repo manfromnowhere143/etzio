@@ -5,6 +5,23 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
+## Fixture accounting and current pickup, 2026-10-14
+
+The [fixture accounting correction](evidence/fixture-metrics-2026-10-14.json) closes a
+demonstrated local reporting defect: missing verification no longer becomes a true negative,
+undefined denominators no longer become perfect scores, and empty/incomplete runs fail.
+The default eight-case counts remain unchanged. Resolve the 2592-test release from
+`artifacts/checkpoints/2026-10-14-fixture-metrics/release-validation.json`; the 25 focused
+passes alone do not establish the full release.
+
+Read `artifacts/checkpoints/latest-review.json` for retained October 14 research and the
+proposed comparison/reporting contracts. Do not treat a source survey, finite experiment
+or this fixture repair as competitive discovery. The 18 registration inputs and native
+operating commitments remain open. The last retained six-thread readback at October 14
+06:35 UTC had no human reply; do not resend the inquiry batch. Continue from genuinely new
+operator evidence or a demonstrated repository defect. Preserve the existing foundation,
+isolation and exact-target order, spent acquisitions and pending decisions.
+
 ## Opening cleanup and available credits, 2026-10-12
 
 The [opening correction](evidence/store-opening-cleanup-2026-10-12.json) extends bounded
