@@ -2,6 +2,29 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-14, Asia/Jerusalem.
 
+## Approved operating pilot follow-ups, 2026-10-14
+
+Three approved scope and pricing requests were sent to Glasklar, Geomys and Trail of
+Bits in their original inquiry threads. The [dispatch record](evidence/operator-pilot-followups-2026-10-14.json)
+binds the approved copies, professional sender, stored-message readback and duplicate
+checks. The six-thread readback contains nine outgoing messages and the one historical
+delivery failure. No human reply or operating commitment was observed. A stored sent
+copy does not establish recipient inbox delivery.
+
+The requests propose a 14 day synthetic-record pilot and ask for accountable operators,
+exact supported duties, administration and recovery arrangements, availability and
+separate setup, development and operating costs. They commit to no purchase or deployment.
+Approval of these exact messages has been exercised. Do not repeat them or ask Daniel
+to approve them again. Read actual replies before filling any native role; ordinary
+checkpoint witnessing alone does not satisfy the application-monitor requirement.
+
+The next dependency remains actual catalog and independent monitor commitments, followed
+by the complete native dossier and exact-operation qualification. Recovery, storage,
+isolation and the 18 comparison-registration inputs remain unresolved. No comparator
+run, finding, bounty income or competitive advantage follows from this outreach. The
+engine and test bytes are unchanged. Resolve this documentation update's validation from
+`artifacts/checkpoints/2026-10-14-pilot-followups/release-validation.json`.
+
 ## Fixture metric accounting, 2026-10-14
 
 Research on evaluation reliability prompted an audit of the existing modeled CATO harness.

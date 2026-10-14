@@ -1,6 +1,6 @@
 {
   "schema_version": "etzio.mission_state.v2",
-  "updated": "2026-10-12",
+  "updated": "2026-10-14",
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
@@ -1486,10 +1486,10 @@
     "account_security_changes_by_agent": 0
   },
   "operator_outreach": {
-    "date": "2026-10-12",
-    "status": "authorized_inquiries_sent_operating_commitments_pending",
+    "date": "2026-10-14",
+    "status": "approved_pilot_followups_sent_operating_commitments_pending",
     "organizations_contacted": 5,
-    "outbound_messages": 6,
+    "outbound_messages": 9,
     "failed_delivery_attempts": 1,
     "failed_attempt_rerouted": true,
     "sent_copy_readback_verified": true,
@@ -1498,11 +1498,13 @@
     "operator_commitments_retained": 0,
     "provider_admissions": 0,
     "purchase_or_deployment_committed": false,
-    "private_evidence": "artifacts/operator-inquiries/2026-10-12/",
-    "fresh_thread_readback": "artifacts/checkpoints/2026-10-12-recovery-fence/provider-thread-readback.json",
+    "private_evidence": "artifacts/operator-inquiries/2026-10-14-pilot-dispatch-resumed/",
+    "fresh_thread_readback": "artifacts/operator-inquiries/2026-10-14-pilot-dispatch-resumed/final-connector-threads.json",
     "engine_project_clarification_pending": false,
     "follow_up_scheduled": false,
-    "thread_readback_retained_host_utc": "2026-10-12 17:09:21 UTC"
+    "thread_readback_retained_host_utc": "2026-10-14T11:07:12.533073+00:00",
+    "approved_followups_sent": 3,
+    "followup_evidence": "docs/evidence/operator-pilot-followups-2026-10-14.json"
   },
   "cleanup_interruption_hardening": {
     "date": "2026-10-12",

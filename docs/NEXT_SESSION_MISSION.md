@@ -5,6 +5,17 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
+## Operating pilot requests sent, 2026-10-14
+
+The [three approved follow-ups](evidence/operator-pilot-followups-2026-10-14.json) are sent
+and verified in their original threads. Their scope is a bounded synthetic-record pilot
+quotation, with no purchase or deployment commitment. The retained six-thread readback
+contains no human reply or operating commitment. Approval is complete; do not repeat the
+messages. Continue from actual operator responses, preserving offered, declined,
+unsupported and development-required duties separately. A quotation is not native
+conformance or provider admission. The full dossier, recovery, storage, independent
+execution and comparison gates retain their existing order.
+
 ## Fixture accounting and current pickup, 2026-10-14
 
 The [fixture accounting correction](evidence/fixture-metrics-2026-10-14.json) closes a
