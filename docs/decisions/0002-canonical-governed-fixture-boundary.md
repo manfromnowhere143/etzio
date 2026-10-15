@@ -89,3 +89,22 @@ may traverse repository bytes; production analysis receives admitted immutable b
 
 A signature authenticates a statement. It does not prove kernel authority, retained
 evidence, independent execution, or the claimed security effect.
+
+## ASCII validation equivalence, 2026-10-15
+
+An implementation may return an already admitted exact `str` immediately after the
+existing code-point length check when `str.isascii()` is true. Every ASCII character is
+a Unicode scalar and an NFC fixed point, including the empty string and control
+characters. JSON escaping still applies when producing canonical wire bytes.
+
+This shortcut must preserve the protocol's accepted values, refusal reasons and order,
+canonical bytes and domain-separated content identities. Non-ASCII strings still use
+the pinned Unicode 17.0.0 validation path. Object-key grammar and length checks, exact
+runtime-type admission, structural ceilings and canonical-wire checks remain mandatory.
+
+Before release, compare the implementation with the frozen predecessor for every single
+Unicode code point, mixed strings, length boundaries and string subclasses. Retain the
+full ASCII alphabet's canonical identity and controls for a late surrogate, decomposed
+Unicode, an overlength ASCII value and invalid ASCII keys. Measure the same owned
+lifecycle before and after without profiling; instrumented timings alone do not establish
+a speedup or production throughput.

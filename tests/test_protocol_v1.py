@@ -23,6 +23,7 @@ from etzio.protocol import (
     strict_loads,
     thaw_json,
 )
+from etzio.protocol.v1 import MAX_KEY_CODEPOINTS, MAX_STRING_CODEPOINTS
 from etzio.schemas import protocol_v1_schema
 
 
@@ -89,6 +90,64 @@ def test_object_keys_must_be_ascii_snake_case(value: dict[str, int]):
 def test_strings_must_be_nfc_unicode_scalars(value: dict[str, str]):
     with pytest.raises(ProtocolError):
         canonical_dumps(value)
+
+
+def test_full_ascii_alphabet_preserves_its_frozen_canonical_identity():
+    value = {"value": "".join(chr(codepoint) for codepoint in range(128))}
+    assert strict_loads(canonical_dumps(value)) == value
+    assert content_id("event", value) == (
+        "sha256:f0b8681f77c96e21c9f29a3be8228fc6a7ebe2809065df437e7e61c8e7302c92"
+    )
+
+
+def test_empty_ascii_string_preserves_canonical_wire():
+    assert canonical_dumps({"value": ""}) == b'{"value":""}'
+
+
+@pytest.mark.parametrize("extra", [0, 1])
+def test_ascii_string_length_ceiling_remains_effective(extra):
+    value = "a" * (MAX_STRING_CODEPOINTS + extra)
+    if extra:
+        with pytest.raises(ProtocolError, match="string exceeds the protocol length ceiling"):
+            canonical_dumps({"value": value})
+    else:
+        assert strict_loads(canonical_dumps({"value": value})) == {"value": value}
+
+
+@pytest.mark.parametrize("suffix,reason", [
+    ("\ud800", "surrogate"),
+    ("\udfff", "surrogate"),
+    ("\ud800\udc00", "surrogate"),
+    ("e\u0301", "NFC"),
+])
+def test_ascii_prefix_does_not_hide_forbidden_unicode(suffix, reason):
+    with pytest.raises(ProtocolError, match=reason):
+        canonical_dumps({"value": "a" * 4096 + suffix + "z" * 16})
+
+
+@pytest.mark.parametrize("value", ["\u0080", "\ud7ff", "\ue000", "\U0010ffff", "café"])
+def test_non_ascii_scalar_boundaries_preserve_exact_utf8(value):
+    expected = b'{"value":"' + value.encode("utf-8") + b'"}'
+    assert canonical_dumps({"value": value}) == expected
+    assert strict_loads(expected) == {"value": value}
+
+
+@pytest.mark.parametrize("as_key", [False, True])
+def test_string_subclass_cannot_supply_its_own_ascii_classification(as_key):
+    class UntrustedString(str):
+        def isascii(self):
+            raise AssertionError("string subclass entered scalar validation")
+
+    value = UntrustedString("e\u0301")
+    body = {value: "value"} if as_key else {"value": value}
+    with pytest.raises(ProtocolError, match="object keys must be strings" if as_key else "unsupported JSON"):
+        canonical_dumps(body)
+
+
+def test_ascii_object_key_length_ceiling_remains_effective():
+    assert canonical_dumps({"a" * MAX_KEY_CODEPOINTS: 1})
+    with pytest.raises(ProtocolError, match="object key exceeds"):
+        canonical_dumps({"a" * (MAX_KEY_CODEPOINTS + 1): 1})
 
 
 def test_strict_loads_rejects_escaped_surrogates_and_non_nfc():

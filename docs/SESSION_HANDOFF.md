@@ -2,7 +2,36 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-15, Asia/Jerusalem.
 
-## Current pickup, 2026-10-15
+## Current pickup, 2026-10-15 — protocol validation
+
+The [ASCII validation evidence](evidence/ascii-validation-2026-10-15.json) records a narrow
+performance correction. After the existing length check, exact admitted ASCII strings
+need no surrogate scan or NFC normalization. Non-ASCII validation, key rules and protocol
+identities retain their contract. The [ADR-0002 equivalence contract](decisions/0002-canonical-governed-fixture-boundary.md#ascii-validation-equivalence-2026-10-15)
+requires behavior preservation before release.
+
+All `55` focused protocol tests pass on both runtimes; the `16` new controls also pass on
+the predecessor. Differential checks agree for every single Unicode code point, `4107`
+additional strings and `8218` canonical wire/identity cases per runtime. One unprofiled
+local lifecycle comparison passed in `105.95` seconds before and `34.16` seconds after.
+That pair does not establish general or production throughput. Resolve complete release
+checks from `artifacts/checkpoints/2026-10-15-ascii-validation/release-validation.json`.
+
+Full-suite collection declaration (a target count, not a passing result):
+
+- 2617 tests expected;
+
+Repository continuity [PR 56](https://github.com/manfromnowhere143/etzio/pull/56) is merged
+at `597df2648bb519a512b90868050efe9174c89bd6`. All `1473` entries across `39` historical
+indexes match. A private archive containing `2070` files and Git history passed an offline
+restore and index check; its record is `artifacts/recovery/2026-10-15-continuity/recovery-verification.json`.
+This is a same-host recovery copy, not qualified independent durability.
+
+Native operator commitments and the complete dossier remain the next integration
+dependency. Preserve the accepted gate order and the spent acquisition/sent outreach
+states below. The optimization grants no native-provider, execution or finding authority.
+
+## Repository continuity release, 2026-10-15
 
 The [repository-continuity correction](evidence/repository-continuity-2026-10-15.json)
 repairs the canonical validation failure caused by ignored upstream Markdown captures.
@@ -13,9 +42,8 @@ include four reproduced failures before repair. All `106` focused repository-pol
 pass. Resolve full-suite, package and exact-head CI results from
 `artifacts/checkpoints/2026-10-15-repository-continuity/release-validation.json`.
 
-Full-suite collection declaration (a target count, not a passing result):
-
-- 2601 tests expected;
+The continuity release passed `2601` tests on both runtimes locally and in exact-head
+Linux CI; its retained release record identifies that commit.
 
 The current store schema is `4`; legacy, unsigned modeled and qualified signed-fixture
 profiles remain distinct. The runtime and execution surface are unchanged. README and

@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-15",
+  "status": "implemented_equivalent_ascii_validation_full_release_separate",
+  "base_commit": "597df2648bb519a512b90868050efe9174c89bd6",
+  "contract": "docs/decisions/0002-canonical-governed-fixture-boundary.md#ascii-validation-equivalence-2026-10-15",
+  "change": "After the existing string-length gate, exact admitted ASCII strings return directly; the non-ASCII path, key rules and remaining canonicalization remain unchanged.",
+  "motivation": {
+    "profile": "artifacts/checkpoints/2026-10-15-repository-continuity/lifecycle-profile-summary.json",
+    "sha256": "d984089ae683ed59c06f6590afbf3b36229954a74585c69431f97968320c25a9",
+    "instrumented_function_calls": 3086411965,
+    "boundary": "Instrumented owned fixture; not production throughput."
+  },
+  "behavior_controls": {
+    "new": 16,
+    "focused_tests": 55,
+    "predecessor": "passed",
+    "candidate_runtimes_passed": [
+      "3.11.15",
+      "3.14.2"
+    ],
+    "scope": "ASCII golden identity, empty and limit-length values, late surrogates and decomposed Unicode, valid non-ASCII boundaries, hostile string subclasses and key length."
+  },
+  "differential_evidence": {
+    "runtimes": [
+      "3.11.15",
+      "3.14.2"
+    ],
+    "single_codepoints": 1114112,
+    "extra_strings": 4107,
+    "string_cases": 1118219,
+    "wire_identity_and_roundtrip_cases": 8218,
+    "corpus_sha256": "e3b7d4d8c8d762cfebb7eb7eb1d94a6910a4b37ee55108096b2845b9832154e9",
+    "results": "all_compared_results_identical",
+    "records": [
+      {
+        "path": "artifacts/checkpoints/2026-10-15-ascii-validation/equivalence-3.11.15.json",
+        "sha256": "d94c2aa09b6ec0bbdebc1249c9b8952786c99b312fca70917a6e37124e6a679d"
+      },
+      {
+        "path": "artifacts/checkpoints/2026-10-15-ascii-validation/equivalence-3.14.2.json",
+        "sha256": "58e173f0f377fce822f90b2df9ddffc112248c5b18aeb8d547715ce7fdfd584e"
+      }
+    ]
+  },
+  "lifecycle_timing": {
+    "test": "tests/test_qualified_fixture_lifecycle_v1.py::test_complete_qualified_receipt_vertical_and_staging_free_restart",
+    "runtime": "CPython 3.11.15",
+    "before_seconds": 105.95,
+    "after_seconds": 34.16,
+    "both_passed": true,
+    "method": "One sequential unprofiled local before/after pair on the same selected fixture test.",
+    "limits": "Uncontrolled host variation and one pair; no production or general throughput claim.",
+    "logs": [
+      {
+        "path": "artifacts/checkpoints/2026-10-15-ascii-validation/lifecycle-before.log",
+        "sha256": "d6a4456afc56532332ed3bfba0631592b7714ba4896d442ae3797ba744d4a5f9"
+      },
+      {
+        "path": "artifacts/checkpoints/2026-10-15-ascii-validation/lifecycle-after.log",
+        "sha256": "8518c36ca87b4a8cc406db3fdc9dac1301f3d1faf700aadeacccae3c41a669a2"
+      }
+    ]
+  },
+  "source_bindings": {
+    "etzio/protocol/v1.py": "b4a7a6ffc3ebf5d0b2763c9ec02a7f9653bf0fa6439a370926a3cc2c74ff9d8e",
+    "tests/test_protocol_v1.py": "7ff4c72f36eb1f92cda0f2a3855839c65b01699741411747507962fa4cedb431",
+    "tests/test_qualified_fixture_lifecycle_v1.py": "03fd68242f18bbbdf57decbd66915878c31f22690e39f6715a60ef51db290ffb"
+  },
+  "full_collection_target": 2617,
+  "release_validation": "artifacts/checkpoints/2026-10-15-ascii-validation/release-validation.json",
+  "limits": {
+    "protocol_version_changed": false,
+    "wire_identity_change_intended": false,
+    "native_profile_admitted": false,
+    "finding_or_comparative_discovery_claim": false,
+    "authority_or_gate_order_changed": false
+  }
+}

@@ -5,7 +5,15 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-15
+## Current continuation, 2026-10-15 — protocol validation
+
+Read the current [handoff](SESSION_HANDOFF.md) and [ASCII validation evidence](evidence/ascii-validation-2026-10-15.json).
+The new release preserves the canonical protocol while eliminating redundant work for
+ASCII strings. Resolve its full checks from the exact release record; one local timing
+pair is not production throughput. The continuity release and private restore check are
+complete. Native operating commitments and the established qualification gates remain.
+
+## Repository continuity continuation, 2026-10-15
 
 Start with the October 15 section of [SESSION_HANDOFF](SESSION_HANDOFF.md) and the
 [repository-continuity evidence](evidence/repository-continuity-2026-10-15.json).

@@ -35,7 +35,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Read the October 15 current pickup and repository-continuity release record. Owned-document validation is corrected without changing runtime or authority. The six provider threads still have no human reply or operating commitment at the retained October 15 live check. Continue from actual catalog/monitor commitments and the complete native dossier, or a demonstrated repository defect. Preserve the fence obligation, recovery/storage/isolation/benchmark/target order, spent acquisitions and already-sent follow-ups. The system review sequencing suggestion is proposed, not accepted; do not repeat the completed survey.",
+    "next_session_pickup": "Read the latest October 15 protocol-validation pickup and its exact release record. The ASCII shortcut preserves the original acceptance rules and wire identities in the retained corpus; do not replace full authentication or expand that shortcut to non-ASCII input. Repository continuity PR 56 is merged, 1473 historical index entries match, and a complete local recovery archive has been restore-verified. Actual catalog/monitor operating commitments and the complete native dossier remain the next integration dependency. Preserve recovery/storage/isolation/benchmark/target order, spent acquisitions and sent follow-ups; no repeat survey.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority",
     "next_session_brief": "docs/NEXT_SESSION_MISSION.md"
   },
@@ -207,9 +207,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption; legacy fixture metrics preserving undefined denominators and unresolved outcome coverage; owned-document link validation and current-state recovery clarification",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption; legacy fixture metrics preserving undefined denominators and unresolved outcome coverage; owned-document link validation and current-state recovery clarification; equivalent ASCII protocol validation with retained differential and fixture timing evidence",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2601,
+    "test_count": 2617,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -223,7 +223,7 @@
     "focused_archived_timestamp_and_clock_capture_tests_passed": 68,
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
-    "release_evidence_pointer": "/repository_continuity/release_validation_record",
+    "release_evidence_pointer": "/ascii_protocol_validation/release_validation_record",
     "focused_source_provenance_tests": 52,
     "focused_trusted_list_signature_tests": 70,
     "focused_native_checkpoint_tests": 105,
@@ -1648,6 +1648,20 @@
       "focused_cleanup_failure_tests": 14
     },
     "runtime_changed": false,
+    "authority_changed": false,
+    "gate_order_changed": false
+  },
+  "ascii_protocol_validation": {
+    "date": "2026-10-15",
+    "status": "implemented_equivalence_full_release_results_separate",
+    "base_commit": "597df2648bb519a512b90868050efe9174c89bd6",
+    "evidence_record": "docs/evidence/ascii-validation-2026-10-15.json",
+    "release_validation_record": "artifacts/checkpoints/2026-10-15-ascii-validation/release-validation.json",
+    "previous_release": "/repository_continuity/release_validation_record",
+    "new_controls": 16,
+    "focused_tests_passed": 55,
+    "differential_string_cases_per_runtime": 1118219,
+    "wire_identity_cases_per_runtime": 8218,
     "authority_changed": false,
     "gate_order_changed": false
   }

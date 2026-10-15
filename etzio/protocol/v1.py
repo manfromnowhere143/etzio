@@ -280,6 +280,9 @@ class ProtocolError(ValueError):
 def _validate_string(value: str, path: str) -> str:
     if len(value) > MAX_STRING_CODEPOINTS:
         raise ProtocolError(f"{path}: string exceeds the protocol length ceiling")
+    # ASCII strings contain only Unicode scalars and are already NFC fixed points.
+    if value.isascii():
+        return value
     if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
         raise ProtocolError(f"{path}: Unicode surrogate code points are forbidden")
     if unicodedata.normalize("NFC", value) != value:
