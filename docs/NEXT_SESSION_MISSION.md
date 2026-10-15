@@ -5,7 +5,27 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-15 — protocol validation
+## Current continuation, 2026-10-15 — progress, comparison and bounty readiness
+
+Read the latest [handoff](SESSION_HANDOFF.md) first. The README and architecture diagrams
+now distinguish implemented fixture paths, native preparation, blocked qualification and
+the selected comparison order. The [frontier baseline](FRONTIER_BASELINE.md#controlled-comparison-and-separate-ablations)
+contains the four-arm design and separate semantic, scheduling and reuse experiments.
+Direction is selected; the `18` registration inputs remain unbound and no comparator ran.
+
+Actual catalog/monitor commitments remain the next integration dependency. The October 15
+`12:45:39Z` host-time readback found no new provider messages or commitments. Preserve sent
+pilot follow-ups, spent FreeTSA attempts and the foundation/recovery/storage/isolation/
+benchmark/target order. Continue from new operating evidence or a demonstrated repository
+defect. The finite CoW source review established no vulnerability or execution result.
+
+Daybreak guidance is refreshed; the last established application state remains unsubmitted,
+and current account approval/key enrollment is unknown. No answer to the setup-status
+question is retained. Model access cannot close Etzio's evidence or target gates. Private
+review/access records and recovery pointers are listed in the handoff; inspect them before
+repeating work. No automatic future polling or campaign is running.
+
+## Engine release continuation, 2026-10-15 — protocol validation
 
 Read the current [handoff](SESSION_HANDOFF.md) and [ASCII validation evidence](evidence/ascii-validation-2026-10-15.json).
 The new release preserves the canonical protocol while eliminating redundant work for

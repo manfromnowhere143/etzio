@@ -5,6 +5,26 @@ Status: **foundation integrity**, current-state reconciliation 2026-10-15.
 The roadmap advances by retained evidence, not calendar dates. A phase may start only when
 its predecessor’s named acceptance conditions are reproduced.
 
+## Current operating sequence, 2026-10-15
+
+The operator selected controlled comparison as the next decisive discovery evidence,
+while preserving the existing foundation order. The immediate external input is the
+catalog/independent-monitor operating commitment and complete native dossier. Three pilot
+follow-ups are already sent; the October 15 readback retained no human reply. More optional
+parsers or an unselected infrastructure deployment would not close that dependency.
+
+Native integrity qualification → external latest-head recovery and effective fencing →
+protected storage → independently qualified MARCELLUS/CATO execution → admitted benchmark
+and exact targets → frozen static-analysis/fuzzing/model-only/hybrid comparison. Semantic
+guidance, scheduling and evidence reuse follow as separate experiments against the frozen
+baseline. The [comparison contract](FRONTIER_BASELINE.md#controlled-comparison-and-separate-ablations)
+retains `18` unbound registration inputs; no experiment or bounty target is admitted.
+
+Public source and program research may continue within the existing preparation scope.
+The October 15 CoW review retained contrary source evidence against four suspected
+weaknesses, not a vulnerability or an execution result. Model-access onboarding is a
+separate dependency and does not alter this order.
+
 ## Phase 0 — repository foundation
 
 Status: **implemented**.
@@ -242,7 +262,9 @@ release evidence.
 
 ## Phase 2 — independent proof plane
 
-Status: **blocked on an explicitly authorized Linux/KVM environment and Phase 1B**.
+Status: **blocked on Phase 1B and an accepted, qualified Linux/KVM execution profile**.
+Bounded benign cloud preflight is already authorized and completed; execution qualification
+is a distinct, still-open gate.
 
 Build separately identified MARCELLUS and CATO workers:
 

@@ -1,6 +1,6 @@
 # Etzio Architecture
 
-Status: **architecture foundation**, 2026-07-29.
+Status: **foundation integrity**, current-state reconciliation 2026-10-15.
 
 This document distinguishes implemented, modeled, proposed, and blocked behavior. A green
 test proves only its named fixture and invariant.
@@ -59,26 +59,34 @@ point and have no kernel authority. The native codecs and lifecycle remain uncha
 
 ## Target system
 
-```text
-[human / program authority] ── exact signed grants ──▶ [AQUILA policy plane]
+This diagram is the intended authority topology, not a runtime deployment. The kernel,
+vault and AQUILA paths operate on fixtures; VELITES has only its narrow Python fixture
+analyzer. The remaining worker roles are proposed or legacy behavior models. Independent
+proof, finding adjudication, disclosure and learned-strategy promotion are blocked.
 
-[AQUILA] ── admitted authority and policy decisions ──▶ [ETZIO control kernel]
-
-[ETZIO] ── leases + exact immutable inputs ──▶ [research workers:
-                                                SCIPIO / FABIUS / VELITES]
-[research workers] ── typed proposals ──▶ [ETZIO]
-
-[ETZIO] ── leases + exact immutable inputs ──▶ [independent proof workers:
-                                                MARCELLUS / CATO]
-[independent proof workers] ── typed proposals + signed receipts ──▶ [ETZIO]
-
-[ETZIO] ◀── canonical reads / atomic writes ──▶ [canonical SQLite evidence vault]
-
-[ETZIO] ── kernel-accepted evidence only ──▶ [CAMILLUS adjudication]
-                                             └──▶ [FABRICIUS draft]
-
-[canonical vault: retained positive + negative outcomes]
-  └──▶ [MINERVA offline evaluation and governed promotion proposals]
+```mermaid
+flowchart TB
+    H["Human / program authority<br/>exact scoped grants"]
+    A["AQUILA<br/>fixture admission · budgets · leases implemented"]
+    K["ETZIO kernel<br/>fixture protocol · canonical state · replay implemented"]
+    V[("Canonical SQLite evidence vault<br/>implemented under documented local assumptions")]
+    R["Research roles<br/>SCIPIO / FABIUS proposed<br/>VELITES narrow fixture analyzer implemented"]
+    M["MARCELLUS · blocked<br/>isolated candidate construction"]
+    C["CATO · blocked<br/>separate principal and execution<br/>independent effect reproduction"]
+    J["CAMILLUS · blocked<br/>adjudication from kernel-accepted evidence"]
+    D["FABRICIUS · blocked<br/>evidence-bound disclosure draft"]
+    L["MINERVA · proposed<br/>offline evaluation and promotion proposals"]
+    H --> A --> K
+    K <-->|"canonical reads / atomic writes"| V
+    K -->|"leases + immutable inputs"| R
+    R -->|"typed proposals"| K
+    K -. "separately admitted construction lease" .-> M
+    M -. "candidate artifacts, not verdicts" .-> K
+    K -. "fresh immutable inputs + verifier lease" .-> C
+    C -. "structured evidence + signed receipt" .-> K
+    K -. "accepted evidence only" .-> J -.-> D
+    V -. "positive and negative outcomes" .-> L
+    L -. "reviewable strategy proposal, no direct authority" .-> A
 ```
 
 Workers return typed proposals. They do not grant authority, mutate canonical state, or
@@ -672,7 +680,13 @@ default-deny egress, no ambient credentials, immutable images, read-only inputs,
 writes, cgroup/resource ceilings, syscall/device restrictions, expiring leases, complete
 execution receipts, and a tested out-of-band kill path.
 
-No such execution tier exists in this repository. Exploit execution remains blocked.
+A bounded October 9 Google Cloud preflight observed KVM API support and an empty VM
+creation/close on a disposable host; cleanup was verified. It exercised no guest payload,
+worker jailer, independent verifier, denied-egress probe or power-fault recovery. Existing
+cloud preparation authority therefore does not establish an accepted execution profile.
+No such execution tier exists in this repository. Exploit execution remains blocked. See
+[qualification next steps](QUALIFICATION_NEXT_STEPS.md) and the
+[README progress map](../README.md#progress-through-2026-10-15).
 
 ## Domain and technique packs
 

@@ -2,7 +2,89 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-15, Asia/Jerusalem.
 
-## Current pickup, 2026-10-15 — protocol validation
+## Current pickup, 2026-10-15 — complete progress and research handoff
+
+This section is the current continuation point. Older dated sections preserve history;
+their pending actions and release counts are not new authority. Start with this section,
+[MISSION_STATE](MISSION_STATE.json), the [README progress map](../README.md#progress-through-2026-10-15)
+and [qualification next steps](QUALIFICATION_NEXT_STEPS.md).
+
+**Implementation:** the engine baseline is `285fdb6497bde93d46f803b19e94cac33da06287`
+([PR 57](https://github.com/manfromnowhere143/etzio/pull/57)). It passed `2617` tests on
+CPython 3.11.15 and 3.14.2 locally and in exact-head Linux CI, plus package checks. This
+documentation tranche changes no runtime, tests, dependencies or authority. Its full
+validation, diagram renders, publication and recovery results must be resolved from
+`artifacts/checkpoints/2026-10-15-documentation-handoff/release-validation.json`; the engine
+baseline is not a claim that this later documentation candidate already passed.
+
+The fixture surface remains six Python rules, seven planted candidates on one vulnerable
+fixture and zero on one clean fixture. Schema v4, signed-fixture qualification, governed
+blocked recovery and modeled receipt admission are implemented. Independent execution,
+native integrity providers, qualified protected storage, a benchmark result, a finding and
+bounty income remain absent. The ASCII optimization preserves protocol behavior; its
+single local timing pair is not a production throughput claim.
+
+**Accepted direction:** preserve the foundation order, qualify independent execution,
+then run static-analysis, fuzzing, model-only and hybrid comparison. Test semantic
+guidance, scheduling and evidence reuse separately afterward. The
+[frontier baseline](FRONTIER_BASELINE.md#controlled-comparison-and-separate-ablations)
+now exposes that order, complete cost accounting, family-separated holdouts and all `18`
+unbound registration inputs. No protocol has been preregistered and no comparator has run.
+The request to pursue bounties did not name an exact target contract or accept an early
+execution exception.
+
+**Immediate dependency:** accountable catalog and independently administered application
+monitor commitments, then the complete native administration, custody, freshness and
+revocation dossier. The six provider threads were checked at `2026-10-15T12:45:39Z` host
+observation time: the same ten message IDs, nine outgoing messages and one historical
+delivery failure; no human reply or operating commitment. A separate query for relevant
+replies from the prospective providers also returned none. This is a bounded mailbox
+observation, not a claim about every communication channel. The three approved pilot
+follow-ups remain sent. Do not resend them, repeat the completed provider survey, add
+optional native parsers or deploy unrelated infrastructure as a substitute for commitments.
+
+After that input, qualify native operations and failure controls without weakening governed
+recovery; prove external latest-head recovery and effective fencing; qualify protected
+storage; prove independent MARCELLUS/CATO execution on an accepted Linux/KVM profile;
+then admit the benchmark and exact targets and bind the comparison protocol. Both FreeTSA
+acquisitions remain spent. Existing bounded cloud preparation and conditional provider-credit
+authority persist; no new resources or target executions occurred in these reviews.
+
+**Research retained:** the system review and subsequent eight-paper/five-competitor review
+are indexed below. Selected methods and limitations were read, not independently reproduced.
+Proposed semantic, scheduling and reuse advantages remain hypotheses. The finite CoW review
+checked seven retained source-file identities and found contrary source evidence against
+four suspected weaknesses. It did not execute contracts, query chain state, establish a
+vulnerability or clear public/private duplicate risk. The publisher-mapped revision is
+`dd08e12e765088470268eb0bbba13e86b14b9cb6`; do not silently equate it with the brief's
+advertised revision or a current deployed runtime.
+
+**Model access:** official Daybreak guidance was rechecked October 15. The last established
+application state is prepared/unsubmitted with individual onboarding unfinished; current
+signed-in account approval was not inspected. A question about subsequent enrollment has
+no retained answer. Do not infer that the planned security key was obtained or enrolled.
+Blue/Red access, workspace/model controls and the reported product notice are separate from
+Etzio's scientific and target gates. No application, support message or account-security
+change was made. An unsent support description and missing diagnostic fields are retained
+privately. Approval, if later obtained, is not a target grant or provider qualification.
+
+| Continuity record | Locator |
+|---|---|
+| Current public progress projection | [evidence record](evidence/documentation-handoff-2026-10-15.json) |
+| Last engine release | `artifacts/checkpoints/2026-10-15-ascii-validation/release-validation.json` |
+| System assessment and eleven retained paper captures | `artifacts/checkpoints/latest-system-review.json` |
+| Eight additional papers, five documented competitor workflows and experiment proposals | `artifacts/checkpoints/latest-competitive-review.json` |
+| Selected comparison order and live provider check | `artifacts/checkpoints/latest-comparison-readiness.json` |
+| CoW source review and Daybreak access follow-through | `artifacts/checkpoints/latest-bounty-source-review.json` |
+| This documentation release | `artifacts/checkpoints/2026-10-15-documentation-handoff/release-validation.json` |
+| Latest complete local recovery copy | `artifacts/recovery/latest.json` |
+
+Private artifacts are not distributed in a fresh clone. Check each manifest/hash before
+reusing retained evidence, preserve raw correspondence privately and do not rewrite frozen
+indexes. The recovery copy is same-host evidence, not independent or off-host durability.
+No background provider polling or autonomous bounty campaign is deployed.
+
+## Engine release, 2026-10-15 — protocol validation
 
 The [ASCII validation evidence](evidence/ascii-validation-2026-10-15.json) records a narrow
 performance correction. After the existing length check, exact admitted ASCII strings

@@ -1,0 +1,274 @@
+{
+  "schema": "etzio.documentation-progress.v1",
+  "date": "2026-10-15",
+  "status": "documentation_projection_no_runtime_or_authority_change",
+  "engine_baseline": "285fdb6497bde93d46f803b19e94cac33da06287",
+  "engine_release": {
+    "pr": "https://github.com/manfromnowhere143/etzio/pull/57",
+    "ci_run": 38731112176,
+    "tests_per_runtime": 2617,
+    "runtimes": [
+      "3.11.15",
+      "3.14.2"
+    ],
+    "local_and_exact_head_ci": "passed"
+  },
+  "release_validation_record": "artifacts/checkpoints/2026-10-15-documentation-handoff/release-validation.json",
+  "retained_progress_sources": [
+    "docs/evidence/ascii-validation-2026-10-15.json",
+    "docs/evidence/repository-continuity-2026-10-15.json",
+    "docs/evidence/fixture-metrics-2026-10-14.json",
+    "docs/evidence/operator-pilot-followups-2026-10-14.json",
+    "docs/QUALIFICATION_NEXT_STEPS.md",
+    "docs/COW_SOURCE_DOSSIER.md"
+  ],
+  "private_record_identities": [
+    {
+      "path": "artifacts/checkpoints/2026-10-15-system-review/assessment.json",
+      "sha256": "d322c88ff51e6eeb7aba9393e25b8371e6ddb080e027c57bb85ebb8441c564f9",
+      "size_bytes": 27550
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-15-competitive-leverage/assessment.json",
+      "sha256": "7b376efef14769934be5e598c9049c33dae384a91f3bde95981442702996c88f",
+      "size_bytes": 21159
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-15-competitive-leverage/experiment-proposals.json",
+      "sha256": "3d18d4aa6fc4df6f506b0e7ae5a7f11767d585efe77d9fc580bfdae82db40773",
+      "size_bytes": 10628
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-15-comparison-readiness/readiness.json",
+      "sha256": "62953054346f2c244230cc28ba6751d7aa452bd50192ad2ce07889e41405cc79",
+      "size_bytes": 3708
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-15-bounty-source-review/review.json",
+      "sha256": "3d955bf4ea0231f3ff917359a54628e39ae0683b8a18ddda128cf6efa532a3e3",
+      "size_bytes": 5252
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-15-bounty-source-review/daybreak-access.json",
+      "sha256": "12fa2e34386cec19eae2070dd105e7335b1a1bd28a637b2c90548c710554628e",
+      "size_bytes": 3496
+    }
+  ],
+  "private_evidence_boundary": "Paths identify retained local evidence, not published downloadable artifacts. Correspondence, account details and raw third-party source remain private.",
+  "research": {
+    "status": "selected_primary_source_review_not_reproduction",
+    "additional_papers": [
+      {
+        "id": "2609.35909v3",
+        "title": "Cheap to Hypothesize, Costly to Verify",
+        "date": "2026-10-07",
+        "source": "https://arxiv.org/html/2609.35909v3",
+        "read": [
+          "3.1",
+          "5",
+          "A",
+          "E.2-E.4"
+        ],
+        "evidence": "Under matched caps on 70 instances from 33 OSS-Fuzz projects, planted safe decoys reduced confirmed crash-signature discoveries by 38.7\u201360.4%.",
+        "limits": "One run per configuration; five open-weight models; automated fuzzers forbidden; crash signatures proxy for causes; effort attribution partly model-labeled. The separate 73.8% verification estimate assigns ambiguous steps to verification.",
+        "decision": "Test bounded investigation, explicit unresolved outcomes and diversity against a simple queue. A timeout cannot become a safety claim. Include expensive benign paths AND real defects behind difficult preconditions."
+      },
+      {
+        "id": "2605.10074v1",
+        "title": "Agentic Fuzzing: Opportunities and Challenges",
+        "date": "2026-05-11",
+        "source": "https://arxiv.org/html/2605.10074v1",
+        "read": [
+          "2.3-2.5",
+          "3",
+          "5.1-5.5",
+          "5.7-7"
+        ],
+        "evidence": "AFuzz combines reference-bug reasoning, scenario deduplication and diversity scheduling. At a fixed $1,000 API budget, one-stage/high-effort found eight bugs versus three for four-stage/high-effort; at 100 seeds, four-stage found nine versus eight while costing more.",
+        "limits": "Small selected experiments, largely one model, limited repeats and substantial separate seed preprocessing. One-stage can itself invoke subagents; this is not a pure single-versus-multi-agent experiment.",
+        "decision": "Begin with a simple discovery controller and separate verification authority. Charge preprocessing and every delegated call. Add stages only if they improve confirmed yield under matched budgets."
+      },
+      {
+        "id": "2609.13004v1",
+        "title": "IntentFuzz",
+        "date": "2026-09-11",
+        "source": "https://arxiv.org/html/2609.13004v1",
+        "read": [
+          "3",
+          "4",
+          "5",
+          "6-7"
+        ],
+        "evidence": "Protocol roles, bound multi-step inputs and explicit invariants expose failures that generic pattern checks miss. The paper distinguishes local violations from delegated settlement responsibilities and documented architectural choices.",
+        "limits": "A narrow bridge corpus; 23 planted mutants; no empirical comparison to generic tools; 22 reported violation instances are not necessarily 22 distinct causes. Several fill paths remain unexercisable.",
+        "decision": "Each proposed property needs a documented responsible component, assumptions and a legitimate-use control. Treat unreachable or unbound test steps as incomplete. Transfer the methodology first to a bounded local EVM slice, not a live bridge."
+      },
+      {
+        "id": "2609.14475v1",
+        "title": "EchoFuzz",
+        "date": "2026-09-13",
+        "source": "https://arxiv.org/html/2609.14475v1",
+        "read": [
+          "4",
+          "5",
+          "6"
+        ],
+        "evidence": "LLM-selected function sequences and feedback-guided refinement improve reported coverage and detections over its selected fuzzers. Table 7 exposes larger total elapsed cost for the full hybrid than its nominal 300-second fuzzing phase.",
+        "limits": "Older models and selected older comparators; small contract scale; no current tuned Echidna comparison. Candidate sequence minimality is approximate. Dataset D3 count differs between Table 1 and the text.",
+        "decision": "Evaluate sequence planning as a separable adapter under end-to-end caps. Never compare nominal fuzzing time while excluding model planning and preprocessing. Coverage is a diagnostic, not the success endpoint."
+      },
+      {
+        "id": "2609.24550v1",
+        "title": "State-Aware Fuzzing of JavaScript Engines with LLM-Guided Instrumentation",
+        "date": "2026-09-21",
+        "source": "https://arxiv.org/html/2609.24550v1",
+        "read": [
+          "3-5",
+          "6.1",
+          "6.4",
+          "7"
+        ],
+        "evidence": "StateLens synthesizes probes offline and switches from structural to state feedback when coverage stalls. Reported component ablations show similar edge coverage can accompany different bug yields. Counted crashes are replayed without probes.",
+        "limits": "JS-engine evidence does not establish EVM gains. Probe synthesis, runtime and memory costs matter; instrumentation can perturb behavior, and testing does not prove absence.",
+        "decision": "Test security-relevant state transitions alongside branch coverage. Prefer existing EVM traces where sufficient; generated instrumentation is optional and must never define the independent verdict."
+      },
+      {
+        "id": "2609.34983v1",
+        "title": "SmartMemory",
+        "date": "2026-09-28",
+        "source": "https://arxiv.org/html/2609.34983v1",
+        "read": [
+          "I",
+          "IV",
+          "V"
+        ],
+        "evidence": "Business-semantic representations, reusable vulnerability patterns and taint analysis target on-chain/off-chain inconsistencies. The paper reports 36 manually confirmed exploitable new cases from 69 warnings across 325 applications.",
+        "limits": "The automatic analysis abstracts off-chain code into a node. Final confirmation uses experts and PoCs. Labeled evaluation uses leave-one-application-out memory; that does not establish all family-level separation or current-model contamination absence.",
+        "decision": "Model trust-boundary obligations explicitly and expose missing components. Do not equate taint reachability with independent exploit reproduction or use warning counts as confirmed-cause counts."
+      },
+      {
+        "id": "2605.17444v1",
+        "title": "MemRepair",
+        "date": "2026-05-17",
+        "source": "https://arxiv.org/html/2605.17444v1",
+        "read": [
+          "3.3-3.4",
+          "4",
+          "5.2",
+          "6.3"
+        ],
+        "evidence": "Repository fixes, security patterns and failure-to-success trajectories support iterative repair. The paper reports gains on several repair benchmarks.",
+        "limits": "PoC-guided repair differs from discovery. Cost is token-based. Exact-CVE exclusion and a CVE year/sequence temporal proxy are weaker evidence than retained publication/commit times and family separation. Stored benchmark experience needs careful isolation.",
+        "decision": "Evaluate immutable, provenance-bound experience against no memory and ordinary retrieval. Use actual dated artifacts and keep the current held-out retrieval corpus frozen; no evaluation outcomes may write back into it."
+      },
+      {
+        "id": "2609.37669v1",
+        "title": "Retrieve, Reproduce, Reveal",
+        "date": "2026-09-29",
+        "source": "https://arxiv.org/html/2609.37669v1",
+        "read": [
+          "3",
+          "4.1",
+          "4.3",
+          "5"
+        ],
+        "evidence": "Six retrieval-based detection systems are compared under a common evaluation. Oracle retrieval still leaves mean vulnerable/patched pair accuracy around 0.51 across the tested detectors.",
+        "limits": "Function-level paired data and 3B\u201332B open-weight models; model substitutions affect reproduction. CWE agreement measures alignment rather than actionable relevance. Not an upper bound on current frontier agents.",
+        "decision": "Treat retrieval accuracy, applicability and downstream verification as separate measurements. Embedding similarity alone cannot authorize reusing a result or suppressing an investigation."
+      }
+    ],
+    "competitor_descriptions": [
+      {
+        "name": "Google CodeMender",
+        "source": "https://cloud.google.com/blog/products/identity-security/find-and-fix-software-vulnerabilities-with-codemender/",
+        "document_date": "2026-07-21",
+        "observed": "Managed preview describes scanning, executable exploit validation in a customer-managed sandbox, generated tested fixes, developer approval and model choice. Third-party frontier model support is described as future.",
+        "implication": "A find-verify-fix loop, sandbox use and model routing are not sufficient differentiators.",
+        "limit": "Vendor documentation, not an independently reproduced comparative evaluation; specific model access is restricted."
+      },
+      {
+        "name": "Codex Security Cloud",
+        "source": "https://learn.chatgpt.com/docs/security/faq",
+        "document_date": null,
+        "observed": "Current documentation describes threat models, repository and commit scanning, attempted reproduction in clean ephemeral containers, validation evidence and proposed remediation. Failed validation remains unvalidated.",
+        "implication": "Evidence attachments, commit monitoring and preserving failed reproduction are already documented competitor features.",
+        "limit": "Documentation does not establish complete coverage or performance on Etzio's proposed population."
+      },
+      {
+        "name": "Anthropic OSS Scanner",
+        "source": "https://red.anthropic.com/oss-scanner/",
+        "document_date": "2026-10-13 changelog; launched 2026-10-08",
+        "observed": "Eligible opt-in OSS projects receive free periodic scans with model-generated reports that have not undergone human review. The separate CVD service uses human review.",
+        "implication": "Generic scanning faces a strong subsidized competitor. Test whether independently reproduced, concise evidence measurably reduces maintainer review burden.",
+        "limit": "Do not conflate these reports with the separately human-reviewed CVD corpus; free OSS eligibility does not cover every private enterprise use case."
+      },
+      {
+        "name": "XBOW",
+        "source": "https://docs.xbow.com/console/guidance/interpreting-results/",
+        "document_date": null,
+        "observed": "Documentation distinguishes validated and informational findings and describes exploit evidence, reproduction steps, trace logs and coverage gaps.",
+        "implication": "Objective validation and visibility into incomplete assessment are not unique to Etzio.",
+        "limit": "Its no-false-positive language is a vendor claim, not an independently established universal guarantee."
+      },
+      {
+        "name": "Certora AutoProver / AutoFuzzer",
+        "source": "https://zeus.certora.com/docs/auto-prover-user-manual",
+        "document_date": null,
+        "observed": "Solidity beta extracts intent, generates properties and CVL rules, uses the Prover, generates Foundry tests, reports formalization gaps and supports repository feedback. Rust support remains planned in the fetched manual.",
+        "implication": "LLM-generated invariants plus a prover and fuzzer are an existing specialist competitor. Include specialist comparisons before claiming EVM frontier performance.",
+        "limit": "Generated properties and proofs remain conditional on the specification and program model. Public documentation cannot establish whether a proposed Etzio feature is absent internally."
+      }
+    ],
+    "capture_limit": "Three direct public-page captures returned HTTP 403; retained web-tool extractions are not original HTTP bytes. See the private packet validation for exact coverage."
+  },
+  "comparison": {
+    "direction_selected": true,
+    "preregistered": false,
+    "executed": false,
+    "arms": [
+      "static_analysis",
+      "fuzzing",
+      "model_only",
+      "hybrid"
+    ],
+    "later_separate_ablations": [
+      "semantic_guidance",
+      "scheduling",
+      "evidence_reuse"
+    ],
+    "unbound_inputs": {
+      "accepted_profiles": null,
+      "task_manifest": null,
+      "target_contracts": null,
+      "license_and_access_review": null,
+      "execution_closure": null,
+      "model_revision_and_scaffold": null,
+      "property_and_oracle_versions": null,
+      "independent_adjudicator": null,
+      "split_manifest": null,
+      "pilot_results": null,
+      "family_count_and_power_or_precision_rationale": null,
+      "repetition_count": null,
+      "seed_and_run_order_manifest": null,
+      "numeric_budgets": null,
+      "reviewer_practical_threshold": null,
+      "uncertainty_method": null,
+      "retry_and_censoring_rule": null,
+      "reuse_corpus_manifest_and_task_horizon": null
+    },
+    "gate_order_changed": false
+  },
+  "bounty_source_review": {
+    "status": "contrary_source_evidence_not_a_finding",
+    "source_files_identity_checked": 7,
+    "hypotheses_with_contrary_evidence": 4,
+    "target_executions": 0,
+    "chain_queries": 0,
+    "submissions": 0,
+    "confirmed_findings": 0,
+    "source_commit": "dd08e12e765088470268eb0bbba13e86b14b9cb6",
+    "deployed_runtime_verified": false
+  },
+  "next_dependency": "Accountable catalog and independently administered application-monitor operating commitments plus complete native administration/custody dossier.",
+  "authority_or_mission_gates_changed": false
+}

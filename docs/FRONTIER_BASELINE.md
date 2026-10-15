@@ -1,11 +1,107 @@
 # 2026 Vulnerability-Research Frontier Baseline
 
-Original comparison snapshot: **2026-07-29**; targeted research update: **2026-10-09**.
+Original comparison snapshot: **2026-07-29**; latest targeted research review: **2026-10-15**.
 This is a design baseline, not an Etzio performance claim. The update below does not
 silently refresh every historical result in the original comparison table.
 Sources are primary project, research, program, or vendor publications where available.
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
+
+## Competitive review and experiment order, 2026-10-15
+
+Two retained October 15 packets extend the system review and examine selected methods,
+results and limitations in recent research. This is a source review, not an exhaustive
+security audit or reproduced frontier ranking. The
+[public evidence projection](evidence/documentation-handoff-2026-10-15.json) records exact
+source versions and private capture locators. It preserves direct-capture failures and
+web-extracted replacements without calling them original HTTP bytes.
+
+| Reviewed primary source | Consequence to test | Important limit |
+|---|---|---|
+| [RedHerring, v3](https://arxiv.org/html/2609.35909v3) | Bound verification effort and include hard benign cases alongside hard real defects | Its selected agents, one-run configurations and crash-signature endpoint do not evaluate the Etzio hybrid |
+| [AFuzz, v1](https://arxiv.org/html/2605.10074v1) | Compare simple and staged controllers under complete cost caps | Fixed-dollar and fixed-seed rankings differ; preprocessing and delegated calls must be charged |
+| [IntentFuzz, v1](https://arxiv.org/html/2609.13004v1) | Bind each semantic obligation to its responsible component and legitimate behavior | A narrow bridge/mutant study does not establish general EVM advantage |
+| [EchoFuzz, v1](https://arxiv.org/html/2609.14475v1) | Isolate sequence planning from the underlying fuzzer | Nominal fuzzing time omits planning cost; selected older comparators do not establish current performance |
+| [StateLens, v1](https://arxiv.org/html/2609.24550v1) | Test state feedback beyond edge coverage and replay effects without instrumentation | JavaScript-engine results do not establish EVM transfer |
+| [SmartMemory, v1](https://arxiv.org/html/2609.34983v1) | Represent cross-component obligations and missing dependencies explicitly | Off-chain abstraction and expert confirmation remain material parts of the method |
+| [MemRepair, v1](https://arxiv.org/html/2605.17444v1) | Compare provenance-bound experience with ordinary retrieval and no retrieval | PoC-guided repair differs from discovery; exact-CVE exclusion is insufficient family separation |
+| [Retrieve, Reproduce, Reveal, v1](https://arxiv.org/html/2609.37669v1) | Measure retrieval relevance, applicability and downstream verdict separately | Selected function-level models and datasets do not bound frontier-agent performance |
+
+Current official descriptions already include overlapping capabilities:
+[Google CodeMender](https://cloud.google.com/blog/products/identity-security/find-and-fix-software-vulnerabilities-with-codemender/)
+describes validation and remediation;
+[Codex Security](https://learn.chatgpt.com/docs/security/faq) describes threat models,
+reproduction evidence and proposed fixes;
+[Anthropic OSS Scanner](https://red.anthropic.com/oss-scanner/) describes automated OSS
+reports, distinct from its human-reviewed CVD service;
+[XBOW](https://docs.xbow.com/console/guidance/interpreting-results/) describes validation,
+reproduction and coverage gaps; and
+[Certora AutoProver](https://zeus.certora.com/docs/auto-prover-user-manual) combines generated
+properties with proof and fuzzing workflows. These are vendor descriptions, not reproduced
+comparators. Generic orchestration, attached evidence or generated invariants alone cannot
+establish Etzio differentiation.
+
+The proposed advantage is higher independently confirmed cause yield per complete cost,
+with fewer invalid reports and less reviewer work. Semantic guidance, bounded scheduling
+and applicability-checked evidence reuse are hypotheses. None has earned promotion.
+
+### Controlled comparison and separate ablations
+
+The operator selected the experiment order while preserving all foundation gates. The
+protocol is still **proposed, not preregistered or run**. Required order: native integrity,
+external recovery/fencing, protected storage, independent isolated execution, and admitted
+benchmark/target contracts before the comparison.
+
+| Arm | Frozen treatment to compare |
+|---|---|
+| S: static analysis | Pinned Slither and its qualified build/analysis closure |
+| F: fuzzing | Pinned Echidna with verified successful Slither preprocessing and a strong configuration selected on a disjoint pilot |
+| M: model only | Fixed model/scaffold and the same permitted information, without S/F tools |
+| H: hybrid | The same model plus the pilot-selected S/F tool configuration |
+
+Choose the primary non-hybrid comparator on the disjoint pilot and report every arm.
+Use paired target/root-cause families; related revisions and near-duplicates remain in
+one split, and repeated seeds are not independent families. The primary endpoint is unique
+independently confirmed causes per assigned task under common currency, CPU, wall-time,
+memory and reviewer caps. Charge builds, setup, property construction, preprocessing,
+model/tool calls, failed investigations, minimization, verification and adjudication.
+Retain unsupported, blocked, invalid, inconclusive and not-reproduced cases explicitly.
+
+The read-only tool audit pinned Slither `eef5df948b8992eff85786b6b0bb4a193933e2c9` and
+Echidna `5adfc83986e64fa95cfa2475ce65eefcf7c1a290`. These are documentary inputs, not qualified
+builds. Missing Slither output must not become a successful empty analysis, supervisor
+time caps must preserve truncation, and RPC/environment defaults are not network isolation.
+
+This is the proposed experimental dependency graph, not a result or execution trace:
+
+```mermaid
+flowchart TB
+    G["Foundation + isolation + exact-target gates closed"]
+    P["Disjoint pilot<br/>bind all registration inputs"]
+    C["Freeze and run S / F / M / H<br/>same information · complete cost · independent verifier"]
+    H["Freeze the hybrid baseline"]
+    S["Semantic guidance experiment<br/>same H with / without guidance"]
+    Q["Scheduling experiment<br/>fixed candidate stream first<br/>end-to-end effects separately"]
+    R["Evidence-reuse experiment<br/>none / ordinary retrieval / checked reuse<br/>frozen corpus outside held-out families"]
+    G --> P --> C --> H
+    H --> S
+    H --> Q
+    H --> R
+```
+
+The three branches isolate interventions; they do not prescribe simultaneous execution
+or combine their gains. No held-out outcome may write back into the reuse corpus. Reject
+an apparent improvement if complete cost, independent cause adjudication or legitimate-use
+controls erase it. A later commercial comparison must also include accessible specialist
+and frontier services under matched information and costs; S/F/M/H alone cannot establish
+market leadership.
+
+All `18` registration inputs remain unbound: accepted profiles; task manifest; target
+contracts; license/access review; execution closure; model revision/scaffold;
+properties/oracles; independent adjudicator; split manifest; pilot results;
+family-count/precision rationale; repetition count; seed/run order; numerical budgets;
+practical-effect threshold; uncertainty method; retry/censoring rule; and reuse
+corpus/horizon. Selecting the direction supplies none of these missing measurements.
 
 ## Mission and provider-feasibility review, 2026-10-12
 
@@ -122,8 +218,8 @@ map each remaining claim to its smallest falsifying experiment. Repository fixtu
 exercise protocol failures; they cannot supply missing external administration evidence.
 
 After those gates, keep the EVM/Solidity first domain and compare a simple static-analysis
-baseline, a model-only baseline, and a hybrid analysis/search system on the same admitted
-tasks and budgets. Include clean, patched and near-miss targets. The independent verifier
+baseline, a fuzzing baseline, a model-only baseline, and a hybrid analysis/search system on
+the same admitted tasks and budgets. Include clean, patched and near-miss targets. The independent verifier
 must receive the retained target and candidate bytes, and the generator must not control
 the success oracle. Add a new language or target category only with its own oracles,
 negative controls and measured transfer results.

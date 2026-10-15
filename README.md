@@ -35,19 +35,71 @@ confidence.**
 > through the complete lifecycle and reconstructs them from retained bytes on cold replay.
 > Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
-> Resolve the current collection target and exact candidate's completed validation from
-> the [handoff](docs/SESSION_HANDOFF.md) and its release record. Collection is not a passing
-> result. The historical [recovery release](https://github.com/manfromnowhere143/etzio/pull/49)
-> passed `2521` tests, including `18` interruption-cleanup and `17` coherent-read controls.
+> The latest engine release, [PR 57](https://github.com/manfromnowhere143/etzio/pull/57)
+> at `285fdb6`, passed `2617` tests on both declared Python runtimes locally and in exact-head
+> Linux CI. This includes the protocol validation optimization; it measures fixture
+> behavior, not vulnerability-discovery quality. The [handoff](docs/SESSION_HANDOFF.md)
+> identifies the latest documentation validation separately.
 > The [decision index](docs/decisions/README.md) contains `24` architecture decisions
 > defining the contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
 > [Open gates and next mission](#open-gates-and-next-mission).
 
-The [2026-10-12 mission assessment](docs/MISSION_REVIEW_2026-10-12.md) reviews the
-implemented boundary, fresh research, provider feasibility and conditional paid routes.
-Competitive discovery, independent external reproduction and income remain undemonstrated.
+The [October 15 frontier review](docs/FRONTIER_BASELINE.md#competitive-review-and-experiment-order-2026-10-15)
+connects current research to a controlled comparison and separate feature experiments.
+The [October 12 mission assessment](docs/MISSION_REVIEW_2026-10-12.md) retains the
+provider-feasibility decision. Competitive discovery, independent external reproduction
+and income remain undemonstrated.
+
+## Progress through 2026-10-15
+
+| Workstream | Retained progress | Remaining boundary |
+|---|---|---|
+| Governed fixture kernel | Signed admission, immutable inputs, candidate and lease lineages, transactional evidence vault, deterministic replay and schema-v4 qualified fixture enrollment | Six Python rule classes and two owned scan fixtures; no independently verified security effect |
+| Integrity and recovery | Four immutable finality phases, authenticated signed-fixture packages, governed retry/seal decisions and interruption controls | Actual independent provider administration and external latest-head recovery are unqualified |
+| Native evidence preparation | Offline timestamp/CRL validation, conditional elapsed-time bounds, trusted-list and checkpoint inspection, source-provenance reconciliation | Documentary and offline observations do not admit a live provider; both FreeTSA acquisition attempts are spent |
+| Host preparation | Bounded Google Cloud KVM preflight completed and disposable resources cleaned up | No accepted worker isolation, protected storage or power-fault profile |
+| Repository reliability | Cleanup and coherent-read repairs, honest unresolved-result accounting, owned-document checks and equivalent ASCII validation | `2617` passing engine-release tests establish repository behavior only |
+| Research and comparison | Two October 15 primary-source review packets; four-arm comparison and separate semantic-guidance, scheduling and evidence-reuse designs retained | Experiment order selected; `18` registration inputs remain unbound; no comparator has run |
+| Bounty preparation | CoW source/deployment-record reconciliation and a finite source review with contrary evidence against four suspected weaknesses | Exact deployed state, scope, independent reproduction and program eligibility remain unresolved; no confirmed finding or payment |
+| Operating dependencies | Three approved pilot follow-ups sent; six existing threads checked on October 15 | No human reply or catalog/monitor operating commitment in that readback |
+
+The [progress evidence record](docs/evidence/documentation-handoff-2026-10-15.json)
+links these claims to their retained records. Private source captures, correspondence and
+recovery copies are excluded from the published repository; their paths are continuity
+locators, not downloadable evidence in a fresh clone. Model-access onboarding is separate
+from provider admission, target permission and execution qualification.
+
+This progress map shows the accepted dependency order, not an operating pipeline. Solid
+edges connect the implemented fixture foundation; dashed edges require new acceptance
+evidence. Preparation is complete only for its named, bounded scope.
+
+```mermaid
+flowchart TB
+    K["IMPLEMENTED ON FIXTURES<br/>authority · candidates · evidence vault"]
+    F["IMPLEMENTED ON FIXTURES<br/>signed qualification · finality · recovery"]
+    P["PREPARATION RETAINED<br/>native-format inspection · KVM preflight<br/>research · source review · operator inquiries"]
+    N["BLOCKED: native integrity roster<br/>independent operating commitments missing"]
+    R["BLOCKED: external latest-head recovery<br/>effective writer fencing"]
+    S["BLOCKED: protected storage<br/>device · quotas · backup · fault recovery"]
+    X["BLOCKED: independent execution<br/>MARCELLUS / CATO · admitted isolation"]
+    B["PROPOSED: admitted EVM benchmark<br/>exact targets · frozen comparison protocol"]
+    E["NOT RUN: static / fuzzing / model / hybrid"]
+    A["PROPOSED: separate feature experiments<br/>semantic guidance · scheduling · evidence reuse"]
+    U["FUTURE: authorized bounty lane<br/>independent findings · accepted outcomes"]
+    K --> F
+    F -.-> N
+    P -. "preparation is not admission" .-> N
+    N -.-> R -.-> S -.-> X -.-> B -.-> E -.-> U
+    E -.-> A
+    classDef done fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
+    classDef prep fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
+    classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#3b0a0a;
+    class K,F done;
+    class P,B,E,A,U prep;
+    class N,R,S,X blocked;
+```
 
 ## The system in one view
 
@@ -289,12 +341,13 @@ flowchart TB
         DBM[("SQLite schema v4 · fixture-integrity profile<br/>permanent after enrollment")]
     end
 
-    subgraph QUAL["Implemented signed-fixture adapter qualification"]
+    subgraph QUAL["Signed-fixture qualification"]
         direction LR
         AP["Exact adapter profile<br/>trust root · validation/provider policies<br/>fixed all-source roster"]
         SP["Role-separated signed fixture packages<br/>Ed25519 · exact nonce-bound requests<br/>authenticate before claim parsing"]
         TH["All-source time qualification<br/>common overlap · conservative outer hull"]
         RF["Full-hull revocation qualification<br/>validity · staleness · metadata/floors"]
+        HH["Head-authority qualification<br/>RFC 9162 inclusion + consistency<br/>unanimous catalog monitors"]
         SM["Sealed provider-neutral mapping<br/>fresh reauthentication · exact BLOB coverage<br/>qualified lifecycle input"]
     end
 
@@ -311,8 +364,12 @@ flowchart TB
     AP --> SP
     SP --> TH
     SP --> RF
+    SP --> HH
+    TH -->|"complete time hull"| RF
+    TH -->|"complete time hull"| HH
     TH --> SM
     RF --> SM
+    HH --> SM
     SM -->|"qualified enrollment only"| IF
 
     classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
@@ -320,7 +377,7 @@ flowchart TB
     classDef qualification fill:#fff3bf,stroke:#e67700,color:#3d2100;
     class AQ,K,S,DBL,V,KC,C,VR implemented;
     class IF,DBM fixture;
-    class AP,SP,TH,RF,SM qualification;
+    class AP,SP,TH,RF,HH,SM qualification;
     style AUTH fill:#f8f9fa,stroke:#adb5bd,color:#212529
     style SCAN fill:#f8f9fa,stroke:#adb5bd,color:#212529
     style OPTIONAL fill:#f8f9fa,stroke:#adb5bd,color:#212529
@@ -334,77 +391,48 @@ and prove external authority at each trust, write and read boundary:
 
 ```mermaid
 flowchart TB
-    E["Proposed EventV1<br/>exact prior global + mission heads<br/>enrolled profile authority"]
-    D["Signed IntegrityDecisionV1<br/>typed time + revocation evidence<br/>prior head-floor evidence"]
-    P1["1 · Pending event<br/>transaction: event + dossier<br/>+ protected BLOBs/mappings when required"]
-    RH["Process-local prime_catalog rehydration<br/>nondurable · not a protocol write"]
-    P2["2 · Anchor statement<br/>retain exact request<br/>then modeled registration"]
-    P3["3 · Checkpoint candidate<br/>retain exact signed head<br/>then modeled publication"]
-    P4["4 · Finalization<br/>retain exact current global + mission floor"]
-    OK["Facade returns<br/>modeled command success"]
-    FX["Legacy modeled-finality fixtures<br/>unsigned code-derived assertions<br/>not external authority"]
-
-    subgraph QUAL2["Networkless time/revocation qualification · consumed by qualified mode"]
-        direction LR
-        QP["Exact profile · trust root · policies<br/>fixed signed-fixture roster"]
-        QT["All-source common overlap<br/>conservative time outer hull"]
-        QR["Full-hull revocation validity/freshness<br/>metadata + all floor sources agree"]
-        QM["Freshly reauthenticated sealed mapping<br/>exact signed-BLOB coverage"]
-        QN["Qualified pending and anchor time<br/>reconstruct exact requests<br/>authenticate retained signed bytes"]
-    end
-
-    subgraph QUAL3["Networkless head-authority qualification · consumed by qualified mode"]
-        direction LR
-        HP["Exact profile · trust root · log origins<br/>2 anchors · 1 catalog · 2 monitors"]
-        HA["Byte-bound registration leaf<br/>RFC 9162 inclusion proof recomputed"]
-        HC["RFC 9162 consistency from retained root<br/>equal size cannot change root"]
-        HM["Unanimous monitor agreement<br/>split view refused"]
-        HN["Qualified anchor and catalog evidence<br/>exact append and head projection<br/>cold reconstruction under enrolled roots"]
-    end
-
-    subgraph BLOCKED["Implemented governed blocked finality · schema v3 · opt-in"]
-        direction LR
-        BO["Durable observation<br/>retained outside every blocked classifier"]
-        BG["Authorized-retry gate<br/>time and repetition are not authority"]
-        BS["Terminal seal<br/>refuses load · recover · append"]
-        BB["Barrier untouched<br/>retaining a block never releases finality"]
-    end
-
-    NEXT["Next authority gate<br/>provider-native qualification<br/>independent administration evidence"]
-    EXT["Future full adapter set<br/>independently administered, authenticated,<br/>durable, monitored, and qualified"]
-
+    E["Proposed event<br/>exact prior global + mission heads"]
+    D["Signed integrity decision<br/>enrolled profile · authenticated dossier"]
+    P1["1 · Pending event<br/>atomic event + dossier + required evidence"]
+    RH["Process-local catalog rehydration<br/>not durable · not a protocol write"]
+    P2["2 · Retained anchor statement<br/>then byte-identical registration retry"]
+    P3["3 · Retained signed checkpoint candidate<br/>then byte-identical publication retry"]
+    P4["4 · Retained finalization<br/>exact current global + mission floor"]
+    OK["Fixture facade returns success<br/>no execution or finding claim"]
+    B["One database-global barrier<br/>blocks later appends and generic replay<br/>from phase 1 until verified phase 4"]
     E --> D --> P1 --> RH --> P2 --> P3 --> P4 --> OK
-    FX --> D
-    FX --> RH
-    FX --> P2
-    FX --> P3
-    FX --> P4
-    QP --> QT
-    QP --> QR
-    QT --> QM
-    QR --> QM
-    QM --> QN
-    QN --> D
-    QN --> P2
-    HP --> HA --> HC --> HM --> HN
-    HN --> D
-    HN --> P3
-    HN --> P4
-    HN -. "external authority remains blocked" .-> NEXT
-    NEXT -. "later provider qualification" .-> EXT
-    EXT -. "future replacement<br/>at trust, write, and read boundaries" .-> D
-    EXT -.-> P2
-    EXT -.-> P3
-    EXT -.-> P4
-
+    P1 -. "establishes" .-> B
+    P4 -. "only verified completion releases" .-> B
     classDef retained fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
     classDef boundary fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
-    classDef qualification fill:#fff3bf,stroke:#e67700,color:#3d2100;
-    classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#3b0a0a;
     class E,D,P1,P2,P3,P4,OK retained;
-    class FX,RH boundary;
-    class QP,QT,QR,QM,QN qualification;
-    class NEXT,EXT blocked;
+    class RH,B boundary;
+```
+
+The following companion diagram shows the implemented opt-in recovery contract within
+the fixture lifecycle. Its relations were introduced in schema v3 and remain in the
+current schema-v4 store. Neither a recovery decision nor elapsed time releases finality.
+
+```mermaid
+flowchart TB
+    PH["Exact highest retained phase<br/>pending · anchor · checkpoint candidate"]
+    REF["Deterministic finality refusal"]
+    OBS["Durable blocked observation<br/>phase · operation · reason · attempt ordinal"]
+    DEC["Signed governed decision<br/>different key AND principal<br/>bound to the latest observation"]
+    RETRY["Authorized retry<br/>resume the exact retained phase"]
+    SEAL["Terminal instance seal<br/>load / recover / append refuse<br/>retained bytes remain readable"]
+    BAR["Unresolved-transition barrier remains<br/>only normal verified finalization releases it"]
+    PH --> REF --> OBS --> DEC
+    DEC -->|"retry disposition"| RETRY
+    RETRY --> PH
+    DEC -->|"seal disposition"| SEAL
+    OBS -.-> BAR
+    RETRY -.-> BAR
+    SEAL -.-> BAR
+    classDef retained fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
+    classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#3b0a0a;
+    class PH,OBS,DEC,RETRY retained;
+    class REF,SEAL,BAR blocked;
 ```
 
 From phase 1 until phase 4, one unresolved transition blocks later appends and generic raw
@@ -446,6 +474,7 @@ repository-owned deterministic fixtures.
 
 | Retained | Value |
 |---|---|
+| Latest engine release, `285fdb6` ([PR 57](https://github.com/manfromnowhere143/etzio/pull/57)) | `2617` passing tests per runtime locally and in exact-head Linux CI on CPython 3.11.15 and 3.14.2 |
 | Historical published-material full-suite release | `1794` passing tests on CPython 3.11.15 and 3.14.2 in Linux CI; retains that release's scope |
 | Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
 | SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` `4` |
@@ -513,6 +542,12 @@ four-phase lifecycle with signed provider packages, exact profile alignment and
 reconstruction from retained bytes. Release
 validation of this tranche is recorded in the handoff; these are still repository fixtures.
 
+The immediate dependency is an accountable catalog operator, independent application
+monitors and the complete native administration/custody dossier. Existing inquiries and
+follow-ups are already sent. Additional fixture parsers, cloud credits or model-access
+approval cannot supply those commitments. See the
+[operating decision](docs/CATALOG_RECOVERY_DECISION.md).
+
 What remains before a finding pipeline can exist:
 
 1. qualify independently administered trusted-time, revocation, anchor, catalog, and monitor
@@ -529,6 +564,14 @@ benchmark, and exact-`TargetContract` gates close may a strictly authorized boun
 lane run in parallel with continued engine development. Accepted outcomes and income are
 measurements, never authority. Autonomy over a live target expands after one full chain of
 custody survives independent reproduction, isolation, and adjudication — not before.
+
+After qualification, the first decisive discovery evidence is the selected
+**static-analysis / fuzzing / model-only / hybrid comparison**, under matched information
+and complete cost accounting. Freeze the baseline before testing semantic guidance,
+scheduling and evidence reuse separately. Exact targets, profiles, numerical budgets and
+the other registration inputs still need to be bound. This order is an accepted direction,
+not a completed preregistration or a comparative result. See the
+[experiment contract](docs/FRONTIER_BASELINE.md#controlled-comparison-and-separate-ablations).
 
 ## Project record
 
