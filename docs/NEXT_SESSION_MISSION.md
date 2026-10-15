@@ -5,6 +5,17 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
+## Current continuation, 2026-10-15
+
+Start with the October 15 section of [SESSION_HANDOFF](SESSION_HANDOFF.md) and the
+[repository-continuity evidence](evidence/repository-continuity-2026-10-15.json).
+It records the owned-document validation correction, current collection target, release
+evidence pointer and live provider-thread check. The system review is retained at
+`artifacts/checkpoints/latest-system-review.json`. Its possible sequencing change remains
+a proposal. Actual operating commitments and the complete native dossier remain the next
+integration dependency; the accepted gate order is unchanged. Older pending-dispatch and
+pending-FreeTSA wording below is historical and must not restart spent actions.
+
 ## Operating pilot requests sent, 2026-10-14
 
 The [three approved follow-ups](evidence/operator-pilot-followups-2026-10-14.json) are sent

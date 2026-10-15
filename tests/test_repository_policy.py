@@ -48,6 +48,110 @@ def test_mutable_action_tag_is_rejected():
     assert "not pinned" in issues[0]
 
 
+@pytest.fixture
+def markdown_repository(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    (tmp_path / ".gitignore").write_text("artifacts/\n", encoding="utf-8")
+    monkeypatch.setattr(repository_policy, "ROOT", tmp_path)
+    return tmp_path
+
+
+def test_markdown_links_preserve_and_skip_ignored_capture(markdown_repository: Path) -> None:
+    root = markdown_repository
+    (root / "artifacts").mkdir()
+    capture = root / "artifacts" / "upstream.md"
+    original = b"[upstream relative link](absent.md)\n\xff"
+    capture.write_bytes(original)
+    (root / "README.md").write_text("[guide](guide.md)\n", encoding="utf-8")
+    (root / "guide.md").write_text("Owned guide.\n", encoding="utf-8")
+
+    assert repository_policy._markdown_link_issues() == []
+    assert capture.read_bytes() == original
+
+
+@pytest.mark.parametrize("tracked", [False, True])
+def test_markdown_links_reject_broken_owned_document(
+    markdown_repository: Path,
+    tracked: bool,
+) -> None:
+    root = markdown_repository
+    name = "guide with space\nand newline.md"
+    (root / name).write_text("[missing](absent.md)\n", encoding="utf-8")
+    if tracked:
+        subprocess.run(["git", "add", "--", name], cwd=root, check=True)
+
+    assert repository_policy._markdown_link_issues() == [
+        f"{name}: missing linked path: absent.md"
+    ]
+
+
+def test_markdown_links_reject_broken_force_tracked_capture(markdown_repository: Path) -> None:
+    root = markdown_repository
+    (root / "artifacts").mkdir()
+    (root / "artifacts" / "capture.md").write_text("[missing](absent.md)\n", encoding="utf-8")
+    subprocess.run(["git", "add", "-f", "artifacts/capture.md"], cwd=root, check=True)
+
+    assert repository_policy._markdown_link_issues() == [
+        "artifacts/capture.md: missing linked path: absent.md"
+    ]
+
+
+def test_markdown_links_cover_hidden_owned_document(markdown_repository: Path) -> None:
+    root = markdown_repository
+    (root / ".owned").mkdir()
+    (root / ".owned" / "guide.md").write_text("[missing](absent.md)\n", encoding="utf-8")
+    subprocess.run(["git", "add", ".owned/guide.md"], cwd=root, check=True)
+
+    assert repository_policy._markdown_link_issues() == [
+        ".owned/guide.md: missing linked path: absent.md"
+    ]
+
+
+@pytest.mark.parametrize("exclusion", ["local", "global"])
+def test_markdown_links_cannot_be_hidden_by_local_git_configuration(
+    markdown_repository: Path,
+    exclusion: str,
+) -> None:
+    root = markdown_repository
+    (root / "guide.md").write_text("[missing](absent.md)\n", encoding="utf-8")
+    if exclusion == "local":
+        (root / ".git" / "info" / "exclude").write_text("guide.md\n", encoding="utf-8")
+    else:
+        ignore_file = root / "local-ignore"
+        ignore_file.write_text("guide.md\n", encoding="utf-8")
+        subprocess.run(
+            ["git", "config", "core.excludesFile", str(ignore_file)], cwd=root, check=True
+        )
+
+    assert repository_policy._markdown_link_issues() == [
+        "guide.md: missing linked path: absent.md"
+    ]
+
+
+def test_markdown_links_report_unstaged_document_removal(markdown_repository: Path) -> None:
+    root = markdown_repository
+    document = root / "guide.md"
+    document.write_text("Owned guide.\n", encoding="utf-8")
+    subprocess.run(["git", "add", "guide.md"], cwd=root, check=True)
+    document.unlink()
+
+    assert repository_policy._markdown_link_issues() == [
+        "guide.md: missing tracked Markdown file"
+    ]
+    subprocess.run(["git", "rm", "--cached", "--", "guide.md"], cwd=root, check=True)
+    assert repository_policy._markdown_link_issues() == []
+
+
+def test_markdown_links_refuse_failed_git_enumeration(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(repository_policy, "ROOT", tmp_path)
+
+    with pytest.raises(subprocess.CalledProcessError):
+        repository_policy._markdown_link_issues()
+
+
 def test_missing_required_schema_is_rejected(tmp_path: Path):
     required = ("etzio/schemas/protocol.v1.schema.json",)
     assert required_path_issues(tmp_path, required) == [

@@ -21,7 +21,7 @@ resolution, BLOBs, and role mappings atomically. It can also authenticate one mo
 receipt that signs the resolution and four typed output digest/size pairs, retain those
 exact output BLOBs with the complete decision evidence, and consume the lease in the same
 event append. Canonical lease lineages now retain explicit expiry, modeled cancellation,
-atomic reassignment, and exact terminal receipt coverage. An empty-history-only schema-v2
+atomic reassignment, and exact terminal receipt coverage. An empty-history-only
 profile can additionally commit every event with a signed decision dossier and recover a
 byte-exact anchor statement, signed checkpoint candidate, and exact-current global and
 mission floor before the modeled facade returns. This is meaningful foundation progress,
@@ -128,7 +128,7 @@ The explicit fixture-only path may optionally be attached to the deterministic f
 qualification surface:
 
 ```text
-completely empty schema-v2 store
+completely empty schema-v4 store
   → irreversible modeled_integrity_fixture_v1 enrollment
   → ModeledIntegrityFinalizingEventStoreV1 facade
   → every event traverses the four-phase modeled-finality state machine
@@ -421,9 +421,12 @@ receipt-output paths use these batches. The selected-response ceiling does not b
 additional integrity I/O needed to validate complete required histories.
 
 The strict schema has Etzio `application_id = 0x45545A31` (ASCII `ETZ1`) and
-`user_version = 2`. Empty new databases are initialized transactionally. An exact
-version-1 transactional vault is migrated atomically to the version-2 layout under a
-permanent legacy profile, preserving its history without assigning integrity finality.
+`user_version = 4`. Empty new databases are initialized transactionally. Exact supported
+older layouts migrate forward through versions 2, 3 and 4. The version-1-to-version-2
+step assigns a permanent legacy profile, preserving history without assigning integrity
+finality; version 3 adds governed recovery relations and version 4 adds the qualified
+acceptance profile. These migrations do not invent native authority or backfill a
+qualified enrollment.
 Only a completely empty profile can irreversibly enroll in modeled integrity. Unknown,
 malformed, or nonempty pre-vault state is still refused without promotion; importing that
 older event-only state requires a separately implemented stop-the-world migration that

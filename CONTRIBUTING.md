@@ -1,7 +1,8 @@
 # Contributing to Etzio
 
-Etzio is currently a private, owner-maintained research repository. External contributions
-are not accepted during the foundation phase.
+Etzio is an owner-maintained research repository with public source visibility under
+[LICENSE.md](LICENSE.md). External contributions are not accepted during the foundation
+phase.
 
 ## Engineering flow
 
@@ -34,6 +35,20 @@ Daniel rather than committed by automation.
   diagnostic evidence.
 - Workflow YAML does not use anchors, aliases, or merge keys; repository policy rejects
   syntax that its dependency-free checker cannot resolve safely.
+
+## Documentation validation
+
+The relative-link check covers every tracked Markdown file and new, untracked Markdown
+files not excluded by repository `.gitignore` rules. Tracked files remain covered even
+when an ignore rule matches them. Local Git excludes and global ignore configuration do
+not change this surface. Git enumeration failure refuses validation; it never becomes
+an empty successful scan. Missing tracked documents are reported until their removal is
+staged.
+
+Ignored research captures, environments and generated artifacts are outside this link
+check. Preserve their original bytes and relative links; source-capture manifests govern
+their integrity separately. This scope does not permit ignored runtime evidence in Git
+or weaken the existing tracked-artifact policy.
 
 ## Security research constraints
 

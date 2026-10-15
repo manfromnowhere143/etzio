@@ -1,6 +1,6 @@
 # Etzio Roadmap
 
-Status: **architecture foundation**, updated 2026-07-29.
+Status: **foundation integrity**, current-state reconciliation 2026-10-15.
 
 The roadmap advances by retained evidence, not calendar dates. A phase may start only when
 its predecessor’s named acceptance conditions are reproduced.
@@ -9,7 +9,7 @@ its predecessor’s named acceptance conditions are reproduced.
 
 Status: **implemented**.
 
-Evidence in the private repository:
+Repository evidence:
 
 - sole-author provenance policy;
 - exact CPython patch matrix and hash-locked dependencies;
@@ -17,13 +17,13 @@ Evidence in the private repository:
   source ID in retained verification output;
 - least-privilege GitHub Actions pinned to immutable commit SHAs;
 - repository-policy known-bads and retained CI logs;
-- private remote, charter, security policy, architecture, frontier baseline, handoff, and
+- canonical remote, charter, security policy, architecture, frontier baseline, handoff, and
   machine-readable mission state.
 
-Operational limitation: GitHub branch protection and repository rulesets were unavailable
-for this private repository on the current account plan when checked on 2026-07-27. CI and
-review discipline therefore remain procedural controls; public visibility is not an
-acceptable workaround.
+Historical hosting check: branch protection and rulesets were unavailable under the
+private-repository account plan on 2026-07-27. That observation is not a current hosting
+assessment. Public source visibility was separately authorized on 2026-08-01; it neither
+changes the license nor establishes branch protection. CI and review requirements remain.
 
 ## Phase 1 — foundation integrity
 
@@ -63,9 +63,9 @@ Implemented in this phase:
 - fail-closed authentication of the exact journal, synchronization, foreign-key,
   trusted-schema, CHECK-enforcement, read-isolation, and writable-schema settings on
   cached replay and every writer boundary;
-- exact SQLite `application_id = 0x45545A31` (ASCII `ETZ1`) and `user_version = 2`,
+- exact SQLite `application_id = 0x45545A31` (ASCII `ETZ1`) and `user_version = 4`,
   strict append-only evidence, event-role, integrity-phase, and integrity-evidence tables,
-  full schema-shape validation, an exact version-1-to-version-2 legacy-layout migration,
+  full schema-shape validation, exact forward migrations through versions 2, 3 and 4,
   and explicit refusal to promote any nonempty legacy history into integrity finality;
 - one canonical evidence vault transaction that derives artifact manifests in code and
   commits exact immutable BLOBs, complete role mappings, and the event together for

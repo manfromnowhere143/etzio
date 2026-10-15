@@ -5,7 +5,7 @@ finding only when a separately authorized verifier reproduces a material effect 
 retained bytes and the kernel accepts the receipt — proof by reproduction, not by
 confidence.**
 
-> **Honest status — 2026-10-12. Phase: foundation integrity. This is the courtroom, not
+> **Honest status — 2026-10-15. Phase: foundation integrity. This is the courtroom, not
 > yet the detective.**
 >
 > Etzio has built a tested evidence and adjudication kernel. It has *not* built
@@ -35,11 +35,12 @@ confidence.**
 > through the complete lifecycle and reconstructs them from retained bytes on cold replay.
 > Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
-> The [published recovery release](https://github.com/manfromnowhere143/etzio/pull/49)
-> passes `2521` tests on both declared Python runtimes locally and in Linux CI, including
-> `18` interruption-cleanup and `17` coherent-read controls. Exact release evidence is
-> recorded in the [handoff](docs/SESSION_HANDOFF.md). `24` architecture decision records define the
-> contracts and their refusal cases.
+> Resolve the current collection target and exact candidate's completed validation from
+> the [handoff](docs/SESSION_HANDOFF.md) and its release record. Collection is not a passing
+> result. The historical [recovery release](https://github.com/manfromnowhere143/etzio/pull/49)
+> passed `2521` tests, including `18` interruption-cleanup and `17` coherent-read controls.
+> The [decision index](docs/decisions/README.md) contains `24` architecture decisions
+> defining the contracts and their refusal cases.
 >
 > Winning bounties is a future measured outcome, never present authority. See
 > [Open gates and next mission](#open-gates-and-next-mission).
@@ -147,7 +148,7 @@ manifest fixture → content-addressed target snapshot
   → byte-bound Python AST observations
   → stable candidate envelopes
   → deterministic replay from append-only lifecycle-validated events
-  → SQLite schema-v2 legacy profile → mission_closed
+  → SQLite schema-v4 store with legacy profile → mission_closed
 ```
 
 This supported CLI path has no integrity-finality lineage.
@@ -438,16 +439,17 @@ toy findings and verifier labels are not security evidence.
 
 ## Retained evidence
 
-Every number below is reproduced by the canonical release command on both declared
-runtimes and by GitHub Actions on the exact recorded commit. Pending work is identified
-explicitly. None of it is a capability claim: the entire suite runs against repository-owned deterministic fixtures.
+Release-specific numbers below retain their historical scope. The current collection
+target and completed local/CI validation are recorded separately in the
+[handoff](docs/SESSION_HANDOFF.md). None is a capability claim: the suite runs against
+repository-owned deterministic fixtures.
 
 | Retained | Value |
 |---|---|
-| Published-material full-suite release | `1794` passing tests on CPython 3.11.15 and 3.14.2 in Linux CI; elapsed-time release evidence is in the handoff |
+| Historical published-material full-suite release | `1794` passing tests on CPython 3.11.15 and 3.14.2 in Linux CI; retains that release's scope |
 | Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
 | SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` `4` |
-| Accepted decisions | `22` architecture decision records, each with a known-bad where it names a gate |
+| Accepted decisions | `24` architecture decision records, each with a known-bad where it names a gate |
 | Merkle core | reproduces the published RFC 6962/9162 reference tree for sizes `0`–`8`, and all `36` reference inclusion plus `36` reference consistency proofs |
 | Qualified-evidence acceptance | `47` known-bads across the anchor, revocation, and head-floor phases; unsigned content is refused in signed mode |
 | Governed fixture scans | vulnerable fixture closes with `7` candidates, clean fixture with `0`, neither mints a finding |

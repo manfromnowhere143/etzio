@@ -1784,8 +1784,20 @@ def _schema_issues() -> list[str]:
 
 def _markdown_link_issues() -> list[str]:
     issues: list[str] = []
-    for path in sorted(ROOT.rglob("*.md")):
-        if any(part.startswith(".") and part != ".github" for part in path.relative_to(ROOT).parts):
+    # Keep captures and generated files outside the owned documentation surface.
+    # Tracked files always participate; only repository ignore rules filter new files.
+    # Local/global Git excludes must not silently hide a new owned document.
+    listed = subprocess.check_output(
+        [
+            "git", "ls-files", "--cached", "--others",
+            "--exclude-per-directory=.gitignore", "-z", "--", "*.md",
+        ],
+        cwd=ROOT,
+    )
+    for relative in sorted({os.fsdecode(name) for name in listed.split(b"\0") if name}):
+        path = ROOT / relative
+        if not path.is_file():
+            issues.append(f"{relative}: missing tracked Markdown file")
             continue
         text = path.read_text(encoding="utf-8")
         for raw_target in MARKDOWN_LINK.findall(text):

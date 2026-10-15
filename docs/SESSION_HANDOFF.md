@@ -1,6 +1,41 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-14, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-15, Asia/Jerusalem.
+
+## Current pickup, 2026-10-15
+
+The [repository-continuity correction](evidence/repository-continuity-2026-10-15.json)
+repairs the canonical validation failure caused by ignored upstream Markdown captures.
+The link check now covers tracked and new owned documents under the
+[documentation contract](../CONTRIBUTING.md#documentation-validation). Local/global Git
+excludes cannot hide them; ignored source captures remain byte-preserved. Nine controls
+include four reproduced failures before repair. All `106` focused repository-policy tests
+pass. Resolve full-suite, package and exact-head CI results from
+`artifacts/checkpoints/2026-10-15-repository-continuity/release-validation.json`.
+
+Full-suite collection declaration (a target count, not a passing result):
+
+- 2601 tests expected;
+
+The current store schema is `4`; legacy, unsigned modeled and qualified signed-fixture
+profiles remain distinct. The runtime and execution surface are unchanged. README and
+architecture projections now distinguish current state from historical release counts.
+Older dated pickup and authority snapshots below retain history; use this section,
+`AGENTS.md` and `MISSION_STATE.json` for current state. Public source visibility was
+authorized on 2026-08-01 and does not authorize deployment or disclosure.
+
+The six existing provider threads were read live on October 15. They still contain nine
+outgoing messages and the historical delivery failure, with no human reply or operating
+commitment. The three approved pilot follow-ups remain sent; do not resend them. Both
+FreeTSA attempts remain spent, Daybreak unsubmitted and the early paid lane unaccepted.
+Native catalog/monitor commitments and the complete source dossier remain the next
+integration dependency. Preserve recovery, storage, isolation, benchmark and exact-target
+gate order. The October 15 sequencing suggestion is a proposal, not an accepted exception.
+
+The complete system assessment and eleven retained paper captures are discoverable through
+`artifacts/checkpoints/latest-system-review.json`. The proposed four-arm comparison and
+its 18 unbound registration inputs remain unchanged. Continue from new operating evidence
+or a demonstrated repository defect; do not repeat the completed survey or finite models.
 
 ## Approved operating pilot follow-ups, 2026-10-14
 
@@ -626,9 +661,9 @@ No new cloud resources, provider-protocol requests or external submissions were 
 Public-document work needs no renewed general permission. Sole-human authorship, exact-head
 release checks and linear fast-forward publication rules below remain in force.
 
-## Current pickup and operator research mandate, 2026-10-11
+## Historical pickup and operator research mandate, 2026-10-11
 
-This section is the current recovery summary. Read
+This section retains the October 11 recovery summary; current pickup appears first. Read
 [NEXT_SESSION_MISSION](NEXT_SESSION_MISSION.md) for the operator's renewed ambition,
 independent research assignment, revenue-path comparison and first-session sequence.
 Older dated sections below preserve historical observations; their pending statuses,
@@ -1164,10 +1199,6 @@ late-block phase misattribution, qualified pending scope mismatch, and catalog p
 assurance missing from monitor agreement. Passing the inherited suite did not establish
 those composition properties. The historical descriptions below retain their original
 scope; this correction takes precedence over broader recovery-completeness claims.
-
-Full-suite collection declaration (a target count, not a passing result):
-
-- 2592 tests expected;
 
 The first repair tranche applies the complete recovery contract at signed-decision
 admission and facade recovery, reauthenticates retained recovery history and SQL indexes,
@@ -2455,11 +2486,14 @@ Known-bads now cover:
 
 These blockers prevent a finding pipeline and all live-target work.
 
-## Current mission order
+## Mission order and historical implementation notes
+
+The mission order remains in force. The dated implementation pickup below is historical;
+the current pickup at the top of this file supersedes its unfinished-work statements.
 
 ### Mission 1 — close finding-admission integrity
 
-**Current pickup, 2026-10-09:** ADR-0020's offline native-time tranche passes both local and
+**Historical pickup, 2026-10-09:** ADR-0020's offline native-time tranche passes both local and
 GitHub release suites. Select a concrete provider profile and collect exact
 wire/client, independent-administration, freshness/revocation and local-loss experiment
 evidence. The narrow P-256/direct-root fixture profile is not evidence that a real TSA
@@ -2546,7 +2580,11 @@ Admit one exact program only after the integrity, isolation, and benchmark gates
 external effects human-authorized. Promote MINERVA strategy versions offline through frozen
 holdouts, regressions, signatures, and rollback.
 
-## Authority state
+## Historical authority snapshot before public visibility
+
+The following snapshot is preserved as history, not current authority. The current
+`AGENTS.md`, machine state and later dated operator grants supersede it. In particular,
+public source visibility and bounded cloud preparation were separately authorized.
 
 Authorized:
 
@@ -2576,6 +2614,6 @@ Before handing off:
 3. validate schemas, package build, wheel install, shell/workflow checks, and Git diff;
 4. stage only the declared tranche;
 5. commit as Daniel without co-author trailers;
-6. push to the private remote and inspect GitHub Actions;
+6. push to the canonical remote and inspect GitHub Actions;
 7. update this file and `MISSION_STATE.json`; and
 8. report exact residuals without promoting modeled behavior to implemented status.

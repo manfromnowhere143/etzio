@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-15",
+  "status": "implemented_repository_policy_correction_full_release_separate",
+  "base_commit": "00585382264ee7f66b393f8091d8de4a345b7543",
+  "contract": "CONTRIBUTING.md#documentation-validation",
+  "problem": "Recursive Markdown discovery included ignored third-party captures, making the canonical workspace fail while an exact-head clean checkout passed.",
+  "scope": "Tracked Markdown plus untracked Markdown admitted by repository .gitignore rules. Local/global exclusions do not reduce this surface. Ignored captures are not read or rewritten.",
+  "new_tests": 9,
+  "before_fix": {
+    "failed": 4,
+    "passed": 5,
+    "log": "artifacts/checkpoints/2026-10-15-repository-continuity/known-bads-before-fix.log"
+  },
+  "focused_after_fix": {
+    "tests_passed": 106,
+    "runtime": "CPython 3.11.15",
+    "log": "artifacts/checkpoints/2026-10-15-repository-continuity/policy-after-fix.log"
+  },
+  "full_collection_target": 2601,
+  "source_bindings": {
+    "scripts/validate_repository.py": "47e5b488e476841ed91cc3f11e0ca0e6d5bfbdf3ce1dc810daee9b160ffff37f",
+    "tests/test_repository_policy.py": "b3de0f8998cd827195fc6b78028960201e0f44d5cc7d8dea4580e43fc1a4f915"
+  },
+  "current_state_corrections": [
+    "Schema version 4 distinguished from legacy profile and historical version 2 introduction",
+    "Historical release counts labeled and current collection moved to the current handoff",
+    "Public source visibility distinguished from historical private-repository restrictions",
+    "Spent acquisition and completed dispatch states preserved"
+  ],
+  "provider_readback": {
+    "read_host_utc": "2026-10-15 10:50:36 UTC",
+    "threads": 6,
+    "messages": 10,
+    "outbound_messages": 9,
+    "historical_delivery_failures": 1,
+    "human_replies_observed": 0,
+    "operating_commitments_observed": 0,
+    "new_messages_sent": 0,
+    "record": "artifacts/checkpoints/2026-10-15-repository-continuity/provider-thread-readback.json",
+    "sha256": "bb9644a2e285ce0649bd7b3502662eebe7d0de573bf0f80886200c34efa27974"
+  },
+  "release_validation": "artifacts/checkpoints/2026-10-15-repository-continuity/release-validation.json",
+  "limits": {
+    "engine_runtime_changed": false,
+    "native_profile_admitted": false,
+    "independent_execution_established": false,
+    "finding": false,
+    "competitive_advantage_measured": false,
+    "gate_order_changed": false
+  }
+}
