@@ -1,7 +1,8 @@
 # Etzio Charter
 
-Etzio is a private research program intended to become an enterprise-grade system for
-**authorized vulnerability research**. Its objective is to discover, reproduce, adjudicate,
+Etzio is an independently governed research program with public source visibility,
+intended to become an enterprise-grade system for **authorized vulnerability research**.
+Its objective is to discover, reproduce, adjudicate,
 and responsibly package real security defects while preserving an exact chain from
 authority to evidence.
 

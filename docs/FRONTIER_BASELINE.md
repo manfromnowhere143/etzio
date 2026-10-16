@@ -106,6 +106,8 @@ This is the proposed experimental dependency graph, not a result or execution tr
 
 ```mermaid
 flowchart TB
+    accTitle: Proposed controlled comparison
+    accDescr: After qualification and registration, compare static analysis, fuzzing, model-only and hybrid arms, then test semantic guidance, scheduling and evidence reuse separately.
     G["Foundation + isolation + exact-target gates closed"]
     P["Disjoint pilot<br/>bind all registration inputs"]
     C["Freeze and run S / F / M / H<br/>same information · complete cost · independent verifier"]

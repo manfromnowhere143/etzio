@@ -1,15 +1,21 @@
 # Etzio Architecture
 
-Status: **foundation integrity**, current-state reconciliation 2026-10-15.
+Status: **foundation integrity**, current-state reconciliation 2026-10-16.
 
 This document distinguishes implemented, modeled, proposed, and blocked behavior. A green
 test proves only its named fixture and invariant.
 
-## Architectural verdict
+## Architectural organization
 
-Etzio’s target shape remains sound: a small deterministic control kernel surrounded by
-replaceable research workers, with policy authority and independent scientific verification
-outside the generative workers.
+Etzio separates deterministic state and evidence admission from replaceable research
+workers. The target design places policy authority and independent scientific verification
+outside the generative workers. The implemented fixture paths currently share one trusted
+host process; unit names and signing keys do not create process isolation.
+
+The [engineering review guide](REVIEW_GUIDE.md) maps these claims to code, tests and open
+risks. The code baseline is `cd5c6ad` (PR 59), with `2629` passing tests per declared runtime
+locally and in Linux CI. Runtime code, schemas and dependencies are unchanged by this
+presentation review; the handoff identifies its separate release validation.
 
 The first truthful vertical slice now exists. A signed fixture authority is admitted before
 mission opening; exact authority and target bytes are retained with their claiming events
@@ -24,8 +30,7 @@ event append. Canonical lease lineages now retain explicit expiry, modeled cance
 atomic reassignment, and exact terminal receipt coverage. An empty-history-only
 profile can additionally commit every event with a signed decision dossier and recover a
 byte-exact anchor statement, signed checkpoint candidate, and exact-current global and
-mission floor before the modeled facade returns. This is meaningful foundation progress,
-but its providers are deterministic repository fixtures. It is candidate generation,
+mission floor before the modeled facade returns. Its providers are deterministic repository fixtures. It is candidate generation,
 verification assignment, byte retention, modeled-statement admission, and lifecycle
 recovery—not external authority or a finding pipeline.
 
@@ -66,6 +71,8 @@ proof, finding adjudication, disclosure and learned-strategy promotion are block
 
 ```mermaid
 flowchart TB
+    accTitle: Target authority topology
+    accDescr: Fixture kernel and authority paths are implemented. Separate construction, independent reproduction, adjudication, disclosure and strategy promotion remain target roles.
     H["Human / program authority<br/>exact scoped grants"]
     A["AQUILA<br/>fixture admission · budgets · leases implemented"]
     K["ETZIO kernel<br/>fixture protocol · canonical state · replay implemented"]
@@ -160,6 +167,93 @@ repository-supplied qualified deterministic finality composition have no network
 credentials, spending, disclosure, publication, or live-target interaction. The
 service-port interfaces do not mechanically prohibit those capabilities in an arbitrary
 replacement; structural conformance alone does not admit one.
+
+## Qualified fixture composition
+
+All paths in this diagram execute within the trusted host process and local storage
+boundary. The two SQLite nodes distinguish enrollment profiles, not distributed services.
+The ordinary CLI uses the legacy profile. An explicitly enrolled API facade supplies
+modeled integrity finality; qualified mode reconstructs signed repository-fixture inputs.
+This is a logical implementation map, not a deployment or independent-execution claim.
+
+This detailed composition shows retained repository-fixture paths only. Green nodes and solid
+arrows are implemented; an `optional` edge is implemented but is not used by the supported
+CLI. Blue is the empty-store fixture-finality surface. Amber is signed-fixture adapter
+qualification, consumed only under explicit qualified enrollment. Its signed packages are
+reconstructed at store admission and replay. Legacy behavior-only
+stubs and blocked target roles are intentionally excluded here and named precisely in the
+[unit-status table](../README.md#system-map). The complete target-state authority topology is in
+[Target system](#target-system); labels, rather than color alone, carry
+status.
+
+```mermaid
+flowchart TB
+    accTitle: Detailed signed-fixture composition
+    accDescr: Authority, candidates, modeled verification and signed-fixture qualification feed distinct legacy and enrolled local storage profiles.
+    subgraph AUTH["Authority and control"]
+        direction LR
+        AQ["AQUILA<br/>implemented fixture authority · budgets · leases"]
+        S[("Filesystem staging/cache<br/>bounded pre-ingestion bytes")]
+        K["ETZIO kernel<br/>implemented fixture protocol · lifecycle · replay"]
+    end
+
+    subgraph SCAN["Supported candidate path"]
+        direction LR
+        V["VELITES<br/>implemented narrow AST observations"]
+        KC["ETZIO candidate admission<br/>construct · validate · retain"]
+        C["Stable candidates<br/>implemented · not findings"]
+    end
+
+    subgraph OPTIONAL["Optional implemented paths and storage"]
+        direction LR
+        VR["ETZIO verification-intent path<br/>modeled lease · resolution · recovery<br/>signed opaque receipt admission · no execution"]
+        DBL[("SQLite schema v4 · legacy profile<br/>supported CLI + ordinary kernel store")]
+        IF["Fixture-integrity finality facade<br/>mode selected at enrollment"]
+        DBM[("SQLite schema v4 · fixture-integrity profile<br/>permanent after enrollment")]
+    end
+
+    subgraph QUAL["Signed-fixture qualification"]
+        direction LR
+        AP["Exact adapter profile<br/>trust root · validation/provider policies<br/>fixed all-source roster"]
+        SP["Role-separated signed fixture packages<br/>Ed25519 · exact nonce-bound requests<br/>authenticate before claim parsing"]
+        TH["All-source time qualification<br/>common overlap · conservative outer hull"]
+        RF["Full-hull revocation qualification<br/>validity · staleness · metadata/floors"]
+        HH["Head-authority qualification<br/>RFC 9162 inclusion + consistency<br/>unanimous catalog monitors"]
+        SM["Sealed provider-neutral mapping<br/>fresh reauthentication · exact BLOB coverage<br/>qualified lifecycle input"]
+    end
+
+    AQ --> K
+    S -->|"first canonical ingestion"| K
+    K -->|"analysis lease + immutable bytes"| V
+    V -->|"typed observations"| KC --> C
+    K -->|"explicit command · action admitted<br/>before mission opening"| VR
+    C -->|"exact retained candidate input"| VR
+    VR -->|"canonical events + evidence"| DBL
+    K <--> DBL
+    K -->|"optional empty-store facade"| IF
+    IF <--> DBM
+    AP --> SP
+    SP --> TH
+    SP --> RF
+    SP --> HH
+    TH -->|"complete time hull"| RF
+    TH -->|"complete time hull"| HH
+    TH --> SM
+    RF --> SM
+    HH --> SM
+    SM -->|"qualified enrollment only"| IF
+
+    classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
+    classDef fixture fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
+    classDef qualification fill:#fff3bf,stroke:#e67700,color:#3d2100;
+    class AQ,K,S,DBL,V,KC,C,VR implemented;
+    class IF,DBM fixture;
+    class AP,SP,TH,RF,HH,SM qualification;
+    style AUTH fill:#f8f9fa,stroke:#adb5bd,color:#212529
+    style SCAN fill:#f8f9fa,stroke:#adb5bd,color:#212529
+    style OPTIONAL fill:#f8f9fa,stroke:#adb5bd,color:#212529
+    style QUAL fill:#fff9db,stroke:#f59f00,color:#3d2100
+```
 
 ## Protocol v1
 
@@ -692,7 +786,7 @@ worker jailer, independent verifier, denied-egress probe or power-fault recovery
 cloud preparation authority therefore does not establish an accepted execution profile.
 No such execution tier exists in this repository. Exploit execution remains blocked. See
 [qualification next steps](QUALIFICATION_NEXT_STEPS.md) and the
-[README progress map](../README.md#progress-through-2026-10-15).
+[README progress map](../README.md#progress-through-2026-10-16).
 
 ## Domain and technique packs
 

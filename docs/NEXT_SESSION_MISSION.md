@@ -5,7 +5,23 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-16 — evidence-input correction
+## Current continuation, 2026-10-16 — engineering review
+
+Start with the latest [handoff](SESSION_HANDOFF.md), [review guide](REVIEW_GUIDE.md) and
+[review evidence](evidence/reviewer-readiness-2026-10-16.json). The engine baseline is
+released PR 59, `cd5c6ad`, with `2629` passing tests per runtime locally and in Linux CI.
+The presentation review preserves runtime bytes and the full technical account, clarifies
+current/future process boundaries, links claims to code/tests and fixes the clean-install
+console-command instructions. Resolve this later documentation release separately from
+its retained validation record.
+
+Continue from actual native operating evidence or a demonstrated repository defect.
+Presentation quality cannot supply provider commitments, protected storage, independent
+execution or comparative results. Preserve the established gate order, sent follow-ups,
+spent acquisitions and unknown Daybreak account/request state. No future polling or
+bounty campaign is running in the background.
+
+## Previous continuation, 2026-10-16 — evidence-input correction
 
 Read the current [handoff](SESSION_HANDOFF.md) and [repair evidence](evidence/evidence-byte-admission-2026-10-16.json).
 Generic evidence admission now refuses bytes subclasses before behavior or work. Resolve

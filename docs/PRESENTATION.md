@@ -1,16 +1,17 @@
 # Etzio presentation standard
 
-Status: standard, 2026-08-01.
+Status: standard, revised 2026-10-16.
 
-Etzio should read like a record a hostile reviewer can audit. The engine's whole thesis is
-that a claim is worth nothing until it is reproduced from retained bytes; the writing must
-hold itself to the same bar. Presentation is not decoration here — it is part of the
-evidence.
+Etzio should read like an engineering record an external team can inspect and reproduce.
+Writing connects each claim to its mechanism, retained evidence and remaining assumptions.
+The mission, current implementation and next experiment should be clear without requiring
+the reader to reconstruct session history.
 
 ## Rules
 
-1. Lead with status before interpretation. The first thing a reader meets is what is *not*
-   established, not what is impressive.
+1. Lead with the stable purpose and a concise statement of current capability. Put dated
+   progress below that introduction. Identify implemented behavior and open gates before
+   interpreting significance; preserve substantive explanations when reorganizing them.
 2. Keep `implemented`, `modeled`, `proposed`, and `blocked` exactly distinct, and never
    collapse `missing`, `blocked`, `inconclusive`, `not_reproduced`, or `null` into success,
    zero, or silence.
@@ -24,13 +25,17 @@ evidence.
    demonstration is not evidence that a gate exists.
 7. Quote numbers exactly, with denominators attached, as backticked literals — `1158`
    tests, `7` candidates, `36` reference proofs — never a rounded or marketing figure.
-8. Use Mermaid diagrams only to clarify a mechanism, gate, or boundary, and keep them small
-   enough to render on a phone. Label every architecture diagram as intended structure, not
-   a runtime screenshot.
+8. Give each Mermaid diagram one job: overview, mechanism, gate sequence or trust boundary.
+   Use a compact overview and link to detailed composition rather than shrinking a dense
+   chart into the front page. Label current fixture paths and proposed target structure
+   explicitly; roles and keys do not imply separate processes. Status must remain legible
+   without color. Add accessible titles and descriptions. Render and visually inspect
+   changed diagrams before release.
 9. Reproduce sections carry literal, copy-pasteable commands and a plain statement that a
    passing suite validates repository bytes, not truth.
 10. Corrections and retractions stay visible in the document they correct. Nulls receive the
-    same structure as wins.
+    same structure as wins. Label historical snapshots and preserve their evidence links;
+    keep one current continuation point and one unambiguous current code baseline.
 
 ## The words we do not use
 
@@ -50,8 +55,8 @@ discipline, and the humility is about the result.
 
 - "A candidate is a falsifiable claim about exact target bytes."
 - "The generator cannot verify its own claim."
-- "Nothing jumps the chain."
-- "This is the courtroom, not yet the detective."
+- "The current fixture paths run within one trusted host process."
+- "Independent execution remains an open acceptance gate."
 - "Winning bounties is a future measured outcome, never present authority."
 
 Do not decorate the work. Let the receipts carry the weight.

@@ -1,16 +1,16 @@
 # Etzio Roadmap
 
-Status: **foundation integrity**, current-state reconciliation 2026-10-15.
+Status: **foundation integrity**, current-state reconciliation 2026-10-16.
 
 The roadmap advances by retained evidence, not calendar dates. A phase may start only when
 its predecessor’s named acceptance conditions are reproduced.
 
-## Current operating sequence, 2026-10-15
+## Current operating sequence, 2026-10-16
 
 The operator selected controlled comparison as the next decisive discovery evidence,
 while preserving the existing foundation order. The immediate external input is the
 catalog/independent-monitor operating commitment and complete native dossier. Three pilot
-follow-ups are already sent; the October 15 readback retained no human reply. More optional
+follow-ups are already sent; the bounded October 16 readback retained no human reply. More optional
 parsers or an unselected infrastructure deployment would not close that dependency.
 
 Native integrity qualification → external latest-head recovery and effective fencing →
@@ -24,6 +24,11 @@ Public source and program research may continue within the existing preparation 
 The October 15 CoW review retained contrary source evidence against four suspected
 weaknesses, not a vulnerability or an execution result. Model-access onboarding is a
 separate dependency and does not alter this order.
+
+The October 16 evidence-input repair is released as `cd5c6ad` (PR 59), with `2629`
+passing tests per runtime locally and in Linux CI. The [engineering review guide](REVIEW_GUIDE.md)
+now links the current claims to code, refusal controls and unresolved risks. Documentation
+and reproduction improvements change no runtime capability or gate order.
 
 ## Phase 0 — repository foundation
 

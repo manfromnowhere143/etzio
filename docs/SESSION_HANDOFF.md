@@ -2,7 +2,43 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-16, Asia/Jerusalem.
 
-## Current pickup, 2026-10-16 — evidence-input repair and bounded research
+## Current pickup, 2026-10-16 — engineering review and repository synchronization
+
+The engine repair is released at `cd5c6ada82b349f3272b0fe010c2878bada6d74c`
+([PR 59](https://github.com/manfromnowhere143/etzio/pull/59)). All `2629` tests passed on
+CPython 3.11.15 and 3.14.2 locally and in exact-commit Linux CI; package checks passed.
+The [public review record](evidence/reviewer-readiness-2026-10-16.json) now projects those
+completed results instead of leaving the README at the preceding engine release.
+Its same-host recovery copy restored `2292` files and verified `1723` entries across `45`
+artifact indexes. Preserve that frozen checkpoint and archive.
+
+This continuation improves presentation and reproducibility without changing runtime,
+tests, dependencies, authority or gate order. The README leads with the stable mission,
+current capability and published evidence. Its compact fixture overview links to the
+preserved detailed composition in Architecture. The [review guide](REVIEW_GUIDE.md)
+maps claims to code and refusal tests, distinguishes same-process fixture roles from
+independent execution, and names the open storage and provider risks. The reproduction
+instructions now install the local package before using its console command.
+
+Resolve this documentation candidate's full local/CI/package validation, fresh-install
+checks, seven diagram renders, publication and recovery from
+`artifacts/checkpoints/2026-10-16-reviewer-readiness/release-validation.json`.
+The previously validated engine baseline does not establish those later checks by itself.
+Use `artifacts/recovery/latest.json` for the latest completed restore check; same-host
+recovery is not independent durability. The fresh dependency-download attempt initially
+timed out and succeeded with a longer read timeout; both logs are retained.
+
+The next integration dependency remains accountable catalog and independent monitor
+commitments plus the complete native dossier. The latest retained mailbox observation is
+the bounded October 16 readback below; no new messages were sent or provider poll performed
+for this presentation review. Preserve the three sent pilot follow-ups, both spent FreeTSA
+attempts, existing cloud-preparation authority and unqualified execution/target state.
+Then follow recovery/fencing, protected storage, independent execution, benchmark/exact
+targets and S/F/M/H, with separate semantic, scheduling and reuse experiments afterward.
+All `18` registration inputs remain unbound. No frontier-performance or external-team
+endorsement claim follows from this documentation review.
+
+## Engine repair checkpoint, 2026-10-16 — evidence-input repair and bounded research
 
 Start here and in [MISSION_STATE](MISSION_STATE.json). The [repair evidence](evidence/evidence-byte-admission-2026-10-16.json)
 records an owned Python API defect: a bytes subclass could underreport its length and
@@ -57,10 +93,10 @@ Full-suite collection declaration (a target count, not a passing result):
 
 - 2629 tests expected;
 
-## Current pickup, 2026-10-15 — complete progress and research handoff
+## Historical pickup, 2026-10-15 — complete progress and research handoff
 
-This section is the current continuation point. Older dated sections preserve history;
-their pending actions and release counts are not new authority. Start with this section,
+This section records the October 15 continuation point, superseded by the current pickup
+above. Its pending actions and release counts preserve history. Its associated records are
 [MISSION_STATE](MISSION_STATE.json), the [README progress map](../README.md#progress-through-2026-10-15)
 and [qualification next steps](QUALIFICATION_NEXT_STEPS.md).
 

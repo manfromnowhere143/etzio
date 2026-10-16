@@ -1,0 +1,63 @@
+{
+  "schema": "etzio.reviewer-readiness.v1",
+  "date": "2026-10-16",
+  "scope": "Presentation, architecture-to-code traceability and clean installation; no runtime change or independent audit",
+  "engine_baseline": {
+    "commit": "cd5c6ada82b349f3272b0fe010c2878bada6d74c",
+    "runtime_tree": "a5559da84713c3beea9d2a5aa1fc844f038ae88c",
+    "pr": "https://github.com/manfromnowhere143/etzio/pull/59",
+    "ci_run": 38873128704,
+    "ci_url": "https://github.com/manfromnowhere143/etzio/actions/runs/38873128704",
+    "tests_passed_per_runtime": 2629,
+    "runtimes": [
+      "3.11.15",
+      "3.14.2"
+    ],
+    "local_full_suites": [
+      {
+        "runtime": "3.11.15",
+        "tests_passed": 2629,
+        "pytest_seconds": 404.85
+      },
+      {
+        "runtime": "3.14.2",
+        "tests_passed": 2629,
+        "pytest_seconds": 442.73
+      }
+    ],
+    "linux_full_suites": [
+      {
+        "runtime": "3.11.15",
+        "tests_passed": 2629,
+        "pytest_seconds": 725.16
+      },
+      {
+        "runtime": "3.14.2",
+        "tests_passed": 2629,
+        "pytest_seconds": 828.72
+      }
+    ],
+    "github_checks_passed": 4,
+    "ci_package_archives_verified": 4
+  },
+  "review_guide": "docs/REVIEW_GUIDE.md",
+  "changes": [
+    "Current published baseline and historical snapshots distinguished",
+    "Stable mission and capability before dated progress",
+    "Current same-process fixture paths distinguished from future independent execution",
+    "Compact README diagram with detailed composition preserved in Architecture",
+    "Claim-to-code and refusal-test map with open risks",
+    "Local package installation before console-command reproduction",
+    "Public source visibility and ADR index wording corrected",
+    "Current version-1/2/3 to version-4 migration behavior reconciled to store implementation"
+  ],
+  "runtime_changed": false,
+  "tests_changed": false,
+  "dependencies_changed": false,
+  "authority_changed": false,
+  "gate_order_changed": false,
+  "release_validation_record": "artifacts/checkpoints/2026-10-16-reviewer-readiness/release-validation.json",
+  "fresh_install_claim_boundary": "Locked dependencies alone do not install the project console entrypoint. Retain before/after checks and any acquisition failures separately.",
+  "diagrams": "Seven Mermaid sources; render and visual-review evidence retained with the exact documentation release.",
+  "claim_boundary": "No native provider, isolation, production-storage, competitive-discovery, finding, income or external-team endorsement claim."
+}

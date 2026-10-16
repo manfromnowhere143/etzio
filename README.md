@@ -1,77 +1,82 @@
 # Etzio
 
-**An evidence-native engine for authorized vulnerability research: a candidate becomes a
-finding only when a separately authorized verifier reproduces a material effect from
-retained bytes and the kernel accepts the receipt — proof by reproduction, not by
-confidence.**
+Etzio is an evidence-native engine for authorized vulnerability research. Its design
+connects exact permission and target bytes to a falsifiable candidate, independent reproduction and
+kernel adjudication. The long-term objective is a research and remediation system whose
+results can be replayed, challenged and corrected from retained evidence.
 
-> **Honest status — 2026-10-16. Phase: foundation integrity. This is the courtroom, not
-> yet the detective.**
->
-> Etzio has built a tested evidence and adjudication kernel. It has *not* built
-> the part that finds vulnerabilities. The entire detection surface today is **six Python
-> rule classes over two repository fixtures** — `7` planted candidates on the vulnerable
-> fixture, `0` on the clean one, and **never a finding**. The kernel authenticates and
-> retains modeled statements; independent proof of a real security effect remains blocked.
->
-> The engine execution surface remains repository-owned deterministic fixtures. Separately,
-> public-source research and operator-authorized, bounded Google Cloud host preflight prepare
-> the next gates; no native provider, exploit execution, benchmark corpus, live target or
-> disclosure is admitted. No trustworthy UTC, current real-world revocation, external durability,
-> non-equivocation, independent verification, finding, live-target authority, or superiority
-> claim follows from anything in this repository.
->
-> What *is* implemented, end to end on those fixtures: a canonical protocol-v1 envelope with
-> semantic wire schemas; Ed25519-signed authority admission; content-addressed immutable
-> targets; a bounded, byte-bound Python analyzer under a lease; lifecycle-checked append-only
-> SQLite with deterministic replay; a transactional evidence vault; kernel-issued modeled
-> verification leases, typed input resolution, and single-use signed-receipt admission;
-> crash-safe modeled integrity finality across four immutable phases behind one
-> database-global barrier; three networkless qualification harnesses (trusted-time and
-> revocation; RFC 9162 anchor, catalog, and monitor head-authority; and a qualified-evidence
-> acceptance layer); durable governed blocked-finality — specified, persisted, wired into the
-> lifecycle, and crash-recovered; and a schema-version-4 store that pins the qualified
-> adapter roots. The opt-in qualified fixture service now carries signed provider packages
-> through the complete lifecycle and reconstructs them from retained bytes on cold replay.
-> Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
-> recovery is also compared with the full-tree implementation across `512` tree sizes.
-> The preceding engine release, [PR 57](https://github.com/manfromnowhere143/etzio/pull/57)
-> at `285fdb6`, passed `2617` tests on both declared Python runtimes locally and in exact-head
-> Linux CI. This includes the protocol validation optimization; it measures fixture
-> behavior, not vulnerability-discovery quality. The October 16 evidence-input repair adds
-> `12` controls, for a collection target of `2629`. Resolve its full validation and
-> publication from the current [handoff](docs/SESSION_HANDOFF.md).
+The kernel is target-neutral. Versioned domain and technique packs supply language,
+analysis, execution and oracle knowledge. Solidity/EVM research is the first planned
+benchmark domain; the mission extends to native code, web services, protocols, cloud,
+mobile and supply chains.
 
-> The [decision index](docs/decisions/README.md) contains `24` architecture decisions
-> defining the contracts and their refusal cases.
->
-> Winning bounties is a future measured outcome, never present authority. See
-> [Open gates and next mission](#open-gates-and-next-mission).
+**Current capability: a governed fixture kernel.** The supported analyzer has six Python
+rule classes over two repository-owned fixtures. It produces `7` planted candidates on
+the vulnerable fixture and `0` on the clean fixture. Modeled verification receipts and
+signed fixture-provider packages exercise admission and recovery; independently produced
+execution evidence, qualified native providers and a finding pipeline remain blocked.
 
-The [October 15 frontier review](docs/FRONTIER_BASELINE.md#competitive-review-and-experiment-order-2026-10-15)
-connects current research to a controlled comparison and separate feature experiments.
-The [October 12 mission assessment](docs/MISSION_REVIEW_2026-10-12.md) retains the
-provider-feasibility decision. Competitive discovery, independent external reproduction
-and income remain undemonstrated.
+Start with the [engineering review guide](docs/REVIEW_GUIDE.md) for the claim-to-code/test
+map and open risks, [architecture](docs/ARCHITECTURE.md) for the contracts, and the
+[handoff](docs/SESSION_HANDOFF.md) for the exact release and continuation state. Public
+source visibility is governed by [LICENSE.md](LICENSE.md).
 
-## Evidence-input repair and research, 2026-10-16
+## The system in one view
 
-Generic evidence inputs now require exact built-in bytes before caller behavior, hashing
-or filesystem work. A reproduced subclass defect could publish 64 bytes under an 8-byte
-limit before refusing the write; another could redirect the digest input. The repair
-refuses both before work and preserves ordinary-byte identities. All `63` focused evidence
-tests pass on both runtimes; the [repair record](docs/evidence/evidence-byte-admission-2026-10-16.json)
-identifies the separate full-release validation. This is a local engine correction.
+Authority → immutable target → falsifiable hypothesis → content-bound candidate → isolated
+exploit artifact → independent reproduction → kernel adjudication → evidence-bound
+disclosure → governed offline learning.
 
-Three [new primary-paper reviews](docs/FRONTIER_BASELINE.md#evidence-reuse-and-oracle-quality-2026-10-16)
-add proposed controls for source-linked reasoning, target-identity sensitivity and
-intended-behavior oracles. The additional CoW fee/fill source analysis remains conditional,
-with degenerate-order semantics unresolved and no confirmed finding. Six provider threads
-were checked again October 16: no new human reply or operating commitment. The dependency
-diagram below and selected comparison order remain current; the October 15 table records
-the preceding progress snapshot.
+```text
+authority → immutable target → leased observations → candidates
+                                                    ├─ current retained boundary
+                                                    └╌→ exploit proof → independent reproduction
+                                                        → adjudication → disclosure draft → learning
+```
 
-## Progress through 2026-10-15
+This is the intended operating chain, not a runtime screenshot. Everything left of the
+boundary is implemented on repository fixtures; everything right of it is a design target
+gated behind isolation, benchmark, and exact-authority acceptance. The mission spans
+vulnerability classes, languages, and target categories; blockchain, Solidity, and EVM
+research are the first benchmark and economic wedge. Domain
+knowledge belongs in versioned packs; policy and scientific authority stay in the kernel.
+The implemented observations come from fixed AST rules. Hypothesis ranking remains a
+planned research-worker capability.
+
+## Why Etzio
+
+A candidate identifies a falsifiable observation against specific bytes. A finding requires
+a separately authorized verifier to reproduce a security-relevant effect from retained artifacts in an independently controlled
+environment, followed by kernel adjudication.
+
+That yields six operating laws:
+
+1. authority is admitted before a mission opens;
+2. workers propose; the kernel alone changes canonical state;
+3. a generator cannot verify its own candidate;
+4. evidence and identities are content-bound and replayable;
+5. refusals, nulls, failures, timeouts, and inconclusive results remain visible; and
+6. credentials, egress, spending, live actions, disclosure, and publication are separate
+   grants.
+
+## Current release and evidence
+
+The current engine baseline is [`cd5c6ad`](https://github.com/manfromnowhere143/etzio/commit/cd5c6ada82b349f3272b0fe010c2878bada6d74c)
+([PR 59](https://github.com/manfromnowhere143/etzio/pull/59), October 16, 2026):
+`2629` tests passed on CPython `3.11.15` and `3.14.2`, locally and in
+[Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/38873128704).
+Both package builds and installed-wheel checks passed. These results cover repository
+behavior under the recorded environments; discovery quality requires a separate benchmark.
+The current documentation release is identified in the handoff.
+
+The [evidence-input repair](docs/evidence/evidence-byte-admission-2026-10-16.json) refuses
+bytes subclasses before caller behavior, hashing or filesystem access. Its `12` new
+controls include `6` predecessor failures per runtime; all `63` focused evidence tests
+pass after correction. The ordinary byte identities and empty generic artifacts are
+preserved. Earlier cleanup, metric-accounting, replay and protocol corrections remain
+visible in the [release history](docs/SESSION_HANDOFF.md).
+
+## Progress through 2026-10-16
 
 | Workstream | Retained progress | Remaining boundary |
 |---|---|---|
@@ -79,13 +84,15 @@ the preceding progress snapshot.
 | Integrity and recovery | Four immutable finality phases, authenticated signed-fixture packages, governed retry/seal decisions and interruption controls | Actual independent provider administration and external latest-head recovery are unqualified |
 | Native evidence preparation | Offline timestamp/CRL validation, conditional elapsed-time bounds, trusted-list and checkpoint inspection, source-provenance reconciliation | Documentary and offline observations do not admit a live provider; both FreeTSA acquisition attempts are spent |
 | Host preparation | Bounded Google Cloud KVM preflight completed and disposable resources cleaned up | No accepted worker isolation, protected storage or power-fault profile |
-| Repository reliability | Cleanup and coherent-read repairs, honest unresolved-result accounting, owned-document checks and equivalent ASCII validation | `2617` passing engine-release tests establish repository behavior only |
-| Research and comparison | Two October 15 primary-source review packets; four-arm comparison and separate semantic-guidance, scheduling and evidence-reuse designs retained | Experiment order selected; `18` registration inputs remain unbound; no comparator has run |
-| Bounty preparation | CoW source/deployment-record reconciliation and a finite source review with contrary evidence against four suspected weaknesses | Exact deployed state, scope, independent reproduction and program eligibility remain unresolved; no confirmed finding or payment |
-| Operating dependencies | Three approved pilot follow-ups sent; six existing threads checked on October 15 | No human reply or catalog/monitor operating commitment in that readback |
+| Repository reliability | Cleanup and coherent-read repairs, honest unresolved-result accounting, owned-document checks, equivalent ASCII validation and exact evidence-byte admission | `2629` passing engine-release tests establish repository behavior only |
+| Research and comparison | Targeted primary-source reviews through October 16; four-arm comparison and separate semantic-guidance, scheduling and evidence-reuse designs retained | Experiment order selected; `18` registration inputs remain unbound; no comparator has run |
+| Bounty preparation | CoW source/deployment-record reconciliation, contrary evidence against four hypotheses and conditional fee/fill obligations | Exact deployed state, scope, independent reproduction and program eligibility remain unresolved; no confirmed finding or payment |
+| Operating dependencies | Three approved pilot follow-ups sent; six existing threads checked on October 16 | No human reply or catalog/monitor operating commitment in that readback |
 
-The [progress evidence record](docs/evidence/documentation-handoff-2026-10-15.json)
-links these claims to their retained records. Private source captures, correspondence and
+The [review evidence record](docs/evidence/reviewer-readiness-2026-10-16.json)
+links the current code baseline and review scope to retained results. The latest
+[research update](docs/FRONTIER_BASELINE.md#evidence-reuse-and-oracle-quality-2026-10-16)
+adds proposed source-linked reasoning, identity-sensitivity and intended-behavior controls. Private source captures, correspondence and
 recovery copies are excluded from the published repository; their paths are continuity
 locators, not downloadable evidence in a fresh clone. Model-access onboarding is separate
 from provider admission, target permission and execution qualification.
@@ -96,6 +103,8 @@ evidence. Preparation is complete only for its named, bounded scope.
 
 ```mermaid
 flowchart TB
+    accTitle: Qualification and evaluation gates
+    accDescr: Implemented fixture foundation and the remaining native integrity, recovery, storage, execution, benchmark and research gates.
     K["IMPLEMENTED ON FIXTURES<br/>authority · candidates · evidence vault"]
     F["IMPLEMENTED ON FIXTURES<br/>signed qualification · finality · recovery"]
     P["PREPARATION RETAINED<br/>native-format inspection · KVM preflight<br/>research · source review · operator inquiries"]
@@ -120,42 +129,12 @@ flowchart TB
     class N,R,S,X blocked;
 ```
 
-## The system in one view
+### Progress through 2026-10-15
 
-Authority → immutable target → falsifiable hypothesis → content-bound candidate → isolated
-exploit artifact → independent reproduction → kernel adjudication → evidence-bound
-disclosure → governed offline learning. **Nothing jumps the chain.**
-
-```text
-authority → immutable target → hypotheses → candidates
-                                             ├─ current retained boundary
-                                             └╌→ exploit proof → independent reproduction
-                                                 → adjudication → disclosure draft → learning
-```
-
-This is the intended operating chain, not a runtime screenshot. Everything left of the
-boundary is implemented on repository fixtures; everything right of it is a design target
-gated behind isolation, benchmark, and exact-authority acceptance. The mission spans
-vulnerability classes, languages, and target categories; blockchain, Solidity, and EVM
-research are the first benchmark and economic wedge — not the architectural ceiling. Domain
-knowledge belongs in versioned packs; policy and scientific authority stay in the kernel.
-
-## Why Etzio
-
-A vulnerability is a falsifiable claim, not an alert. A candidate identifies a specific
-observation against specific bytes. A finding requires a separately authorized verifier to
-reproduce a security-relevant effect from retained artifacts in an independently controlled
-environment, followed by kernel adjudication.
-
-That yields six operating laws:
-
-1. authority is admitted before a mission opens;
-2. workers propose; the kernel alone changes canonical state;
-3. a generator cannot verify its own candidate;
-4. evidence and identities are content-bound and replayable;
-5. refusals, nulls, failures, timeouts, and inconclusive results remain visible; and
-6. credentials, egress, spending, live actions, disclosure, and publication are separate
-   grants.
+The [October 15 snapshot](docs/evidence/documentation-handoff-2026-10-15.json) retains the
+preceding `2617`-test baseline, research reviews and provider readback. The current table
+above incorporates the October 16 repair and bounded follow-through without changing gate
+order or promoting source hypotheses into findings.
 
 ## Current-state guide
 
@@ -169,7 +148,7 @@ That yields six operating laws:
   mapping for repository-owned signed fixtures. An explicitly enrolled qualified mode now
   consumes their signed packages at all four finality phases and reconstructs them on replay.
 - **Governed blocked finality:** a refused finality attempt is now a durable, reasoned,
-  content-addressed observation persisted under SQLite schema version 3. Recovery past a
+  content-addressed observation introduced in schema version 3 and retained in current schema version 4. Recovery past a
   block requires a signed decision from a principal and key separated from both the
   integrity-decision and head-checkpoint authorities. Exactly two dispositions exist —
   authorized retry and terminal instance sealing — and neither finalizes, deletes,
@@ -326,82 +305,39 @@ claim.
 
 ## System map
 
-This compact diagram shows retained repository-fixture paths only. Green nodes and solid
-arrows are implemented; an `optional` edge is implemented but is not used by the supported
-CLI. Blue is the empty-store fixture-finality surface. Amber is signed-fixture adapter
-qualification, consumed only under explicit qualified enrollment. Its signed packages are
-reconstructed at store admission and replay. Legacy behavior-only
-stubs and blocked target roles are intentionally excluded here and named precisely in the
-status table below. The complete target-state authority topology is in
-[Architecture](docs/ARCHITECTURE.md#target-system); labels, rather than color alone, carry
-status.
+This diagram groups the implemented fixture paths by store profile. All run within one
+trusted host process. The supported CLI uses the legacy profile; finality is available only
+through explicit APIs on an enrolled empty store. VELITES supplies the bounded AST analysis.
+The [detailed composition](docs/ARCHITECTURE.md#qualified-fixture-composition) retains the
+individual authority, candidate, qualification and evidence edges.
 
 ```mermaid
 flowchart TB
-    subgraph AUTH["Authority and control"]
-        direction LR
-        AQ["AQUILA<br/>implemented fixture authority · budgets · leases"]
-        S[("Filesystem staging/cache<br/>bounded pre-ingestion bytes")]
-        K["ETZIO kernel<br/>implemented fixture protocol · lifecycle · replay"]
-    end
-
-    subgraph SCAN["Supported candidate path"]
-        direction LR
-        V["VELITES<br/>implemented narrow AST observations"]
-        KC["ETZIO candidate admission<br/>construct · validate · retain"]
-        C["Stable candidates<br/>implemented · not findings"]
-    end
-
-    subgraph OPTIONAL["Optional implemented paths and storage"]
-        direction LR
-        VR["ETZIO verification-intent path<br/>modeled lease · resolution · recovery<br/>signed opaque receipt admission · no execution"]
-        DBL[("SQLite schema v4 · legacy profile<br/>supported CLI + ordinary kernel store")]
-        IF["Fixture-integrity finality facade<br/>mode selected at enrollment"]
-        DBM[("SQLite schema v4 · fixture-integrity profile<br/>permanent after enrollment")]
-    end
-
-    subgraph QUAL["Signed-fixture qualification"]
-        direction LR
-        AP["Exact adapter profile<br/>trust root · validation/provider policies<br/>fixed all-source roster"]
-        SP["Role-separated signed fixture packages<br/>Ed25519 · exact nonce-bound requests<br/>authenticate before claim parsing"]
-        TH["All-source time qualification<br/>common overlap · conservative outer hull"]
-        RF["Full-hull revocation qualification<br/>validity · staleness · metadata/floors"]
-        HH["Head-authority qualification<br/>RFC 9162 inclusion + consistency<br/>unanimous catalog monitors"]
-        SM["Sealed provider-neutral mapping<br/>fresh reauthentication · exact BLOB coverage<br/>qualified lifecycle input"]
-    end
-
-    AQ --> K
-    S -->|"first canonical ingestion"| K
-    K -->|"analysis lease + immutable bytes"| V
-    V -->|"typed observations"| KC --> C
-    K -->|"explicit command · action admitted<br/>before mission opening"| VR
-    C -->|"exact retained candidate input"| VR
-    VR -->|"canonical events + evidence"| DBL
-    K <--> DBL
-    K -->|"optional empty-store facade"| IF
-    IF <--> DBM
-    AP --> SP
-    SP --> TH
-    SP --> RF
-    SP --> HH
-    TH -->|"complete time hull"| RF
-    TH -->|"complete time hull"| HH
-    TH --> SM
-    RF --> SM
-    HH --> SM
-    SM -->|"qualified enrollment only"| IF
-
+    accTitle: Implemented fixture runtime paths
+    accDescr: Fixture commands share one trusted host process. The CLI uses the legacy store; an optional enrolled facade adds fixture finality.
+    A["Admitted fixture authority<br/>exact target bytes · bounded lease"]
+    K["ETZIO commands<br/>scan and candidate admission<br/>explicit modeled-verification APIs"]
+    L[("Legacy SQLite profile<br/>canonical events + evidence vault")]
+    F["Optional fixture-finality facade<br/>four retained recovery phases"]
+    Q["Signed-fixture qualification<br/>time · revocation · head authority"]
+    E[("Enrolled SQLite profile<br/>events + vault + finality records")]
+    A --> K
+    K -->|"supported CLI / ordinary APIs"| L
+    K -->|"separate API · empty-store enrollment"| F
+    Q -->|"qualified mode only"| F
+    F --> E
     classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
     classDef fixture fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
     classDef qualification fill:#fff3bf,stroke:#e67700,color:#3d2100;
-    class AQ,K,S,DBL,V,KC,C,VR implemented;
-    class IF,DBM fixture;
-    class AP,SP,TH,RF,HH,SM qualification;
-    style AUTH fill:#f8f9fa,stroke:#adb5bd,color:#212529
-    style SCAN fill:#f8f9fa,stroke:#adb5bd,color:#212529
-    style OPTIONAL fill:#f8f9fa,stroke:#adb5bd,color:#212529
-    style QUAL fill:#fff9db,stroke:#f59f00,color:#3d2100
+    class A,K,L implemented;
+    class F,E fixture;
+    class Q qualification;
 ```
+
+The CLI closes a scan with candidates. The explicit verification-intent APIs retain leases,
+resolved bytes and signed modeled receipts. Neither path executes a proof artifact or
+creates a finding. The enrolled facade adds integrity finality; its provider inputs remain
+repository-owned fixtures. Labels carry these distinctions independently of color.
 
 The optional integrity facade retains four immutable local phases. Its enrolled mode selects
 unsigned modeled assertions or qualified signed-fixture packages. Both remain local fixture
@@ -410,6 +346,8 @@ and prove external authority at each trust, write and read boundary:
 
 ```mermaid
 flowchart TB
+    accTitle: Fixture integrity finality
+    accDescr: Four immutable retained phases advance from a pending event to verified finalization. The unresolved transition holds a database-global barrier.
     E["Proposed event<br/>exact prior global + mission heads"]
     D["Signed integrity decision<br/>enrolled profile · authenticated dossier"]
     P1["1 · Pending event<br/>atomic event + dossier + required evidence"]
@@ -434,6 +372,8 @@ current schema-v4 store. Neither a recovery decision nor elapsed time releases f
 
 ```mermaid
 flowchart TB
+    accTitle: Governed blocked-finality recovery
+    accDescr: A role-separated signed decision authorizes retry or terminal sealing. Neither disposition releases the unresolved-transition barrier.
     PH["Exact highest retained phase<br/>pending · anchor · checkpoint candidate"]
     REF["Deterministic finality refusal"]
     OBS["Durable blocked observation<br/>phase · operation · reason · attempt ordinal"]
@@ -493,12 +433,13 @@ repository-owned deterministic fixtures.
 
 | Retained | Value |
 |---|---|
-| Latest engine release, `285fdb6` ([PR 57](https://github.com/manfromnowhere143/etzio/pull/57)) | `2617` passing tests per runtime locally and in exact-head Linux CI on CPython 3.11.15 and 3.14.2 |
+| Engine baseline `cd5c6ad` ([PR 59](https://github.com/manfromnowhere143/etzio/pull/59)) | `2629` passing tests per runtime locally and in exact-head Linux CI on CPython 3.11.15 and 3.14.2 |
 | Historical published-material full-suite release | `1794` passing tests on CPython 3.11.15 and 3.14.2 in Linux CI; retains that release's scope |
 | Rollback-journal policy | `DELETE` / `EXTRA` on both runtimes, exact `sqlite_source_id()` retained |
 | SQLite identity | `application_id` `0x45545A31` (ASCII `ETZ1`), `user_version` `4` |
 | Accepted decisions | `24` architecture decision records, each with a known-bad where it names a gate |
 | Merkle core | reproduces the published RFC 6962/9162 reference tree for sizes `0`–`8`, and all `36` reference inclusion plus `36` reference consistency proofs |
+| Merkle append frontier | compared with the full-tree implementation across `512` tree sizes |
 | Qualified-evidence acceptance | `47` known-bads across the anchor, revocation, and head-floor phases; unsigned content is refused in signed mode |
 | Governed fixture scans | vulnerable fixture closes with `7` candidates, clean fixture with `0`, neither mints a finding |
 
@@ -513,7 +454,7 @@ The canonical interpreter is CPython 3.11.15; CI also reproduces the suite on CP
 3.14.2. Validation dependencies are exact and hash-locked.
 
 ```bash
-git clone git@github.com:manfromnowhere143/etzio.git
+git clone https://github.com/manfromnowhere143/etzio.git
 cd etzio
 python3.11 -m venv .venv
 .venv/bin/python -m pip install \
@@ -522,8 +463,13 @@ python3.11 -m venv .venv
   --only-binary=:all: \
   --requirement tools/ci/requirements-ci.lock
 .venv/bin/python -m pip check
+.venv/bin/python -m pip install --no-input --no-deps --no-build-isolation .
 ETZIO_PYTHON=.venv/bin/python make verify
 ```
+
+Record `git rev-parse HEAD` with the validation output. The package-install step creates
+the `etzio` console command using the already locked build/runtime dependencies. A passing
+suite validates this checkout under the recorded runtime; it does not establish a finding.
 
 Run the governed fixtures:
 
@@ -545,14 +491,15 @@ Neither conversion tool exists yet. Use a fresh state path and preserve the refu
 database plus journal bytes unchanged until an explicit stop-the-world migration is
 implemented and qualified.
 
-An exact `user_version = 1` transactional-vault database is the narrow exception: opening
-it atomically installs the version-2 integrity tables under the permanent legacy profile
-without relabeling any retained event as finalized. Only an entirely empty legacy profile
-can enroll in modeled integrity finality.
+Exact supported version-1, version-2 and version-3 schema layouts migrate transactionally
+to version `4`, adding the required relations without relabeling retained events as
+finalized. A version-1 transactional-vault database retains the legacy profile. Existing
+enrollment is preserved; only an entirely empty legacy profile can newly enroll in
+fixture-integrity finality.
 
 ## Open gates and next mission
 
-The next mission is not more detector breadth. The evidence foundation is deep: the typed
+The next mission qualifies the external integrity boundary. The fixture foundation includes the typed
 integrity-evidence contract, crash-safe modeled finality across four immutable phases, three
 networkless qualification harnesses, durable governed blocked-finality — specified,
 persisted, wired into the lifecycle, and crash-recovered — and a schema-version-4 store that
@@ -594,6 +541,7 @@ not a completed preregistration or a comparative result. See the
 
 ## Project record
 
+- [Engineering review guide](docs/REVIEW_GUIDE.md)
 - [Session handoff](docs/SESSION_HANDOFF.md)
 - [Machine-readable mission state](docs/MISSION_STATE.json)
 - [Charter](CHARTER.md)
@@ -602,7 +550,7 @@ not a completed preregistration or a comparative result. See the
 - [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
 - [Provider and host qualification next steps](docs/QUALIFICATION_NEXT_STEPS.md)
 - [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
-- [Architecture decisions (ADR-0001 through ADR-0022)](docs/decisions/README.md)
+- [Architecture decisions (24 accepted records)](docs/decisions/README.md)
 - [Presentation standard](docs/PRESENTATION.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)
