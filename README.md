@@ -5,7 +5,7 @@ finding only when a separately authorized verifier reproduces a material effect 
 retained bytes and the kernel accepts the receipt — proof by reproduction, not by
 confidence.**
 
-> **Honest status — 2026-10-15. Phase: foundation integrity. This is the courtroom, not
+> **Honest status — 2026-10-16. Phase: foundation integrity. This is the courtroom, not
 > yet the detective.**
 >
 > Etzio has built a tested evidence and adjudication kernel. It has *not* built
@@ -35,11 +35,13 @@ confidence.**
 > through the complete lifecycle and reconstructs them from retained bytes on cold replay.
 > Merkle verification uses the published **RFC 6962/9162 reference vectors**; append-frontier
 > recovery is also compared with the full-tree implementation across `512` tree sizes.
-> The latest engine release, [PR 57](https://github.com/manfromnowhere143/etzio/pull/57)
+> The preceding engine release, [PR 57](https://github.com/manfromnowhere143/etzio/pull/57)
 > at `285fdb6`, passed `2617` tests on both declared Python runtimes locally and in exact-head
 > Linux CI. This includes the protocol validation optimization; it measures fixture
-> behavior, not vulnerability-discovery quality. The [handoff](docs/SESSION_HANDOFF.md)
-> identifies the latest documentation validation separately.
+> behavior, not vulnerability-discovery quality. The October 16 evidence-input repair adds
+> `12` controls, for a collection target of `2629`. Resolve its full validation and
+> publication from the current [handoff](docs/SESSION_HANDOFF.md).
+
 > The [decision index](docs/decisions/README.md) contains `24` architecture decisions
 > defining the contracts and their refusal cases.
 >
@@ -51,6 +53,23 @@ connects current research to a controlled comparison and separate feature experi
 The [October 12 mission assessment](docs/MISSION_REVIEW_2026-10-12.md) retains the
 provider-feasibility decision. Competitive discovery, independent external reproduction
 and income remain undemonstrated.
+
+## Evidence-input repair and research, 2026-10-16
+
+Generic evidence inputs now require exact built-in bytes before caller behavior, hashing
+or filesystem work. A reproduced subclass defect could publish 64 bytes under an 8-byte
+limit before refusing the write; another could redirect the digest input. The repair
+refuses both before work and preserves ordinary-byte identities. All `63` focused evidence
+tests pass on both runtimes; the [repair record](docs/evidence/evidence-byte-admission-2026-10-16.json)
+identifies the separate full-release validation. This is a local engine correction.
+
+Three [new primary-paper reviews](docs/FRONTIER_BASELINE.md#evidence-reuse-and-oracle-quality-2026-10-16)
+add proposed controls for source-linked reasoning, target-identity sensitivity and
+intended-behavior oracles. The additional CoW fee/fill source analysis remains conditional,
+with degenerate-order semantics unresolved and no confirmed finding. Six provider threads
+were checked again October 16: no new human reply or operating commitment. The dependency
+diagram below and selected comparison order remain current; the October 15 table records
+the preceding progress snapshot.
 
 ## Progress through 2026-10-15
 

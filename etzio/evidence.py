@@ -136,8 +136,8 @@ def _rename_noreplace(
 
 
 def evidence_digest(data: bytes) -> str:
-    if not isinstance(data, bytes):
-        raise EvidenceError("evidence must be bytes")
+    if type(data) is not bytes:
+        raise EvidenceError("evidence must be immutable bytes")
     return f"sha256:{hashlib.sha256(_EVIDENCE_DOMAIN + data).hexdigest()}"
 
 
@@ -560,8 +560,8 @@ class FileEvidenceStore:
             os.close(root_descriptor)
 
     def put(self, data: bytes) -> ArtifactReceipt:
-        if not isinstance(data, bytes):
-            raise EvidenceError("evidence must be bytes")
+        if type(data) is not bytes:
+            raise EvidenceError("evidence must be immutable bytes")
         if len(data) > self.max_artifact_bytes:
             raise EvidenceError("evidence artifact exceeds configured limit")
         digest = evidence_digest(data)

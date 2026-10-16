@@ -1,11 +1,41 @@
 # 2026 Vulnerability-Research Frontier Baseline
 
-Original comparison snapshot: **2026-07-29**; latest targeted research review: **2026-10-15**.
+Original comparison snapshot: **2026-07-29**; latest targeted research review: **2026-10-16**.
 This is a design baseline, not an Etzio performance claim. The update below does not
 silently refresh every historical result in the original comparison table.
 Sources are primary project, research, program, or vendor publications where available.
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
+
+## Evidence reuse and oracle quality, 2026-10-16
+
+Three additional primary papers sharpen the selected comparison. Their methods, evaluation
+conditions and limitations were inspected; no benchmark or third-party code was executed.
+Exact source identities and review depth are retained with the
+[October 16 continuation evidence](evidence/evidence-byte-admission-2026-10-16.json).
+
+| Primary source | Observed contribution and limit | Etzio consequence to test |
+|---|---|---|
+| [AVRI, v1, October 8](https://arxiv.org/html/2610.11602v1) | Source-linked forward/backward reasoning and persistent evidence reduce reported aggregate cost on 20 fixed-harness C/C++ tasks. One run per configuration and no component ablations leave robustness and attribution open; crash-based success is weaker than independent security-effect proof. | Compare useful source queries, cached computation and context recovery separately. Charge auxiliary work. Persistent evidence alone is already a published technique, not a unique Etzio advantage. |
+| [AnonVul, v1, October 13](https://arxiv.org/html/2610.17542v1) | Business-logic tasks use hidden relational oracles, patched controls and identity anonymization. A matched 20-task cohort is sensitive to restored software identity. Residual cues, expert construction and single runs limit generalization; unrelated valid findings are outside its target-specific score. | Bind principal, action, object, state and forbidden effect explicitly. Test identity sensitivity with semantics-preserving paired variants and keep off-target findings distinct from target success. |
+| [Patching benchmark reliability, v1, October 7](https://arxiv.org/html/2610.10150v1) | A curated 112-bug study separates PoC, regression and developer-added tests and examines harness failures. Upstream tests strengthen the oracle but remain incomplete; selection favors reproducible, well-tested projects. | Preserve intended behavior and adjacent legitimate cases. Classify harness failures separately; passing one trigger test cannot establish a correct fix. |
+
+These are proposed controls within the existing experiment order. First freeze and run
+S/F/M/H after admission; then test semantic guidance, scheduling and reuse separately.
+An identity-sensitivity study must hold access, budgets and security semantics fixed and
+validate its transformed positive and negative controls before interpreting a difference.
+It is not a new admitted corpus or an extra result from the four-arm baseline.
+
+The practical research unit is a source-bound obligation: who can perform which action on
+which object, in which state, and what observation would distinguish a violation from
+legitimate behavior. Keep input-to-operation reachability, required unsafe conditions,
+contrary evidence and unresolved assumptions separate. Reuse requires exact source and
+analysis-context applicability; a saved narrative is not verification authority.
+
+The retained CoW fee/fill review applies this discipline to positive-quantity, partial,
+full and degenerate-order cases. It rules against simple fee-overcharge explanations in
+the ordinary source cases and leaves degenerate-order semantics unresolved. It is manual
+source reasoning, not a target execution, independent proof or bounty-eligibility decision.
 
 ## Competitive review and experiment order, 2026-10-15
 

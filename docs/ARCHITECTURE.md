@@ -389,6 +389,12 @@ aliasing, and digest drift. Writes use exclusive creation, fsync, and post-write
 verification. Filesystem availability after commit is not canonical retention and is not
 a replay invariant.
 
+All generic and typed digest/write entrypoints require exact built-in `bytes` before
+length inspection, domain concatenation, hashing or filesystem access. Subclasses are
+refused without coercion, so caller-defined length or reflected-addition behavior cannot
+change the resource check or digest input. The October 16 repair preserves ordinary-byte
+identities and generic empty-artifact support.
+
 Repository-fixture target bytes retain their original generic evidence identity. Modeled
 verification inputs use a separate type-domain digest:
 

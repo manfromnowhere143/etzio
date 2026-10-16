@@ -108,3 +108,23 @@ full ASCII alphabet's canonical identity and controls for a late surrogate, deco
 Unicode, an overlength ASCII value and invalid ASCII keys. Measure the same owned
 lifecycle before and after without profiling; instrumented timings alone do not establish
 a speedup or production throughput.
+
+## Exact evidence-byte admission, 2026-10-16
+
+Generic and typed evidence digest and write entrypoints admit only exact built-in
+`bytes`. A subclass is refused before querying its length, concatenating a digest
+domain, computing a hash or opening the staging root. Do not coerce rejected objects:
+conversion can invoke caller behavior or allocate before the byte limit is checked.
+
+This closes two demonstrated generic-input defects. A subclass can underreport its
+length, causing an over-limit file to be published before post-write validation refuses
+it. It can also override reflected concatenation and redirect the digest input.
+Neither a late refusal nor an eventual canonical-vault rejection makes that earlier
+identity computation and staging write acceptable.
+
+Exact-byte identities, empty generic artifacts, nonempty typed artifacts, size ceilings,
+atomic no-clobber publication and existing-file verification keep their contracts. Prove
+early refusal for plain and behavior-bearing subclasses at all four public entrypoints,
+with no subclass callbacks, hashing or filesystem access and no changes to retained
+artifacts. This is a local input-boundary correction, not execution isolation, a
+finding-admission change or evidence of third-party exploitability.

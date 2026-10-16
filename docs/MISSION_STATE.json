@@ -1,6 +1,6 @@
 {
   "schema_version": "etzio.mission_state.v2",
-  "updated": "2026-10-15",
+  "updated": "2026-10-16",
   "engine": "Etzio",
   "workspace": "/Users/danielwahnich/workspace/etzio",
   "canonical_branch": "main",
@@ -35,7 +35,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Read the October 15 complete-progress handoff and documentation release record. The engine remains at the validated PR 57 runtime boundary: 2617 tests, schema v4, owned fixtures only. The operator selected S/F/M/H comparison after existing foundation and independent-execution gates, followed by separate semantic guidance, scheduling and reuse experiments; all 18 registration inputs remain unbound. Native catalog/monitor commitments and the full dossier remain the next integration dependency. Preserve sent follow-ups, spent FreeTSA acquisitions and exact target admission. Current Daybreak account approval is unknown; latest known preparation remains unsubmitted. Private research, source-review and recovery pointers are retained in the handoff.",
+    "next_session_pickup": "Read the October 16 evidence-input repair handoff and exact release record (2629-test collection target). Generic evidence inputs now reject bytes subclasses before behavior or work; authority and schema v4 are unchanged. New primary research refines source-linked obligations, identity-sensitivity and intended-behavior controls without running a comparison. CoW source reasoning remains conditional, not a finding. Native catalog/monitor commitments and the full dossier remain the next integration dependency; the October 16 bounded readback found no new human reply. Preserve sent follow-ups, spent acquisitions and recovery/storage/isolation/benchmark/exact-target gates, then S/F/M/H and separate feature experiments. All 18 registration inputs remain unbound. Current Daybreak approval and enabled-request state are unknown; saved work survived the display notice.",
     "post_gate_operating_model": "run a strictly authorized exact-TargetContract bounty-research lane in parallel with continued engine development only after integrity isolation and benchmark gates close; accepted outcomes and income are measured results never authority",
     "next_session_brief": "docs/NEXT_SESSION_MISSION.md"
   },
@@ -207,9 +207,9 @@
     "research-native cockpit"
   ],
   "current_evidence": {
-    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption; legacy fixture metrics preserving undefined denominators and unresolved outcome coverage; owned-document link validation and current-state recovery clarification; equivalent ASCII protocol validation with retained differential and fixture timing evidence; documentation and diagram reconciliation with selected frontier research, controlled-comparison direction and bounded public-source review, without runtime or gate changes",
+    "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption; legacy fixture metrics preserving undefined denominators and unresolved outcome coverage; owned-document link validation and current-state recovery clarification; equivalent ASCII protocol validation with retained differential and fixture timing evidence; documentation and diagram reconciliation with selected frontier research, controlled-comparison direction and bounded public-source review, without runtime or gate changes; exact built-in evidence-byte admission before subclass behavior, digest computation or staging access",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2617,
+    "test_count": 2629,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -223,13 +223,14 @@
     "focused_archived_timestamp_and_clock_capture_tests_passed": 68,
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
-    "release_evidence_pointer": "/documentation_handoff/release_validation_record",
+    "release_evidence_pointer": "/exact_evidence_byte_admission/release_validation_record",
     "focused_source_provenance_tests": 52,
     "focused_trusted_list_signature_tests": 70,
     "focused_native_checkpoint_tests": 105,
     "focused_effect_evidence_tests": 13,
     "focused_interruption_cleanup_tests": 18,
-    "focused_cleanup_failure_tests": 14
+    "focused_cleanup_failure_tests": 14,
+    "focused_evidence_tests": 63
   },
   "documentation_release_evidence": {
     "scope": "2026-07-29 documentation and frontier reconciliation only",
@@ -1503,13 +1504,14 @@
     "provider_admissions": 0,
     "purchase_or_deployment_committed": false,
     "private_evidence": "artifacts/operator-inquiries/2026-10-14-pilot-dispatch-resumed/",
-    "fresh_thread_readback": "artifacts/checkpoints/2026-10-15-comparison-readiness/provider-thread-readback.json",
+    "fresh_thread_readback": "artifacts/checkpoints/2026-10-16-evidence-byte-admission/provider-thread-readback.json",
     "engine_project_clarification_pending": false,
     "follow_up_scheduled": false,
-    "thread_readback_retained_host_utc": "2026-10-15T12:45:39Z",
+    "thread_readback_retained_host_utc": "2026-10-16T07:58:32.835013+00:00",
     "approved_followups_sent": 3,
     "followup_evidence": "docs/evidence/operator-pilot-followups-2026-10-14.json",
-    "readback_scope": "Six existing threads and a separate bounded prospective-provider reply query; same ten message IDs, no new human reply or operating commitment."
+    "readback_scope": "Six existing threads and a separate bounded prospective-provider reply query; same ten message IDs, no new human reply or operating commitment.",
+    "latest_status_record": "artifacts/checkpoints/2026-10-16-evidence-byte-admission/provider-status.json"
   },
   "cleanup_interruption_hardening": {
     "date": "2026-10-12",
@@ -1693,7 +1695,18 @@
     "preregistered": false,
     "comparison_executed": false,
     "early_lane_exception_accepted": false,
-    "gate_order_changed": false
+    "gate_order_changed": false,
+    "latest_targeted_review": {
+      "date": "2026-10-16",
+      "record": "artifacts/checkpoints/2026-10-16-evidence-byte-admission/research/review.json",
+      "sources": [
+        "2610.11602v1",
+        "2610.17542v1",
+        "2610.10150v1"
+      ],
+      "scope": "Selected methods, evaluation conditions and limitations; not independent reproduction",
+      "evidence_record": "docs/evidence/evidence-byte-admission-2026-10-16.json"
+    }
   },
   "bounty_source_review": {
     "status": "contrary_source_evidence_not_a_finding",
@@ -1706,7 +1719,17 @@
     "source_commit": "dd08e12e765088470268eb0bbba13e86b14b9cb6",
     "deployed_runtime_verified": false,
     "date": "2026-10-15",
-    "record": "artifacts/checkpoints/latest-bounty-source-review.json"
+    "record": "artifacts/checkpoints/latest-bounty-source-review.json",
+    "additional_fee_fill_review": {
+      "date": "2026-10-16",
+      "record": "artifacts/checkpoints/2026-10-16-evidence-byte-admission/bounty-obligations.json",
+      "source_files_identity_checked": 6,
+      "status": "conditional_obligations_degenerate_semantics_unresolved",
+      "target_executions": 0,
+      "chain_queries": 0,
+      "submissions": 0,
+      "confirmed_findings": 0
+    }
   },
   "documentation_handoff": {
     "date": "2026-10-15",
@@ -1721,5 +1744,21 @@
     "gate_order_changed": false,
     "diagram_scope": "fixture system, finality, governed recovery, full target topology, progress gates and separate comparison experiments",
     "previous_release": "/ascii_protocol_validation/release_validation_record"
+  },
+  "exact_evidence_byte_admission": {
+    "date": "2026-10-16",
+    "status": "implemented_resolve_exact_release_validation",
+    "base_commit": "00083c29614c142d2d13c0ded6a307a03dfa564b",
+    "evidence_record": "docs/evidence/evidence-byte-admission-2026-10-16.json",
+    "release_validation_record": "artifacts/checkpoints/2026-10-16-evidence-byte-admission/release-validation.json",
+    "new_controls": 12,
+    "predecessor_failed_per_runtime": 6,
+    "predecessor_passed_per_runtime": 6,
+    "focused_tests_passed_per_runtime": 63,
+    "full_suite_collection_target": 2629,
+    "runtime_changed": true,
+    "authority_changed": false,
+    "gate_order_changed": false,
+    "finding": false
   }
 }

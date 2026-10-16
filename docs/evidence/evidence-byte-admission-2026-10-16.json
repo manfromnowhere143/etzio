@@ -1,0 +1,105 @@
+{
+  "schema": "etzio.evidence-byte-admission.v1",
+  "date": "2026-10-16",
+  "base_commit": "00083c29614c142d2d13c0ded6a307a03dfa564b",
+  "status": "implemented_local_input_boundary_correction",
+  "contract": "docs/decisions/0002-canonical-governed-fixture-boundary.md#exact-evidence-byte-admission-2026-10-16",
+  "reproduction": {
+    "before": {
+      "configured_limit_bytes": 8,
+      "subclass_reported_length": 1,
+      "actual_buffer_bytes": 64,
+      "published_file_bytes": 64,
+      "write_result": "late_refusal_after_publication",
+      "reflected_concat_can_redirect_digest_input": true
+    },
+    "after": {
+      "result": "early_exact_type_refusal",
+      "published_files": 0,
+      "subclass_callbacks": 0,
+      "hash_calls": 0,
+      "filesystem_opens": 0
+    },
+    "runtimes": [
+      "3.11.15",
+      "3.14.2"
+    ],
+    "boundary": "Owned local Python input tests; not remote or third-party exploitability, independent execution, or a finding."
+  },
+  "new_controls": 12,
+  "predecessor_controls_per_runtime": {
+    "failed": 6,
+    "passed": 6
+  },
+  "focused_tests_per_runtime": 63,
+  "full_collection_target": 2629,
+  "release_validation_record": "artifacts/checkpoints/2026-10-16-evidence-byte-admission/release-validation.json",
+  "private_record_identities": [
+    {
+      "path": "artifacts/checkpoints/2026-10-16-evidence-byte-admission/provider-status.json",
+      "sha256": "bcee5e49f90b21fc9a02d05a698fde6d810c775caf1867e798194d194a4c3466",
+      "size_bytes": 461
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-16-evidence-byte-admission/bounty-obligations.json",
+      "sha256": "85ed060dc6a06a52280c79e65077f3c877ec7253aa4c6833a7dedc308bf6eda3",
+      "size_bytes": 5511
+    }
+  ],
+  "primary_research": [
+    {
+      "id": "2610.11602v1",
+      "source": "https://arxiv.org/html/2610.11602v1",
+      "sha256": "80dc9f336a01dadb6e9fbc827a29c6e4b0870626f85fb57c42b6579598a9c0f7",
+      "size_bytes": 252266,
+      "reviewed_sections": [
+        "2.1-2.5",
+        "3",
+        "4.4-4.5",
+        "5",
+        "6"
+      ]
+    },
+    {
+      "id": "2610.17542v1",
+      "source": "https://arxiv.org/html/2610.17542v1",
+      "sha256": "3b9bea464faeff23bce436c6f960db86ba5993b3778866f69af7a35b0168a0e0",
+      "size_bytes": 1481177,
+      "reviewed_sections": [
+        "3",
+        "4",
+        "5 RQ3-RQ5",
+        "7"
+      ]
+    },
+    {
+      "id": "2610.10150v1",
+      "source": "https://arxiv.org/html/2610.10150v1",
+      "sha256": "0eea100e71c605df950d3731267baba63b193ce360332da0285f65b750e4faed",
+      "size_bytes": 482506,
+      "reviewed_sections": [
+        "4.2",
+        "9"
+      ]
+    }
+  ],
+  "research_status": "selected_primary_source_review_not_reproduction",
+  "bounty_preparation": {
+    "source_revision": "dd08e12e765088470268eb0bbba13e86b14b9cb6",
+    "source_files_identity_checked": 6,
+    "status": "conditional_source_obligations_and_contrary_evidence",
+    "executions": 0,
+    "chain_queries": 0,
+    "submissions": 0,
+    "confirmed_findings": 0
+  },
+  "provider_status": {
+    "threads_checked": 6,
+    "messages_unchanged": 10,
+    "new_human_replies": 0,
+    "operating_commitments": 0,
+    "messages_sent": 0
+  },
+  "authority_changed": false,
+  "gate_order_changed": false
+}

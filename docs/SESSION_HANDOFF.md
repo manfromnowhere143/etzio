@@ -1,6 +1,61 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-15, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-16, Asia/Jerusalem.
+
+## Current pickup, 2026-10-16 — evidence-input repair and bounded research
+
+Start here and in [MISSION_STATE](MISSION_STATE.json). The [repair evidence](evidence/evidence-byte-admission-2026-10-16.json)
+records an owned Python API defect: a bytes subclass could underreport its length and
+publish an oversized staging file before a late refusal, or redirect the generic digest
+input through reflected addition. Generic digest/write entrypoints now require exact
+built-in bytes, matching the typed entrypoints, before callbacks, hashing or filesystem
+access. No coercion is performed. Ordinary-byte identities and empty generic artifacts
+retain their contract. The base is `00083c29614c142d2d13c0ded6a307a03dfa564b`.
+
+The twelve new controls give six failures and six passes on the predecessor on each
+runtime; all 63 focused evidence tests pass after repair on CPython 3.11.15 and 3.14.2.
+The full collection target is 2629. Resolve full local, package, exact-head Linux CI,
+publication and recovery results from
+`artifacts/checkpoints/2026-10-16-evidence-byte-admission/release-validation.json`.
+Focused results alone are not a complete release. Schema v4, fixture-only execution,
+independent verification requirements and authority remain unchanged.
+
+Three new primary papers inform [proposed comparison controls](FRONTIER_BASELINE.md#evidence-reuse-and-oracle-quality-2026-10-16):
+source-linked obligations and separately costed evidence reuse; paired target-identity
+sensitivity; and intended-behavior oracles beyond a single PoC. Selected methods and
+limitations were read, with exact captures retained; none was independently reproduced.
+Keep S/F/M/H first after admission, then separate semantic, scheduling and reuse experiments.
+All 18 registration inputs remain unbound. Do not claim competitive superiority.
+
+The additional CoW review rechecked six retained file identities at
+`dd08e12e765088470268eb0bbba13e86b14b9cb6` and partitioned fee/fill obligations by order kind
+and quantity. Ordinary cases supply contrary evidence to simple overcharge hypotheses;
+degenerate-order semantics remain unresolved. No contract execution, chain query, deployed
+state check, submission or confirmed finding occurred. Retain the source assumptions in
+`artifacts/checkpoints/2026-10-16-evidence-byte-admission/bounty-obligations.json`.
+
+The six provider threads were checked at host time `2026-10-16T07:58:32.835013+00:00`:
+the same ten messages, no new human reply or operating commitment. A separate bounded
+reply query returned none. Preserve sent follow-ups and spent acquisitions; do not resend
+or substitute more offline parsers for accountable native operators. The next integration
+dependency remains catalog/monitor commitments and the complete native dossier, followed
+by recovery/fencing, protected storage, independent execution, benchmark and exact targets.
+
+The reported OpenAI content-display restriction did not roll back saved repository or
+private evidence files; their JSON was read back successfully. Official guidance was
+rechecked October 16. Current account approval, tier and enabled-request state are unknown;
+the last established application state remains prepared/unsubmitted. No support message,
+application or account change was made. Product access is separate from Etzio authority.
+
+The new private checkpoint also contains provider readback, raw paper captures, predecessor
+and repaired reproductions and focused logs. Existing frozen indexes remain immutable.
+Use `artifacts/recovery/latest.json` for the latest restore-checked same-host recovery copy;
+it is not independent durability. The existing architecture diagrams remain accurate and
+their Mermaid source is unchanged. Older dated sections below preserve prior release facts.
+
+Full-suite collection declaration (a target count, not a passing result):
+
+- 2629 tests expected;
 
 ## Current pickup, 2026-10-15 — complete progress and research handoff
 
@@ -98,10 +153,6 @@ additional strings and `8218` canonical wire/identity cases per runtime. One unp
 local lifecycle comparison passed in `105.95` seconds before and `34.16` seconds after.
 That pair does not establish general or production throughput. Resolve complete release
 checks from `artifacts/checkpoints/2026-10-15-ascii-validation/release-validation.json`.
-
-Full-suite collection declaration (a target count, not a passing result):
-
-- 2617 tests expected;
 
 Repository continuity [PR 56](https://github.com/manfromnowhere143/etzio/pull/56) is merged
 at `597df2648bb519a512b90868050efe9174c89bd6`. All `1473` entries across `39` historical

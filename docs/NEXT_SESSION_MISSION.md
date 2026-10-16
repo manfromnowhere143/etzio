@@ -5,7 +5,22 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-15 — progress, comparison and bounty readiness
+## Current continuation, 2026-10-16 — evidence-input correction
+
+Read the current [handoff](SESSION_HANDOFF.md) and [repair evidence](evidence/evidence-byte-admission-2026-10-16.json).
+Generic evidence admission now refuses bytes subclasses before behavior or work. Resolve
+the 2629-test full release, packages and publication from its exact validation record;
+63 focused passes alone are insufficient. Existing diagram sources remain unchanged.
+
+Three additional primary papers refine proposed evidence-reuse, identity-sensitivity and
+oracle controls; no experiment has run. CoW fee/fill source obligations are conditional,
+with degenerate semantics unresolved and no confirmed finding. The October 16 provider
+readback found no new human reply or operating commitment. Continue from actual operating
+evidence or a demonstrated owned-repository defect, preserving the selected gate order,
+sent follow-ups and spent acquisitions. Current Daybreak approval/request state is unknown;
+the reported display notice did not remove saved work.
+
+## Previous continuation, 2026-10-15 — progress, comparison and bounty readiness
 
 Read the latest [handoff](SESSION_HANDOFF.md) first. The README and architecture diagrams
 now distinguish implemented fixture paths, native preparation, blocked qualification and
