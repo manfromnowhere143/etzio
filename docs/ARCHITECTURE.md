@@ -489,6 +489,15 @@ refused without coercion, so caller-defined length or reflected-addition behavio
 change the resource check or digest input. The October 16 repair preserves ordinary-byte
 identities and generic empty-artifact support.
 
+During shard and temporary-file setup, the acquiring helper owns its descriptor until
+it returns successfully. If setup raises, including `KeyboardInterrupt` or `SystemExit`,
+it closes that descriptor and removes an unpublished temporary file before propagating
+the interruption. Existing artifacts remain unchanged and the caller may retry. The
+October 18 controls inject interruptions at shard permission setup, directory validation,
+root synchronization and temporary-file permission setup through both write entrypoints.
+They assume cleanup succeeds; they do not qualify arbitrary signal timing, interrupted
+cleanup, process-kill recovery, power loss or the storage profile.
+
 Repository-fixture target bytes retain their original generic evidence identity. Modeled
 verification inputs use a separate type-domain digest:
 
@@ -786,7 +795,7 @@ worker jailer, independent verifier, denied-egress probe or power-fault recovery
 cloud preparation authority therefore does not establish an accepted execution profile.
 No such execution tier exists in this repository. Exploit execution remains blocked. See
 [qualification next steps](QUALIFICATION_NEXT_STEPS.md) and the
-[README progress map](../README.md#progress-through-2026-10-16).
+[README progress map](../README.md#progress-through-2026-10-18).
 
 ## Domain and technique packs
 

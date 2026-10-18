@@ -1,8 +1,53 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-16, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-18, Asia/Jerusalem.
 
-## Current pickup, 2026-10-16 — engineering review and repository synchronization
+## Current pickup, 2026-10-18 — evidence setup and frontier review
+
+The preceding documentation release is complete: [PR 60](https://github.com/manfromnowhere143/etzio/pull/60),
+`827f5707ef9a3372d6cbfb9c3dcd48871b4caf4e`, with `2629` tests passing per runtime
+locally and in exact-commit Linux CI. All seven diagrams were rendered and reviewed.
+Its same-host recovery check restored `2382` files and verified `1811` entries across
+`46` artifact indexes. Preserve those frozen records.
+
+The [current repair](evidence/evidence-setup-interruption-2026-10-18.json) closes acquired
+shard and temporary-file descriptors when setup raises `KeyboardInterrupt` or `SystemExit`;
+unpublished temporary files are removed before the interruption propagates. Sixteen
+controls fail on the predecessor on both declared runtimes. After repair, all `79` focused
+evidence tests pass per runtime, preserving existing artifacts, retry and idempotence.
+This assumes cleanup succeeds; it does not qualify arbitrary signal timing, cleanup
+failure, process death, power loss or protected storage.
+
+Full-suite collection declaration (a target count, not a passing result):
+
+- 2645 tests expected;
+
+Resolve the exact candidate's full local suites, packages, Linux CI, publication and
+cleanup from `artifacts/checkpoints/2026-10-18-evidence-setup-interruption/release-validation.json`.
+Use `artifacts/recovery/latest.json` for the latest completed restore check. The diagrams'
+gates and topology are unchanged; their source is checked against the October 16 renders.
+
+The [mission review](MISSION_REVIEW_2026-10-18.md) reads selected methods, results and limits
+from four additional preprints and refreshes the public CoW and Google cyber pages. It
+refines post-change verification, complete-cost accounting, strong cache baselines and
+population denominators. No paper was independently reproduced. The owned engine repair
+is not a research benchmark or a third-party finding. The CoW source/deployed-state gap
+remains unresolved; no target, downloaded tool or contract was executed.
+
+Six existing provider threads were read at host time `2026-10-18T08:28:31.727036+00:00`:
+the same ten message IDs, no new message or operating commitment. This readback did not
+search other threads or channels. Nothing was sent. Preserve the three sent follow-ups,
+both spent FreeTSA attempts and existing bounded cloud-preparation authority.
+
+The next integration dependency remains accountable catalog/independent-monitor
+commitments and the complete native dossier. Then prove external recovery/fencing,
+protected storage and independent execution; admit benchmark and exact targets before
+S/F/M/H, followed by separate semantic, scheduling and reuse experiments. All `18`
+registration inputs remain unbound. No accepted finding, settled income or comparative
+advantage is established. Continue from new operating evidence or a demonstrated owned
+foundation defect; do not restart completed surveys or add optional parsers as a substitute.
+
+## Previous pickup, 2026-10-16 — engineering review and repository synchronization
 
 The engine repair is released at `cd5c6ada82b349f3272b0fe010c2878bada6d74c`
 ([PR 59](https://github.com/manfromnowhere143/etzio/pull/59)). All `2629` tests passed on

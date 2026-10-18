@@ -1,0 +1,147 @@
+{
+  "schema": "etzio.evidence-setup-interruption.v1",
+  "date": "2026-10-18",
+  "base_commit": "827f5707ef9a3372d6cbfb9c3dcd48871b4caf4e",
+  "status": "implemented_focused_controls_passed_resolve_release_record",
+  "contract": "docs/ARCHITECTURE.md#evidence-and-target-identity",
+  "decision": "docs/MISSION_REVIEW_2026-10-18.md",
+  "new_controls": 16,
+  "predecessor_failed_per_runtime": 16,
+  "focused_passed_per_runtime": 79,
+  "runtimes": [
+    "3.11.15",
+    "3.14.2"
+  ],
+  "full_collection_target": 2645,
+  "release_validation_record": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/release-validation.json",
+  "sites": [
+    "shard_permission_setup",
+    "shard_directory_validation",
+    "root_directory_synchronization",
+    "temporary_file_permission_setup"
+  ],
+  "interruptions": [
+    "KeyboardInterrupt",
+    "SystemExit"
+  ],
+  "entrypoints": [
+    "generic_put",
+    "typed_put"
+  ],
+  "preserved": [
+    "exception_identity",
+    "prior_artifact_bytes",
+    "no_new_publication",
+    "retry",
+    "idempotence"
+  ],
+  "boundary": "Injected exceptions after descriptor acquisition with successful cleanup; no arbitrary async interruption, cleanup failure, process kill, power loss or production storage qualification. Owned engine repair, not a third-party finding.",
+  "research_status": "selected_methods_results_and_limitations_not_independent_reproduction",
+  "primary_research": [
+    {
+      "id": "2610.19005v1",
+      "reviewed_scope": [
+        "selected framework sections",
+        "5.2",
+        "5.3",
+        "5.5",
+        "6"
+      ],
+      "capture": {
+        "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/research/2610.19005v1-html.html",
+        "size_bytes": 609642,
+        "sha256": "33b8749dbd6cb695d3f73d76e069d41d0bc8b3f83966f52e55b4d9d313319921"
+      }
+    },
+    {
+      "id": "2610.21309v1",
+      "reviewed_scope": [
+        "3.1-3.4",
+        "4.1",
+        "4.2",
+        "5.2"
+      ],
+      "capture": {
+        "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/research/2610.21309v1-html.html",
+        "size_bytes": 390707,
+        "sha256": "972fcc54898cd5fc7ed4b34d7297c0f1089444fc7655c6206b911eec6e4dba48"
+      }
+    },
+    {
+      "id": "2610.21394v1",
+      "reviewed_scope": [
+        "12.1-12.2",
+        "17.2",
+        "19",
+        "negative-result and limitation passages"
+      ],
+      "capture": {
+        "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/research/2610.21394v1-html.html",
+        "size_bytes": 563884,
+        "sha256": "1077ad83aa736627e0a5dd7a8d46ef97591cf4d0862aa5b78a9d05e4cf533a4c"
+      }
+    },
+    {
+      "id": "2610.22301v1",
+      "reviewed_scope": [
+        "4.1",
+        "4.3-4.4",
+        "6.2"
+      ],
+      "capture": {
+        "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/research/2610.22301v1-html.html",
+        "size_bytes": 295566,
+        "sha256": "44c98715ea644923331011c9b66a530fdbf1f310e0b802eaf9b4e3e54892bad6"
+      }
+    }
+  ],
+  "private_record_identities": [
+    {
+      "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/provider-status.json",
+      "size_bytes": 354,
+      "sha256": "120e270b877a8dd7174215574d6e21e0c99f9e525d789c0e199a649ec3bb2c8f"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/research/sources.json",
+      "size_bytes": 5434,
+      "sha256": "9e37dabf19bf9e2da96e2f4e5237b5984ec6f0a938b5a0343e2bc874d5ad9590"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/research/review.json",
+      "size_bytes": 6604,
+      "sha256": "ecbea2dd8ad227032534fe01993cef33d13cb4d6d084b19b8f4ba6f3cc2ae3c8"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/predecessor-311.log",
+      "size_bytes": 63624,
+      "sha256": "6c83d53db22362bcc386a005286a0cf733a971a6c01f2ecfe000827960275099"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/predecessor-314.log",
+      "size_bytes": 63624,
+      "sha256": "07ebb04410c3c0992e06e9003fed8150b6bd52ae9682df7ddaaaa6bbeb058b88"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/focused-311.log",
+      "size_bytes": 179,
+      "sha256": "841e136e63323d1587e2f1e229388298d498fd21e5c06c5fe6a546fa723b1556"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-18-evidence-setup-interruption/focused-314.log",
+      "size_bytes": 179,
+      "sha256": "080fde601eb10503a295811db8e7345d8005be08fa66d09d77dce15ff2c8f2db"
+    }
+  ],
+  "provider_status": {
+    "threads_checked": 6,
+    "messages_unchanged": 10,
+    "new_messages": 0,
+    "new_operating_commitments": 0,
+    "sent": 0,
+    "scope": "Six existing threads only; no separate sender search this review."
+  },
+  "authority_changed": false,
+  "gate_order_changed": false,
+  "accepted_findings": 0,
+  "paid_outcomes": 0
+}

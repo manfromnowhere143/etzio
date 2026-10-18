@@ -1,10 +1,9 @@
 # Engineering review guide
 
-Status: review entrypoint, 2026-10-16. The implemented code baseline is
-[`cd5c6ad`](https://github.com/manfromnowhere143/etzio/commit/cd5c6ada82b349f3272b0fe010c2878bada6d74c)
-([PR 59](https://github.com/manfromnowhere143/etzio/pull/59)). This guide maps claims to
-implementation and refusal evidence. It is a scoped review aid, not an exhaustive security
-audit, independent assessment or comparative performance result.
+Status: review entrypoint, 2026-10-18. The [current repair record](evidence/evidence-setup-interruption-2026-10-18.json)
+and [handoff](SESSION_HANDOFF.md) identify implementation and validation at this revision.
+This guide maps claims to code and refusal evidence. It is a scoped review aid, not an
+exhaustive security audit, independent assessment or comparative performance result.
 
 ## Read in this order
 
@@ -40,7 +39,7 @@ These are entrypoints into the review, not exhaustive lists of all supporting te
 |---|---|---|
 | Canonical wire and semantic dispatch | [protocol](../etzio/protocol/v1.py), [semantic registry](../etzio/protocol/semantic_v1.py) | [wire controls](../tests/test_protocol_v1.py), [schema parity](../tests/test_protocol_schema_v1.py) |
 | Authority before mission opening; exact fixture scope | [authority](../etzio/authority.py), [fixture scan](../etzio/kernel/fixture_scan.py), [CLI](../etzio/scan.py) | [grant controls](../tests/test_authority_v1.py), [fixture lifecycle](../tests/test_fixture_scan_v1.py), [CLI controls](../tests/test_scan_cli.py) |
-| Immutable byte identity and bounded staging | [evidence store](../etzio/evidence.py) | [filesystem/identity controls](../tests/test_evidence_v1.py), [subclass refusal before work](../tests/test_evidence_input_boundary.py) |
+| Immutable byte identity and bounded staging | [evidence store](../etzio/evidence.py) | [filesystem/identity controls](../tests/test_evidence_v1.py), [subclass refusal before work](../tests/test_evidence_input_boundary.py), [interrupted setup cleanup](../tests/test_evidence_setup_interruption.py) |
 | Atomic event, role and BLOB retention; replay after staging loss | [vault manifests](../etzio/kernel/evidence_vault.py), [SQLite store](../etzio/kernel/store.py), [reducer](../etzio/kernel/reducer.py) | [protected appends, rollback and corruption](../tests/test_transactional_evidence_vault_v1.py), [coherent reads](../tests/test_store_read_snapshot.py) |
 | Exact lease/input/receipt binding and single consumption | [lease issuance](../etzio/kernel/verification_lease.py), [resolution](../etzio/kernel/artifact_resolution.py), [receipt admission](../etzio/kernel/receipt_admission.py) | [lease controls](../tests/test_kernel_verification_lease_v1.py), [resolution controls](../tests/test_kernel_verification_artifacts_v1.py), [receipt races and substitution](../tests/test_kernel_receipt_admission_v1.py) |
 | Four-phase finality, exact retry and global barrier | [transition coordinator](../etzio/kernel/integrity_transition.py), [store](../etzio/kernel/store.py) | [recovery matrix](../tests/test_integrity_recovery_matrix_v1.py), [adversarial transitions](../tests/test_integrity_transition_adversarial_v1.py) |
@@ -73,9 +72,10 @@ checked-out commit. The supported validation matrix is CPython `3.11.15` and `3.
 The exact lock includes the build and optional qualification dependencies; install the
 local package before invoking its console command.
 
-The cited engine release passed `2629` tests per runtime locally and in
+The preceding October 16 engine release passed `2629` tests per runtime locally and in
 [exact-commit Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/38873128704).
-Package contents and installed-wheel behavior were checked separately. Repository policy
+The current collection contains `2645` tests; its exact full-suite and package checks are
+resolved separately through the handoff. Repository policy
 also checks sole-author history, immutable Action revisions, read-only workflow permissions
 and owned-document paths. These checks do not certify all code, detect all broken external
 links or validate every prose claim.
@@ -97,6 +97,6 @@ registration inputs remain unbound.
 Compare verified outcomes, false positives, coverage, cost and reviewer burden under fixed
 information and resource conditions. Preserve null and inconclusive results, family-level
 holdouts, contamination uncertainty and intended-behavior controls. The
-[dated primary-source review](FRONTIER_BASELINE.md#evidence-reuse-and-oracle-quality-2026-10-16)
+[dated primary-source review](MISSION_REVIEW_2026-10-18.md)
 informs these hypotheses. It does not establish superiority over another system or imply
 endorsement by an external engineering team.

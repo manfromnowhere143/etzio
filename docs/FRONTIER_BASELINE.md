@@ -7,6 +7,21 @@ Sources are primary project, research, program, or vendor publications where ava
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
 
+## Verification cost and dependency controls, 2026-10-18
+
+The [dated mission review](MISSION_REVIEW_2026-10-18.md) records selected methods, results
+and limitations from CyberArena, LLM4SAST, Matoi and MCP-FSD, plus current vendor and CoW
+program evidence. Exact versioned captures are identified in the
+[public evidence record](evidence/evidence-setup-interruption-2026-10-18.json).
+The papers were not independently reproduced.
+
+The proposed comparison now explicitly carries post-change run identity and legitimate-use
+controls, excluded-attempt cost, analyzer/oracle validation, identical-representation cache
+baselines and distinct attempted/analyzed/verified denominators. These refine the existing
+protocol; they do not admit a corpus, implement a reuse subsystem or change experiment
+order. Independently confirmed cause yield per full cost and reviewer effort remains the
+advantage to test. All `18` registration inputs remain unbound.
+
 ## Evidence reuse and oracle quality, 2026-10-16
 
 Three additional primary papers sharpen the selected comparison. Their methods, evaluation

@@ -5,7 +5,22 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-16 — engineering review
+## Current continuation, 2026-10-18 — setup interruption and comparison controls
+
+Read the current [handoff](SESSION_HANDOFF.md), [mission review](MISSION_REVIEW_2026-10-18.md)
+and [repair evidence](evidence/evidence-setup-interruption-2026-10-18.json). The acquired
+resource cleanup repair has `16` predecessor-failing controls and `79` focused passes on
+each declared runtime. Resolve the `2645`-test full release from its exact validation
+record. Diagrams retain their accepted gate order and current/future boundaries.
+
+Four fresh preprints refine evaluation controls; they supply no Etzio result. CoW public
+program pages were recaptured without execution or submission. Six existing provider
+threads contain the same ten messages, with no new commitment. The native operational
+dossier remains the next integration dependency. Preserve sent follow-ups, spent
+acquisitions and all accepted gates. Customer-paid work remains conditional on a real
+buyer and exact accepted scope; no income forecast is supported.
+
+## Previous continuation, 2026-10-16 — engineering review
 
 Start with the latest [handoff](SESSION_HANDOFF.md), [review guide](REVIEW_GUIDE.md) and
 [review evidence](evidence/reviewer-readiness-2026-10-16.json). The engine baseline is

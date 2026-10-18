@@ -311,7 +311,7 @@ class FileEvidenceStore:
             if created:
                 os.fsync(root_descriptor)
             return descriptor
-        except Exception:
+        except BaseException:
             os.close(descriptor)
             raise
 
@@ -460,7 +460,7 @@ class FileEvidenceStore:
                 raise EvidenceError("cannot create temporary evidence artifact") from exc
             try:
                 os.fchmod(descriptor, 0o600)
-            except Exception:
+            except BaseException:
                 os.close(descriptor)
                 try:
                     os.unlink(temporary_name, dir_fd=shard_descriptor)
