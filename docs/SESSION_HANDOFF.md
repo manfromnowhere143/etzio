@@ -134,9 +134,7 @@ Use `artifacts/recovery/latest.json` for the latest restore-checked same-host re
 it is not independent durability. The existing architecture diagrams remain accurate and
 their Mermaid source is unchanged. Older dated sections below preserve prior release facts.
 
-Full-suite collection declaration (a target count, not a passing result):
-
-- 2629 tests expected;
+Historical collection target for the October 16 engine repair: `2629` tests.
 
 ## Historical pickup, 2026-10-15 — complete progress and research handoff
 
