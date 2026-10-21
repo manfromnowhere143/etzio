@@ -154,6 +154,13 @@ Only `clean_app.py` and `vulnerable_app.py` from the immutable repository manife
 admitted. `etzio.scan` has no arbitrary filesystem-target argument. The analyzer itself
 takes bytes and owns no filesystem walker.
 
+The CLI's [versioned JSON report](FIXTURE_SCAN_REPORT_V1.md) is an unsigned view of
+freshly reduced retained events. Text and JSON output share the same outcome rule:
+closure with parse failures remains incomplete, and refused or incomplete analysis
+cannot return exit `0`. Neither the report nor its installed schema admits authority
+or supplies independent execution evidence. The output adapter changes no kernel
+event, provider contract, storage profile or gate order.
+
 The verification-intent branch records an assignment, resolves its predeclared bytes, and
 can admit one authenticated, caller-supplied modeled statement while consuming its lease.
 Four separately typed output artifacts must already exist in the canonical vault or exact

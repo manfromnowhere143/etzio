@@ -16,6 +16,7 @@ import stat
 import sys
 import tempfile
 import time
+from contextlib import ExitStack
 from pathlib import Path
 
 from .authority import (
@@ -31,7 +32,7 @@ from .evidence import (
     retain_snapshot,
 )
 from .kernel.fixture_scan import run_fixture_scan
-from .kernel.reducer import MissionProjection
+from .kernel.reducer import MissionProjection, ProjectionPhase, reduce_events
 from .kernel.store import SQLiteEventStore
 from .mission_v1 import StaticCandidateV1
 from .protocol import EnvelopeV1, canonical_dumps, content_id, thaw_json
@@ -52,6 +53,12 @@ def _parser() -> argparse.ArgumentParser:
         choices=tuple(sorted(_FIXTURES)),
         default="vulnerable",
         help="closed-manifest fixture to analyze (default: vulnerable)",
+    )
+    parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="report format (default: text); JSON uses etzio.fixture_scan_report.v1",
     )
     parser.add_argument(
         "--state-dir",
@@ -140,7 +147,86 @@ def _execute(
         replayed = event_store.load(mission_id)
     if replayed != projection.events:
         raise RuntimeError("durable replay differs from the mission projection")
-    return projection, snapshot, relative_path
+    return reduce_events(replayed), snapshot, relative_path
+
+
+def _scan_status(projection: MissionProjection) -> tuple[str, str | None]:
+    """Keep lifecycle closure separate from complete static analysis."""
+
+    if projection.phase is ProjectionPhase.CLOSED:
+        if projection.parse_failures:
+            return "incomplete", "parse_failures"
+        if (
+            projection.scan_summary is not None
+            and projection.terminal_event is not None
+            and projection.terminal_event.payload["status"] == "completed"
+        ):
+            return "completed", None
+    if projection.phase in {
+        ProjectionPhase.REFUSED,
+        ProjectionPhase.FAILED,
+        ProjectionPhase.CANCELLED,
+        ProjectionPhase.TIMED_OUT,
+        ProjectionPhase.BUDGET_EXHAUSTED,
+    }:
+        terminal = projection.terminal_event
+        if terminal is None:
+            raise RuntimeError("terminal fixture result has no retained terminal event")
+        return projection.phase.value, terminal.payload["reason_code"]
+    return "incomplete", "static_scan_not_closed"
+
+
+def _candidates(projection: MissionProjection) -> tuple[StaticCandidateV1, ...]:
+    return tuple(
+        StaticCandidateV1.from_envelope(
+            EnvelopeV1.from_bytes(canonical_dumps(thaw_json(event.payload)["candidate"]))
+        )
+        for event in projection.candidate_events
+    )
+
+
+def _json_report(
+    projection: MissionProjection,
+    snapshot: TargetSnapshotV1,
+    relative_path: str,
+    *,
+    ephemeral: bool,
+) -> dict[str, object]:
+    """Present the supported static fixture command; this is not an admission API."""
+
+    status, reason = _scan_status(projection)
+    return {
+        "schema_version": "etzio.fixture_scan_report.v1",
+        "scope": "repository_fixture",
+        "claim_level": "static_candidates",
+        "verification_status": "not_performed",
+        "mission_id": projection.mission_id,
+        "authority_id": projection.authority_id,
+        "target_snapshot_id": snapshot.object_id,
+        "event_head": projection.events[-1].event_digest,
+        "event_count": len(projection.events),
+        "fixture": relative_path,
+        "phase": projection.phase.value,
+        "status": status,
+        "reason_code": reason,
+        "state_retention": "ephemeral" if ephemeral else "operator_path",
+        "candidate_count": len(projection.candidate_events),
+        "candidates": [
+            {
+                "candidate_id": candidate.candidate_id,
+                "claim_id": candidate.claim_id,
+                "source_artifact_digest": candidate.source_artifact_digest,
+                "relative_path": candidate.relative_path,
+                "line": candidate.line,
+                "column": candidate.column,
+                "rule_id": candidate.rule_id,
+                "severity": candidate.severity,
+            }
+            for candidate in _candidates(projection)
+        ],
+        "parse_failure_count": len(projection.parse_failures),
+        "parse_failures": [thaw_json(event.payload)["parse_failure"] for event in projection.parse_failures],
+    }
 
 
 def _render(
@@ -157,14 +243,16 @@ def _render(
     print(f"target snapshot  : {snapshot.object_id}")
     print(f"fixture          : {relative_path}")
     print(f"terminal phase   : {projection.phase.value}")
+    status, reason = _scan_status(projection)
+    print(f"scan status      : {status}")
+    if reason is not None:
+        print(f"reason           : {reason}")
+    print(f"parse failures   : {len(projection.parse_failures)}")
     print(f"durable events   : {len(projection.events)}")
     print(f"state retention  : {'ephemeral demo directory' if ephemeral else 'operator path'}")
     print("-" * 78)
     print(f"VELITES candidates: {len(projection.candidate_events)}")
-    for event in projection.candidate_events:
-        payload = thaw_json(event.payload)
-        envelope = EnvelopeV1.from_bytes(canonical_dumps(payload["candidate"]))
-        candidate = StaticCandidateV1.from_envelope(envelope)
+    for candidate in _candidates(projection):
         print(
             f"  {candidate.candidate_id}  [{candidate.severity}] "
             f"{candidate.rule_id} at {candidate.relative_path}:"
@@ -178,22 +266,27 @@ def _render(
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     fixture_name = _FIXTURES[args.fixture]
-    if args.state_dir is not None:
-        try:
-            state_dir = _prepare_state_dir(args.state_dir)
+    ephemeral = args.state_dir is None
+    try:
+        with ExitStack() as cleanup:
+            if ephemeral:
+                temporary = cleanup.enter_context(tempfile.TemporaryDirectory(prefix="etzio-fixture-"))
+                state_dir = Path(temporary)
+                os.chmod(state_dir, 0o700)
+            else:
+                state_dir = _prepare_state_dir(args.state_dir)
             projection, snapshot, relative_path = _execute(fixture_name, state_dir)
-        except (OSError, RuntimeError, ValueError) as exc:
-            print(f"error: governed fixture mission failed: {exc}", file=sys.stderr)
-            return 2
-        _render(projection, snapshot, relative_path, ephemeral=False)
-        return 0
-
-    with tempfile.TemporaryDirectory(prefix="etzio-fixture-") as temporary:
-        state_dir = Path(temporary)
-        os.chmod(state_dir, 0o700)
-        projection, snapshot, relative_path = _execute(fixture_name, state_dir)
-        _render(projection, snapshot, relative_path, ephemeral=True)
-    return 0
+        # Finish ephemeral cleanup before emitting a report. Both retention modes
+        # use the same outcome policy and operational-error channel.
+        if args.format == "json":
+            report = _json_report(projection, snapshot, relative_path, ephemeral=ephemeral)
+            print(canonical_dumps(report).decode("utf-8"))
+        else:
+            _render(projection, snapshot, relative_path, ephemeral=ephemeral)
+        return 0 if _scan_status(projection)[0] == "completed" else 3
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"error: governed fixture mission failed: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

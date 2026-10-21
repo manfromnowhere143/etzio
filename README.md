@@ -484,6 +484,13 @@ Run the governed fixtures:
 .venv/bin/etzio --fixture clean
 ```
 
+For local integrations, `etzio --fixture vulnerable --format json` emits the
+[versioned fixture report](docs/FIXTURE_SCAN_REPORT_V1.md). Exit `0` means completed
+static analysis, including scans with candidates; incomplete or refused analysis
+exits `3`, and operational errors exit `2`. Empty candidate output is not a finding
+or proof of safety. The [interface and paid pilot assessment](docs/ENGINE_INTERFACES_AND_VALUE.md)
+sets out the consumer requirements for a future SDK, API and MCP adapter.
+
 To retain replay state, provide a new path or an existing owner-controlled directory whose
 mode is already `0700`:
 

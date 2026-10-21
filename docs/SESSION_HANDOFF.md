@@ -2,7 +2,62 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-21, Asia/Jerusalem.
 
-## Current pickup, 2026-10-21: public contribution and customer discovery
+## Current pickup, 2026-10-21: fixture integration and failure outcomes
+
+The preceding release is `daca6d7789ad3e29cfd8a81a796f9b9d804008f5`
+([PR 64](https://github.com/manfromnowhere143/etzio/pull/64)); its outreach and
+recovery records are frozen. The inherited baseline passes all `2674` tests again
+on CPython 3.11.15. Preserve earlier sent messages and spent acquisition grants.
+
+The [CLI repair](evidence/fixture-cli-report-2026-10-21.json) fixes a demonstrated
+false success exit: retained analyzer failure and closure with parse failures both
+previously returned `0`. Four end to end controls fail on the predecessor on both
+supported runtimes. The corrected command returns `3` for retained refused or
+incomplete analysis and `2` for operational failures, while completed static scans
+with or without candidates still return `0`.
+
+`--format json` adds the [versioned fixture report](FIXTURE_SCAN_REPORT_V1.md) and
+installed schema. Reports derive from freshly reduced retained events and include
+explicit outcome, reason, source and candidate identities without source literals
+or private state paths. Both retention modes finish cleanup before emission and
+preserve interruptions. The `57` focused tests pass per runtime, including actual
+retained outcomes, invalid replay, misleading cached summaries and report delivery
+failure. The collection target is not a full-suite passing result:
+
+- 2711 tests expected;
+
+Resolve full local suites, package checks, exact commit Linux CI and publication
+from `artifacts/checkpoints/2026-10-21-fixture-cli-report/release-validation.json`.
+No protocol event, native provider, isolation profile or authority gate changes.
+The current diagram topology and gate order are unchanged.
+
+The [interface and value assessment](ENGINE_INTERFACES_AND_VALUE.md) retains the
+consumer conditions for an SDK, HTTP API and MCP adapter. Only the CLI report is
+implemented. A proposed paid fixture reviewability pilot measures correct outcome
+classification and reviewer time; fee, scope, license and acceptance need an actual
+buyer agreement. No engagement or income is established.
+
+One source review was published on each existing Semgrep and Socket pull request,
+with exact readback and original contributor credit preserved. They identify a
+missing test of special interfile error priority and a released-port test race.
+No upstream code was executed, no fix or bounty finding was claimed, and no sales
+pitch or email was sent. Private records are at
+`artifacts/contributions/2026-10-21-semgrep-socket/`. Do not repeat either approach
+without a relevant response. Other evaluated prospects were not contacted.
+
+Selected VulContextBench v1 methods and results and MCP 2026-07-28 protocol sections
+were reviewed, not reproduced. Source captures at
+`artifacts/research/2026-10-21-engine-interfaces/` distinguish tool-extracted web text
+from original HTTP bytes. The resulting evidence-sufficiency questions refine the
+existing proposed evaluation; all `18` comparison inputs remain unbound.
+
+Native catalog and independent monitor commitments remain the external dependency.
+This turn did not recheck provider mailboxes and establishes no new commitment.
+Continue from actual operating evidence or demonstrated owned foundation defects,
+then external recovery/fencing, protected storage, separate MARCELLUS/CATO, benchmark
+and exact target admission. Technical outreach does not qualify a bounty lane.
+
+## Previous pickup, 2026-10-21: public contribution and customer discovery
 
 Daniel explicitly directed starting the proposed GitHub contribution approach and
 developing customer relationships. One attributed source review was published in
@@ -66,7 +121,7 @@ storage, independently administered services or external recovery.
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2674 tests expected;
+Historical full-suite collection target for the preceding recovery release: `2674` tests.
 
 Resolve full local suites, packages, exact-commit CI and publication from
 `artifacts/checkpoints/2026-10-21-qualified-recovery-composition/release-validation.json`.

@@ -1,0 +1,56 @@
+{
+  "schema": "etzio.fixture-cli-report-release.v1",
+  "date": "2026-10-21",
+  "base_commit": "daca6d7789ad3e29cfd8a81a796f9b9d804008f5",
+  "status": "focused_passed_resolve_full_release",
+  "new_tests": 37,
+  "focused_passed_per_runtime": 57,
+  "predecessor_failures_per_runtime": 4,
+  "runtimes": [
+    "3.11.15",
+    "3.14.2"
+  ],
+  "full_collection_target": 2711,
+  "contract": "docs/FIXTURE_SCAN_REPORT_V1.md",
+  "runtime": "etzio/scan.py",
+  "tests": [
+    "tests/test_scan_cli_outcomes.py",
+    "tests/test_scan_cli_report.py"
+  ],
+  "release_validation_record": "artifacts/checkpoints/2026-10-21-fixture-cli-report/release-validation.json",
+  "authority_changed": false,
+  "gate_order_changed": false,
+  "boundaries": [
+    "Repository-owned static fixtures only",
+    "Unsigned JSON presentation of local retained state",
+    "No supported SDK, HTTP service or MCP server",
+    "No native provider, protected storage, independent execution, finding or paid engagement"
+  ],
+  "private_validation": [
+    {
+      "path": "artifacts/checkpoints/2026-10-21-fixture-cli-report/baseline-311.log",
+      "bytes": 8036,
+      "sha256": "49c27965904a2b80a7421f040f9a92b1eedb10320978ea004bb7973e294b882d"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-fixture-cli-report/predecessor-311.log",
+      "bytes": 6400,
+      "sha256": "fd9f71143b1486a175505c2d88272ce4ad531c66f39085d4cdc7799377b31368"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-fixture-cli-report/predecessor-314.log",
+      "bytes": 6400,
+      "sha256": "a286e2e7b00a6df529872f4a200abded8ca10a488e40dd1632c6c54213de08ce"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-fixture-cli-report/focused-final-311.log",
+      "bytes": 100,
+      "sha256": "83797c65b0439c042b164c807220661a380a858d0bf8123df7886ec6fbc3cc0c"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-fixture-cli-report/focused-final-314.log",
+      "bytes": 100,
+      "sha256": "5ecd33cfc8c6013fd73bfcc7ef63006273c0bb7d8e25fbf9d28bc580cf18581a"
+    }
+  ]
+}

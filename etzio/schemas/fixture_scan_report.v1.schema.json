@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Etzio fixture scan report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scope",
+    "claim_level",
+    "verification_status",
+    "mission_id",
+    "authority_id",
+    "target_snapshot_id",
+    "event_head",
+    "event_count",
+    "fixture",
+    "phase",
+    "status",
+    "reason_code",
+    "state_retention",
+    "candidate_count",
+    "candidates",
+    "parse_failure_count",
+    "parse_failures"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "etzio.fixture_scan_report.v1"
+    },
+    "scope": {
+      "const": "repository_fixture"
+    },
+    "claim_level": {
+      "const": "static_candidates"
+    },
+    "verification_status": {
+      "const": "not_performed"
+    },
+    "mission_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "authority_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "target_snapshot_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "event_head": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "event_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "fixture": {
+      "enum": [
+        "clean_app.py",
+        "vulnerable_app.py"
+      ]
+    },
+    "phase": {
+      "enum": [
+        "admitted",
+        "open",
+        "analyzing",
+        "scan_completed",
+        "closed",
+        "refused",
+        "failed",
+        "cancelled",
+        "timed_out",
+        "budget_exhausted"
+      ]
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "incomplete",
+        "refused",
+        "failed",
+        "cancelled",
+        "timed_out",
+        "budget_exhausted"
+      ]
+    },
+    "reason_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "state_retention": {
+      "enum": [
+        "ephemeral",
+        "operator_path"
+      ]
+    },
+    "candidate_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "parse_failure_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "parse_failures": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/parse_failure"
+      }
+    }
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "claim_id",
+        "source_artifact_digest",
+        "relative_path",
+        "line",
+        "column",
+        "rule_id",
+        "severity"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "claim_id": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_artifact_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "relative_path": {
+          "enum": [
+            "clean_app.py",
+            "vulnerable_app.py"
+          ]
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rule_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        }
+      }
+    },
+    "parse_failure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relative_path",
+        "reason_code",
+        "line",
+        "column"
+      ],
+      "properties": {
+        "relative_path": {
+          "enum": [
+            "clean_app.py",
+            "vulnerable_app.py"
+          ]
+        },
+        "reason_code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "phase": {
+            "const": "closed"
+          },
+          "reason_code": {
+            "type": "null"
+          },
+          "parse_failure_count": {
+            "const": 0
+          },
+          "parse_failures": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "reason_code": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "refused"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "phase": {
+            "const": "refused"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "failed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "phase": {
+            "const": "failed"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "cancelled"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "phase": {
+            "const": "cancelled"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "timed_out"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "phase": {
+            "const": "timed_out"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "budget_exhausted"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "phase": {
+            "const": "budget_exhausted"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "incomplete"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "phase": {
+            "enum": [
+              "admitted",
+              "open",
+              "analyzing",
+              "scan_completed",
+              "closed"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
