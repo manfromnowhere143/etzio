@@ -804,7 +804,7 @@ worker jailer, independent verifier, denied-egress probe or power-fault recovery
 cloud preparation authority therefore does not establish an accepted execution profile.
 No such execution tier exists in this repository. Exploit execution remains blocked. See
 [qualification next steps](QUALIFICATION_NEXT_STEPS.md) and the
-[README progress map](../README.md#progress-through-2026-10-18).
+[README progress map](../README.md#progress-through-2026-10-21).
 
 ## Domain and technique packs
 
