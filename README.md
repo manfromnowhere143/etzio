@@ -61,10 +61,10 @@ That yields six operating laws:
 
 ## Current release and evidence
 
-The preceding engine release is [`70dc455`](https://github.com/manfromnowhere143/etzio/commit/70dc4554c6c086f502d0f2ce36e25ea1f649e60a)
-([PR 62](https://github.com/manfromnowhere143/etzio/pull/62), October 21, 2026):
-`2663` tests passed on CPython `3.11.15` and `3.14.2`, locally and in
-[Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/39615921462).
+The current engine release is [`905b63b`](https://github.com/manfromnowhere143/etzio/commit/905b63b7f56970eb925224dbb5c40f9cd599f2df)
+([PR 63](https://github.com/manfromnowhere143/etzio/pull/63), October 21, 2026):
+`2674` tests passed on CPython `3.11.15` and `3.14.2`, locally and in
+[Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/39619826870).
 Both package builds and installed-wheel checks passed. These results cover repository
 behavior under the recorded environments; discovery quality requires a separate benchmark.
 
@@ -91,7 +91,9 @@ and protocol corrections remain in the retained release history.
 | Repository reliability | Cleanup and coherent-read repairs, exact evidence-byte admission, interrupted setup cleanup, ambiguous close ownership and qualified governed recovery composition | `2674` tests in the current collection; release checks establish repository behavior only |
 | Research and comparison | Targeted primary-source reviews through October 21; four-arm comparison and separate semantic-guidance, scheduling and evidence-reuse designs retained | Experiment order selected; `18` registration inputs remain unbound; no comparator has run |
 | Bounty preparation | CoW source/deployment-record reconciliation, contrary evidence against four hypotheses and conditional fee/fill obligations | Exact deployed state, scope, independent reproduction and program eligibility remain unresolved; no confirmed finding or payment |
-| Operating dependencies | Three approved pilot follow-ups sent; six existing threads and a bounded five-domain inbound query checked on October 21 | No new operating commitment observed; three exact scope-confirmation drafts await approval |
+| Operating dependencies | Eight organizations contacted for catalog or monitor roles; approved scope confirmations and three new introductions sent and verified on October 21 | No operating commitment or provider admission observed |
+| Upstream engineering | [Source review contributed to Tessera issue 1098](https://github.com/transparency-dev/tessera/issues/1098#issuecomment-6320024671), with producer error cleanup and worker completion controls | No native reproduction, upstream fix or maintainer acceptance established |
+| Customer discovery | Two new inquiries proposing a small paid design pilot on synthetic evidence, with current capability limits stated | No customer engagement, delivery commitment or payment established |
 
 The [engineering review record](docs/evidence/reviewer-readiness-2026-10-16.json)
 retains the preceding presentation review. The latest

@@ -2,7 +2,48 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-21, Asia/Jerusalem.
 
-## Current pickup, 2026-10-21 — qualified governed recovery composition
+## Current pickup, 2026-10-21: public contribution and customer discovery
+
+Daniel explicitly directed starting the proposed GitHub contribution approach and
+developing customer relationships. One attributed source review was published in
+[Tessera issue 1098](https://github.com/transparency-dev/tessera/issues/1098#issuecomment-6320024671)
+under his account. It identifies producer error paths that bypass resource worker cleanup,
+proposes completion controls and distinguishes the iterator's background work. The original
+reporter retains discovery credit. No foreign code was executed, no fix or finding was
+claimed, and no maintainer response was observed at readback.
+
+The integration could read but returned HTTP 403 on comment creation. The authenticated
+GitHub CLI then posted exactly once; independent connector readback matched the body.
+Resolve the frozen receipt from
+`artifacts/contributions/2026-10-21-tessera-1098/status.json`. The earlier source review at
+`artifacts/research/2026-10-21-github-contribution-strategy/` remains a historical assessment;
+its statement that nothing was posted is superseded by this dispatch.
+
+Two new commercial discovery inquiries were sent to published business contacts after
+fresh domain searches found no previous correspondence. Each proposes a small paid design
+pilot on synthetic evidence and states that independent execution and production storage
+remain under qualification. Both stored sent copies match the exact plain and Odeya HTML
+bodies, with one operation marker per new thread and no private address copied. Gmail
+assigned different RFC Message-IDs; the first verification stopped on that mismatch, then
+verified the existing send without resending. Both requested and stored identities are
+retained. No customer engagement, price, delivery commitment or payment is established.
+The frozen private record is
+`artifacts/customer-discovery/2026-10-21-design-pilots/status.json`.
+
+This is demand discovery and public source discussion within Daniel's outreach authority.
+It does not accept an early execution lane, change the threat model or admit a bounty
+target. CoW's current published eligibility excludes current and former paid contributors,
+including external auditors and people paid through its listed service providers; preserve
+that distinction when considering commercial prospects. The exact source/state identity,
+native integrity, storage, isolation, benchmark and target gates remain open. Do not send
+automatic reminders or repeat the completed provider survey while awaiting actual replies.
+
+The preceding engine release is `905b63b7f56970eb925224dbb5c40f9cd599f2df`, with `2674`
+tests passing on both declared runtimes locally and in Linux CI. This continuation changes
+documentation only. Resolve its local validation, exact commit CI and publication from
+`artifacts/checkpoints/2026-10-21-community-customer-outreach/release-validation.json`.
+
+## Previous pickup, 2026-10-21: qualified governed recovery composition
 
 The preceding release is `70dc4554c6c086f502d0f2ce36e25ea1f649e60a`
 ([PR 62](https://github.com/manfromnowhere143/etzio/pull/62)): `2663` tests passed on
@@ -31,14 +72,32 @@ Resolve full local suites, packages, exact-commit CI and publication from
 `artifacts/checkpoints/2026-10-21-qualified-recovery-composition/release-validation.json`.
 The existing seven diagram sources retain their topology and gate order.
 
-Six existing operator threads still contain the same ten messages. A bounded five-domain
-inbound query after October 12 returned no matches; other channels remain unobserved.
-Three new exact scope-confirmation drafts are ready at
-`artifacts/checkpoints/2026-10-21-qualified-recovery-composition/operator-followups/review.md`.
-Their approval is pending; they have not been sent. Before any send, resolve the latest
-approval and live thread state. Preserve the three previously sent pilot follow-ups and
-both spent FreeTSA acquisitions. General mission urgency does not supply a new exact-copy
-send approval, purchase commitment or provider admission.
+Daniel approved the three prepared scope-confirmation replies. All three were sent on
+October 21 to Glasklar, Geomys and Trail of Bits in their existing threads, using the
+canonical Odeya professional presentation and signature. Exact stored bodies, sender,
+recipient, reply headers and one operation marker per thread were verified twice. No
+private address was copied. The dispatch record is
+`artifacts/operator-inquiries/2026-10-21-scope-dispatch/status.json`; its receipt contains
+the message and thread identities. The earlier frozen draft record remains unchanged.
+
+Daniel then corrected the outreach priority: find new relevant organizations instead of
+repeatedly following up unanswered requests. He explicitly authorized researching and
+contacting new prospects. One tailored introduction was sent to each of ControlPlane,
+TestifySec and Least Authority after official contact verification and fresh professional
+mailbox searches found no prior correspondence with those domains. Their published
+expertise motivates feasibility inquiries; it does not establish willingness or the exact
+operating capability. All three new messages and professional signatures were read back
+twice. Resolve their source ledger, exact copy and receipts from
+`artifacts/operator-inquiries/2026-10-21-new-prospects/status.json`.
+
+The latest nine-thread readback contains sixteen messages: fifteen outgoing messages and
+one previously recorded delivery failure, across eight organizations. No human reply or
+operating commitment was observed in those threads; other channels remain unobserved.
+Sent-copy verification does not establish recipient inbox delivery. Do not send another
+unanswered followup without a reply or Daniel's specific instruction. No followup is
+scheduled. Catalog and independent monitor commitments remain the next external
+dependency. Preserve all sent messages and both spent FreeTSA acquisitions. Neither
+dispatch makes a purchase commitment or provider admission.
 
 The [continued review](MISSION_REVIEW_2026-10-21.md#continuation-authority-at-consumption-not-only-preparation)
 uses dual-write proof assumptions and CarryoverBench's stage-conditioned measurements to
