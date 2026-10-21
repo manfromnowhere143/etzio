@@ -122,3 +122,38 @@ platform, build and dependency identities. These are proposed directions, each r
 its own permission, isolation, benchmark and effect oracle. Remediation validation,
 enterprise assurance and governed offline learning remain part of Etzio's purpose alongside
 bounties. No single model, technique or benchmark establishes coverage of all use cases.
+
+## Continuation: authority at consumption, not only preparation
+
+The bounded recovery audit found missing composition coverage, not a reproduced runtime
+defect. Eleven new schedules combine signed fixture packages with governed retry, cold
+restart, a second interruption and a second connection changing recovery authority before
+the actual write. The existing implementation passes. Removing the transactional gate
+makes all six unauthorized-write controls fail; removing fresh-attempt authorization makes
+both cold-restart controls fail. Three valid concurrent-retry cases preserve progress.
+Resolve the exact validation from the [composition record](evidence/qualified-governed-recovery-2026-10-21.json).
+This protects local integration behavior without establishing external writer fencing.
+
+[Machine-Checked Dual-Write Recovery v5](https://arxiv.org/html/2608.00501v5), sections 6–7,
+separates delayed arrivals from competing recovery workers. Its positive results assume
+atomic acceptance/fence operations; its batch model excludes interruption inside a batch.
+Our inference is to demand a concrete acceptance point for each native effect and a
+per-operation crash schedule, rather than transfer a theorem across different atomicity
+boundaries. An authenticated remote epoch read alone cannot enforce a later SQLite commit.
+
+[CarryoverBench v1](https://arxiv.org/html/2610.28425v1), October 20, separates planting an
+instruction in persistent state from triggering it later. It reports 101 attack tasks,
+five models and five trigger rounds. The primary latent rounds repeat the same follow-up;
+the finite alias verifier misses some effects. Its appendix reports zero first-opportunity
+triggers for different-intent and unrelated prompts in two tested models, so persistence
+must not be reported as topic-independent harm. Conditional trigger rates also need their
+plant denominator. Selected methods, tables and limitations were reviewed; no benchmark
+was executed or independently reproduced.
+
+The proposed Etzio learning experiment should therefore measure three separate boundaries:
+admission of a retained observation, promotion into a reusable procedure, and authority at
+each later use. Pair malicious carryover controls with useful legitimate reuse, changed
+target scope, revocation and varied subsequent tasks. Preserve source taint through
+summarization and require kernel authorization at consumption. These are experimental
+obligations for the future learning lane, not implemented defenses or a reason to reorder
+native qualification, isolation and the initial S/F/M/H comparison.

@@ -1,0 +1,99 @@
+{
+  "schema": "etzio.qualified-governed-recovery-composition.v1",
+  "date": "2026-10-21",
+  "base_commit": "70dc4554c6c086f502d0f2ce36e25ea1f649e60a",
+  "status": "existing_runtime_conformance_focused_passed_resolve_full_release",
+  "new_tests": 11,
+  "focused_passed_per_runtime": 67,
+  "runtimes": [
+    "3.11.15",
+    "3.14.2"
+  ],
+  "negative_calibration_per_runtime": {
+    "missing_transaction_gate": {
+      "failed": 6,
+      "passed": 3,
+      "deselected": 2
+    },
+    "missing_fresh_attempt_gate": {
+      "failed": 2,
+      "deselected": 9
+    }
+  },
+  "runtime_bytes_changed": false,
+  "contract": "docs/decisions/0019-qualified-evidence-lifecycle-consumption.md#governed-recovery-composition-obligations-2026-10-21",
+  "tests": "tests/test_qualified_governed_recovery_composition_v1.py",
+  "full_collection_target": 2674,
+  "release_validation_record": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/release-validation.json",
+  "boundaries": [
+    "repository-owned signed fixture services and roots",
+    "cold connection/service restart after injected interruption, not process kill",
+    "two thread-owned SQLite connections ordered before actual phase transactions",
+    "no external acceptance, native writer fencing, protected storage or independent execution"
+  ],
+  "authority_changed": false,
+  "gate_order_changed": false,
+  "private_validation": [
+    {
+      "path": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/focused-311.log",
+      "bytes": 110,
+      "sha256": "6baf7a40f62ebfb98d11d54b16e768c2a5427e1e7272ec503036caccfcffeb62"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/focused-314.log",
+      "bytes": 111,
+      "sha256": "cab5aab37390d93e77b416f9101e2c160e8429ca3d4b62aa415841ee362d33a1"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/mutant-fresh-311.log",
+      "bytes": 4294,
+      "sha256": "495f0a1b597653f4fd64af4f8411fcecdf899faec24baf41eed6e2cea175d616"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/mutant-fresh-314.log",
+      "bytes": 4418,
+      "sha256": "4331cf13262f15af02e40ac8ac955e9da293dc4135252e3116dcea3fcbee2fce"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/mutant-transaction-311.log",
+      "bytes": 23366,
+      "sha256": "f08e192b9d78486321d7b5d192de6c1276d2763188385be3238e8f2cc184551b"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/mutant-transaction-314.log",
+      "bytes": 23876,
+      "sha256": "433c66a670bbb6b2fef45508414f6bb70e050f9d56996a0de5808c60cc8fa1c5"
+    }
+  ],
+  "research_sources": [
+    {
+      "id": "2610.28425v1",
+      "url": "https://arxiv.org/html/2610.28425v1",
+      "captured_host_utc": "2026-10-21T14:42:31.192130+00:00",
+      "path": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/2610.28425v1.html",
+      "bytes": 419991,
+      "sha256": "aaeedbe4145fbb33765957c4762bc3f08b139fc56fda3244766ae60fa1e3aaad",
+      "reviewed_sections": [
+        "2.3 metrics",
+        "4 results and Table 2",
+        "5.1-5.3 analyses",
+        "Limitations",
+        "Appendix D.2 and Table 15"
+      ],
+      "independently_reproduced": false
+    },
+    {
+      "id": "2608.00501v5",
+      "url": "https://arxiv.org/html/2608.00501v5",
+      "captured_host_utc": "2026-10-21T14:42:31.594958+00:00",
+      "path": "artifacts/checkpoints/2026-10-21-qualified-recovery-composition/2608.00501v5.html",
+      "bytes": 408539,
+      "sha256": "941f90ef92b0b26a0d704849427872c677d5903bfdd44131fc5982d238d5ef16",
+      "reviewed_sections": [
+        "6 arrival fence and limitations",
+        "7 claim fence and exactness preconditions"
+      ],
+      "independently_reproduced": false
+    }
+  ]
+}

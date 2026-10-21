@@ -2,7 +2,57 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-21, Asia/Jerusalem.
 
-## Current pickup, 2026-10-21 — close ownership and mission continuation
+## Current pickup, 2026-10-21 — qualified governed recovery composition
+
+The preceding release is `70dc4554c6c086f502d0f2ce36e25ea1f649e60a`
+([PR 62](https://github.com/manfromnowhere143/etzio/pull/62)): `2663` tests passed on
+both declared runtimes locally and in exact-commit Linux CI. Its frozen release checkpoint
+is `artifacts/checkpoints/2026-10-21-mission-takeover/`; preserve it unchanged.
+
+The [composition record](evidence/qualified-governed-recovery-2026-10-21.json) adds eleven
+tests to the existing runtime. Cold signed-fixture recovery after authorized phase progress
+and another interruption requires a current-phase grant. Across each of three phase-write
+transactions, a concurrently retained unanswered observation or seal stops an older
+recoverer; a valid latest-observation decision permits progress. Retained bytes, attempt
+ordinals, the unresolved barrier and store-domain refusals survive these schedules.
+
+Both runtimes pass `67` focused tests. In-memory negative variants remove one existing
+gate at a time: missing transaction authorization fails all six forbidden-write controls
+while three valid-retry controls pass; missing fresh-attempt authorization fails both
+cold-restart controls. No runtime defect was reproduced and no runtime bytes changed.
+This qualifies bounded fixture composition, not native fencing, process death, protected
+storage, independently administered services or external recovery.
+
+Full-suite collection declaration (a target count, not a passing result):
+
+- 2674 tests expected;
+
+Resolve full local suites, packages, exact-commit CI and publication from
+`artifacts/checkpoints/2026-10-21-qualified-recovery-composition/release-validation.json`.
+The existing seven diagram sources retain their topology and gate order.
+
+Six existing operator threads still contain the same ten messages. A bounded five-domain
+inbound query after October 12 returned no matches; other channels remain unobserved.
+Three new exact scope-confirmation drafts are ready at
+`artifacts/checkpoints/2026-10-21-qualified-recovery-composition/operator-followups/review.md`.
+Their approval is pending; they have not been sent. Before any send, resolve the latest
+approval and live thread state. Preserve the three previously sent pilot follow-ups and
+both spent FreeTSA acquisitions. General mission urgency does not supply a new exact-copy
+send approval, purchase commitment or provider admission.
+
+The [continued review](MISSION_REVIEW_2026-10-21.md#continuation-authority-at-consumption-not-only-preparation)
+uses dual-write proof assumptions and CarryoverBench's stage-conditioned measurements to
+separate evidence retention, procedure promotion and authority at use. Selected sections
+were reviewed, not independently reproduced. These future learning experiments do not
+replace the first S/F/M/H comparison; all `18` registration inputs remain unbound.
+
+Continue the four operator-requested gates in order: accountable native catalog/monitor
+commitments and complete qualification; external recovery/fencing, protected storage and
+separate MARCELLUS/CATO execution; admitted EVM benchmark and frozen comparison; exact
+authorized target, independent eligible impact and separately approved submission. None
+is closed by these local tests. No comparative advantage, finding or income is established.
+
+## Previous pickup, 2026-10-21 — close ownership and mission continuation
 
 The preceding release is `f6fd73d639859cc76aba088ee5c51ae18dc4976c`
 ([PR 61](https://github.com/manfromnowhere143/etzio/pull/61)), with `2645` tests passing
@@ -22,7 +72,7 @@ production storage remain outside the bounded contract.
 
 Full-suite collection declaration (a target count, not a passing result):
 
-- 2663 tests expected;
+Historical full-suite collection target for the close-ownership repair: `2663` tests.
 
 Resolve the exact candidate's full local suites, packages, Linux CI, publication and
 cleanup from `artifacts/checkpoints/2026-10-21-mission-takeover/release-validation.json`.

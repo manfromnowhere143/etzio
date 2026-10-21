@@ -373,6 +373,24 @@ both runtimes and CI reproduction:
    bundles are optional and cannot replace retained evidence. No schema migration is
    needed; unsupported interim qualified bytes refuse rather than being rewritten.
 
+## Governed recovery composition obligations, 2026-10-21
+
+The ADR-0016 rules also apply when all retained provider packages are signed fixtures.
+A cold recovery after authorized phase progress must bind its decision to the current
+phase; its old grant cannot silently authorize a new attempt. A newer blocked observation
+or seal retained by another connection after facade authorization must be checked again
+inside each actual phase-write transaction. The local write must refuse without creating
+an adapter-failure observation or releasing the global barrier. A valid retry answering
+the latest observation must still permit progress. Already retained canonical bytes
+remain readable and unchanged throughout these schedules.
+
+The bounded qualification schedules cover cold restart after anchor and checkpoint
+retention, plus two connections ordered before each of the three new phase writes.
+They are implementation tests of existing authority semantics, not a change to the
+protocol or evidence of external writer fencing, process-kill recovery, physical storage
+durability, or independently administered services. No native side-effect boundary is
+tested by these repository-owned fixtures.
+
 ## Claim boundary
 
 This decision is implemented by the qualified fixture service, store reconstruction and
