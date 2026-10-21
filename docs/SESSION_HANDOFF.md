@@ -1,8 +1,56 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-18, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-21, Asia/Jerusalem.
 
-## Current pickup, 2026-10-18 — evidence setup and frontier review
+## Current pickup, 2026-10-21 — close ownership and mission continuation
+
+The preceding release is `f6fd73d639859cc76aba088ee5c51ae18dc4976c`
+([PR 61](https://github.com/manfromnowhere143/etzio/pull/61)), with `2645` tests passing
+on CPython 3.11.15 and 3.14.2 locally and in exact-commit Linux CI. Its four retained suite
+logs were rehashed, and the 3.11 baseline was rerun successfully in this session. Its
+same-host recovery record reports `2480` files and `1907` entries across `47` artifact
+indexes. Preserve those frozen records; they do not establish independent durability.
+
+The [current repair](evidence/evidence-close-ownership-2026-10-21.json) removes the temporary
+artifact descriptor from cleanup ownership before its pre-publication close. If close
+releases the number and then raises, cleanup cannot close an unrelated resource reusing
+it. All `18` new controls fail on the predecessor on both runtimes; all `97` focused
+evidence tests pass after repair. They preserve exception identity, earlier evidence,
+fresh retry and idempotence. Before-release failure can leave a resource open; arbitrary
+asynchronous interruption, further cleanup failures, process death, power loss and
+production storage remain outside the bounded contract.
+
+Full-suite collection declaration (a target count, not a passing result):
+
+- 2663 tests expected;
+
+Resolve the exact candidate's full local suites, packages, Linux CI, publication and
+cleanup from `artifacts/checkpoints/2026-10-21-mission-takeover/release-validation.json`.
+Use `artifacts/recovery/latest.json` for the latest completed restore check. The seven
+diagram sources retain their preceding topology and gate order.
+
+The [mission review](MISSION_REVIEW_2026-10-21.md) reads selected methods, results and limits
+from AgenticVulHunter, SKILL-SIF, RAISE and ClawMMU, and checks current primary competitor,
+standards and CoW program sources. It refines selected-population denominators, skill
+regressions, causal scheduler inputs and provenance-bound reuse. No paper was independently
+reproduced. No downloaded tool, benchmark, skill or contract was executed.
+
+Six existing provider threads were read at host time `2026-10-21T14:04:07.696753+00:00`:
+the same ten message IDs, no new operating commitment in those threads. A broader inbound
+search failed with a rate-limit error; other threads remain unobserved. Nothing was sent.
+Preserve the three sent follow-ups, both spent FreeTSA attempts and existing bounded
+cloud-preparation authority. The CoW source-to-current-deployment/state gap remains open.
+
+The next integration dependency is still accountable catalog and independently administered
+monitor commitments plus the complete native dossier. Then prove external recovery/fencing,
+protected storage and independent execution; admit benchmark and exact targets before
+S/F/M/H, followed by separate semantic, scheduling and reuse experiments. All `18`
+registration inputs remain unbound. No finding, settled income or comparative advantage is
+established. Continue from new operating evidence or demonstrated owned foundation defects;
+more parsers or surveys cannot replace independent administration. The broader target-neutral
+research, remediation and offline-learning mission remains intact.
+
+## Previous pickup, 2026-10-18 — evidence setup and frontier review
 
 The preceding documentation release is complete: [PR 60](https://github.com/manfromnowhere143/etzio/pull/60),
 `827f5707ef9a3372d6cbfb9c3dcd48871b4caf4e`, with `2629` tests passing per runtime
@@ -18,9 +66,7 @@ evidence tests pass per runtime, preserving existing artifacts, retry and idempo
 This assumes cleanup succeeds; it does not qualify arbitrary signal timing, cleanup
 failure, process death, power loss or protected storage.
 
-Full-suite collection declaration (a target count, not a passing result):
-
-- 2645 tests expected;
+Historical full-suite collection target for the October 18 repair: `2645` tests.
 
 Resolve the exact candidate's full local suites, packages, Linux CI, publication and
 cleanup from `artifacts/checkpoints/2026-10-18-evidence-setup-interruption/release-validation.json`.

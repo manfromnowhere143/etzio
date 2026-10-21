@@ -61,24 +61,22 @@ That yields six operating laws:
 
 ## Current release and evidence
 
-The preceding engine release is [`cd5c6ad`](https://github.com/manfromnowhere143/etzio/commit/cd5c6ada82b349f3272b0fe010c2878bada6d74c)
-([PR 59](https://github.com/manfromnowhere143/etzio/pull/59), October 16, 2026):
-`2629` tests passed on CPython `3.11.15` and `3.14.2`, locally and in
-[Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/38873128704).
+The preceding engine release is [`f6fd73d`](https://github.com/manfromnowhere143/etzio/commit/f6fd73d639859cc76aba088ee5c51ae18dc4976c)
+([PR 61](https://github.com/manfromnowhere143/etzio/pull/61), October 18, 2026):
+`2645` tests passed on CPython `3.11.15` and `3.14.2`, locally and in
+[Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/39112222672).
 Both package builds and installed-wheel checks passed. These results cover repository
 behavior under the recorded environments; discovery quality requires a separate benchmark.
-The following documentation release, [PR 60](https://github.com/manfromnowhere143/etzio/pull/60),
-passed the same full matrix and package checks, plus seven diagram renders.
 
-The current [evidence-setup repair](docs/evidence/evidence-setup-interruption-2026-10-18.json)
-releases acquired descriptors and unpublished temporary files when setup is interrupted.
-Its `16` new controls fail on the predecessor and pass after correction on both runtimes;
-all `79` focused evidence tests pass. Existing evidence and retries remain intact.
-The full collection is `2645` tests; resolve exact full-suite, package and CI results from
+The current [evidence-close repair](docs/evidence/evidence-close-ownership-2026-10-21.json)
+prevents cleanup from retrying an ambiguous close and closing an unrelated reused descriptor.
+Its `18` new controls fail on the predecessor and pass after correction on both runtimes;
+all `97` focused evidence tests pass. Existing evidence and retries remain intact.
+The full collection is `2663` tests; resolve exact full-suite, package and CI results from
 the [release handoff](docs/SESSION_HANDOFF.md). Earlier byte-admission, cleanup, accounting
 and protocol corrections remain in the retained release history.
 
-## Progress through 2026-10-18
+## Progress through 2026-10-21
 
 | Workstream | Retained progress | Remaining boundary |
 |---|---|---|
@@ -86,15 +84,15 @@ and protocol corrections remain in the retained release history.
 | Integrity and recovery | Four immutable finality phases, authenticated signed-fixture packages, governed retry/seal decisions and interruption controls | Actual independent provider administration and external latest-head recovery are unqualified |
 | Native evidence preparation | Offline timestamp/CRL validation, conditional elapsed-time bounds, trusted-list and checkpoint inspection, source-provenance reconciliation | Documentary and offline observations do not admit a live provider; both FreeTSA acquisition attempts are spent |
 | Host preparation | Bounded Google Cloud KVM preflight completed and disposable resources cleaned up | No accepted worker isolation, protected storage or power-fault profile |
-| Repository reliability | Cleanup and coherent-read repairs, honest unresolved-result accounting, owned-document checks, equivalent ASCII validation, exact evidence-byte admission and interrupted evidence-setup cleanup | `2645` tests in the current collection; release checks establish repository behavior only |
-| Research and comparison | Targeted primary-source reviews through October 18; four-arm comparison and separate semantic-guidance, scheduling and evidence-reuse designs retained | Experiment order selected; `18` registration inputs remain unbound; no comparator has run |
+| Repository reliability | Cleanup and coherent-read repairs, honest unresolved-result accounting, owned-document checks, equivalent ASCII validation, exact evidence-byte admission, interrupted setup cleanup and ambiguous close ownership | `2663` tests in the current collection; release checks establish repository behavior only |
+| Research and comparison | Targeted primary-source reviews through October 21; four-arm comparison and separate semantic-guidance, scheduling and evidence-reuse designs retained | Experiment order selected; `18` registration inputs remain unbound; no comparator has run |
 | Bounty preparation | CoW source/deployment-record reconciliation, contrary evidence against four hypotheses and conditional fee/fill obligations | Exact deployed state, scope, independent reproduction and program eligibility remain unresolved; no confirmed finding or payment |
-| Operating dependencies | Three approved pilot follow-ups sent; six existing threads checked on October 18 | No human reply or catalog/monitor operating commitment in that readback |
+| Operating dependencies | Three approved pilot follow-ups sent; six existing threads checked on October 21 | No new operating commitment in those threads; broader inbound search failed, leaving other threads unobserved |
 
 The [engineering review record](docs/evidence/reviewer-readiness-2026-10-16.json)
 retains the preceding presentation review. The latest
-[mission review](docs/MISSION_REVIEW_2026-10-18.md) sharpens complete-cost accounting,
-post-change effect checks and strong reuse baselines. Private source captures, correspondence and
+[mission review](docs/MISSION_REVIEW_2026-10-21.md) sharpens population denominators,
+causal scheduling controls and provenance-bound reuse. Private source captures, correspondence and
 recovery copies are excluded from the published repository; their paths are continuity
 locators, not downloadable evidence in a fresh clone. Model-access onboarding is separate
 from provider admission, target permission and execution qualification.
@@ -135,7 +133,7 @@ flowchart TB
 
 The [October 15 snapshot](docs/evidence/documentation-handoff-2026-10-15.json) retains the
 preceding `2617`-test baseline, research reviews and provider readback. The current table
-above incorporates the October 16 and 18 repairs and bounded follow-through without changing gate
+above incorporates the October 16, 18 and 21 repairs and bounded follow-through without changing gate
 order or promoting source hypotheses into findings.
 
 ## Current-state guide

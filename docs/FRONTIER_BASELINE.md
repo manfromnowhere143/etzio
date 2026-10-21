@@ -1,11 +1,29 @@
 # 2026 Vulnerability-Research Frontier Baseline
 
-Original comparison snapshot: **2026-07-29**; latest targeted research review: **2026-10-16**.
+Original comparison snapshot: **2026-07-29**; latest targeted research review: **2026-10-21**.
 This is a design baseline, not an Etzio performance claim. The update below does not
 silently refresh every historical result in the original comparison table.
 Sources are primary project, research, program, or vendor publications where available.
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
+
+## Selection, scheduling and reuse controls, 2026-10-21
+
+The [mission review](MISSION_REVIEW_2026-10-21.md) examines selected methods, results and
+limits from AgenticVulHunter, SKILL-SIF, RAISE and ClawMMU, with versioned captures in the
+[evidence record](evidence/evidence-close-ownership-2026-10-21.json). None was independently
+reproduced. Threshold-selected comment quality is not assigned-task cause yield; file-guided
+identification is not executed impact; a retrospective scheduling simulation is not a causal
+compute-allocation result; a proposed memory protection design is not an implementation.
+
+Carry four controls into the existing proposed comparison: freeze retrieval and thresholds
+on the disjoint pilot; preserve contrary evidence and regressions in learned procedures;
+exclude future information from scheduler inputs while retaining zero-yield tasks and all
+costs; and reject reuse across revoked provenance, old checkpoints or incompatible scope.
+Current vendor workflows already include reproduction and remediation checks. Distinct
+confirmed causes per complete cost and reviewer effort remains the advantage to test.
+S/F/M/H still precedes separate semantic, scheduling and reuse experiments; all `18`
+registration inputs remain unbound. No provider, target or execution gate changes.
 
 ## Verification cost and dependency controls, 2026-10-18
 

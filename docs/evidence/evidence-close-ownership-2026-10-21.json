@@ -1,0 +1,161 @@
+{
+  "schema": "etzio.evidence-close-ownership.v1",
+  "date": "2026-10-21",
+  "base_commit": "f6fd73d639859cc76aba088ee5c51ae18dc4976c",
+  "status": "implemented_focused_controls_passed_resolve_release_record",
+  "contract": "docs/decisions/0002-canonical-governed-fixture-boundary.md#temporary-descriptor-close-ownership-2026-10-21",
+  "decision": "docs/MISSION_REVIEW_2026-10-21.md",
+  "new_controls": 18,
+  "predecessor_failed_per_runtime": 18,
+  "focused_passed_per_runtime": 97,
+  "runtimes": [
+    "3.11.15",
+    "3.14.2"
+  ],
+  "full_collection_target": 2663,
+  "release_validation_record": "artifacts/checkpoints/2026-10-21-mission-takeover/release-validation.json",
+  "close_states": [
+    "before_release",
+    "after_release_without_reuse",
+    "after_release_with_unrelated_reuse"
+  ],
+  "interruptions": [
+    "OSError",
+    "KeyboardInterrupt",
+    "SystemExit"
+  ],
+  "entrypoints": [
+    "generic_put",
+    "typed_put"
+  ],
+  "preserved": [
+    "one_close_attempt",
+    "exception_identity",
+    "prior_artifact_bytes",
+    "no_new_publication",
+    "no_temporary_name",
+    "unrelated_reused_descriptor",
+    "retry",
+    "idempotence"
+  ],
+  "boundary": "Injected exceptions at the pre-publication temporary-file close with successful remaining cleanup. Before-release failure can leave a resource open. No arbitrary async interruption, further cleanup failure, process kill, power loss or production storage qualification. Owned engine repair, not a third-party finding.",
+  "research_status": "selected_methods_results_and_limitations_not_independent_reproduction",
+  "primary_research": [
+    {
+      "id": "2610.27383v1",
+      "url": "https://arxiv.org/html/2610.27383v1",
+      "reviewed_scope": [
+        "II architecture",
+        "III setup and metrics",
+        "IV results",
+        "V threats"
+      ],
+      "capture": {
+        "path": "artifacts/checkpoints/2026-10-21-mission-takeover/research/2610.27383v1.source.txt",
+        "size_bytes": 93219,
+        "sha256": "317778a5659a17cf45229ea25719c1ffc70dfcdd154032efe67e83e75b4e8f7a"
+      }
+    },
+    {
+      "id": "2610.25705v1",
+      "url": "https://arxiv.org/html/2610.25705v1",
+      "reviewed_scope": [
+        "3.2",
+        "3.5",
+        "4.1",
+        "4.3",
+        "5",
+        "6.1",
+        "selected 6.2 results",
+        "8 threats"
+      ],
+      "capture": {
+        "path": "artifacts/checkpoints/2026-10-21-mission-takeover/research/2610.25705v1.source.txt",
+        "size_bytes": 552168,
+        "sha256": "e5042c133a501dc4b59c578b6fd8604cfe7c32204147b2f982c7fbf7e5857bae"
+      }
+    },
+    {
+      "id": "2610.27828v1",
+      "url": "https://arxiv.org/html/2610.27828v1",
+      "reviewed_scope": [
+        "4.5 setup",
+        "5.3 scheduling evaluation",
+        "6 threats",
+        "selected allocation results"
+      ],
+      "capture": {
+        "path": "artifacts/checkpoints/2026-10-21-mission-takeover/research/2610.27828v1.source.txt",
+        "size_bytes": 279264,
+        "sha256": "58a07b4bd25ad47686c935f64152c09b2213aacf8918db54d700964ec6ec1f16"
+      }
+    },
+    {
+      "id": "2610.28093v1",
+      "url": "https://arxiv.org/html/2610.28093v1",
+      "reviewed_scope": [
+        "2-5 design and limitations",
+        "appendices A-C"
+      ],
+      "capture": {
+        "path": "artifacts/checkpoints/2026-10-21-mission-takeover/research/2610.28093v1.source.txt",
+        "size_bytes": 101279,
+        "sha256": "8a36a19fc6c90302d0db17387c3576b211786cec083d6d1480f1e3ef63cc01a5"
+      }
+    }
+  ],
+  "private_record_identities": [
+    {
+      "path": "artifacts/checkpoints/2026-10-21-mission-takeover/baseline-release-readback.json",
+      "size_bytes": 601,
+      "sha256": "59c10dae0323048b5dfde17841d8b465a047c1821220a3995864c426d1caf67b"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-mission-takeover/provider-status.json",
+      "size_bytes": 437,
+      "sha256": "69e5f44b75e66c38da3a242c4a9e343921064ff3ca3c55306eb3ef65b33f7140"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-mission-takeover/research/sources.json",
+      "size_bytes": 4711,
+      "sha256": "ddf47da79d907c9ff37c2313250db6fb41f3e6697af0b74a3b00fb1983e00f30"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-mission-takeover/research/review.json",
+      "size_bytes": 2359,
+      "sha256": "90575b7d699ef68fadc0e97eef8c05ad6b6d8b419920ed333ecdb2d77bf33bb4"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-mission-takeover/predecessor-311.log",
+      "size_bytes": 55322,
+      "sha256": "9976f27e2248a1946996e7f3aab86b40b0bff73102641c31351590d5b41c9513"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-mission-takeover/predecessor-314.log",
+      "size_bytes": 55322,
+      "sha256": "a86cfff3feb570e9c30fb181f2dffe49ef9fc6e81ea6af43fff17b00317a18dc"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-mission-takeover/focused-311.log",
+      "size_bytes": 179,
+      "sha256": "0473e6182756606595520fa08c3db988ec1fe2b004afcc425727d0633da95054"
+    },
+    {
+      "path": "artifacts/checkpoints/2026-10-21-mission-takeover/focused-314.log",
+      "size_bytes": 179,
+      "sha256": "32e090d1b300684f9c9b1cd3a28d83269651367b3d6dd6b6e6387c43a5174600"
+    }
+  ],
+  "provider_status": {
+    "threads_checked": 6,
+    "messages_unchanged": 10,
+    "new_messages_in_checked_threads": 0,
+    "new_operating_commitments_in_checked_threads": 0,
+    "sent": 0,
+    "broader_inbound_search": "failed_rate_limit_no_absence_inference"
+  },
+  "authority_changed": false,
+  "gate_order_changed": false,
+  "accepted_findings": 0,
+  "paid_outcomes": 0
+}

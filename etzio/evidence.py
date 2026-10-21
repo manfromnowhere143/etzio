@@ -517,8 +517,10 @@ class FileEvidenceStore:
                             raise EvidenceError("evidence artifact write made no progress")
                         written += count
                     os.fsync(descriptor)
-                    os.close(descriptor)
+                    closing_descriptor = descriptor
                     descriptor = -1
+                    # A failed close may already have released this number for reuse.
+                    os.close(closing_descriptor)
                     try:
                         _rename_noreplace(
                             shard_descriptor,

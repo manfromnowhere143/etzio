@@ -128,3 +128,25 @@ early refusal for plain and behavior-bearing subclasses at all four public entry
 with no subclass callbacks, hashing or filesystem access and no changes to retained
 artifacts. This is a local input-boundary correction, not execution isolation, a
 finding-admission change or evidence of third-party exploitability.
+
+## Temporary descriptor close ownership, 2026-10-21
+
+Before attempting the temporary artifact's pre-publication close, the writer must
+relinquish that descriptor number from its cleanup state. A close that raises may already
+have released the descriptor; retrying can close an unrelated resource that reused the
+number. The [Linux close documentation](https://man7.org/linux/man-pages/man2/close.2.html)
+describes this hazard. A successful preceding fsync does not justify retrying close.
+
+If that close raises, publication must not proceed. With successful remaining cleanup,
+preserve the initiating exception, unlink the unpublished temporary name, leave existing
+artifacts intact and allow a fresh write attempt. That fresh write is a new operation,
+not a retry of the ambiguous descriptor close.
+
+Prove both generic and typed entrypoints with `OSError`, `KeyboardInterrupt` and
+`SystemExit` at three boundaries: before release, after release without reuse, and after
+release with an unrelated file occupying the same number. Require one close attempt,
+original exception identity, no new artifact or temporary name, preservation of the
+unrelated descriptor, and ordinary retry/idempotence. If the failed close did not release
+the resource, physical release is unproved; never resolve that uncertainty by blindly
+closing its number again. Arbitrary asynchronous interruption, further cleanup failures,
+process death, power loss and production storage remain outside this bounded contract.

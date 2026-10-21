@@ -1,6 +1,6 @@
 # Etzio Architecture
 
-Status: **foundation integrity**, current-state reconciliation 2026-10-16.
+Status: **foundation integrity**, current-state reconciliation 2026-10-21.
 
 This document distinguishes implemented, modeled, proposed, and blocked behavior. A green
 test proves only its named fixture and invariant.
@@ -13,9 +13,9 @@ outside the generative workers. The implemented fixture paths currently share on
 host process; unit names and signing keys do not create process isolation.
 
 The [engineering review guide](REVIEW_GUIDE.md) maps these claims to code, tests and open
-risks. The code baseline is `cd5c6ad` (PR 59), with `2629` passing tests per declared runtime
-locally and in Linux CI. Runtime code, schemas and dependencies are unchanged by this
-presentation review; the handoff identifies its separate release validation.
+risks. The preceding release is `f6fd73d` (PR 61), with `2645` passing tests per declared
+runtime locally and in Linux CI. The current close-ownership repair adds `18` controls;
+the handoff identifies its separate release validation. Schema and authority are unchanged.
 
 The first truthful vertical slice now exists. A signed fixture authority is admitted before
 mission opening; exact authority and target bytes are retained with their claiming events
@@ -497,6 +497,15 @@ October 18 controls inject interruptions at shard permission setup, directory va
 root synchronization and temporary-file permission setup through both write entrypoints.
 They assume cleanup succeeds; they do not qualify arbitrary signal timing, interrupted
 cleanup, process-kill recovery, power loss or the storage profile.
+
+Before the temporary artifact's pre-publication close, the writer removes the descriptor
+number from its cleanup ownership. If close raises after releasing the resource, cleanup
+cannot close another file that reused the number. Publication aborts; successful remaining
+cleanup preserves the original exception and removes the unpublished name. October 21
+controls cover both entrypoints and three exception classes before release, after release
+and after reuse. A failure before physical release can leave a resource open; the bounded
+contract does not resolve that uncertainty by retrying an ambiguous close. See
+[ADR-0002](decisions/0002-canonical-governed-fixture-boundary.md#temporary-descriptor-close-ownership-2026-10-21).
 
 Repository-fixture target bytes retain their original generic evidence identity. Modeled
 verification inputs use a separate type-domain digest:
