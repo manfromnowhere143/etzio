@@ -2,7 +2,65 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-24, Asia/Jerusalem.
 
-## Current pickup, 2026-10-24: parallel bounty work and real benign KVM effects
+## Current pickup, 2026-10-24: owned guest containment preflight
+
+The inherited release is `1cbdfe0b0917679aea3b66eaa96564ad108e830c`
+([PR 67](https://github.com/manfromnowhere143/etzio/pull/67)). Its new-session
+CPython 3.11.15 baseline passes all `2729` tests. Previous experiment, release
+and recovery evidence remains frozen.
+
+The [owned Firecracker experiment](OWNED_FIRECRACKER_PREFLIGHT.md) prepares four
+fixed guest programs with pinned kernel, VMM and jailer bytes. Three builds
+reproduce the same sixteen source/object/executable/initramfs artifacts. The
+first cloud attempt failed during artifact staging; the second reached the
+jailed API but failed before guest boot because its HTTP helper used an
+unsupported context-manager interface. Both attempts' six resources are verified
+absent. The third attempt exposed input-directory traversal removed by the startup
+umask and also ended before guest boot. Its resources are absent. Explicit final
+directory permissions and a regression control address that fault. The fourth
+attempt acknowledged VM start, then refused its immediate thread-filter snapshot;
+its resources are absent. That failing snapshot was not retained. Pinned source
+inspection identifies a startup ordering window: a runtime API roundtrip now
+precedes the unchanged filter requirements, and a failed snapshot is retained.
+The fifth attempt confirmed all three thread filters and booted the owned guest,
+but rejected its CRLF console marker with an LF parser. The sixth attempt passed
+all four controls after exact line framing was corrected. Every worker was
+killed/reaped and every cgroup emptied. All six attempts' six resource identities
+are verified absent. The [summary and byte identities](evidence/owned-firecracker-preflight-2026-10-24.json)
+retain the failures and bounded result. No arbitrary-code profile is admitted.
+
+Thirty-six portable controls pass on both supported runtimes, including unsupported
+host/kernel and altered/missing/symlink artifact refusal before native calls.
+Three real Unix-socket checks fail on the earlier API helper and pass after
+explicit connection cleanup. These are test and preparation observations, not
+an admitted arbitrary-code profile or independent CATO verification.
+
+A separate five-file CoW authentication/initialization/simulation source review
+found no demonstrated eligible impact. Its exact scoped revision, contrary
+evidence and remaining deployment/eligibility obligations are private at
+`artifacts/bounty-research/2026-10-24-cow-authentication-review/`. This does not
+duplicate the other session's Immutable work and executed no target code.
+
+The private experiment and product-access diagnosis are retained at
+`artifacts/runner-preparation-20261024-1005/`. Current resource ownership and
+recovery are at `artifacts/coordination/2026-10-24-runtime-continuation.json`.
+A model access notice does not resolve or invalidate repository work. Current
+Daybreak approval is unverified; do not silently reroute or retry a refused
+request. Continue permitted work from retained checkpoints.
+
+The collection target is:
+
+- 2765 tests expected;
+
+Resolve full-suite, package and publication results from
+`artifacts/checkpoints/2026-10-24-owned-firecracker/release-validation.json`.
+No target execution, report submission, accepted bounty or payment is established.
+Next, measure actual collector death, resource exhaustion, input mutation and
+cross-worker access on the pinned Firecracker profile, then obtain independent
+review and bind an exact scoped reproduction contract. Production integrity,
+provider and storage gates and ADR-0025 independent reproduction remain unchanged.
+
+## Previous pickup, 2026-10-24: parallel bounty work and real benign KVM effects
 
 The inherited release is `25764fda91106a1a10b1d28bde38f03ce57c6513`
 ([PR 66](https://github.com/manfromnowhere143/etzio/pull/66)), with `2729` passes
@@ -80,7 +138,7 @@ pre/post-state oracle fails all `18` new cases at the intended assertion on
 CPython 3.11.15. No runtime bytes or schema changed; power loss and production
 storage qualification remain open. The collection target is:
 
-- 2729 tests expected;
+- Historical collection target: 2729 tests.
 
 Resolve focused results, calibration, full local checks, packages, exact commit CI
 and publication from

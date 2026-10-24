@@ -1,0 +1,185 @@
+{
+  "schema": "etzio.owned-firecracker.preflight-summary.v1",
+  "date": "2026-10-24",
+  "status": "four_owned_controls_passed_not_execution_profile_admission",
+  "base_commit": "1cbdfe0b0917679aea3b66eaa96564ad108e830c",
+  "authority": "Existing October 9 bounded benign host/OS/KVM cloud preparation grant; four closed repository-owned programs only.",
+  "collector": {
+    "path": "scripts/collect_owned_firecracker_preflight.py",
+    "sha256": "0f7b5881e9a41738c841d208edf34476b2f3a7842643eabbc9b78a7bd34bd125"
+  },
+  "builder": {
+    "path": "scripts/build_owned_firecracker_initrd.py",
+    "sha256": "231e3a0fb56d86f8ada3aced2e42bf6a354784ffe21bd5453f006b753b614e3f"
+  },
+  "observation": {
+    "path": "docs/evidence/owned-firecracker-guest-observation-2026-10-24.json",
+    "bytes": 27857,
+    "sha256": "4470c34773e8b4a8edc330185a7625ccc201fbe7c88a9cd06fc3ec34627ed471"
+  },
+  "host": {
+    "image": "debian-12-bookworm-v20261023",
+    "image_id": "2443613614497996558",
+    "kernel": "6.1.0-54-cloud-amd64",
+    "machine_type": "n2-standard-4",
+    "nested_virtualization": true,
+    "service_account": false,
+    "oauth_scopes": false,
+    "boot_disk_gib": 10,
+    "requested_delete_deadline_minutes": 15
+  },
+  "artifacts": {
+    "firecracker_version": "v1.17.0",
+    "source_commit": "95f868c8e345b1cc8faccd1a3c910b4989dc3f58",
+    "pins": {
+      "firecracker": "99ad0f5cd0514a88aad0e9ae8cfdb3cc3b4ab9d190e1194602406c786b5de7a5",
+      "jailer": "65ef226e96f0ceda55ba643f445801ef2cc0ea667ef67cad8ac4f406c9c8434f",
+      "output.cpio": "a2c7993868ac3cdb07356c2b676122909d1e3bd4e3e7755c7b7e0267bbb93dd3",
+      "ready.cpio": "0ebe96565bc13874d342a711e239579cabce9e83bd9942ea50e9809b0a22b556",
+      "spin.cpio": "b9f97806803bdd9e7b0d8f6a61d0edefcd1c9e75f48d1e3d832e110215cc0673",
+      "vmlinux": "da5e0041fb31fcc7337026da9e2b64fb7694b4eed760cc9b5e8fe54e52fa8188",
+      "wrong.cpio": "1f05fb9e7a9ba0ca3466b554fed114fa8294aefdca372d0124c1affd436ccb13"
+    },
+    "same_source_rebuilds": 3,
+    "identical_build_artifacts_per_build": 16,
+    "source_ordering_ledger": [
+      {
+        "path": "src/vmm/src/rpc_interface.rs",
+        "git_blob": "ca743fa6f5c43b08624a08f8772ea9793f6e8f2c",
+        "sha256": "5555181815144d34b8f6659cbc07319728720364dd30a09d724a80a38bad1309",
+        "url": "https://github.com/firecracker-microvm/firecracker/blob/95f868c8e345b1cc8faccd1a3c910b4989dc3f58/src/vmm/src/rpc_interface.rs"
+      },
+      {
+        "path": "src/firecracker/src/api_server_adapter.rs",
+        "git_blob": "70abff48ce870067f0431108618be9914854fabf",
+        "sha256": "54650093cbf2fd01ffe5b66c94aef5a3a191c36b6098d07328c77eceb43e45d9",
+        "url": "https://github.com/firecracker-microvm/firecracker/blob/95f868c8e345b1cc8faccd1a3c910b4989dc3f58/src/firecracker/src/api_server_adapter.rs"
+      },
+      {
+        "path": "src/vmm/src/builder.rs",
+        "git_blob": "bcb0e027a89ff7c03f0eaa379d968d79dbf44951",
+        "sha256": "8c0325e39f6cfc3d5ace5c59d85d22a723e575ea81cc65628f2a56b5f2b2d945",
+        "url": "https://github.com/firecracker-microvm/firecracker/blob/95f868c8e345b1cc8faccd1a3c910b4989dc3f58/src/vmm/src/builder.rs"
+      },
+      {
+        "path": "src/firecracker/src/api_server/request/machine_configuration.rs",
+        "git_blob": "a12326d3a8dba959d05820618484accef1bf85ec",
+        "sha256": "0a3bd220e84f42c07235d25d5b43505ca94d824ef25f4b69ce8f5f2bec97911e",
+        "url": "https://github.com/firecracker-microvm/firecracker/blob/95f868c8e345b1cc8faccd1a3c910b4989dc3f58/src/firecracker/src/api_server/request/machine_configuration.rs"
+      }
+    ],
+    "release_tag_signed": false,
+    "independent_build_attestation": false
+  },
+  "results": {
+    "controls_passed": 4,
+    "controls": [
+      {
+        "mode": "ready",
+        "decision": "owned_marker_observed_then_stopped",
+        "worker_reaped_exit_code": -9,
+        "cgroup_empty": true,
+        "post_kill_seconds": 0.12061945300000332,
+        "observed_output_bytes": 1990,
+        "observed_threads": 3
+      },
+      {
+        "mode": "wrong",
+        "decision": "wrong_marker_rejected",
+        "worker_reaped_exit_code": -9,
+        "cgroup_empty": true,
+        "post_kill_seconds": 0.08965158999999545,
+        "observed_output_bytes": 1990,
+        "observed_threads": 3
+      },
+      {
+        "mode": "spin",
+        "decision": "owned_marker_observed_then_stopped",
+        "worker_reaped_exit_code": -9,
+        "cgroup_empty": true,
+        "post_kill_seconds": 0.1410912859999982,
+        "observed_output_bytes": 1990,
+        "observed_threads": 3
+      },
+      {
+        "mode": "output",
+        "decision": "output_limit_termination",
+        "worker_reaped_exit_code": -9,
+        "cgroup_empty": true,
+        "post_kill_seconds": 0.07960598700000077,
+        "observed_output_bytes": 65546,
+        "observed_threads": 3
+      }
+    ],
+    "default_seccomp_and_no_new_privileges_on_all_observed_threads": true,
+    "temporary_public_ip_and_https_rule_removed_before_collector": true,
+    "worker_network_namespace": "loopback only, no guest network device",
+    "portable_tests_per_runtime": 36,
+    "runtimes": [
+      "CPython 3.11.15",
+      "CPython 3.14.2"
+    ],
+    "predecessor_api_negative_calibration_failures": 3,
+    "retained_output_framing_calibration": "The failed fifth attempt contains the complete ready output; its SHA matches. The old LF parser rejects it and the complete CRLF-line parser accepts it. That attempt remains failed."
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "outcome": "artifact_staging_http_403_no_vmm",
+      "control_sha256": "4fbb337677df23b40d79f427cde3c202665102ba1c14976ae9fa33eefbb41c4f",
+      "artifact_index_sha256": "0a16fb7e1946e5434a074cf7760e102af1e51bfe55073c3dc660c60c48fe347f",
+      "all_six_resource_identities_verified_absent": true
+    },
+    {
+      "attempt": 2,
+      "outcome": "api_connection_context_manager_before_guest_start",
+      "control_sha256": "55d80263dda369f8ca9617d1bf14175c9c9fb6d4b6b872823405186589898071",
+      "artifact_index_sha256": "adf46ee45e96615dbee3eae4ca082e46910153e5b169b96f1666c6c169b152a5",
+      "all_six_resource_identities_verified_absent": true
+    },
+    {
+      "attempt": 3,
+      "outcome": "input_directory_umask_permission_before_guest_start",
+      "control_sha256": "c4196d4a34a06df1141feee51e46ddfeb87479f919d864964b68b949994b4c7f",
+      "artifact_index_sha256": "70fd4c9b06fa2a8c937bb198559219475cbf5af23f5757eecfa81a1dc891bc2d",
+      "all_six_resource_identities_verified_absent": true
+    },
+    {
+      "attempt": 4,
+      "outcome": "immediate_poststart_filter_observation_refused_snapshot_not_retained",
+      "control_sha256": "734d0933ccaabdee47f043ce519b8ba8b92f30727effaf356bcf0b6838dde869",
+      "artifact_index_sha256": "e1e1fa6701240c3bfd63752a73943df856bbd9c735c118026dd80d0c1200656b",
+      "all_six_resource_identities_verified_absent": true
+    },
+    {
+      "attempt": 5,
+      "outcome": "guest_ready_crlf_output_rejected_by_lf_parser",
+      "control_sha256": "b14071de7c70ca09957e67aaba449c6ac3242ece8f82b912ddb53a5f378b16ea",
+      "artifact_index_sha256": "46fc816966333e3e8ca3ed4b980dc6aa82c8234c2b98a88bd6212ad24b7142c6",
+      "all_six_resource_identities_verified_absent": true
+    },
+    {
+      "attempt": 6,
+      "outcome": "four_owned_guest_controls_passed",
+      "control_sha256": "898eb631855d138a1166ca752832504c0c360cd4492dc8e95da3a0d27885f2b6",
+      "artifact_index_sha256": "eb31d3d9315b0b4bb233412c1f0c4b9279b7433d4b8aa54ed15fe730b2e05859",
+      "all_six_resource_identities_verified_absent": true
+    }
+  ],
+  "cost": {
+    "compute_reference_usd_per_hour": 0.194236,
+    "requested_15_minute_compute_estimate_per_attempt_usd": 0.048559,
+    "attempts": 6,
+    "actual_bill_measured": false,
+    "enforced_account_spending_cap": false,
+    "exclusions": "Disk, brief public IPv4, taxes and deletion delay; reference estimate is not a billing receipt."
+  },
+  "limits": [
+    "Owned guest controls only; no target builds, target execution, finding, submission or payment.",
+    "The API runtime roundtrip precedes the unchanged observed-thread filter check; the fourth failed thread snapshot was not retained, so its specific missing field is unproved.",
+    "Configured memory/pids limits are not exhaustion controls. Actual controller death and cross-worker/input-isolation resistance remain untested in this Firecracker profile.",
+    "The overflow case retains its output digest, count, first 4096 and last 1024 bytes, not its complete output; the other three full outputs fit the retained prefixes.",
+    "No independent CATO administration, physical-host/microcode qualification, kernel-escape proof, protected storage or production execution admission."
+  ],
+  "private_evidence": "artifacts/runner-preparation-20261024-1005/"
+}
