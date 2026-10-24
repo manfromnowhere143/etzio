@@ -2,7 +2,62 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-24, Asia/Jerusalem.
 
-## Current pickup, 2026-10-24: mission verdict and canonical process death
+## Current pickup, 2026-10-24: parallel bounty work and real benign KVM effects
+
+The inherited release is `25764fda91106a1a10b1d28bde38f03ce57c6513`
+([PR 66](https://github.com/manfromnowhere143/etzio/pull/66)), with `2729` passes
+on both declared runtimes locally and in exact-commit Linux CI. Preserve its frozen
+checkpoint and recovery records.
+
+Daniel explicitly directed supervised bounty work alongside continued engine
+development. [ADR-0025](decisions/0025-parallel-supervised-bounty-research.md)
+records that scheduling change. Production native integrity, recovery, storage,
+independent execution and comparative gates remain intact. A supervised report
+still needs exact program/target scope, accepted containment, independent
+reproduction and separate submission authority. No target is admitted here.
+
+The [owned KVM experiment](BENIGN_KVM_PREFLIGHT.md) now executes fixed benign
+instructions on a disposable nested-KVM host. Seven controls passed: correct
+output under two UIDs, wrong-output rejection, writable/read-only memory effects,
+external worker kill and supervisor-death termination. Worker network and canary
+denials are retained. The first attempt failed before guest execution with a
+Python integer overflow; it remains a failure. The corrected collector is retained
+exactly. Both attempts' VM, disk, firewall, subnet and VPC were verified absent.
+No third-party code, target transaction or exploit ran. This is not a production
+jailer, independent verifier or accepted arbitrary-code execution profile.
+
+The private experiment directories are `artifacts/kvm-preflight-20261024/` and
+`artifacts/kvm-preflight-20261024-retry/`. Their plans, sources, serial outputs,
+control-plane operations and indexes preserve both outcomes. The public evidence
+record contains byte identities and bounded claims, without cloud account IDs.
+
+The CoW zero-quantity fee lead is closed as an official documented known issue;
+the private canonical record is
+`artifacts/bounty-research/2026-10-24-cow-source-review/review.json`.
+A separate eight-file review of the explicitly listed service-worker/reset path
+pins release commit `d0bf6060e0fcf1f48c37c7c5af42430f851bafb5`. No demonstrated
+eligible impact emerged. Retain source hypotheses and dispositions privately at
+`artifacts/cow-service-worker-20261024/review.json`; do not publish or submit them
+as findings. A bounded public HTML read recovered all `19` contract asset URLs and
+`11` contract impacts without browser control. That structured payload lacks web
+entries despite the web-scope prose; preserve this discrepancy. Personal eligibility,
+web-report scope and affected production-path proof remain unresolved. No reports,
+accepted awards or payments.
+
+The new-session baseline encountered disk exhaustion: `2716` passed, `4` failed
+and `9` errored. After deleting only that run's disposable pytest directory, all
+`35` affected-file tests passed. This is not a passing full baseline. Resolve the
+post-change full verification and exact candidate identity from
+`artifacts/checkpoints/2026-10-24-benign-kvm/release-validation.json`.
+The collection target remains `2729`; the seven cloud cases are separate evidence.
+
+Continue the accepted containment work and a finite scoped source-review batch
+alongside actual native-provider qualification evidence. Do not wait for catalog
+and monitor commitments to conduct ordinary supervised source review. Another
+session is active; use separate worktrees and resource names, and consult
+`artifacts/coordination/2026-10-24-kvm-preflight.json` before overlapping work.
+
+## Previous pickup, 2026-10-24: mission verdict and canonical process death
 
 The inherited release is `e1b47fea581c4abe3864ca5b1a1a036809c1da03`
 ([PR 65](https://github.com/manfromnowhere143/etzio/pull/65)). Its frozen checkpoint

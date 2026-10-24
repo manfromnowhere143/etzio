@@ -1,0 +1,185 @@
+{
+  "schema": "etzio.benign-kvm-preflight.evidence.v1",
+  "date": "2026-10-24",
+  "status": "seven_owned_controls_passed_both_attempts_cleaned_up",
+  "contract": "docs/BENIGN_KVM_PREFLIGHT.md",
+  "scope": "Owned fixed instructions only; not a production runner or independently verified target finding. No target/build/exploit execution.",
+  "collector": {
+    "path": "scripts/collect_benign_kvm_preflight.py",
+    "sha256": "c8dc10db7e6456b62e942b7ad47f051cad86a098c9e9dabb1a0a26cb64e1d9e1"
+  },
+  "raw_observation": {
+    "path": "docs/evidence/benign-kvm-guest-observation-2026-10-24.json",
+    "sha256": "797be5406ed02978308f684bc5db2a4daafe63be039be7e423c25b8fd4df2240",
+    "bytes": 6941
+  },
+  "configuration": {
+    "machine": "n2-standard-4",
+    "zone": "us-central1-a",
+    "image": "ubuntu-os-cloud/ubuntu-2404-noble-amd64-v20261021",
+    "image_id": "4996011480491275419",
+    "kernel": "7.0.0-1014-gcp",
+    "kvm_api": 12,
+    "nested_virtualization": true,
+    "threads_per_core": 1,
+    "external_ip": false,
+    "service_account": false,
+    "oauth_scopes": false,
+    "disk_gb": 10,
+    "disk_auto_delete": true,
+    "maximum_requested_minutes_per_attempt": 15,
+    "egress": "dedicated deny-all VPC; worker CLONE_NEWNET denial observed within each case",
+    "shielded_secure_boot": true
+  },
+  "controls": [
+    {
+      "mode": "emit",
+      "readonly": false,
+      "uid": 65532,
+      "parent_death": false,
+      "decision": "effect_accepted",
+      "passed": true,
+      "elapsed_seconds": 0.030198873000003346,
+      "post_kill_reap_seconds": null,
+      "reaped_exit_codes": [
+        0
+      ]
+    },
+    {
+      "mode": "emit",
+      "readonly": false,
+      "uid": 65533,
+      "parent_death": false,
+      "decision": "effect_accepted",
+      "passed": true,
+      "elapsed_seconds": 0.015743248000006815,
+      "post_kill_reap_seconds": null,
+      "reaped_exit_codes": [
+        0
+      ]
+    },
+    {
+      "mode": "wrong_emit",
+      "readonly": false,
+      "uid": 65532,
+      "parent_death": false,
+      "decision": "wrong_effect_rejected",
+      "passed": true,
+      "elapsed_seconds": 0.014609414999995352,
+      "post_kill_reap_seconds": null,
+      "reaped_exit_codes": [
+        0
+      ]
+    },
+    {
+      "mode": "store",
+      "readonly": false,
+      "uid": 65532,
+      "parent_death": false,
+      "decision": "writable_memory_positive_control",
+      "passed": true,
+      "elapsed_seconds": 0.01517536999999436,
+      "post_kill_reap_seconds": null,
+      "reaped_exit_codes": [
+        0
+      ]
+    },
+    {
+      "mode": "store",
+      "readonly": true,
+      "uid": 65532,
+      "parent_death": false,
+      "decision": "write_request_refused_without_emulation",
+      "passed": true,
+      "elapsed_seconds": 0.012434189000003926,
+      "post_kill_reap_seconds": null,
+      "reaped_exit_codes": [
+        0
+      ]
+    },
+    {
+      "mode": "spin",
+      "readonly": false,
+      "uid": 65532,
+      "parent_death": false,
+      "decision": "worker_killed_by_external_observer",
+      "passed": true,
+      "elapsed_seconds": 0.3111129150000096,
+      "post_kill_reap_seconds": 0.0077050030000123115,
+      "reaped_exit_codes": [
+        -9
+      ]
+    },
+    {
+      "mode": "spin",
+      "readonly": false,
+      "uid": 65532,
+      "parent_death": true,
+      "decision": "worker_killed_after_parent_death",
+      "passed": true,
+      "elapsed_seconds": 0.31246699000000433,
+      "post_kill_reap_seconds": 0.006161243000008199,
+      "reaped_exit_codes": [
+        -9,
+        -9
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "private_directory": "artifacts/kvm-preflight-20261024",
+      "control_sha256": "13534bd0faf67d03704821d1e922f58dd4b961b644724c6dda3e1557afa8ff12",
+      "collector_sha256": "9e4690e9347fd05a87500ce51374d2627ac5eae111e4a22672a9acce7f328681",
+      "status": "failed_before_guest_instructions_python_fcntl_integer_overflow",
+      "cleanup": {
+        "disks": "verified_absent",
+        "firewall-rules": "verified_absent",
+        "instances": "verified_absent",
+        "networks": "verified_absent",
+        "networks subnets": "verified_absent"
+      }
+    },
+    {
+      "private_directory": "artifacts/kvm-preflight-20261024-retry",
+      "control_sha256": "eb0f7d3075cec918f92cd4263e666c238ec46e0048e072d82fdcf251c6262e14",
+      "collector_sha256": "c8dc10db7e6456b62e942b7ad47f051cad86a098c9e9dabb1a0a26cb64e1d9e1",
+      "status": "seven_controls_passed",
+      "cleanup": {
+        "disks": "verified_absent",
+        "firewall-rules": "verified_absent",
+        "instances": "verified_absent",
+        "networks": "verified_absent",
+        "networks subnets": "verified_absent"
+      }
+    }
+  ],
+  "correction": "TSS guest address 0x100000 replaces 0xFFFBD000; exact failed source and traceback retained.",
+  "cost": {
+    "compute_usd_per_hour_reference": 0.194236,
+    "requested_30_minute_compute_estimate_usd": 0.097118,
+    "invoice_observed": false,
+    "exclusions": [
+      "disk",
+      "taxes",
+      "account pricing",
+      "termination delay"
+    ],
+    "source": "https://cloud.google.com/products/compute/pricing/general-purpose"
+  },
+  "limits": [
+    "no arbitrary or third-party code",
+    "no accepted isolation profile",
+    "no seccomp; observed Seccomp=0",
+    "no mount jail or full credential-confinement proof",
+    "no cgroup/resource-exhaustion qualification",
+    "no guest OS",
+    "no physical host, power-fault or escape-resistance proof",
+    "no independent CATO or administration",
+    "no qualified UTC",
+    "no kernel execution receipt or bounty finding"
+  ],
+  "private_indexes": [
+    "artifacts/kvm-preflight-20261024/artifact-index.json",
+    "artifacts/kvm-preflight-20261024-retry/artifact-index.json"
+  ]
+}

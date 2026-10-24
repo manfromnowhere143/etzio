@@ -1,11 +1,27 @@
 # Etzio Roadmap
 
-Status: **foundation integrity**, current-state reconciliation 2026-10-18.
+Status: **foundation integrity and parallel supervised bounty preparation**, 2026-10-24.
 
-The roadmap advances by retained evidence, not calendar dates. A phase may start only when
-its predecessor’s named acceptance conditions are reproduced.
+The production engine roadmap advances by retained evidence. Its phases retain their
+predecessor acceptance conditions. The supervised report workflow below proceeds beside it.
 
-## Current operating sequence, 2026-10-18
+## Current operating direction, 2026-10-24
+
+Daniel directed practical bounty research to proceed alongside the engine build.
+[ADR-0025](decisions/0025-parallel-supervised-bounty-research.md) records the narrow
+sequencing change. A supervised report need not await production catalog/monitor
+qualification or the comparative engine benchmark. Exact program/target identity,
+accepted containment, bounded execution and independent reproduction remain entry
+requirements. No target execution profile is admitted by this ordering decision.
+
+The engine's native integrity, recovery, storage and independent proof-plane work
+continues. Supervised research records its own source, effects, cost and reviewer
+provenance without issuing production kernel findings. The
+[owned KVM experiment](BENIGN_KVM_PREFLIGHT.md) passed seven benign controls after
+one retained setup failure; all created resources were deleted. The immediate work
+is an accepted containment profile and one exact target/reproduction packet.
+
+## Previous operating sequence, 2026-10-18
 
 The operator selected controlled comparison as the next decisive discovery evidence,
 while preserving the existing foundation order. The immediate external input is the

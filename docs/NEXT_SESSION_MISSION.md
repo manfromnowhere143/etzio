@@ -5,7 +5,23 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-24 — close the operational chain
+## Current continuation, 2026-10-24 — supervised bounty work in parallel
+
+Read [ADR-0025](decisions/0025-parallel-supervised-bounty-research.md) before applying
+older foundation-first instructions to supervised reports. Daniel explicitly changed
+that ordering. Keep production engine qualification intact, and proceed with exact
+program/target preparation, accepted containment and independent report reproduction
+as a concurrent workflow. No target or execution profile is admitted merely by the
+new direction. Use separate worktrees and record resource ownership across sessions.
+
+Resolve the owned KVM preflight from the current handoff and retained observations.
+The corrected run passed seven controls and both attempts were cleaned up. Complete
+the accepted arbitrary-code containment profile; this probe is not that runner.
+The first attempt failed before guest execution; never relabel it as a pass. The
+zero-amount CoW fee-replay lead is an official known issue and must not be recycled
+as a new finding. CoW eligibility and current deployment/source identity remain open.
+
+## Earlier continuation, 2026-10-24 — close the operational chain
 
 Read the current [handoff](SESSION_HANDOFF.md), [verdict and plan](MISSION_REVIEW_2026-10-24.md)
 and [process-death evidence](evidence/store-process-death-2026-10-24.json). Resolve

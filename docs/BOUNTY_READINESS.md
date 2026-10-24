@@ -1,5 +1,22 @@
 # Bounty readiness and candidate selection
 
+## Current direction, 2026-10-24
+
+[ADR-0025](decisions/0025-parallel-supervised-bounty-research.md) supersedes the
+foundation-first scheduling below for separately supervised bounty reports. Public
+source review and accepted isolated reproductions proceed alongside production
+engine qualification. Exact scope, containment, independent reproduction and
+submission authority remain required. No target execution profile is admitted.
+
+The prior CoW zero-quantity fee question is closed as an official documented known
+issue. A separate review pinned eight service-worker/reset source files on the
+current release branch; no eligible impact or reproduced finding was established.
+Private captures and review outcomes are identified in the current handoff.
+The [owned KVM preflight](BENIGN_KVM_PREFLIGHT.md) passed seven benign controls;
+it is preparation for containment, not target execution. No report or payment exists.
+
+## Historical selection, 2026-10-09
+
 Status: **proposed selection; execution blocked**. Public briefs inspected 2026-10-09.
 No target is admitted, no external code was executed, and no finding or income exists.
 This is a dated research decision, not a replacement for a program's current terms or an

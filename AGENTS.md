@@ -64,6 +64,21 @@ permission. Preserve unrelated workloads, retain resource identities and costs, 
 cleanup. This preparation exception admits no native provider, exploit execution, bounty
 target or production execution profile. See `docs/QUALIFICATION_NEXT_STEPS.md`.
 
+## Parallel bounty mission, operator direction 2026-10-24
+
+Daniel explicitly directed practical bounty research to proceed alongside continued
+engine development and assigned another session to the work. Follow
+`docs/decisions/0025-parallel-supervised-bounty-research.md`. This supersedes the
+prior requirement that every supervised report wait for all production engine
+gates. Native provider and external-head arrangements remain engine dependencies.
+
+A supervised report workflow still requires exact target/revision and program
+scope, an accepted isolated execution profile, bounded actions/resources,
+independent reproduction and separate submission/disclosure authority. It cannot
+issue production kernel findings or present fixture receipts as native execution.
+Public source review and already authorized benign host preparation proceed now.
+Use separate worktrees and disjoint resource names for concurrent sessions.
+
 ## Current mission order
 
 The first governed fixture vertical slice now has a canonical protocol envelope, signed
@@ -192,11 +207,11 @@ Close the remaining foundation-integrity gates before adding finder breadth:
    evidence; and
 6. prove every new refusal and concurrency invariant with a known-bad.
 
-Then build MARCELLUS and independent CATO execution on an explicitly accepted Linux/KVM
-profile before the benchmark-first EVM domain pack. Only after the integrity, isolation,
-benchmark, and exact-`TargetContract` gates close may a strictly authorized bounty-research
-lane run in parallel with continued engine development; accepted outcomes and income are
-measurements, never authority.
+Then build production MARCELLUS and independent CATO execution on an explicitly accepted
+Linux/KVM profile before the benchmark-first EVM domain pack. Production engine bounty
+execution requires the integrity, isolation, benchmark and exact-`TargetContract` gates.
+The separately supervised report workflow follows the October 24 direction and ADR-0025
+above. Accepted outcomes and income are measurements, never authority.
 
 ## Change discipline
 

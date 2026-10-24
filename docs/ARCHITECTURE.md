@@ -807,8 +807,12 @@ execution receipts, and a tested out-of-band kill path.
 
 A bounded October 9 Google Cloud preflight observed KVM API support and an empty VM
 creation/close on a disposable host; cleanup was verified. It exercised no guest payload,
-worker jailer, independent verifier, denied-egress probe or power-fault recovery. Existing
-cloud preparation authority therefore does not establish an accepted execution profile.
+worker jailer, independent verifier, denied-egress probe or power-fault recovery.
+The [October 24 owned-instruction preflight](BENIGN_KVM_PREFLIGHT.md) adds seven
+measured controls for fixed output, a wrong effect, guest memory writes, worker
+network/canary denial and process termination. Both disposable attempts were cleaned
+up. It supplies no arbitrary-code jailer, seccomp profile or independent verifier.
+Existing cloud preparation authority does not establish an accepted execution profile.
 No such execution tier exists in this repository. Exploit execution remains blocked. See
 [qualification next steps](QUALIFICATION_NEXT_STEPS.md) and the
 [README progress map](../README.md#progress-through-2026-10-21).

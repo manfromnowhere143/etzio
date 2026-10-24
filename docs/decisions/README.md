@@ -27,6 +27,7 @@ numbered ADRs. A later ADR supersedes an earlier decision; history is not rewrit
 - [ADR-0022: Native timestamp acquisition and consumption bounds](0022-native-time-consumption-bounds.md)
 - [ADR-0023: Offline single-request acquisition custody](0023-offline-acquisition-custody.md)
 - [ADR-0024: Bounded single-attempt HTTPS material capture](0024-bounded-https-material-capture.md)
+- [ADR-0025: Supervised bounty research alongside engine qualification](0025-parallel-supervised-bounty-research.md)
 
 ADR-0010 supersedes only the split filesystem/SQLite retention caveats and deferred work
 recorded in ADR-0005, ADR-0006, ADR-0007, and ADR-0009. Their protocol, lifecycle,
@@ -103,3 +104,8 @@ fresh bounded collector receives no journal path; the parent retains exact HTTP 
 before networkless interpretation. Owned loopback TLS and failure controls qualify the
 implementation only. The proposed FreeTSA plan remains unaccepted and unexecuted; neither
 the transport nor a plan-digest acknowledgement is provider or engine authority.
+
+ADR-0025 records the October 24 operator direction to pursue supervised bounty
+reports alongside the engine build. It supersedes ADR-0001 only for that workflow
+ordering; exact target scope, accepted isolation and independent reproduction
+remain required. No production kernel gate or pending transition is released.
