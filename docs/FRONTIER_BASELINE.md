@@ -1,11 +1,26 @@
 # 2026 Vulnerability-Research Frontier Baseline
 
-Original comparison snapshot: **2026-07-29**; latest targeted research review: **2026-10-21**.
+Original comparison snapshot: **2026-07-29**; latest targeted research review: **2026-10-24**.
 This is a design baseline, not an Etzio performance claim. The update below does not
 silently refresh every historical result in the original comparison table.
 Sources are primary project, research, program, or vendor publications where available.
 Results are not directly comparable across different datasets, scaffolds, budgets, and
 best-of-*k* settings.
+
+## Verifier acceptance, skills and proof scope, 2026-10-24
+
+The [dated review](MISSION_REVIEW_2026-10-24.md) examines selected VerifierBench v1,
+smart-contract auditing skills v1 and ReEVMBench v1 methods and results, together
+with current primary formal-verification and bounty accounts. None was reproduced.
+Retain valid-alternative acceptance and no-decision denominators in oracle validation;
+evaluate skills per exact model/harness with matched costs and regression controls;
+and bind any formal claim to its specification, executable correspondence and checker.
+Vendor awards, historical award labels and aggregate profile earnings remain distinct.
+
+These are requirements for the existing proposed comparison, not new capability
+claims or added experimental arms. S/F/M/H precedes separate guidance, scheduling
+and reuse experiments. All `18` registration inputs remain unbound. The next work
+must close an operational or measured obligation; another survey is not a dependency.
 
 ## Selection, scheduling and reuse controls, 2026-10-21
 

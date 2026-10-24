@@ -1,0 +1,192 @@
+{
+  "date": "2026-10-24",
+  "status": "focused_controls_passed_full_release_results_separate",
+  "baseline_commit": "e1b47fea581c4abe3864ca5b1a1a036809c1da03",
+  "baseline_local_3_11_tests_passed": 2711,
+  "contract": "docs/STORE_PROCESS_DEATH.md",
+  "test_file": "tests/test_store_process_death.py",
+  "controls": 18,
+  "boundaries": [
+    "before SQLite COMMIT call",
+    "after SQLite COMMIT returns before caller acknowledgement"
+  ],
+  "evidence_event_kinds": [
+    "authority_admitted",
+    "mission_opened",
+    "verification_artifacts_resolved",
+    "verifier_receipt_admitted"
+  ],
+  "qualified_phases": [
+    "pending",
+    "anchor_statement",
+    "checkpoint_candidate",
+    "finalization"
+  ],
+  "cache_spill_controls": 2,
+  "oracle": "Cold store validation and complete SQL dump equals exact prefix or uninterrupted completion; repeated operations retain exact bytes and global barriers. Evidence APIs refuse stale duplicates; qualified phase APIs reconcile exact retries.",
+  "runtime_changed": false,
+  "schema_changed": false,
+  "limits": [
+    "Not an interruption inside SQLite COMMIT",
+    "Not power loss or qualified filesystem/device flush semantics",
+    "Not independent provider administration or external durability",
+    "Not production storage, isolation, execution, finding or payment"
+  ],
+  "research": {
+    "capture_kind": "tool_extracted_web_text_not_original_HTTP_bytes",
+    "independently_reproduced": false,
+    "sources": [
+      {
+        "title": "VerifierBench",
+        "url": "https://arxiv.org/html/2610.28679v1",
+        "publication_date": "2026-10-19",
+        "review_depth": "v1; selected methods 2.1\u20132.4, results 3.1\u20133.4 through 4.1; not reproduced"
+      },
+      {
+        "title": "Demystifying Agent Skills for Smart Contract Auditing",
+        "url": "https://arxiv.org/html/2609.29454v1",
+        "publication_date": "2026-09-24",
+        "review_depth": "v1; selected methods V/VI, limitations VII, tables VI and IX; not reproduced"
+      },
+      {
+        "title": "ReEVMBench",
+        "url": "https://arxiv.org/html/2603.10795v1",
+        "publication_date": "2026-03-11",
+        "review_depth": "v1; abstract, selected results 4.3\u20135.2 and limitations 8; not reproduced"
+      },
+      {
+        "title": "Anthropic formal verification",
+        "url": "https://www.anthropic.com/research/formal-verification",
+        "publication_date": "2026-10-22",
+        "review_depth": "article methods and limitations; vendor report; proof artifacts not executed"
+      },
+      {
+        "title": "Anthropic attack surface reduction",
+        "url": "https://www.anthropic.com/research/attack-surface-reduction",
+        "publication_date": "2026-10-20",
+        "review_depth": "article and limits; vendor report; not reproduced"
+      },
+      {
+        "title": "XBOW Chrome full chain",
+        "url": "https://xbow.com/blog/xbow-built-a-chrome-full-chain-exploit",
+        "publication_date": "2026-10-13",
+        "review_depth": "vendor account; award, compute, preparation, human participation"
+      },
+      {
+        "title": "Kritt",
+        "url": "https://docs.kritt.ai/getting-started/welcome",
+        "publication_date": null,
+        "review_depth": "vendor documentation; internal workflow income attribution"
+      },
+      {
+        "title": "Blockian profile",
+        "url": "https://immunefi.com/profile/Blockian/",
+        "publication_date": null,
+        "review_depth": "platform displayed aggregate; period and attribution not comparable with Kritt claim"
+      },
+      {
+        "title": "CoW program",
+        "url": "https://immunefi.com/bug-bounty/cowprotocol/information/",
+        "publication_date": null,
+        "review_depth": "current proof, eligibility, payment and testing restrictions"
+      },
+      {
+        "title": "SQLite locking",
+        "url": "https://sqlite.org/lockingv3.html",
+        "publication_date": null,
+        "review_depth": "rollback journal and recovery"
+      },
+      {
+        "title": "SQLite pragmas",
+        "url": "https://sqlite.org/pragma.html#pragma_cache_spill",
+        "publication_date": null,
+        "review_depth": "cache-spill mechanics"
+      },
+      {
+        "title": "SQLite testing",
+        "url": "https://sqlite.org/testing.html",
+        "publication_date": null,
+        "review_depth": "upstream fault-testing scope"
+      },
+      {
+        "title": "SQLite atomic commit",
+        "url": "https://sqlite.org/atomiccommit.html",
+        "publication_date": null,
+        "review_depth": "commit assumptions and process versus system failure"
+      }
+    ],
+    "retained_tool_projections": [
+      {
+        "path": "artifacts/research/2026-10-24-mission-review/broad-review.txt",
+        "bytes": 36465,
+        "sha256": "55f8560b2e18bf028f2f326fb0a6dec15b9d18bfebb1e9051d0b60ff8facd1bf"
+      },
+      {
+        "path": "artifacts/research/2026-10-24-mission-review/formal-verification.txt",
+        "bytes": 29523,
+        "sha256": "9042690b2d03cceb3c5c22e25786a2e5687e16d1ea2f1d8123b5582eae2ef143"
+      },
+      {
+        "path": "artifacts/research/2026-10-24-mission-review/kritt-profile.txt",
+        "bytes": 11939,
+        "sha256": "47b152a4ef11738113341933682a2bdaaf3a6a8b20f69660c2e958cdeb7a3d83"
+      },
+      {
+        "path": "artifacts/research/2026-10-24-mission-review/primary-open-results.json",
+        "bytes": 31740,
+        "sha256": "9570107e1cdaabc37efb58ce95a0a1665f805c9bfb111be2aeeca1181099ee75"
+      },
+      {
+        "path": "artifacts/research/2026-10-24-mission-review/proof-sqlite.txt",
+        "bytes": 17617,
+        "sha256": "5d96007935d74422a192e97b114267d535257821c2e0def7142dc0877757dc19"
+      },
+      {
+        "path": "artifacts/research/2026-10-24-mission-review/skills-program-extracted.txt",
+        "bytes": 32767,
+        "sha256": "8c2680b0d6fd1a444176b5ac127eea5dcdb862a7ee776e8ce172fc1d82dbf483"
+      },
+      {
+        "path": "artifacts/research/2026-10-24-mission-review/verifierbench-extracted.txt",
+        "bytes": 31196,
+        "sha256": "419040d40739c4659540d800a7a338a16b7c74a8fd324d1e3b910ca144c4f584"
+      }
+    ]
+  },
+  "correspondence_readback": {
+    "action": "read_only",
+    "threads": 7,
+    "messages": 13,
+    "new_provider_declines": 1,
+    "operator_already_acknowledged": true,
+    "commitments_in_scope": 0,
+    "messages_sent": 0,
+    "other_threads_and_channels": "unobserved"
+  },
+  "release_validation_record": "artifacts/checkpoints/2026-10-24-mission-takeover/release-validation.json",
+  "focused_results": [
+    {
+      "runtime": "3.11",
+      "tests_passed": 83,
+      "seconds": 145.12,
+      "log": "artifacts/checkpoints/2026-10-24-mission-takeover/focused-3.11.log",
+      "sha256": "8ad6dfc83eddf57efa6274c47228dc635e3e91907fd500a59921d7ee80ea5e7e"
+    },
+    {
+      "runtime": "3.14",
+      "tests_passed": 83,
+      "seconds": 151.51,
+      "log": "artifacts/checkpoints/2026-10-24-mission-takeover/focused-3.14.log",
+      "sha256": "95740680fa8671f3071265acbcf781f6b88bfa7794fd431f2c99257016e5cf0b"
+    }
+  ],
+  "negative_calibration": {
+    "runtime": "CPython 3.11.15",
+    "change": "reverse expected precommit and postcommit complete SQL snapshots in a private test copy",
+    "expected_failures": 18,
+    "observed_failures": 18,
+    "failures_at_intended_assertion": 18,
+    "log": "artifacts/checkpoints/2026-10-24-mission-takeover/calibration-3.11.log",
+    "sha256": "65a9412d933d48d03161821e8923a799224c1cf0b948f287fb7fa9302ff08962"
+  }
+}

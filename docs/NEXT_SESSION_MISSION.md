@@ -5,7 +5,23 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-18 — setup interruption and comparison controls
+## Current continuation, 2026-10-24 — close the operational chain
+
+Read the current [handoff](SESSION_HANDOFF.md), [verdict and plan](MISSION_REVIEW_2026-10-24.md)
+and [process-death evidence](evidence/store-process-death-2026-10-24.json). Resolve
+the `2729`-test release from its exact checkpoint; process death is not power loss.
+No runtime or authority gate changes. One provider declined and Daniel already
+acknowledged; seven reread provider/customer conversations establish no commitment.
+No new outreach occurred. Preserve the scoped readback and earlier correspondence.
+
+The next external dependency is an actual independent provider arrangement. Follow
+the retained qualification, recovery, storage, isolation, benchmark and exact-target
+order. All `18` registration inputs remain unbound. Make the next continuation close
+an obligation or change a decision with bounded evidence; do not require another
+survey, repeat unanswered outreach or treat more test cases as discovery performance.
+The CoW dossier remains conditional, and no confirmed finding or payment exists.
+
+## Previous continuation, 2026-10-18 — setup interruption and comparison controls
 
 Read the current [handoff](SESSION_HANDOFF.md), [mission review](MISSION_REVIEW_2026-10-18.md)
 and [repair evidence](evidence/evidence-setup-interruption-2026-10-18.json). The acquired

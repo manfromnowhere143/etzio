@@ -1,6 +1,6 @@
 # Engineering review guide
 
-Status: review entrypoint, 2026-10-18. The [current repair record](evidence/evidence-setup-interruption-2026-10-18.json)
+Status: review entrypoint, 2026-10-24. The [current process-death record](evidence/store-process-death-2026-10-24.json)
 and [handoff](SESSION_HANDOFF.md) identify implementation and validation at this revision.
 This guide maps claims to code and refusal evidence. It is a scoped review aid, not an
 exhaustive security audit, independent assessment or comparative performance result.
@@ -74,7 +74,7 @@ local package before invoking its console command.
 
 The preceding October 16 engine release passed `2629` tests per runtime locally and in
 [exact-commit Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/38873128704).
-The current collection contains `2645` tests; its exact full-suite and package checks are
+The current collection contains `2729` tests; its exact full-suite and package checks are
 resolved separately through the handoff. Repository policy
 also checks sole-author history, immutable Action revisions, read-only workflow permissions
 and owned-document paths. These checks do not certify all code, detect all broken external

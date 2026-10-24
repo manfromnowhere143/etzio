@@ -1,8 +1,56 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-21, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-24, Asia/Jerusalem.
 
-## Current pickup, 2026-10-21: fixture integration and failure outcomes
+## Current pickup, 2026-10-24: mission verdict and canonical process death
+
+The inherited release is `e1b47fea581c4abe3864ca5b1a1a036809c1da03`
+([PR 65](https://github.com/manfromnowhere143/etzio/pull/65)). Its frozen checkpoint
+records `2711` passes on both declared runtimes locally and in exact-commit Linux
+CI. The new-session CPython 3.11.15 baseline again passes all `2711` tests.
+
+Read the [mission verdict and execution plan](MISSION_REVIEW_2026-10-24.md).
+Etzio has a governed fixture kernel, not demonstrated frontier discovery or income.
+New primary-source reviews refine verifier acceptance, skill evaluation and proof
+scope. The first registered S/F/M/H comparison and all `18` unbound inputs remain
+ahead; no third-party benchmark or target was executed.
+
+The [process-death contract](STORE_PROCESS_DEATH.md) and
+[evidence record](evidence/store-process-death-2026-10-24.json) add `18` real
+`SIGKILL` controls: two commit boundaries at each of four evidence admissions and
+four qualified finality phases, plus two cache-spill controls. Complete logical
+database equality, cold replay, global barriers, exact repeat outcomes and absent
+staging are checked. All `83` focused controls pass on both runtimes; a reversed
+pre/post-state oracle fails all `18` new cases at the intended assertion on
+CPython 3.11.15. No runtime bytes or schema changed; power loss and production
+storage qualification remain open. The collection target is:
+
+- 2729 tests expected;
+
+Resolve focused results, calibration, full local checks, packages, exact commit CI
+and publication from
+`artifacts/checkpoints/2026-10-24-mission-takeover/release-validation.json`.
+Prior release and spent acquisition records remain frozen. Diagram topology and
+gate order are unchanged.
+
+A read-only provider/customer check found one prospect's October 23 decline and
+Daniel's existing acknowledgement. Seven reread conversations contain thirteen
+messages and no operating or customer commitment. Other threads/channels were not
+established by this readback. An initial batch returned HTTP 404; subsequent reads
+by current message identity succeeded. No email was sent, reminder scheduled,
+purchase made or bounty submitted. The scoped private record is
+`artifacts/operator-inquiries/2026-10-24-readback/status.json`; research captures and
+review depth are at `artifacts/research/2026-10-24-mission-review/index.json`.
+
+Native independent catalog and monitor commitments remain the next external
+dependency. Continue with actual operating evidence and the smallest complete
+qualification task, then external recovery/fencing, protected storage, independent
+MARCELLUS/CATO, registered comparison and one exact bounty target. Do not restart
+the provider survey, repeat unanswered outreach or add speculative finder breadth.
+CoW source/state identity and eligibility remain unresolved. No finding or payment
+is established; preserve that distinction while pursuing the authorized mission.
+
+## Previous pickup, 2026-10-21: fixture integration and failure outcomes
 
 The preceding release is `daca6d7789ad3e29cfd8a81a796f9b9d804008f5`
 ([PR 64](https://github.com/manfromnowhere143/etzio/pull/64)); its outreach and
@@ -24,7 +72,7 @@ preserve interruptions. The `57` focused tests pass per runtime, including actua
 retained outcomes, invalid replay, misleading cached summaries and report delivery
 failure. The collection target is not a full-suite passing result:
 
-- 2711 tests expected;
+- Historical collection target: 2711 tests.
 
 Resolve full local suites, package checks, exact commit Linux CI and publication
 from `artifacts/checkpoints/2026-10-21-fixture-cli-report/release-validation.json`.
