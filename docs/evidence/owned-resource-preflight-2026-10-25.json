@@ -1,0 +1,185 @@
+{
+  "schema": "etzio.owned-resource.summary.v1",
+  "date": "2026-10-25",
+  "status": "four_owned_controls_passed_no_target_profile_admitted",
+  "base_commit": "ed8c1a52924b2ae6c016551b34835351ebb199f7",
+  "observation": "owned-resource-observation-2026-10-25.json",
+  "observation_bytes": 28709,
+  "observation_sha256": "73cc1ea471624b77a30162655da1b21189a69cfb9a3f062074c6a8c8b0914e0f",
+  "attempts": [
+    {
+      "ordinal": 1,
+      "all_controls_passed": false,
+      "resource_identities_verified_absent": 6,
+      "collector_sha256": "f539706dcc5cc96eb5ac9424b5873d6c7b0738736205ba6694ab055c3ba9b929",
+      "observation_sha256": "653356d518be2e34066f2290a373a4fe975c83f7de87486bc63c51df66ceb3b6",
+      "refusal": {
+        "message": "Command '['dmesg', '--raw', '--notime']' returned non-zero exit status 1.",
+        "type": "CalledProcessError"
+      }
+    },
+    {
+      "ordinal": 2,
+      "all_controls_passed": true,
+      "resource_identities_verified_absent": 6,
+      "collector_sha256": "9155a7837f08050898d9a40821ccadfba8e78175f8bea0376f31b29b38fbf527",
+      "observation_sha256": "73cc1ea471624b77a30162655da1b21189a69cfb9a3f062074c6a8c8b0914e0f",
+      "refusal": null
+    }
+  ],
+  "portable_controls": {
+    "new": 80,
+    "runtimes": [
+      "CPython 3.11.15",
+      "CPython 3.14.2"
+    ]
+  },
+  "cases": [
+    {
+      "mode": "memory-low",
+      "passed": true,
+      "uid": 65011,
+      "worker_pid": 943,
+      "effect_accepted": true,
+      "cleanup": {
+        "empty": true,
+        "reaped": {
+          "worker": -9
+        },
+        "seconds": 0.17264111499999757
+      },
+      "peak_bytes": 141344768,
+      "memory_events": {
+        "high": 0,
+        "low": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_group_kill": 0,
+        "oom_kill": 0
+      },
+      "pids_current": 4,
+      "pids_events": {
+        "max": 0
+      },
+      "natural_exit": null,
+      "fork_errno": null
+    },
+    {
+      "mode": "memory-high",
+      "passed": true,
+      "uid": 65012,
+      "worker_pid": 961,
+      "effect_accepted": true,
+      "cleanup": {
+        "empty": true,
+        "reaped": {
+          "worker": -9
+        },
+        "seconds": 9.551600000179405e-05
+      },
+      "peak_bytes": 268435456,
+      "memory_events": {
+        "high": 0,
+        "low": 0,
+        "max": 38,
+        "oom": 1,
+        "oom_group_kill": 0,
+        "oom_kill": 1
+      },
+      "pids_current": 0,
+      "pids_events": {
+        "max": 0
+      },
+      "natural_exit": -9,
+      "fork_errno": null
+    },
+    {
+      "mode": "tasks-low",
+      "passed": true,
+      "uid": 65013,
+      "worker_pid": 974,
+      "effect_accepted": true,
+      "cleanup": {
+        "empty": true,
+        "reaped": {
+          "975": -9,
+          "976": -9,
+          "977": -9,
+          "978": -9,
+          "worker": -9
+        },
+        "seconds": 0.09250187299998913
+      },
+      "peak_bytes": 16695296,
+      "memory_events": {
+        "high": 0,
+        "low": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_group_kill": 0,
+        "oom_kill": 0
+      },
+      "pids_current": 5,
+      "pids_events": {
+        "max": 0
+      },
+      "natural_exit": null,
+      "fork_errno": 0
+    },
+    {
+      "mode": "tasks-high",
+      "passed": true,
+      "uid": 65014,
+      "worker_pid": 980,
+      "effect_accepted": true,
+      "cleanup": {
+        "empty": true,
+        "reaped": {
+          "981": -9,
+          "982": -9,
+          "983": -9,
+          "984": -9,
+          "985": -9,
+          "986": -9,
+          "987": -9,
+          "988": -9,
+          "989": -9,
+          "990": -9,
+          "991": -9,
+          "992": -9,
+          "993": -9,
+          "994": -9,
+          "995": -9,
+          "worker": -9
+        },
+        "seconds": 0.007903411000000915
+      },
+      "peak_bytes": 28938240,
+      "memory_events": {
+        "high": 0,
+        "low": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_group_kill": 0,
+        "oom_kill": 0
+      },
+      "pids_current": 16,
+      "pids_events": {
+        "max": 1
+      },
+      "natural_exit": null,
+      "fork_errno": 11
+    }
+  ],
+  "corrections": [
+    "Explicit Linux EAGAIN value rather than the macOS host errno constant.",
+    "Remove mutually exclusive dmesg --notime flag from --raw read; actual old-option negative control retained before guest boot.",
+    "Host oom_kill counter includes memcg victims; require the one expected delta plus exact kernel/cgroup/victim attribution."
+  ],
+  "limits": [
+    "Owned fixed programs only, no target admission.",
+    "Same host/root administration, no independent reproduction.",
+    "Host task limit is measured by a fixed host helper, not guest forks.",
+    "No disk/power-fault, escape, native provider, finding or payment claim."
+  ]
+}

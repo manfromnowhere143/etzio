@@ -35,7 +35,7 @@
     "thesis": "a candidate becomes a finding only after independent reproduction from retained bytes and kernel adjudication",
     "current_phase": "foundation_integrity",
     "next_gate": "independently_administered_native_provider_qualification",
-    "next_session_pickup": "Read the latest handoff and ADR-0025. Owned actual collector-death and withheld-watchdog calibration passed after three retained refused attempts; all 24 resources are absent. Next measure bounded memory/pids exhaustion and input/cross-worker controls on the same pinned profile, then independent review and exact scoped reproduction. Continue finite supervised source review separately from production integrity work; do not duplicate the other session Immutable lane. CoW relayer review produced no report candidate. No target execution or submission is admitted by these controls.",
+    "next_session_pickup": "Read the latest handoff and containment review packet. Four resource controls and bidirectional file/API/signal/input/abstract-socket controls passed; all three attempts and eighteen deleted cloud resource identities are retained. Obtain an actual independent reviewer and separate reproduction, then accept an exact bounded profile and bind a current eligible target/candidate. No target execution or report candidate is established. Continue production integrity work separately and preserve the other Immutable session.",
     "post_gate_operating_model": "Production kernel bounty execution remains subject to integrity, isolation, benchmark and exact TargetContract gates. The operator-directed supervised report workflow proceeds separately under ADR-0025.",
     "next_session_brief": "docs/NEXT_SESSION_MISSION.md",
     "operating_model": "Production engine qualification plus a parallel supervised private bounty-report workflow under ADR-0025; exact target scope, accepted isolation and independent reproduction remain required."
@@ -210,7 +210,7 @@
   "current_evidence": {
     "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption; legacy fixture metrics preserving undefined denominators and unresolved outcome coverage; owned-document link validation and current-state recovery clarification; equivalent ASCII protocol validation with retained differential and fixture timing evidence; documentation and diagram reconciliation with selected frontier research, controlled-comparison direction and bounded public-source review, without runtime or gate changes; exact built-in evidence-byte admission before subclass behavior, digest computation or staging access; reviewer-facing architecture/code/test traceability, public release reconciliation and fresh-install console documentation; acquired evidence-setup descriptor and temporary-file cleanup under bounded KeyboardInterrupt and SystemExit injection; temporary-file pre-publication close ownership transferred before an ambiguous close, preserving unrelated reused descriptors under bounded fault injection; signed-fixture governed recovery under second interruption and concurrently changed authority at actual phase writes, with negative implementation calibration; fixture CLI failure exits and versioned JSON reports from fresh retained-event reduction, preserving unresolved outcomes and source minimization; real subprocess SIGKILL before and after canonical evidence and qualified finality commit, complete cold logical-state equality, global-barrier preservation, repeat outcomes and cache-spill rollback controls",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2854,
+    "test_count": 2971,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -224,7 +224,7 @@
     "focused_archived_timestamp_and_clock_capture_tests_passed": 68,
     "focused_acquisition_custody_tests_passed": 111,
     "focused_https_capture_tests": 144,
-    "release_evidence_pointer": "/owned_collector_death_preflight/release_validation_record",
+    "release_evidence_pointer": "/owned_resource_and_peer_preflight/release_validation_record",
     "focused_source_provenance_tests": 52,
     "focused_trusted_list_signature_tests": 70,
     "focused_native_checkpoint_tests": 105,
@@ -2116,5 +2116,28 @@
     "collector_in_default_verify": false,
     "source_review": "artifacts/bounty-research/2026-10-25-cow-relayer-review/review.json",
     "source_review_report_candidates": 0
+  },
+  "owned_resource_and_peer_preflight": {
+    "date": "2026-10-25",
+    "status": "owned_controls_passed_no_target_profile_admitted",
+    "resource_contract": "docs/OWNED_RESOURCE_PREFLIGHT.md",
+    "peer_contract": "docs/OWNED_CROSS_WORKER_PREFLIGHT.md",
+    "review_packet": "docs/CONTAINMENT_REVIEW_2026-10-25.md",
+    "private_evidence": "artifacts/resource-containment-20261025/",
+    "public_resource_evidence": "docs/evidence/owned-resource-preflight-2026-10-25.json",
+    "public_peer_evidence": "docs/evidence/owned-cross-worker-preflight-2026-10-25.json",
+    "release_validation_record": "artifacts/checkpoints/2026-10-25-resource-containment/release-validation.json",
+    "new_portable_tests": 117,
+    "focused_tests": 240,
+    "resource_controls_passed": 4,
+    "peer_helper_controls_passed": 6,
+    "cloud_attempts": 3,
+    "failed_attempts_retained": 1,
+    "resource_identities_verified_absent": 18,
+    "target_executions": 0,
+    "isolation_profile_admitted": false,
+    "independent_verifier_qualified": false,
+    "reviewer_identity": "unassigned",
+    "collector_in_default_verify": false
   }
 }

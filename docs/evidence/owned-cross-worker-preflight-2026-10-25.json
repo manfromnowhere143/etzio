@@ -1,0 +1,208 @@
+{
+  "schema": "etzio.owned-cross-worker.summary.v1",
+  "date": "2026-10-25",
+  "status": "owned_bidirectional_controls_passed_no_target_profile_admitted",
+  "observation": "owned-cross-worker-observation-2026-10-25.json",
+  "observation_bytes": 15631,
+  "observation_sha256": "d4d20e93679a0a613037cf8ec6b389fc17ab92b04c8c9224de93a77eedb162ca",
+  "collector_sha256": "8894605abc15a2e8f58e88307d53ec71c0875b0ad470cb0eda2676c24f702e75",
+  "dependency_sha256": {
+    "collect_owned_firecracker_preflight.py": "016b72a49ffc5463e170aed5290075a2aa0d50c1c8ba70773dfd24eeb97dad95",
+    "observe_owned_collector_death.py": "2dd3f8727ca86f9afbc647f8f38dadb1f0583912be8f8b6aef68bde68ccba79e",
+    "observe_owned_resource_containment.py": "9155a7837f08050898d9a40821ccadfba8e78175f8bea0376f31b29b38fbf527"
+  },
+  "cloud_attempts": 1,
+  "resource_identities_verified_absent": 6,
+  "portable_controls": {
+    "new": 37,
+    "combined_with_resource_and_prior_controls": 240,
+    "runtimes": [
+      "CPython 3.11.15",
+      "CPython 3.14.2"
+    ]
+  },
+  "two_live_guests": true,
+  "all_six_helpers_alive_at_final_observation": true,
+  "probes": [
+    {
+      "side": "a",
+      "role": "serve",
+      "passed": true,
+      "report": {
+        "listener_positive": true
+      }
+    },
+    {
+      "side": "b",
+      "role": "serve",
+      "passed": true,
+      "report": {
+        "listener_positive": true
+      }
+    },
+    {
+      "side": "a",
+      "role": "dac",
+      "passed": true,
+      "report": {
+        "own_api": {
+          "huge_pages": "None",
+          "mem_size_mib": 512,
+          "smt": false,
+          "track_dirty_pages": false,
+          "vcpu_count": 1
+        },
+        "own_canary": "owned-peer-a\n",
+        "own_signal": true,
+        "peer_api_errno": 13,
+        "peer_read_errno": 13,
+        "peer_signal_errno": 1
+      }
+    },
+    {
+      "side": "a",
+      "role": "namespace",
+      "passed": true,
+      "report": {
+        "create_input": 13,
+        "denials": {
+          "initrd": {
+            "chmod": 1,
+            "replace": 13,
+            "truncate": 13,
+            "unlink": 13,
+            "write": 13
+          },
+          "kernel": {
+            "chmod": 1,
+            "replace": 13,
+            "truncate": 13,
+            "unlink": 13,
+            "write": 13
+          }
+        },
+        "hashes": {
+          "initrd": "eea36941182a37d2a069744f04003ccd08b59a05abb54a9abe222de54792ab1f",
+          "kernel": "da5e0041fb31fcc7337026da9e2b64fb7694b4eed760cc9b5e8fe54e52fa8188"
+        },
+        "network": {
+          "a": 0,
+          "b": 111,
+          "host": 111
+        },
+        "scratch": true
+      }
+    },
+    {
+      "side": "b",
+      "role": "dac",
+      "passed": true,
+      "report": {
+        "own_api": {
+          "huge_pages": "None",
+          "mem_size_mib": 512,
+          "smt": false,
+          "track_dirty_pages": false,
+          "vcpu_count": 1
+        },
+        "own_canary": "owned-peer-b\n",
+        "own_signal": true,
+        "peer_api_errno": 13,
+        "peer_read_errno": 13,
+        "peer_signal_errno": 1
+      }
+    },
+    {
+      "side": "b",
+      "role": "namespace",
+      "passed": true,
+      "report": {
+        "create_input": 13,
+        "denials": {
+          "initrd": {
+            "chmod": 1,
+            "replace": 13,
+            "truncate": 13,
+            "unlink": 13,
+            "write": 13
+          },
+          "kernel": {
+            "chmod": 1,
+            "replace": 13,
+            "truncate": 13,
+            "unlink": 13,
+            "write": 13
+          }
+        },
+        "hashes": {
+          "initrd": "eea36941182a37d2a069744f04003ccd08b59a05abb54a9abe222de54792ab1f",
+          "kernel": "da5e0041fb31fcc7337026da9e2b64fb7694b4eed760cc9b5e8fe54e52fa8188"
+        },
+        "network": {
+          "a": 111,
+          "b": 0,
+          "host": 111
+        },
+        "scratch": true
+      }
+    }
+  ],
+  "cleanup": {
+    "empty": true,
+    "final": {
+      "cpu": {
+        "burst_usec": 0,
+        "nr_bursts": 0,
+        "nr_periods": 26,
+        "nr_throttled": 22,
+        "system_usec": 89950,
+        "throttled_usec": 1656217,
+        "usage_usec": 507584,
+        "user_usec": 417634
+      },
+      "current": 16384,
+      "host_available_kib": 15490320,
+      "host_oom_kill": 0,
+      "limits": {
+        "cpu.max": "20000 100000",
+        "memory.max": "134217728",
+        "memory.swap.max": "0",
+        "pids.max": "8"
+      },
+      "memory": {
+        "high": 0,
+        "low": 0,
+        "max": 0,
+        "oom": 0,
+        "oom_group_kill": 0,
+        "oom_kill": 0
+      },
+      "peak": 93540352,
+      "pids": {
+        "max": 0
+      },
+      "pids_current": 0
+    },
+    "passed": true,
+    "reaped": {
+      "967": -9,
+      "968": -9,
+      "969": -9,
+      "970": -9,
+      "971": -9,
+      "972": -9
+    },
+    "watchdog": {
+      "completed_ns": 58599189816,
+      "empty": true,
+      "observed_ns": 58588963091,
+      "reason": "explicit_stop"
+    }
+  },
+  "limits": [
+    "Same root administration; no independent CATO reproduction.",
+    "Host namespace probes have Seccomp=0 and do not inherit VMM Seccomp=2.",
+    "Abstract Unix socket separation is not TCP/IP or guest escape qualification.",
+    "No target build/execution, finding, submission or bounty payment."
+  ]
+}

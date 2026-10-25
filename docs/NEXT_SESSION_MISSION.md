@@ -5,7 +5,17 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-24 — supervised bounty work in parallel
+## Current continuation, 2026-10-25 — independent containment review
+
+The resource and cross-worker experiments are now measured; read the current
+[handoff](SESSION_HANDOFF.md) and [review packet](CONTAINMENT_REVIEW_2026-10-25.md).
+All eighteen new cloud resource identities are absent, with the initial collector
+CLI failure retained. Obtain a real independent reviewer and separate execution
+before accepting a scoped target reproduction. Re-running the same session or
+renaming its role does not supply independence. Preserve CoW negative reviews,
+known-issue closures and the other session's Immutable work.
+
+## Earlier continuation, 2026-10-24 — supervised bounty work in parallel
 
 Read [ADR-0025](decisions/0025-parallel-supervised-bounty-research.md) before applying
 older foundation-first instructions to supervised reports. Daniel explicitly changed

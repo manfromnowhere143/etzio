@@ -2,7 +2,48 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-25, Asia/Jerusalem.
 
-## Current pickup, 2026-10-25: actual collector-death controls
+## Current pickup, 2026-10-25: resource exhaustion and cross-worker controls
+
+The inherited release is `ed8c1a52924b2ae6c016551b34835351ebb199f7`
+([PR 69](https://github.com/manfromnowhere143/etzio/pull/69)). Preserve its frozen
+release and recovery evidence. The new [resource experiment](OWNED_RESOURCE_PREFLIGHT.md)
+passed both memory and both host-task controls. The large allocation caused one
+kernel-attributed VMM cgroup OOM kill with a 256 MiB observed peak; the task
+ceiling returned EAGAIN after fifteen children. All owned processes were reaped.
+One earlier attempt stopped at mutually exclusive dmesg options; its failure is
+retained and the corrected host reproduces that CLI refusal before guest boot.
+
+The [cross-worker experiment](OWNED_CROSS_WORKER_PREFLIGHT.md) passed in both
+directions: own canary/API/signal controls succeeded; peer file/API/signal probes
+were denied; input mutation/replacement failed with hashes unchanged; own abstract
+socket connections succeeded and peer/host names were refused. Both VMMs and all
+six helpers remained alive through final observation, then were reaped. Kernel
+helpers exited and cgroups emptied. All three attempts' eighteen cloud resource
+identities are verified absent. Host probes do not inherit VMM seccomp; these are
+bounded file, credential and namespace observations, not a guest-escape proof.
+
+The new portable controls total 117, with 240 focused passes per runtime including
+prior preflights. The current full-suite collection target is:
+
+- 2971 tests expected;
+
+Resolve exact full-suite, package and CI outcomes from
+`artifacts/checkpoints/2026-10-25-resource-containment/release-validation.json`.
+Private experiment sources, every attempted controller, all builds and failures
+are at `artifacts/resource-containment-20261025/`. Current ownership is recorded at
+`artifacts/coordination/2026-10-25-resource-containment.json`.
+
+The next dependency is the [independent containment review](CONTAINMENT_REVIEW_2026-10-25.md)
+and separate execution from retained inputs. Reviewer identity was requested and
+remains unassigned. Do not replace it with same-session agreement. A target run
+still requires profile acceptance and an exact eligible target/candidate contract.
+The retained CoW reviews establish no report candidate; preserve known-issue and
+negative dispositions and the other session's Immutable lane. No target build,
+execution, submission, accepted bounty or payment occurred in this tranche.
+Production integrity/storage/provider gates are unchanged. No Daybreak access,
+model or security configuration was changed.
+
+## Previous pickup, 2026-10-25: actual collector-death controls
 
 The inherited release is `2baea709089ca5cb88928bd41f3c65d94fa38c15`
 ([PR 68](https://github.com/manfromnowhere143/etzio/pull/68)). Preserve its
@@ -18,7 +59,7 @@ resource identities are verified absent. No arbitrary-code profile is admitted.
 Eighty-seven new portable controls pass on both supported runtimes; the focused
 total with the previous guest preflight is 123. The collection target is:
 
-- 2854 tests expected;
+- 2854 tests in that previous collection;
 
 Resolve full-suite, package and exact-commit CI results from
 `artifacts/checkpoints/2026-10-25-collector-death/release-validation.json`.
