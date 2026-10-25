@@ -60,6 +60,17 @@ insert and acknowledged commit. Therefore at most one call can return a fresh de
 There is no retry or recovery transition that deletes it. This establishes a local
 at-most-once handoff opportunity, not exactly-once remote execution or delivery.
 
+Correction, 2026-10-25: the original concurrent-debit test required exactly one
+successful caller, exceeding this at-most-once contract. With zero busy timeout,
+contention can leave every caller with a storage error. In DELETE mode an open
+reader can prevent even an already-started writer from committing; SQLite
+[documents this COMMIT failure](https://www.sqlite.org/lang_transaction.html#implicit_versus_explicit_transactions).
+The journal closes that failed transaction and returns no debit. Controls now
+retain the zero-success case, prove the prepared state remains unchanged after a
+reader-blocked commit, and separately check success after contention ends. No
+automatic retry or runtime behavior is added. A lost acknowledgement after an
+actual commit remains spent and is covered separately.
+
 Controls must cover concurrent debit calls, death before and after debit commit, lost
 commit acknowledgement, cold replay without original input files, retained input/output
 substitution, missing or foreign schema, raw ordering violations, immutable-row changes,

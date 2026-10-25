@@ -18,7 +18,7 @@ resource identities are verified absent. No arbitrary-code profile is admitted.
 Eighty-seven new portable controls pass on both supported runtimes; the focused
 total with the previous guest preflight is 123. The collection target is:
 
-- 2852 tests expected;
+- 2854 tests expected;
 
 Resolve full-suite, package and exact-commit CI results from
 `artifacts/checkpoints/2026-10-25-collector-death/release-validation.json`.
@@ -26,6 +26,16 @@ The initial baseline attempt used a symlinked TMPDIR and also observed one
 process-group PermissionError. Both its failure log and the corrected-path
 baseline/focused results are retained; the process-group error did not recur in
 25 additional owned stderr trials. No runtime cleanup repair is claimed.
+
+The initial candidate's Python 3.14 full suite also exposed an acquisition-custody
+test that incorrectly required one successful concurrent debit. Its retained
+database contains one intent and no debit or outcome. The ADR-0023 contract is
+at-most-once: zero-timeout storage contention can refuse every caller. The
+[correction](decisions/0023-offline-acquisition-custody.md) adds a held-reader
+concurrent schedule and a real reader-blocked COMMIT control, proving no debit
+returns and the transaction rolls back before a separate quiescent fixture call.
+Runtime bytes are unchanged. Preserve the initial failed full run and resolve
+the revised candidate's complete checks from the release record above.
 
 A separate five-file CoW relayer/transfer source review closed three hypotheses
 without a report candidate. Exact scoped source URLs, byte identities, contrary

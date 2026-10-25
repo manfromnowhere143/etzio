@@ -439,7 +439,8 @@ def test_foreign_database_is_not_adopted(tmp_path):
         custody.AcquisitionJournal(path).inspect()
 
 
-def test_concurrent_debits_have_one_fresh_return(tmp_path):
+@pytest.mark.parametrize("held_reader", [False, True])
+def test_concurrent_debits_have_at_most_one_fresh_return(tmp_path, held_reader):
     journal = _journal(tmp_path)
     barrier = Barrier(4)
 
@@ -454,10 +455,54 @@ def test_concurrent_debits_have_one_fresh_return(tmp_path):
             assert error.sqlite_errorcode in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED)
             return "busy", None
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
-        results = list(executor.map(debit, range(4)))
-    assert sum(kind == "fresh" for kind, _ in results) == 1
-    assert journal.inspect().attempt_id == next(value for kind, value in results if kind == "fresh")
+    with closing(sqlite3.connect(journal.path)) as reader:
+        if held_reader:
+            reader.execute("BEGIN")
+            reader.execute("SELECT wire FROM intent").fetchall()
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            results = list(executor.map(debit, range(4)))
+        if held_reader:
+            assert all(kind == "busy" for kind, _ in results), results
+        reader.rollback()
+    fresh = [value for kind, value in results if kind == "fresh"]
+    assert len(fresh) <= 1, results
+    state = custody.AcquisitionJournal(journal.path).inspect()
+    if fresh:
+        attempt = fresh[0]
+        assert state.status == "attempt_indeterminate" and state.attempt_id == attempt
+    else:
+        assert all(kind == "busy" for kind, _ in results), results
+        assert state.status == "prepared" and state.attempt_id is None
+        # Separate quiescent fixture call, not an automatic retry in the journal.
+        attempt = journal.debit()
+    assert journal.inspect().attempt_id == attempt
+    with pytest.raises(custody.CustodyError, match="attempt_already_spent"):
+        journal.debit()
+
+
+def test_reader_blocked_commit_returns_no_debit_and_rolls_back(tmp_path, monkeypatch):
+    journal = _journal(tmp_path)
+    prepared = journal.inspect()
+    real_commit = custody._commit
+    commit_debit_counts = []
+
+    def commit(connection):
+        commit_debit_counts.append(connection.execute("SELECT COUNT(*) FROM debit").fetchone()[0])
+        real_commit(connection)
+
+    with closing(sqlite3.connect(journal.path)) as reader:
+        reader.execute("BEGIN")
+        reader.execute("SELECT wire FROM intent").fetchall()
+        with monkeypatch.context() as patch:
+            patch.setattr(custody, "_commit", commit)
+            with pytest.raises(sqlite3.OperationalError) as caught:
+                journal.debit()
+        assert caught.value.sqlite_errorcode == sqlite3.SQLITE_BUSY
+        assert commit_debit_counts == [1]
+        assert custody.AcquisitionJournal(journal.path).inspect() == prepared
+        reader.rollback()
+    attempt = journal.debit()
+    assert custody.AcquisitionJournal(journal.path).inspect().attempt_id == attempt
     with pytest.raises(custody.CustodyError, match="attempt_already_spent"):
         journal.debit()
 

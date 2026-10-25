@@ -210,7 +210,7 @@
   "current_evidence": {
     "scope": "Fixture kernel, conditional offline timing, historical timestamp authentication, benign cloud observations, offline acquisition custody and owned loopback HTTPS capture, bounded advisory transport diagnostics and two separately accepted indeterminate finite discovery observations, the second with a retained advisory TLS EOF classification and counted bytes; offline source provenance inspection and publisher-source reconciliation; conditional EU/Spain signed-document bootstrap inspection; streamed canonicalization and explicit namespace work ceilings; offline native C2SP checkpoint and timestamped cosignature inspection under complete caller pins; runtime SQLite interruption cleanup and commit-boundary recovery; coherent local SQLite read snapshots across validation, barrier checks and readout; fail-closed handle disposal after bounded rollback/close interruption; owned finite recovery-fence schedule enumeration with explicit atomicity assumptions and retained counterexamples, without runtime or native qualification; failed SQLite construction and schema migration cleanup under bounded interruption; legacy fixture metrics preserving undefined denominators and unresolved outcome coverage; owned-document link validation and current-state recovery clarification; equivalent ASCII protocol validation with retained differential and fixture timing evidence; documentation and diagram reconciliation with selected frontier research, controlled-comparison direction and bounded public-source review, without runtime or gate changes; exact built-in evidence-byte admission before subclass behavior, digest computation or staging access; reviewer-facing architecture/code/test traceability, public release reconciliation and fresh-install console documentation; acquired evidence-setup descriptor and temporary-file cleanup under bounded KeyboardInterrupt and SystemExit injection; temporary-file pre-publication close ownership transferred before an ambiguous close, preserving unrelated reused descriptors under bounded fault injection; signed-fixture governed recovery under second interruption and concurrently changed authority at actual phase writes, with negative implementation calibration; fixture CLI failure exits and versioned JSON reports from fresh retained-event reduction, preserving unresolved outcomes and source minimization; real subprocess SIGKILL before and after canonical evidence and qualified finality commit, complete cold logical-state equality, global-barrier preservation, repeat outcomes and cache-spill rollback controls",
     "validation_status": "resolve_exact_candidate_release_record",
-    "test_count": 2852,
+    "test_count": 2854,
     "python_rule_classes": 6,
     "planted_instances": 7,
     "clean_fixtures": 1,
@@ -2086,6 +2086,16 @@
     "collector_in_default_verify": false,
     "source_review": "artifacts/bounty-research/2026-10-24-cow-authentication-review/review.json",
     "source_review_report_candidates": 0
+  },
+  "acquisition_custody_contention_correction": {
+    "date": "2026-10-25",
+    "status": "test_oracle_corrected_runtime_unchanged",
+    "contract": "docs/decisions/0023-offline-acquisition-custody.md",
+    "initial_full_run": "2851 passed, 1 failed on CPython 3.14.2; retained database had no debit or outcome",
+    "new_controls": 2,
+    "claim": "At most one fresh debit; contention may refuse every caller. A real reader-blocked COMMIT returns no debit and closes with rollback.",
+    "automatic_retry_added": false,
+    "evidence": "artifacts/checkpoints/2026-10-25-collector-death/release-validation.json"
   },
   "owned_collector_death_preflight": {
     "date": "2026-10-25",
