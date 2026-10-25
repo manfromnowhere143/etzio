@@ -47,7 +47,8 @@ versioned domain and technique adapters; the kernel remains target-neutral.
 - No exploit execution outside a proved hard-isolation profile.
 - No network egress, spending, credential use, or disclosure without a separate scoped grant.
 - A model-generated candidate is not a finding.
-- The generator may not verify its own claim.
+- The generator may not verify its own production kernel claim. The separately
+  supervised workflow below may retain clearly labeled self-reproduction.
 - Missing, blocked, inconclusive, not-reproduced, and null results remain distinct.
 - Self-improvement is offline, evaluated, reversible, and unable to change authority policy,
   evaluators, benchmarks, or production bytes directly.
@@ -74,10 +75,30 @@ gates. Native provider and external-head arrangements remain engine dependencies
 
 A supervised report workflow still requires exact target/revision and program
 scope, an accepted isolated execution profile, bounded actions/resources,
-independent reproduction and separate submission/disclosure authority. It cannot
-issue production kernel findings or present fixture receipts as native execution.
+reproduction under the October 25 direction below and separate submission/disclosure
+authority. It cannot issue production kernel findings or present fixture receipts
+as native execution.
 Public source review and already authorized benign host preparation proceed now.
 Use separate worktrees and disjoint resource names for concurrent sessions.
+
+## Solo supervised workflow, operator direction 2026-10-25
+
+Daniel explicitly directed removal of internal obstacles to a supervised workflow
+operated by Daniel and the assistant. Follow
+`docs/decisions/0026-solo-supervised-bounty-workflow.md`. An outside containment
+reviewer or independently administered verifier is no longer a prerequisite for
+supervised local research or a report draft. The assistant may assess a concrete
+isolated profile from retained measurements and develop and repeat scoped proofs.
+Record these as same-assistant self-reproduction; independent assessment remains
+pending until it actually occurs. Do not ask Daniel to recruit an outside reviewer
+or repeat approval of this workflow.
+
+This exception supersedes the outside-review prerequisites in the earlier
+containment preparation documents for supervised work only. Exact program scope,
+isolation, bounded resources, honest outcomes and separate submission/disclosure
+authority remain. Production kernel verification, integrity, storage, providers
+and benchmark requirements are unchanged. No target/profile is admitted merely
+by this policy change.
 
 ## Current mission order
 

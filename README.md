@@ -16,6 +16,11 @@ the vulnerable fixture and `0` on the clean fixture. Modeled verification receip
 signed fixture-provider packages exercise admission and recovery; independently produced
 execution evidence, qualified native providers and a finding pipeline remain blocked.
 
+A separate supervised bounty workflow proceeds alongside the kernel. Its source
+reviews and owned toolchain preparation are retained below. It permits clearly
+labeled self-reproduction under exact scope and isolation; no eligible report,
+accepted bounty or payment has been established.
+
 Start with the [engineering review guide](docs/REVIEW_GUIDE.md) for the claim-to-code/test
 map and open risks, [architecture](docs/ARCHITECTURE.md) for the contracts, and the
 [handoff](docs/SESSION_HANDOFF.md) for the exact release and continuation state. Public
@@ -45,11 +50,11 @@ planned research-worker capability.
 
 ## Why Etzio
 
-A candidate identifies a falsifiable observation against specific bytes. A finding requires
+A candidate identifies a falsifiable observation against specific bytes. A production kernel finding requires
 a separately authorized verifier to reproduce a security-relevant effect from retained artifacts in an independently controlled
 environment, followed by kernel adjudication.
 
-That yields six operating laws:
+That yields six production kernel operating laws:
 
 1. authority is admitted before a mission opens;
 2. workers propose; the kernel alone changes canonical state;
@@ -61,10 +66,10 @@ That yields six operating laws:
 
 ## Current release and evidence
 
-The preceding verified engine release is [`e1b47fe`](https://github.com/manfromnowhere143/etzio/commit/e1b47fea581c4abe3864ca5b1a1a036809c1da03)
-([PR 65](https://github.com/manfromnowhere143/etzio/pull/65), October 21, 2026):
-`2711` tests passed on CPython `3.11.15` and `3.14.2`, locally and in
-[Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/39637265745).
+The preceding verified release is [`b010c08`](https://github.com/manfromnowhere143/etzio/commit/b010c0850c97a2280b452f64ab2dee0edc08a25e)
+([PR 71](https://github.com/manfromnowhere143/etzio/pull/71), October 25, 2026):
+`2971` tests passed on CPython `3.11.15` and `3.14.2`, locally and in
+[Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/40181735173).
 Both package builds and installed-wheel checks passed. These results cover repository
 behavior under the recorded environments; discovery quality requires a separate benchmark.
 
@@ -93,8 +98,23 @@ This remains preparation for an execution profile; no target or finding is admit
 The October 25 [resource and peer controls](docs/OWNED_RESOURCE_PREFLIGHT.md)
 measure cgroup OOM and task ceilings, then bidirectional file/API/signal denial,
 input immutability and abstract-socket namespace separation between two owned
-workers. All attempts and cleanup evidence are retained. The next step is
-[independent review and a separately scoped reproduction](docs/CONTAINMENT_REVIEW_2026-10-25.md).
+workers. All attempts and cleanup evidence are retained. The
+[containment packet](docs/CONTAINMENT_REVIEW_2026-10-25.md) now follows the
+[solo supervised workflow](docs/decisions/0026-solo-supervised-bounty-workflow.md):
+the assistant may assess an exact measured profile without recruiting an outside
+reviewer. This changes an internal workflow prerequisite, not a target's permission.
+
+The latest private Aave source review closes `5` hypotheses without an eligible
+report. It binds `21` source/support files, `6` published audits and an official
+proposal report. An owned integer model passed `422619` finite checks and rejected
+`3` deliberately wrong variants; these are neither EVM runs nor independent proof.
+Known issues, contrary evidence and deployment limits remain retained privately.
+
+[Owned compiler preparation](docs/SUPERVISED_TOOLCHAIN_PREPARATION.md) pins official
+Foundry `1.8.6` and Solidity `0.8.38` binaries. Two fixed guest images, one intended
+to pass and one intended to fail, match across `2` builds and `8` artifact pairs.
+An earlier assembler failure is retained. The compiler and guest images have
+not been executed; this is preparation for the next isolated calibration.
 
 The full collection is `2971` tests; resolve exact full-suite, package and CI results from
 the [release handoff](docs/SESSION_HANDOFF.md). Earlier byte-admission, cleanup, accounting
@@ -107,10 +127,11 @@ and protocol corrections remain in the retained release history.
 | Governed fixture kernel | Signed admission, immutable inputs, candidate and lease lineages, transactional evidence vault, deterministic replay and schema-v4 qualified fixture enrollment | Six Python rule classes and two owned scan fixtures; no independently verified security effect |
 | Integrity and recovery | Four immutable finality phases, authenticated signed-fixture packages, governed retry/seal decisions and interruption controls | Actual independent provider administration and external latest-head recovery are unqualified |
 | Native evidence preparation | Offline timestamp/CRL validation, conditional elapsed-time bounds, trusted-list and checkpoint inspection, source-provenance reconciliation | Documentary and offline observations do not admit a live provider; both FreeTSA acquisition attempts are spent |
-| Host preparation | Benign KVM, [four owned guest controls](docs/OWNED_FIRECRACKER_PREFLIGHT.md) and [collector-death controls](docs/OWNED_COLLECTOR_DEATH_PREFLIGHT.md) completed; disposable resources deleted | No accepted worker isolation, protected storage or power-fault profile |
+| Host preparation | Benign KVM, owned guest, collector-death, resource-exhaustion and cross-worker controls measured; disposable resources deleted | No target profile, protected storage or power-fault qualification |
 | Repository reliability | Cleanup and coherent-read repairs, exact evidence-byte admission, interrupted setup cleanup, ambiguous close ownership, qualified recovery and real canonical process-death controls | `2971` tests in the current collection; release checks establish repository behavior only |
 | Research and comparison | Targeted primary-source reviews through October 24; verifier acceptance, model-specific skill evaluation and explicit proof scope refine the retained comparison | Experiment order selected; `18` registration inputs remain unbound; no comparator has run |
-| Bounty preparation | CoW source/deployment-record reconciliation, conditional fee/fill obligations and relayer/transfer source checks | Exact deployed state, scope, independent reproduction and program eligibility remain unresolved; no confirmed finding or payment |
+| Supervised bounty research | CoW, GHO and Aave source dispositions retained; latest Aave batch has `5` hypotheses and no eligible report; ADR-0026 permits labeled self-reproduction | Exact eligible target applicability and accepted isolation precede proof work; no confirmed finding or payment |
+| Supervised toolchain | Publisher digests checked; `2` fixed owned compiler fixtures built identically twice | Guest execution and positive/failing result calibration have not run; no general target runner is admitted |
 | Operating dependencies | Eight organizations previously contacted for catalog or monitor roles; October 24 readback records one decline already acknowledged by the operator | No commitment in seven reread provider/customer conversations; other threads and channels unobserved |
 | Upstream engineering | [Source review contributed to Tessera issue 1098](https://github.com/transparency-dev/tessera/issues/1098#issuecomment-6320024671), with producer error cleanup and worker completion controls | No native reproduction, upstream fix or maintainer acceptance established |
 | Customer discovery | Two new inquiries proposing a small paid design pilot on synthetic evidence, with current capability limits stated | No customer engagement, delivery commitment or payment established |
@@ -128,15 +149,17 @@ pipeline. Solid edges connect the implemented fixture foundation; dashed edges r
 acceptance evidence. Preparation is complete only for its named, bounded scope.
 
 The parallel supervised report workflow follows
-[ADR-0025](docs/decisions/0025-parallel-supervised-bounty-research.md). Public source
-review proceeds now. A supervised reproduction requires exact program and target
-scope, accepted containment, bounded actions and independent reproduction; it need
-not await production catalog/monitor qualification or the comparative engine benchmark.
-It cannot issue a production kernel finding.
+[ADR-0025](docs/decisions/0025-parallel-supervised-bounty-research.md) and
+[ADR-0026](docs/decisions/0026-solo-supervised-bounty-workflow.md). It requires exact
+program and target scope, accepted containment and bounded actions. The assistant
+may develop and repeat proofs with self-reproduction stated explicitly, without
+an outside reviewer or completed production-provider qualification. Independent
+assessment is only claimed after it occurs. This workflow cannot issue a production
+kernel finding, and report submission retains separate authority.
 
 ```mermaid
 flowchart TB
-    accTitle: Qualification and evaluation gates
+    accTitle: Production kernel qualification and evaluation gates
     accDescr: Implemented fixture foundation and the remaining native integrity, recovery, storage, execution, benchmark and research gates.
     K["IMPLEMENTED ON FIXTURES<br/>authority · candidates · evidence vault"]
     F["IMPLEMENTED ON FIXTURES<br/>signed qualification · finality · recovery"]
@@ -160,6 +183,22 @@ flowchart TB
     class K,F done;
     class P,B,E,A,U prep;
     class N,R,S,X blocked;
+```
+
+The supervised workflow has its own current boundary. Building an image does not
+establish execution or vulnerability impact. The detailed
+[supervised evidence path](docs/ARCHITECTURE.md#supervised-evidence-path) separates
+self-reproduction, report preparation and actual program assessment.
+
+```mermaid
+flowchart TB
+    accTitle: Supervised research progress
+    accDescr: Source review is retained without an eligible report. Two owned compiler fixture images are built but unexecuted. Isolated calibration and exact scoped proof work are next.
+    SR["RETAINED<br/>source reviews and dispositions<br/>no eligible report"]
+    BI["BUILT · NOT EXECUTED<br/>two owned compiler fixtures<br/>matching rebuilds"]
+    NX["NEXT<br/>isolated compiler calibration<br/>then an exact scoped proof"]
+    SR --> BI
+    BI -.-> NX
 ```
 
 ### Progress through 2026-10-15
@@ -192,7 +231,7 @@ order or promoting source hypotheses into findings.
   turn their statements into external observations. Neither path establishes execution,
   trustworthy UTC, current real
   revocation, independent administration, external durability, or a finding.
-- **Blocked target system:** exploit construction, hard isolation, independent
+- **Blocked production target system:** exploit construction, hard isolation, independent
   reproduction, adjudication, governed disclosure, evaluated promotion, live targets, and
   production external finality remain unavailable.
 
@@ -539,7 +578,7 @@ fixture-integrity finality.
 
 ## Open gates and next mission
 
-The next mission qualifies the external integrity boundary. The fixture foundation includes the typed
+The production mission qualifies the external integrity boundary. The fixture foundation includes the typed
 integrity-evidence contract, crash-safe modeled finality across four immutable phases, three
 networkless qualification harnesses, durable governed blocked-finality — specified,
 persisted, wired into the lifecycle, and crash-recovered — and a schema-version-4 store that
@@ -548,13 +587,13 @@ four-phase lifecycle with signed provider packages, exact profile alignment and
 reconstruction from retained bytes. Release
 validation of this tranche is recorded in the handoff; these are still repository fixtures.
 
-The immediate dependency is an accountable catalog operator, independent application
+Its immediate dependency is an accountable catalog operator, independent application
 monitors and the complete native administration/custody dossier. Existing inquiries and
 follow-ups are already sent. Additional fixture parsers, cloud credits or model-access
 approval cannot supply those commitments. See the
 [operating decision](docs/CATALOG_RECOVERY_DECISION.md).
 
-What remains before a finding pipeline can exist:
+What remains before a production kernel finding pipeline can exist:
 
 1. qualify independently administered trusted-time, revocation, anchor, catalog, and monitor
    providers, and prove external latest-head authority survives local database loss;
@@ -567,8 +606,8 @@ What remains before a finding pipeline can exist:
 
 Only then does the benchmark-first EVM pack run, and only after the integrity, isolation,
 benchmark, and exact-`TargetContract` gates close may production kernel bounty execution
-begin. The separately supervised workflow proceeds alongside this work under ADR-0025,
-with its own exact scope, accepted containment and independent reproduction requirements.
+begin. The separately supervised workflow proceeds alongside this work under ADR-0025
+and ADR-0026, with exact scope, accepted containment and labeled self-reproduction.
 Accepted outcomes and income are measurements, never authority. Autonomy over a live target
 expands after one full chain of custody survives independent reproduction, isolation, and
 adjudication — not before.
@@ -592,7 +631,7 @@ not a completed preregistration or a comparative result. See the
 - [2026 frontier baseline](docs/FRONTIER_BASELINE.md)
 - [Provider and host qualification next steps](docs/QUALIFICATION_NEXT_STEPS.md)
 - [Protocol-v1 semantic wire schema](etzio/schemas/protocol.v1.schema.json)
-- [Architecture decisions (24 accepted records)](docs/decisions/README.md)
+- [Architecture decisions (26 records)](docs/decisions/README.md)
 - [Presentation standard](docs/PRESENTATION.md)
 - [Security policy](SECURITY.md)
 - [Contributing](CONTRIBUTING.md)

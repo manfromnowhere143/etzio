@@ -1,6 +1,6 @@
 # Etzio Architecture
 
-Status: **foundation integrity**, current-state reconciliation 2026-10-21.
+Status: **foundation integrity and separate supervised workflow**, reconciled 2026-10-25.
 
 This document distinguishes implemented, modeled, proposed, and blocked behavior. A green
 test proves only its named fixture and invariant.
@@ -13,9 +13,9 @@ outside the generative workers. The implemented fixture paths currently share on
 host process; unit names and signing keys do not create process isolation.
 
 The [engineering review guide](REVIEW_GUIDE.md) maps these claims to code, tests and open
-risks. The preceding release is `f6fd73d` (PR 61), with `2645` passing tests per declared
-runtime locally and in Linux CI. The current close-ownership repair adds `18` controls;
-the handoff identifies its separate release validation. Schema and authority are unchanged.
+risks. The preceding release is `b010c08` (PR 71), with `2971` passing tests per declared
+runtime locally and in Linux CI. The handoff identifies subsequent release validation.
+ADR-0026 changes the supervised workflow; production runtime and schema are unchanged.
 
 The first truthful vertical slice now exists. A signed fixture authority is admitted before
 mission opening; exact authority and target bytes are retained with their claiming events
@@ -61,6 +61,36 @@ trace, and derives outward receipt/use intervals under explicit rate and reading
 assumptions. A half-open evaluation window must contain the complete use interval.
 These conditional observations qualify neither the host clock nor the actual consumption
 point and have no kernel authority. The native codecs and lifecycle remain unchanged.
+
+## Supervised evidence path
+
+[ADR-0026](decisions/0026-solo-supervised-bounty-workflow.md) permits the assistant
+to assess a concrete isolated profile and repeat exact scoped proofs without
+recruiting an outside reviewer. These remain same-assistant self-reproduction.
+They are retained outside production kernel finding admission. The target program
+supplies its own scope and any eventual acceptance; neither a repeated run nor a
+diagram creates independent assessment.
+
+The latest source batch yielded no eligible report. Two
+[owned compiler fixture images](SUPERVISED_TOOLCHAIN_PREPARATION.md) are built and
+byte-matched across two builds, but guest/compiler execution has not occurred.
+The next execution measures those fixed controls before any target-specific proof.
+
+```mermaid
+flowchart TB
+    accTitle: Supervised evidence and external assessment
+    accDescr: Exact program scope and measured isolation constrain assistant-operated reproduction. A draft states self-reproduction. Submission needs its own authority; program acceptance and payment are external outcomes.
+    PS["REQUIRED<br/>exact program scope and target<br/>accepted measured isolation"]
+    AR["NOT RUN<br/>assistant-operated local proof<br/>fresh repeat and contrary control"]
+    RD["NOT PREPARED<br/>private report draft<br/>self-reproduction stated"]
+    PA["EXTERNAL · NOT OBSERVED<br/>program assessment<br/>accepted report and payment"]
+    PS -.-> AR
+    AR -. "demonstrated eligible effect" .-> RD
+    RD -. "separate submission authority" .-> PA
+```
+
+The production topology below retains generator/verifier separation and kernel
+adjudication. Supervised artifacts cannot satisfy that topology by relabeling.
 
 ## Target system
 

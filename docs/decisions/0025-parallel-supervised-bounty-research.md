@@ -5,6 +5,12 @@
 - Owner: Daniel Wahnich
 - Supersedes: ADR-0001 only for the sequencing of supervised bounty research
 
+October 25 update: [ADR-0026](0026-solo-supervised-bounty-workflow.md) supersedes
+this decision's mandatory outside-review prerequisite for supervised work. The
+assistant may retain clearly labeled self-reproduction under an exact accepted
+isolated profile. Historical references to independent review below describe the
+earlier contract; production kernel independence remains unchanged.
+
 ## Decision and authority
 
 On October 24 Daniel explicitly directed bounty research to proceed alongside the

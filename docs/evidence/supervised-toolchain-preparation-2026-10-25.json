@@ -1,0 +1,83 @@
+{
+  "schema": "etzio.supervised-toolchain.preparation.v1",
+  "date": "2026-10-25",
+  "status": "built_not_executed",
+  "base_commit": "b010c0850c97a2280b452f64ab2dee0edc08a25e",
+  "workflow_decision": "docs/decisions/0026-solo-supervised-bounty-workflow.md",
+  "private_record": "artifacts/supervised-evm-preparation-20261025/",
+  "publisher_assets": [
+    {
+      "file": "foundry_v1.8.6_alpine_amd64.tar.gz",
+      "bytes": 138516323,
+      "sha256": "1165568a5ae449e9c28bba18f90012b7f89826fa20bd0d0006d4371f5d6dfc3b",
+      "url": "https://github.com/foundry-rs/foundry/releases/download/v1.8.6/foundry_v1.8.6_alpine_amd64.tar.gz",
+      "executed": false
+    },
+    {
+      "file": "solc-static-linux",
+      "bytes": 15527664,
+      "sha256": "65c3180a336eabb6bdc4bbd49cc405aeb233976964ae6c11fba2a6c8be8f3243",
+      "url": "https://github.com/argotorg/solidity/releases/download/v0.8.38/solc-static-linux",
+      "executed": false
+    }
+  ],
+  "binary_format_inspection": [
+    {
+      "file": "forge",
+      "bytes": 123376792,
+      "sha256": "6141a465334e5eac4169401df43739f20459f0a65d60d78b8806b444c6362d8e",
+      "elf_machine": 62,
+      "type": 3,
+      "interpreter": [],
+      "executed": false
+    },
+    {
+      "file": "solc-static-linux",
+      "bytes": 15527664,
+      "sha256": "65c3180a336eabb6bdc4bbd49cc405aeb233976964ae6c11fba2a6c8be8f3243",
+      "elf_machine": 62,
+      "type": 2,
+      "interpreter": [],
+      "executed": false
+    }
+  ],
+  "builder_sha256": "75f1eba65298d759f029d0dc2a57bf7c497860244cbbda0e43e2b2ba0c9badfe",
+  "builds": {
+    "successful": 2,
+    "failed": 1,
+    "matched_artifact_pairs": 8,
+    "manifest_equal": true,
+    "failure": "Assembler rejected ambiguous memory-operand cmp; corrected to explicit cmpl. Failed source and log retained."
+  },
+  "fixtures": [
+    {
+      "mode": "pass",
+      "bytes": 138912256,
+      "sha256": "349dec27ea881808b2343174096467925c1a5da8ce820445746f8e9a9d6825a2",
+      "init_sha256": "69c9eaefbc0ba90a9e37f08a20a10e341b213fd35d17f515699f8497735c2876",
+      "owned_solidity_sha256": "4284406e5a1ea7adbb5d7e7ff021bbb984656841d43b3b56dab4ffebef1c4a54",
+      "expected_child_exit": 0
+    },
+    {
+      "mode": "fail",
+      "bytes": 138912256,
+      "sha256": "cd979fd74efda929698920b39d16667f89789e1aac0e598c3e080d55b83e99db",
+      "init_sha256": "4e74e1499e10b41fd2b31b93f60df7e70b10bea7c56efd27eddfad9fafc0c5a8",
+      "owned_solidity_sha256": "9a74d63b6277bc00318b1b2163457e74092deae848f4bc182511c18c8ad3480d",
+      "expected_child_exit": 1
+    }
+  ],
+  "toolchain_executions": 0,
+  "guest_executions": 0,
+  "target_executions": 0,
+  "cloud_resources_created": 0,
+  "eligible_report_candidates": 0,
+  "submissions": 0,
+  "payments": 0,
+  "limits": [
+    "Owned preparation only; compiler and guest behavior not yet observed.",
+    "Publisher digest and ELF format checks are not independent supply-chain attestation.",
+    "Byte-identical builds are not execution, isolation qualification or a security finding.",
+    "No supported public runner interface or production kernel integration."
+  ]
+}

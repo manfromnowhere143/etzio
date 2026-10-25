@@ -80,8 +80,10 @@ and cleaned up; it is never silently redispatched.
 
 Portable positive and known-bad controls validate the outcome predicates; actual
 host observations are required for effects. Same-host root observation is not
-independent CATO administration. Cross-worker/input controls, independent review,
-explicit profile acceptance and an exact target contract remain subsequent work.
+independent CATO administration. The subsequent cross-worker/input results must
+be assessed with this evidence before accepting an exact profile and target
+contract. [ADR-0026](decisions/0026-solo-supervised-bounty-workflow.md) permits that
+supervised assessment without an outside reviewer; it grants no independence claim.
 
 The [summary](evidence/owned-resource-preflight-2026-10-25.json) and
 [exact observation](evidence/owned-resource-observation-2026-10-25.json)

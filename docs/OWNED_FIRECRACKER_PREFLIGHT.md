@@ -98,10 +98,12 @@ prefix and suffix; its complete output is not retained. Thirty-six portable
 checks cover host/artifact refusals, API completion/refusal, restrictive umask,
 runtime response validation and exact console framing on both supported runtimes.
 
-Next, measure actual collector death, resource exhaustion, input mutation and
-cross-worker access controls on this same pinned profile. Then require independent
-review of those results and an exact scoped reproduction contract. These four
-guest cases alone do not close those obligations.
+The subsequent collector-death, resource-exhaustion, input and cross-worker
+experiments retain their own measured results. Review them together before an
+exact scoped reproduction contract. Under
+[ADR-0026](decisions/0026-solo-supervised-bounty-workflow.md), supervised profile
+assessment does not require recruiting an outside reviewer. These four guest
+cases alone do not qualify a target runner.
 
 ## Claim boundary
 
@@ -116,4 +118,5 @@ runner or create a security finding.
 Continue [supervised source review](decisions/0025-parallel-supervised-bounty-research.md)
 alongside the remaining containment controls. Exact target/revision, program
 scope, accepted containment and independent reproduction remain necessary before
-a bounty reproduction is admitted.
+a production kernel finding is admitted. Supervised self-reproduction follows
+ADR-0026 and must state its provenance.

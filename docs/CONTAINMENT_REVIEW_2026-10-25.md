@@ -1,7 +1,13 @@
 # Containment review packet
 
-Status: **review preparation; independent reviewer and execution unassigned**.
+Status: **retained containment preparation; solo supervised review authorized**.
 Date: 2026-10-25. No target-execution acceptance is recorded here.
+
+[ADR-0026](decisions/0026-solo-supervised-bounty-workflow.md) supersedes the
+mandatory outside-review prerequisite below for supervised research. The assistant
+may assess a concrete isolated profile and retain self-reproduction. The historical
+independent-review obligations remain the standard for an independence claim;
+they are not a requirement to recruit another person before supervised work.
 
 ## Review scope and evidence
 

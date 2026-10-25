@@ -72,13 +72,13 @@ fifteen-minute VM DELETE deadline. Verify all owned cloud resource identities
 absent. Retain the final source/payload hashes, observations, local tests and exact
 candidate validation for review.
 
-An independent reviewer must inspect the combined containment packet and perform
-a separate execution from retained inputs. Record the real reviewer and execution
-identity, objections, contrary controls and disposition. Same-session rechecking
-or model agreement is not this review. Only after explicit profile acceptance
-may an exact target/revision and its current program rules be bound to a separate
-reproduction contract under ADR-0025. No target execution is authorized by this
-proposal.
+Under [ADR-0026](decisions/0026-solo-supervised-bounty-workflow.md), the assistant
+may assess the combined containment evidence for an exact supervised profile
+without recruiting an outside reviewer. Retain the accepted bounds, objections
+and disposition before binding an exact target/revision and its program rules.
+Same-assistant repeats remain self-reproduction. A claim of independent review
+still needs an actual separate reviewer and execution identity. This experiment's
+results alone authorize no target execution.
 
 ## Retained result
 

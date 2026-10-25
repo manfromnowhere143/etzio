@@ -2,7 +2,66 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-25, Asia/Jerusalem.
 
-## Current pickup, 2026-10-25: supervised source review and outcome accounting
+## Current pickup, 2026-10-25: solo supervised workflow and source outcomes
+
+Daniel explicitly directed the assistant to continue supervised bounty research
+without recruiting an outside reviewer. [ADR-0026](decisions/0026-solo-supervised-bounty-workflow.md)
+removes that internal prerequisite and permits measured profile assessment and
+clearly labeled same-assistant self-reproduction. Do not ask him to appoint a
+reviewer again. Exact program authority, isolation, bounded resources and separate
+submission/disclosure authority remain; production kernel requirements are intact.
+
+The next practical work is a bounded isolated compiler/test-runner calibration,
+then exact scoped target work. Preparation is private at
+`artifacts/supervised-evm-preparation-20261025/`. Resolve actual execution status
+from its retained observations; downloaded binaries or built images are not runs.
+The [public preparation summary](SUPERVISED_TOOLCHAIN_PREPARATION.md) records two
+fixed images and eight artifact pairs matched across two builds. An initial
+assembler failure is retained; no compiler/guest execution or cloud dispatch has
+occurred. The README and architecture diagrams now show this supervised path
+separately from production kernel admission.
+
+The operator also reported a Daybreak/Astra display restriction. Official guidance
+was read; account entitlement remains unverified. No model, account, security or
+access setting was changed, and no bypass was attempted. Preserve repository and
+private evidence checkpoints if the interface interrupts a continuation.
+
+The inherited release is `b010c0850c97a2280b452f64ab2dee0edc08a25e`
+([PR 71](https://github.com/manfromnowhere143/etzio/pull/71)). Its exact tree passed
+all `2971` tests per declared runtime locally and in Linux CI; its post-publication
+CI also succeeded. This continuation reuses that unchanged baseline in the same
+session. Preserve the earlier release, research and recovery records.
+
+The private packet at
+`artifacts/bounty-research/2026-10-25-aave-liquidation-review/` retains `21` source
+and support files at one exact revision, six published audits and one official
+proposal report, each checked against its pinned Git blob. Twenty of the twenty-one
+source/support files match the merged v3.7 release revision; only the README differs.
+This establishes source identity, not current deployed byte equivalence. Program
+scope captures, retrieval limitations and finite duplicate-search coverage remain
+explicit in the packet.
+
+Five hypotheses produced no eligible report candidate. A manually transcribed,
+networkless integer model passed `422619` arithmetic checks over seven properties
+and rejected three deliberately wrong variants. Those counts are separate from
+Etzio's test suite. They establish neither EVM execution, a formal proof nor
+independent reproduction. Preserve the private hypothesis dispositions and audit
+evidence; known issues must not be presented as new discoveries.
+
+No target build, target execution, chain RPC call, submission, accepted award or
+payment occurred in this source review. No cloud resources were created for it.
+Independent assessment has not occurred, but it is no longer a prerequisite for
+the supervised workflow. The previous GHO hypothesis stays conditional on eligible
+deployed applicability; the separate Immutable session is untouched. Preserve the
+reviewed dispositions and move further discovery to a distinct scoped hypothesis.
+
+Runtime, tests and dependencies are unchanged. ADR-0026 changes the supervised
+workflow contract. Resolve this tranche's validation and publication from
+`artifacts/checkpoints/2026-10-25-aave-liquidation-review/release-validation.json`.
+The private packet's byte index is `artifact-index.json`; coordination is at
+`artifacts/coordination/2026-10-25-aave-liquidation-review.json`.
+
+## Previous pickup, 2026-10-25: supervised source review and outcome accounting
 
 The inherited release is `defa6b1d16fbabb3ae4289c85ab9a23d4df3e203`
 ([PR 70](https://github.com/manfromnowhere143/etzio/pull/70)). Its frozen checkpoint

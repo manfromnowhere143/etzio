@@ -5,7 +5,40 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-25 — source outcomes and independent execution
+## Current continuation, 2026-10-25 — solo supervised execution preparation
+
+Follow [ADR-0026](decisions/0026-solo-supervised-bounty-workflow.md). Daniel explicitly
+removed the outside-review prerequisite for supervised research. The assistant is
+responsible for measured profile assessment, exact scoped target work and labeled
+self-reproduction; do not ask him to recruit another reviewer. Production kernel
+independence and actual program authorization remain separate requirements.
+
+Resume compiler/test-runner preparation from
+`artifacts/supervised-evm-preparation-20261025/`, retaining actual success and failure
+observations before making a target-run claim. The owned positive and deliberately
+failing compiler fixtures are intended to measure tool behavior only; they have
+not executed. Then use an exact scoped
+target contract and a distinct hypothesis. Keep source research and proof evidence
+private; submission retains separate authority.
+
+## Source review completed in this continuation
+
+Read the latest [handoff](SESSION_HANDOFF.md) and the private packet at
+`artifacts/bounty-research/2026-10-25-aave-liquidation-review/`. Five hypotheses
+yielded no eligible report. Retained source identities, six audits, a release
+comparison and bounded arithmetic reasoning explain those dispositions. The owned
+model's `422619` checks and three rejected wrong variants are not target execution
+or independent verification. No bounty submission or payment resulted.
+
+Move further source discovery to a distinct scoped hypothesis; do not repeat the
+reviewed issues as new findings. The prior GHO applicability question remains
+conditional. Exact eligible deployed applicability and accepted isolation must
+precede target proof work. Preserve the separate Immutable session and prior
+CoW/GHO dispositions. The outside-review prerequisite is superseded by ADR-0026.
+The release record is under
+`artifacts/checkpoints/2026-10-25-aave-liquidation-review/`.
+
+## Previous continuation, 2026-10-25 — source outcomes and independent execution
 
 Read the latest [handoff](SESSION_HANDOFF.md). The private Aave/GHO batch at
 `artifacts/bounty-research/2026-10-25-gho-accounting-review/` records five hypothesis

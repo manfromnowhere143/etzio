@@ -1,25 +1,31 @@
 # Etzio Roadmap
 
-Status: **foundation integrity and parallel supervised bounty preparation**, 2026-10-24.
+Status: **foundation integrity and solo supervised bounty preparation**, 2026-10-25.
 
 The production engine roadmap advances by retained evidence. Its phases retain their
 predecessor acceptance conditions. The supervised report workflow below proceeds beside it.
 
-## Current operating direction, 2026-10-24
+## Current operating direction, 2026-10-25
 
 Daniel directed practical bounty research to proceed alongside the engine build.
 [ADR-0025](decisions/0025-parallel-supervised-bounty-research.md) records the narrow
 sequencing change. A supervised report need not await production catalog/monitor
 qualification or the comparative engine benchmark. Exact program/target identity,
-accepted containment, bounded execution and independent reproduction remain entry
-requirements. No target execution profile is admitted by this ordering decision.
+accepted containment and bounded execution remain entry requirements.
+[ADR-0026](decisions/0026-solo-supervised-bounty-workflow.md) removes the mandatory
+outside-review prerequisite and permits clearly labeled self-reproduction. No
+target execution profile is admitted merely by either decision.
 
 The engine's native integrity, recovery, storage and independent proof-plane work
 continues. Supervised research records its own source, effects, cost and reviewer
 provenance without issuing production kernel findings. The
 [owned KVM experiment](BENIGN_KVM_PREFLIGHT.md) passed seven benign controls after
-one retained setup failure; all created resources were deleted. The immediate work
-is an accepted containment profile and one exact target/reproduction packet.
+one retained setup failure; subsequent guest, collector-death, resource and peer
+controls retain their own effects and cleanup. Two owned compiler fixture images
+now reproduce byte-for-byte across two builds. They have not executed. The immediate
+work is their bounded isolated calibration, followed by an accepted target profile
+and exact reproduction packet. Source reviews currently establish no eligible
+report or payment; preserve their known-issue and negative dispositions.
 
 ## Previous operating sequence, 2026-10-18
 
