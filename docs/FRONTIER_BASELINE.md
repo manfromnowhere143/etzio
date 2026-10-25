@@ -153,20 +153,64 @@ time caps must preserve truncation, and RPC/environment defaults are not network
 This is the proposed experimental dependency graph, not a result or execution trace:
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Proposed controlled comparison
-    accDescr: After qualification and registration, compare static analysis, fuzzing, model-only and hybrid arms, then test semantic guidance, scheduling and evidence reuse separately.
-    G["Foundation + isolation + exact-target gates closed"]
-    P["Disjoint pilot<br/>bind all registration inputs"]
-    C["Freeze and run S / F / M / H<br/>same information · complete cost · independent verifier"]
-    H["Freeze the hybrid baseline"]
-    S["Semantic guidance experiment<br/>same H with / without guidance"]
-    Q["Scheduling experiment<br/>fixed candidate stream first<br/>end-to-end effects separately"]
-    R["Evidence-reuse experiment<br/>none / ordinary retrieval / checked reuse<br/>frozen corpus outside held-out families"]
-    G --> P --> C --> H
+    accTitle: Proposed evaluation — controlled comparison, then separate ablations
+    accDescr: No comparator has run. Foundation, isolation and exact-target acceptance precede a disjoint pilot and frozen registration. Static, fuzzing, model-only and hybrid arms share information, complete cost accounting and an independent verifier. A frozen hybrid then supports separate guidance, scheduling and reuse experiments.
+    subgraph REGISTER["01 · Proposed registration"]
+        G["<b>Acceptance gates closed</b><br/>Foundation · isolation · exact target"]
+        P["<b>Disjoint pilot</b><br/>Bind all registration inputs"]
+        G --> P
+    end
+    subgraph COMPARE["02 · Comparison · not run"]
+        C["<b>Freeze and run four arms</b><br/>S · static / F · fuzzing<br/>M · model-only / H · hybrid<br/>Same information · complete cost<br/>Independent verifier"]
+        H["<b>Freeze the hybrid baseline</b><br/>Retain outcomes and comparison evidence"]
+        C --> H
+    end
+    subgraph ABLATE["03 · Proposed ablations"]
+        S["<b>Semantic guidance</b><br/>Same hybrid<br/>With / without guidance"]
+        Q["<b>Scheduling</b><br/>Fixed candidate stream first<br/>End-to-end effects separately"]
+        R["<b>Evidence reuse</b><br/>None / ordinary retrieval / checked reuse<br/>Frozen corpus outside held-out families"]
+    end
+    P --> C
     H --> S
     H --> Q
     H --> R
+
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class G,P qualified;
+    class C,H,S,Q,R planned;
+    style REGISTER fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style COMPARE fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style ABLATE fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 The three branches isolate interventions; they do not prescribe simultaneous execution

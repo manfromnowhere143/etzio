@@ -158,31 +158,71 @@ assessment is only claimed after it occurs. This workflow cannot issue a product
 kernel finding, and report submission retains separate authority.
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Production kernel qualification and evaluation gates
-    accDescr: Implemented fixture foundation and the remaining native integrity, recovery, storage, execution, benchmark and research gates.
-    K["IMPLEMENTED ON FIXTURES<br/>authority · candidates · evidence vault"]
-    F["IMPLEMENTED ON FIXTURES<br/>signed qualification · finality · recovery"]
-    P["PREPARATION RETAINED<br/>native-format inspection · KVM preflight<br/>research · source review · operator inquiries"]
-    N["BLOCKED: native integrity roster<br/>independent operating commitments missing"]
-    R["BLOCKED: external latest-head recovery<br/>effective writer fencing"]
-    S["BLOCKED: protected storage<br/>device · quotas · backup · fault recovery"]
-    X["BLOCKED: independent execution<br/>MARCELLUS / CATO · admitted isolation"]
-    B["PROPOSED: admitted EVM benchmark<br/>exact targets · frozen comparison protocol"]
-    E["NOT RUN: static / fuzzing / model / hybrid"]
-    A["PROPOSED: separate feature experiments<br/>semantic guidance · scheduling · evidence reuse"]
-    U["FUTURE: authorized bounty lane<br/>independent findings · accepted outcomes"]
-    K --> F
+    accTitle: Production engine — retained foundation and open gates
+    accDescr: The fixture foundation is implemented. Native integrity, external recovery, protected storage and independent execution are blocked. Evaluation and bounty outcomes remain proposed; dashed arrows indicate dependencies, not execution.
+    subgraph FOUNDATION["01 · Fixture foundation"]
+        K["<b>Fixture kernel</b><br/>Authority · candidates · evidence vault<br/>IMPLEMENTED ON FIXTURES"]
+        F["<b>Integrity and recovery</b><br/>Signed qualification · finality · retry / seal<br/>IMPLEMENTED ON FIXTURES"]
+        P["<b>Qualification preparation</b><br/>Native-format inspection · KVM preflight<br/>Research · source review · operator inquiries"]
+        K --> F
+    end
+    subgraph NATIVE["02 · Production gates"]
+        N["<b>Native integrity · BLOCKED</b><br/>Independent operating commitments"]
+        R["<b>Latest-head recovery · BLOCKED</b><br/>Effective writer fencing"]
+        S["<b>Protected storage · BLOCKED</b><br/>Device · quotas · backup · fault recovery"]
+        X["<b>Independent execution · BLOCKED</b><br/>MARCELLUS / CATO<br/>Explicitly admitted isolation"]
+        N -.-> R -.-> S -.-> X
+    end
+    subgraph EVALUATION["03 · Proposed evaluation"]
+        B["<b>Admitted EVM benchmark</b><br/>Exact targets · frozen protocol"]
+        E["<b>Controlled comparison · NOT RUN</b><br/>Static / fuzzing / model / hybrid"]
+        A["<b>Separate feature experiments</b><br/>Semantic guidance · scheduling<br/>Evidence reuse"]
+        U["<b>Authorized bounty lane · FUTURE</b><br/>Independent findings<br/>Accepted outcomes"]
+        B -.-> E -.-> U
+        E -.-> A
+    end
     F -.-> N
     P -. "preparation is not admission" .-> N
-    N -.-> R -.-> S -.-> X -.-> B -.-> E -.-> U
-    E -.-> A
-    classDef done fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
-    classDef prep fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
-    classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#3b0a0a;
-    class K,F done;
-    class P,B,E,A,U prep;
+    X -.-> B
+
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class K,F retained;
+    class P fixture;
     class N,R,S,X blocked;
+    class B,E,A,U planned;
+    style FOUNDATION fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style NATIVE fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style EVALUATION fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 The supervised workflow has its own current boundary. Building an image does not
@@ -191,14 +231,56 @@ establish execution or vulnerability impact. The detailed
 self-reproduction, report preparation and actual program assessment.
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Supervised research progress
-    accDescr: Source review is retained without an eligible report. Two owned compiler fixture images are built but unexecuted. Isolated calibration and exact scoped proof work are next.
-    SR["RETAINED<br/>source reviews and dispositions<br/>no eligible report"]
-    BI["BUILT · NOT EXECUTED<br/>two owned compiler fixtures<br/>matching rebuilds"]
-    NX["NEXT<br/>isolated compiler calibration<br/>then an exact scoped proof"]
-    SR --> BI
-    BI -.-> NX
+    accTitle: Supervised research — evidence retained and the next experiment
+    accDescr: Source review retains no eligible report. Two owned compiler images have matching rebuilds but have not run. Isolated calibration must precede an exact scoped proof. Neither proof nor payment is established.
+    subgraph RETAINED["Retained evidence"]
+        SR["<b>Source review</b><br/>Hypotheses and contrary evidence<br/>No eligible report"]
+        BI["<b>Owned compiler fixtures</b><br/>Two images · matching rebuilds<br/>BUILT · NOT EXECUTED"]
+    end
+    subgraph NEXT["Next · not run"]
+        CAL["<b>Isolated compiler calibration</b><br/>Expected pass and failure<br/>Measured execution and cleanup"]
+        NX["<b>Exact scoped proof</b><br/>Eligible target · accepted isolation<br/>Self-reproduction stated explicitly"]
+    end
+    BI -. "execute owned calibration" .-> CAL
+    SR -. "eligibility evidence" .-> NX
+    CAL -. "accepted measured result" .-> NX
+
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class SR retained;
+    class BI fixture;
+    class CAL,NX planned;
+    style RETAINED fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style NEXT fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 ### Progress through 2026-10-15
@@ -377,33 +459,111 @@ claim.
 
 ## System map
 
-This diagram groups the implemented fixture paths by store profile. All run within one
-trusted host process. The supported CLI uses the legacy profile; finality is available only
-through explicit APIs on an enrolled empty store. VELITES supplies the bounded AST analysis.
-The [detailed composition](docs/ARCHITECTURE.md#qualified-fixture-composition) retains the
-individual authority, candidate, qualification and evidence edges.
+This full composition shows authority, candidate admission, modeled verification, signed
+qualification and both storage profiles. All run within one trusted host process. The
+supported CLI uses the legacy profile; finality is available only through explicit APIs on
+an enrolled empty store. VELITES supplies the bounded AST analysis. The same diagram is
+retained in [Architecture](docs/ARCHITECTURE.md#qualified-fixture-composition).
+
+The [diagram history](docs/DIAGRAM_HISTORY.md) traces the October 15 rewrite and October 16
+move that reduced the earlier README detail. This October 25 restoration brings the current
+composition back to the front page and applies one visual language across all ten diagrams.
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Implemented fixture runtime paths
-    accDescr: Fixture commands share one trusted host process. The CLI uses the legacy store; an optional enrolled facade adds fixture finality.
-    A["Admitted fixture authority<br/>exact target bytes · bounded lease"]
-    K["ETZIO commands<br/>scan and candidate admission<br/>explicit modeled-verification APIs"]
-    L[("Legacy SQLite profile<br/>canonical events + evidence vault")]
-    F["Optional fixture-finality facade<br/>four retained recovery phases"]
-    Q["Signed-fixture qualification<br/>time · revocation · head authority"]
-    E[("Enrolled SQLite profile<br/>events + vault + finality records")]
-    A --> K
-    K -->|"supported CLI / ordinary APIs"| L
-    K -->|"separate API · empty-store enrollment"| F
-    Q -->|"qualified mode only"| F
-    F --> E
-    classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
-    classDef fixture fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
-    classDef qualification fill:#fff3bf,stroke:#e67700,color:#3d2100;
-    class A,K,L implemented;
-    class F,E fixture;
-    class Q qualification;
+    accTitle: Implemented fixture composition — authority, candidates, qualification and storage
+    accDescr: All components share one trusted host. Authority and immutable inputs feed candidate admission and optional modeled verification. Signed-fixture qualification feeds only qualified finality enrollment. Legacy and enrolled SQLite profiles remain distinct; no execution or finding is established.
+    subgraph AUTH["01 · Authority and control"]
+        direction LR
+        AQ["<b>AQUILA</b><br/>Fixture authority<br/>Budgets · leases"]
+        S[("<b>Filesystem staging / cache</b><br/>Bounded pre-ingestion bytes")]
+        K["<b>ETZIO kernel</b><br/>Fixture protocol<br/>Lifecycle · replay"]
+    end
+
+    subgraph SCAN["02 · Candidate path"]
+        direction LR
+        V["<b>VELITES</b><br/>Narrow AST observations"]
+        KC["<b>Candidate admission</b><br/>Construct · validate · retain"]
+        C["<b>Stable candidates</b><br/>Not findings"]
+    end
+
+    subgraph OPTIONAL["03 · APIs and storage"]
+        direction LR
+        VR["<b>Verification-intent APIs</b><br/>Modeled lease · resolution · recovery<br/>Signed opaque receipts · no execution"]
+        DBL[("<b>SQLite v4 · legacy profile</b><br/>Supported CLI<br/>Ordinary kernel store")]
+        IF["<b>Fixture-finality facade</b><br/>Mode selected at enrollment"]
+        DBM[("<b>SQLite v4 · enrolled profile</b><br/>Fixture integrity<br/>Permanent after enrollment")]
+    end
+
+    subgraph QUAL["04 · Fixture qualification"]
+        direction LR
+        AP["<b>Exact adapter profile</b><br/>Trust root · validation / provider policies<br/>Fixed all-source roster"]
+        SP["<b>Role-separated signed packages</b><br/>Ed25519 · nonce-bound requests<br/>Authenticate before claim parsing"]
+        TH["<b>All-source time</b><br/>Common overlap<br/>Conservative outer hull"]
+        RF["<b>Full-hull revocation</b><br/>Validity · staleness<br/>Metadata and floors"]
+        HH["<b>Head authority</b><br/>RFC 9162 inclusion + consistency<br/>Unanimous catalog monitors"]
+        SM["<b>Sealed provider-neutral mapping</b><br/>Fresh reauthentication · exact BLOBs<br/>Qualified lifecycle input"]
+    end
+
+    AQ --> K
+    S -->|"first canonical ingestion"| K
+    K -->|"analysis lease + immutable bytes"| V
+    V -->|"typed observations"| KC --> C
+    K -->|"explicit command · action admitted<br/>before mission opening"| VR
+    C -->|"exact retained candidate input"| VR
+    VR -->|"canonical events + evidence"| DBL
+    K <--> DBL
+    K -->|"optional empty-store facade"| IF
+    IF <--> DBM
+    AP --> SP
+    SP --> TH
+    SP --> RF
+    SP --> HH
+    TH -->|"complete time hull"| RF
+    TH -->|"complete time hull"| HH
+    TH --> SM
+    RF --> SM
+    HH --> SM
+    SM -->|"qualified enrollment only"| IF
+
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class K core;
+    class AQ,V,KC,C,DBL retained;
+    class S,VR,IF,DBM fixture;
+    class AP,SP,TH,RF,HH,SM qualified;
+    style AUTH fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style SCAN fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style OPTIONAL fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style QUAL fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 The CLI closes a scan with candidates. The explicit verification-intent APIs retain leases,
@@ -417,25 +577,65 @@ sources. A future independently administered adapter set must satisfy the same s
 and prove external authority at each trust, write and read boundary:
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Fixture integrity finality
-    accDescr: Four immutable retained phases advance from a pending event to verified finalization. The unresolved transition holds a database-global barrier.
-    E["Proposed event<br/>exact prior global + mission heads"]
-    D["Signed integrity decision<br/>enrolled profile · authenticated dossier"]
-    P1["1 · Pending event<br/>atomic event + dossier + required evidence"]
-    RH["Process-local catalog rehydration<br/>not durable · not a protocol write"]
-    P2["2 · Retained anchor statement<br/>then byte-identical registration retry"]
-    P3["3 · Retained signed checkpoint candidate<br/>then byte-identical publication retry"]
-    P4["4 · Retained finalization<br/>exact current global + mission floor"]
-    OK["Fixture facade returns success<br/>no execution or finding claim"]
-    B["One database-global barrier<br/>blocks later appends and generic replay<br/>from phase 1 until verified phase 4"]
-    E --> D --> P1 --> RH --> P2 --> P3 --> P4 --> OK
+    accTitle: Fixture finality — four immutable phases and one global barrier
+    accDescr: A proposed event and signed decision precede atomic pending retention. Process-local catalog rehydration is not a durable protocol write. Anchor and checkpoint bytes are retained before byte-identical retries. Only verified finalization releases the database-global barrier.
+    subgraph ADMISSION["Admission · exact prior state"]
+        E["<b>Proposed event</b><br/>Prior global + mission heads"]
+        D["<b>Signed integrity decision</b><br/>Enrolled profile · authenticated dossier"]
+        E --> D
+    end
+    subgraph RETENTION["Four immutable phases"]
+        P1["<b>01 · Pending event</b><br/>Atomic event + dossier<br/>Required evidence"]
+        RH["<b>Catalog rehydration</b><br/>Process-local · not durable<br/>Not a protocol write"]
+        P2["<b>02 · Retained anchor statement</b><br/>Then byte-identical registration retry"]
+        P3["<b>03 · Signed checkpoint candidate</b><br/>Then byte-identical publication retry"]
+        P4["<b>04 · Retained finalization</b><br/>Exact current global + mission floor"]
+        P1 --> RH --> P2 --> P3 --> P4
+    end
+    B["<b>Database-global barrier</b><br/>Blocks later appends and generic replay<br/>Held from phase 01 until verified phase 04"]
+    OK["<b>Fixture facade returns success</b><br/>No execution or finding claim"]
+    D --> P1
     P1 -. "establishes" .-> B
-    P4 -. "only verified completion releases" .-> B
-    classDef retained fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
-    classDef boundary fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
-    class E,D,P1,P2,P3,P4,OK retained;
-    class RH,B boundary;
+    P4 -. "verified completion releases" .-> B
+    P4 --> OK
+
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class E,RH fixture;
+    class D qualified;
+    class P1,P2,P3,P4,OK retained;
+    class B core;
+    style ADMISSION fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style RETENTION fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 The following companion diagram shows the implemented opt-in recovery contract within
@@ -443,27 +643,65 @@ the fixture lifecycle. Its relations were introduced in schema v3 and remain in 
 current schema-v4 store. Neither a recovery decision nor elapsed time releases finality.
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Governed blocked-finality recovery
-    accDescr: A role-separated signed decision authorizes retry or terminal sealing. Neither disposition releases the unresolved-transition barrier.
-    PH["Exact highest retained phase<br/>pending · anchor · checkpoint candidate"]
-    REF["Deterministic finality refusal"]
-    OBS["Durable blocked observation<br/>phase · operation · reason · attempt ordinal"]
-    DEC["Signed governed decision<br/>different key AND principal<br/>bound to the latest observation"]
-    RETRY["Authorized retry<br/>resume the exact retained phase"]
-    SEAL["Terminal instance seal<br/>load / recover / append refuse<br/>retained bytes remain readable"]
-    BAR["Unresolved-transition barrier remains<br/>only normal verified finalization releases it"]
-    PH --> REF --> OBS --> DEC
-    DEC -->|"retry disposition"| RETRY
+    accTitle: Blocked finality — retained observation and governed disposition
+    accDescr: A deterministic refusal retains the exact phase, operation, reason and attempt ordinal. A decision from a separated key and principal must bind the latest observation. Retry returns to that phase; sealing is terminal. Neither disposition releases the unresolved-transition barrier.
+    subgraph OBSERVATION["01 · Retain the block"]
+        PH["<b>Exact highest retained phase</b><br/>Pending · anchor · checkpoint candidate"]
+        REF["<b>Deterministic finality refusal</b>"]
+        OBS["<b>Durable blocked observation</b><br/>Phase · operation · reason · attempt ordinal"]
+        PH --> REF --> OBS
+    end
+    subgraph GOVERNANCE["02 · Governed disposition"]
+        DEC{"<b>Signed decision</b><br/>Different key AND principal<br/>Latest observation binding"}
+        RETRY["<b>Authorized retry</b><br/>Resume the exact retained phase"]
+        SEAL["<b>Terminal instance seal</b><br/>Load / recover / append refuse<br/>Retained bytes remain readable"]
+        DEC -->|"retry"| RETRY
+        DEC -->|"seal"| SEAL
+    end
+    BAR["<b>Barrier remains</b><br/>Only normal verified finalization releases it"]
+    OBS --> DEC
     RETRY --> PH
-    DEC -->|"seal disposition"| SEAL
     OBS -.-> BAR
     RETRY -.-> BAR
     SEAL -.-> BAR
-    classDef retained fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
-    classDef blocked fill:#ffe3e3,stroke:#c92a2a,color:#3b0a0a;
-    class PH,OBS,DEC,RETRY retained;
-    class REF,SEAL,BAR blocked;
+
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class PH,OBS,RETRY retained;
+    class DEC qualified;
+    class REF,SEAL blocked;
+    class BAR core;
+    style OBSERVATION fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style GOVERNANCE fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 From phase 1 until phase 4, one unresolved transition blocks later appends and generic raw

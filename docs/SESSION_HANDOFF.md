@@ -2,6 +2,25 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-25, Asia/Jerusalem.
 
+## Presentation restoration, 2026-10-25
+
+Daniel requested a history audit and a professional redesign of every Mermaid diagram,
+with full architectural detail restored to the README. [The audit](DIAGRAM_HISTORY.md)
+confirms the October 15 rewrite and October 16 move; the latter preserved the full source
+in Architecture while replacing the front-page version with a compact overview. The
+current full composition is restored, all ten diagrams share a consistent design, and
+[PRESENTATION.md](PRESENTATION.md) now protects substantive diagram detail from silent
+replacement or relocation. No runtime, schema, research outcome or authority changed in
+this presentation revision. Nisayon was inspected read-only for presentation patterns.
+
+The direct ancestor `308e82c6d3b40b0db63ce92789d24229a5cd9d4c` passed `2971` tests on
+both declared runtimes locally and in [Linux CI](https://github.com/manfromnowhere143/etzio/actions/runs/40215250290),
+including package and installed-wheel checks. It remains part of PR 72. Release validation
+for this diagram revision is tracked separately. Resolve the completed results and final commit from
+PR 72 and the private checkpoint
+`artifacts/checkpoints/2026-10-25-diagram-restoration/release-validation.json`.
+The earlier research, toolchain and release recovery copies remain intact.
+
 ## Current pickup, 2026-10-25: solo supervised workflow and source outcomes
 
 Daniel explicitly directed the assistant to continue supervised bounty research

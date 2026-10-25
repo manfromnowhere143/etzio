@@ -77,16 +77,60 @@ byte-matched across two builds, but guest/compiler execution has not occurred.
 The next execution measures those fixed controls before any target-specific proof.
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Supervised evidence and external assessment
-    accDescr: Exact program scope and measured isolation constrain assistant-operated reproduction. A draft states self-reproduction. Submission needs its own authority; program acceptance and payment are external outcomes.
-    PS["REQUIRED<br/>exact program scope and target<br/>accepted measured isolation"]
-    AR["NOT RUN<br/>assistant-operated local proof<br/>fresh repeat and contrary control"]
-    RD["NOT PREPARED<br/>private report draft<br/>self-reproduction stated"]
-    PA["EXTERNAL · NOT OBSERVED<br/>program assessment<br/>accepted report and payment"]
+    accTitle: Supervised evidence — authority, reproduction and external assessment
+    accDescr: Exact target scope and accepted measured isolation constrain assistant-operated proof and repetition. An eligible effect may support a private draft labeled self-reproduction. Separate submission authority precedes program assessment; acceptance and payment are not observed.
+    subgraph SCOPE["01 · Required authority"]
+        PS["<b>Exact program authority</b><br/>Target · revision · permitted actions<br/>Bounded resources"]
+        ISO["<b>Accepted isolation</b><br/>Concrete measured profile<br/>Retained containment evidence"]
+    end
+    subgraph LOCAL["02 · Local proof · not run"]
+        AR["<b>Assistant-operated proof</b><br/>Fresh repeat · contrary control<br/>Exact inputs and observations"]
+        RD["<b>Private report draft · NOT PREPARED</b><br/>Demonstrated eligible effect<br/>Self-reproduction stated"]
+    end
+    subgraph EXTERNAL["03 · External assessment"]
+        PA["<b>External program assessment</b><br/>Eligibility · validity · impact<br/>Acceptance and payment, if awarded"]
+    end
     PS -.-> AR
-    AR -. "demonstrated eligible effect" .-> RD
+    ISO -.-> AR
+    AR -. "retained eligible effect" .-> RD
     RD -. "separate submission authority" .-> PA
+
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class PS,ISO qualified;
+    class AR,RD,PA planned;
+    style SCOPE fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style LOCAL fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style EXTERNAL fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 The production topology below retains generator/verifier separation and kernel
@@ -100,31 +144,75 @@ analyzer. The remaining worker roles are proposed or legacy behavior models. Ind
 proof, finding adjudication, disclosure and learned-strategy promotion are blocked.
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Target authority topology
-    accDescr: Fixture kernel and authority paths are implemented. Separate construction, independent reproduction, adjudication, disclosure and strategy promotion remain target roles.
-    H["Human / program authority<br/>exact scoped grants"]
-    A["AQUILA<br/>fixture admission · budgets · leases implemented"]
-    K["ETZIO kernel<br/>fixture protocol · canonical state · replay implemented"]
-    V[("Canonical SQLite evidence vault<br/>implemented under documented local assumptions")]
-    R["Research roles<br/>SCIPIO / FABIUS proposed<br/>VELITES narrow fixture analyzer implemented"]
-    M["MARCELLUS · blocked<br/>isolated candidate construction"]
-    C["CATO · blocked<br/>separate principal and execution<br/>independent effect reproduction"]
-    J["CAMILLUS · blocked<br/>adjudication from kernel-accepted evidence"]
-    D["FABRICIUS · blocked<br/>evidence-bound disclosure draft"]
-    L["MINERVA · proposed<br/>offline evaluation and promotion proposals"]
+    accTitle: Target architecture — authority and evidence boundaries
+    accDescr: Fixture authority, kernel and vault are implemented under local assumptions. Research breadth, isolated construction, independent reproduction, adjudication, disclosure and offline strategy promotion remain target roles. Bidirectional worker links carry leases and inputs outward and proposals or evidence inward; only the kernel changes canonical state.
+    H["<b>Human / program authority</b><br/>Exact scoped grants"]
+    A["<b>AQUILA · fixture implementation</b><br/>Admission · budgets · leases"]
+    K["<b>ETZIO kernel · fixture implementation</b><br/>Protocol · canonical state · replay"]
+    V[("<b>Canonical SQLite vault</b><br/>Implemented · local assumptions")]
+    subgraph WORKERS["Worker interfaces · authority stays in the kernel"]
+        R["<b>Research roles</b><br/>VELITES · narrow fixture analyzer<br/>SCIPIO / FABIUS · proposed"]
+        M["<b>MARCELLUS · BLOCKED</b><br/>Isolated candidate construction<br/>Artifacts are not verdicts"]
+        C["<b>CATO · BLOCKED</b><br/>Separate principal and execution<br/>Independent effect reproduction"]
+    end
+    subgraph GOVERNANCE["Downstream roles · blocked / proposed"]
+        J["<b>CAMILLUS · BLOCKED</b><br/>Adjudication from accepted evidence"]
+        D["<b>FABRICIUS · BLOCKED</b><br/>Evidence-bound disclosure draft"]
+        L["<b>MINERVA · PROPOSED</b><br/>Offline evaluation<br/>Strategy promotion proposals"]
+        J -.-> D
+    end
     H --> A --> K
     K <-->|"canonical reads / atomic writes"| V
-    K -->|"leases + immutable inputs"| R
-    R -->|"typed proposals"| K
-    K -. "separately admitted construction lease" .-> M
-    M -. "candidate artifacts, not verdicts" .-> K
-    K -. "fresh immutable inputs + verifier lease" .-> C
-    C -. "structured evidence + signed receipt" .-> K
-    K -. "accepted evidence only" .-> J -.-> D
+    K <-->|"lease + inputs / typed proposals"| R
+    K <-.->|"construction lease / candidate artifacts"| M
+    K <-.->|"fresh inputs + lease / signed evidence"| C
+    K -. "accepted evidence only" .-> J
     V -. "positive and negative outcomes" .-> L
-    L -. "reviewable strategy proposal, no direct authority" .-> A
+    L -. "reviewable strategy · no direct authority" .-> A
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class K core;
+    class A,V retained;
+    class H qualified;
+    class R fixture;
+    class L planned;
+    class M,C,J,D blocked;
+    style WORKERS fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style GOVERNANCE fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
+
+Bidirectional worker links carry admitted leases and immutable inputs outward, then typed
+proposals or signed evidence inward. Construction and verification retain separate grants;
+CATO receives fresh immutable inputs under a verifier lease. Only the kernel admits state.
 
 Workers return typed proposals. They do not grant authority, mutate canonical state, or
 declare a finding. CAMILLUS never consumes a worker proposal or receipt directly: ETZIO
@@ -224,39 +312,63 @@ stubs and blocked target roles are intentionally excluded here and named precise
 status.
 
 ```mermaid
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
 flowchart TB
-    accTitle: Detailed signed-fixture composition
-    accDescr: Authority, candidates, modeled verification and signed-fixture qualification feed distinct legacy and enrolled local storage profiles.
-    subgraph AUTH["Authority and control"]
+    accTitle: Implemented fixture composition — authority, candidates, qualification and storage
+    accDescr: All components share one trusted host. Authority and immutable inputs feed candidate admission and optional modeled verification. Signed-fixture qualification feeds only qualified finality enrollment. Legacy and enrolled SQLite profiles remain distinct; no execution or finding is established.
+    subgraph AUTH["01 · Authority and control"]
         direction LR
-        AQ["AQUILA<br/>implemented fixture authority · budgets · leases"]
-        S[("Filesystem staging/cache<br/>bounded pre-ingestion bytes")]
-        K["ETZIO kernel<br/>implemented fixture protocol · lifecycle · replay"]
+        AQ["<b>AQUILA</b><br/>Fixture authority<br/>Budgets · leases"]
+        S[("<b>Filesystem staging / cache</b><br/>Bounded pre-ingestion bytes")]
+        K["<b>ETZIO kernel</b><br/>Fixture protocol<br/>Lifecycle · replay"]
     end
 
-    subgraph SCAN["Supported candidate path"]
+    subgraph SCAN["02 · Candidate path"]
         direction LR
-        V["VELITES<br/>implemented narrow AST observations"]
-        KC["ETZIO candidate admission<br/>construct · validate · retain"]
-        C["Stable candidates<br/>implemented · not findings"]
+        V["<b>VELITES</b><br/>Narrow AST observations"]
+        KC["<b>Candidate admission</b><br/>Construct · validate · retain"]
+        C["<b>Stable candidates</b><br/>Not findings"]
     end
 
-    subgraph OPTIONAL["Optional implemented paths and storage"]
+    subgraph OPTIONAL["03 · APIs and storage"]
         direction LR
-        VR["ETZIO verification-intent path<br/>modeled lease · resolution · recovery<br/>signed opaque receipt admission · no execution"]
-        DBL[("SQLite schema v4 · legacy profile<br/>supported CLI + ordinary kernel store")]
-        IF["Fixture-integrity finality facade<br/>mode selected at enrollment"]
-        DBM[("SQLite schema v4 · fixture-integrity profile<br/>permanent after enrollment")]
+        VR["<b>Verification-intent APIs</b><br/>Modeled lease · resolution · recovery<br/>Signed opaque receipts · no execution"]
+        DBL[("<b>SQLite v4 · legacy profile</b><br/>Supported CLI<br/>Ordinary kernel store")]
+        IF["<b>Fixture-finality facade</b><br/>Mode selected at enrollment"]
+        DBM[("<b>SQLite v4 · enrolled profile</b><br/>Fixture integrity<br/>Permanent after enrollment")]
     end
 
-    subgraph QUAL["Signed-fixture qualification"]
+    subgraph QUAL["04 · Fixture qualification"]
         direction LR
-        AP["Exact adapter profile<br/>trust root · validation/provider policies<br/>fixed all-source roster"]
-        SP["Role-separated signed fixture packages<br/>Ed25519 · exact nonce-bound requests<br/>authenticate before claim parsing"]
-        TH["All-source time qualification<br/>common overlap · conservative outer hull"]
-        RF["Full-hull revocation qualification<br/>validity · staleness · metadata/floors"]
-        HH["Head-authority qualification<br/>RFC 9162 inclusion + consistency<br/>unanimous catalog monitors"]
-        SM["Sealed provider-neutral mapping<br/>fresh reauthentication · exact BLOB coverage<br/>qualified lifecycle input"]
+        AP["<b>Exact adapter profile</b><br/>Trust root · validation / provider policies<br/>Fixed all-source roster"]
+        SP["<b>Role-separated signed packages</b><br/>Ed25519 · nonce-bound requests<br/>Authenticate before claim parsing"]
+        TH["<b>All-source time</b><br/>Common overlap<br/>Conservative outer hull"]
+        RF["<b>Full-hull revocation</b><br/>Validity · staleness<br/>Metadata and floors"]
+        HH["<b>Head authority</b><br/>RFC 9162 inclusion + consistency<br/>Unanimous catalog monitors"]
+        SM["<b>Sealed provider-neutral mapping</b><br/>Fresh reauthentication · exact BLOBs<br/>Qualified lifecycle input"]
     end
 
     AQ --> K
@@ -280,16 +392,20 @@ flowchart TB
     HH --> SM
     SM -->|"qualified enrollment only"| IF
 
-    classDef implemented fill:#d8f3dc,stroke:#2d6a4f,color:#081c15;
-    classDef fixture fill:#e7f5ff,stroke:#1971c2,color:#061b2c;
-    classDef qualification fill:#fff3bf,stroke:#e67700,color:#3d2100;
-    class AQ,K,S,DBL,V,KC,C,VR implemented;
-    class IF,DBM fixture;
-    class AP,SP,TH,RF,HH,SM qualification;
-    style AUTH fill:#f8f9fa,stroke:#adb5bd,color:#212529
-    style SCAN fill:#f8f9fa,stroke:#adb5bd,color:#212529
-    style OPTIONAL fill:#f8f9fa,stroke:#adb5bd,color:#212529
-    style QUAL fill:#fff9db,stroke:#f59f00,color:#3d2100
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class K core;
+    class AQ,V,KC,C,DBL retained;
+    class S,VR,IF,DBM fixture;
+    class AP,SP,TH,RF,HH,SM qualified;
+    style AUTH fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style SCAN fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style OPTIONAL fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style QUAL fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 ## Protocol v1

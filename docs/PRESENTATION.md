@@ -1,6 +1,6 @@
 # Etzio presentation standard
 
-Status: standard, revised 2026-10-16.
+Status: standard, revised 2026-10-25.
 
 Etzio should read like an engineering record an external team can inspect and reproduce.
 Writing connects each claim to its mechanism, retained evidence and remaining assumptions.
@@ -25,12 +25,15 @@ the reader to reconstruct session history.
    demonstration is not evidence that a gate exists.
 7. Quote numbers exactly, with denominators attached, as backticked literals — `1158`
    tests, `7` candidates, `36` reference proofs — never a rounded or marketing figure.
-8. Give each Mermaid diagram one job: overview, mechanism, gate sequence or trust boundary.
-   Use a compact overview and link to detailed composition rather than shrinking a dense
-   chart into the front page. Label current fixture paths and proposed target structure
-   explicitly; roles and keys do not imply separate processes. Status must remain legible
-   without color. Add accessible titles and descriptions. Render and visually inspect
-   changed diagrams before release.
+8. Give each Mermaid diagram a clear purpose: architecture, mechanism, gate sequence or
+   trust boundary. Preserve the full README architecture and its substantive relationships;
+   an overview may supplement it but must not silently replace or move it. Explain any
+   proposed removal or restructuring before editing. Use consistent typography, restrained
+   semantic colors, labeled subsystem groups and deliberate routing. Label current fixture
+   paths and proposed target structure explicitly; roles, boxes and keys do not imply
+   separate processes. Status must remain legible without color. Add accessible titles and
+   descriptions. Render and visually inspect every changed diagram before release, using
+   GitHub-compatible Mermaid without external icons, fonts or layout plugins.
 9. Reproduce sections carry literal, copy-pasteable commands and a plain statement that a
    passing suite validates repository bytes, not truth.
 10. Corrections and retractions stay visible in the document they correct. Nulls receive the

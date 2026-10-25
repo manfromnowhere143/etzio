@@ -215,16 +215,62 @@ writer. A read cut without fencing supports a historical snapshot only; it canno
 resuming consequential writes as if no newer head exists.
 
 ```mermaid
-flowchart LR
-    A[Authenticated recovery bootstrap] --> B[Acquire external recovery fence]
-    B --> C[Fresh responses from every required monitor]
-    C --> D[Verify complete catalog projection]
-    D --> E[Reconstruct retained lifecycle and evidence]
-    E --> F[Resume only under the accepted epoch]
-    B --> G[Retained block on refusal or ambiguity]
+---
+config:
+  theme: base
+  fontFamily: Arial
+  themeVariables:
+    fontFamily: 'Arial'
+    fontSize: '15px'
+    primaryColor: '#edf4fb'
+    primaryTextColor: '#18344d'
+    primaryBorderColor: '#6b8ba8'
+    lineColor: '#62788d'
+    clusterBkg: '#f8fafc'
+    clusterBorder: '#c5d1dd'
+    edgeLabelBackground: '#ffffff'
+  flowchart:
+    curve: linear
+    nodeSpacing: 28
+    rankSpacing: 48
+    padding: 16
+    wrappingWidth: 260
+    subGraphTitleMargin:
+      top: 12
+      bottom: 20
+---
+flowchart TB
+    accTitle: Proposed external recovery — authenticated head and enforceable epoch
+    accDescr: This is a proposed native recovery path, not a released runtime. Authenticated bootstrap precedes an external fence, fresh responses from every required monitor, complete catalog verification and retained lifecycle reconstruction. Refusal or ambiguity retains a block. Resume requires an accepted, enforceable epoch at each consequential boundary.
+    subgraph EXTERNAL["01 · External authority"]
+        A["<b>Authenticated recovery bootstrap</b>"]
+        B["<b>Acquire external recovery fence</b>"]
+        C["<b>Fresh monitor responses</b><br/>Every required monitor"]
+        A --> B --> C
+    end
+    subgraph RECONSTRUCT["02 · Proposed recovery"]
+        D["<b>Verify complete catalog projection</b>"]
+        E["<b>Reconstruct retained state</b><br/>Lifecycle and exact evidence"]
+        F["<b>Resume under accepted epoch only</b><br/>Enforcement at consequential boundaries<br/>Remains an open proof obligation"]
+        D --> E --> F
+    end
+    G["<b>RETAINED BLOCK</b><br/>Refusal or ambiguity<br/>No inferred recovery success"]
+    C --> D
+    B --> G
     C --> G
     D --> G
     E --> G
+
+    classDef core fill:#18344d,stroke:#18344d,color:#ffffff,stroke-width:2px;
+    classDef retained fill:#eaf5f0,stroke:#468570,color:#173e32,stroke-width:1.5px;
+    classDef fixture fill:#edf4fb,stroke:#6b8ba8,color:#18344d,stroke-width:1.5px;
+    classDef qualified fill:#fff5e3,stroke:#af8137,color:#624719,stroke-width:1.5px;
+    classDef planned fill:#f4f3f8,stroke:#8a829e,color:#48415a,stroke-width:1.5px,stroke-dasharray:5 4;
+    classDef blocked fill:#fff0ef,stroke:#ad6461,color:#713735,stroke-width:1.5px;
+    class A,B,C,D,E,F planned;
+    class G blocked;
+    style EXTERNAL fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
+    style RECONSTRUCT fill:#f8fafc,stroke:#c5d1dd,color:#304b63,stroke-width:1px
 ```
 
 This is a proposed native protocol. The four local phases, two ordinary lifecycle writes,
