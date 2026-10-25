@@ -2,7 +2,47 @@
 
 Status: **canonical recovery entrypoint**. Updated 2026-10-25, Asia/Jerusalem.
 
-## Current pickup, 2026-10-25: resource exhaustion and cross-worker controls
+## Current pickup, 2026-10-25: supervised source review and outcome accounting
+
+The inherited release is `defa6b1d16fbabb3ae4289c85ab9a23d4df3e203`
+([PR 70](https://github.com/manfromnowhere143/etzio/pull/70)). Its frozen checkpoint
+records `2971` passes per declared runtime locally and in exact-commit Linux CI.
+The new-session CPython 3.11.15 baseline also passes all `2971` tests. Preserve the
+earlier experiment, release and recovery records.
+
+A finite review of the reserve Aave/GHO source lane is retained privately at
+`artifacts/bounty-research/2026-10-25-gho-accounting-review/`. The packet binds
+current program-page captures, `16` source/support files at one exact revision,
+five publisher address-book files, a published audit, duplicate checks and five
+hypothesis dispositions. Each of the `21` source/address files was checked against
+its pinned Git blob and given a SHA-256 identity. Review depth is explicit; retained
+upstream tests and proof configurations were not executed.
+
+One hypothesis remains dependent on an eligible deployed configuration. The retained
+analysis is not a target reproduction or a report candidate. Public deployment-source
+retrieval failures, known issues and contrary
+source evidence are retained. No eligible report, target build, target execution,
+submission, accepted award or payment resulted. No cloud resources were created.
+Keep hypothesis details private and preserve the separate Immutable session.
+
+All ten files in the existing [containment review packet](CONTAINMENT_REVIEW_2026-10-25.md)
+match its retained manifest. This is a byte check, not independent review. An actual
+reviewer and separate execution remain unassigned; the current turn requested the
+missing reviewer identity. Do not infer acceptance from another session or role label.
+
+The README now distinguishes the production engine sequence from the parallel
+supervised workflow already authorized by [ADR-0025](decisions/0025-parallel-supervised-bounty-research.md).
+Runtime, tests, dependencies and authority contracts are unchanged. Resolve this
+documentation tranche's local, package and publication results from
+`artifacts/checkpoints/2026-10-25-bounty-source/release-validation.json`.
+Coordination is at `artifacts/coordination/2026-10-25-bounty-source.json`.
+
+Next, obtain the independent containment disposition and resolve exact eligible
+deployment applicability before investing in a target proof. A source-only or
+hypothetical configuration example must not be submitted as a finding. Production
+provider, external recovery and protected-storage dependencies remain separate.
+
+## Previous pickup, 2026-10-25: resource exhaustion and cross-worker controls
 
 The inherited release is `ed8c1a52924b2ae6c016551b34835351ebb199f7`
 ([PR 69](https://github.com/manfromnowhere143/etzio/pull/69)). Preserve its frozen

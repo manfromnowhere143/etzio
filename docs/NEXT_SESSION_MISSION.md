@@ -5,7 +5,22 @@ plan, not a provider admission, target grant, or finding. Start with
 [SESSION_HANDOFF](SESSION_HANDOFF.md) and [MISSION_STATE](MISSION_STATE.json).
 The latest dated recovery section governs current status; older sections retain history.
 
-## Current continuation, 2026-10-25 — independent containment review
+## Current continuation, 2026-10-25 — source outcomes and independent execution
+
+Read the latest [handoff](SESSION_HANDOFF.md). The private Aave/GHO batch at
+`artifacts/bounty-research/2026-10-25-gho-accounting-review/` records five hypothesis
+dispositions, exact source identities, audit/duplicate checks and one unresolved
+source hypothesis. It establishes no eligible report or target execution.
+Resolve deployed applicability before attempting a proof; preserve the known-issue
+and negative dispositions. Do not repeat the batch as a new discovery.
+
+The independent containment reviewer remains unassigned. All ten manifest files
+match, but another byte check or same-administration run does not close that gate.
+The current turn requested reviewer identity. Preserve the separate Immutable lane
+and the engine's native-provider work. Release verification for this documentation
+continuation is under `artifacts/checkpoints/2026-10-25-bounty-source/`.
+
+## Previous continuation, 2026-10-25 — independent containment review
 
 The resource and cross-worker experiments are now measured; read the current
 [handoff](SESSION_HANDOFF.md) and [review packet](CONTAINMENT_REVIEW_2026-10-25.md).

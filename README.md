@@ -123,9 +123,16 @@ recovery copies are excluded from the published repository; their paths are cont
 locators, not downloadable evidence in a fresh clone. Model-access onboarding is separate
 from provider admission, target permission and execution qualification.
 
-This progress map shows the accepted dependency order, not an operating pipeline. Solid
-edges connect the implemented fixture foundation; dashed edges require new acceptance
-evidence. Preparation is complete only for its named, bounded scope.
+This progress map shows the production engine's accepted dependency order, not an operating
+pipeline. Solid edges connect the implemented fixture foundation; dashed edges require new
+acceptance evidence. Preparation is complete only for its named, bounded scope.
+
+The parallel supervised report workflow follows
+[ADR-0025](docs/decisions/0025-parallel-supervised-bounty-research.md). Public source
+review proceeds now. A supervised reproduction requires exact program and target
+scope, accepted containment, bounded actions and independent reproduction; it need
+not await production catalog/monitor qualification or the comparative engine benchmark.
+It cannot issue a production kernel finding.
 
 ```mermaid
 flowchart TB
@@ -559,10 +566,12 @@ What remains before a finding pipeline can exist:
 4. prove MARCELLUS/CATO separation on an explicitly accepted Linux/KVM profile.
 
 Only then does the benchmark-first EVM pack run, and only after the integrity, isolation,
-benchmark, and exact-`TargetContract` gates close may a strictly authorized bounty-research
-lane run in parallel with continued engine development. Accepted outcomes and income are
-measurements, never authority. Autonomy over a live target expands after one full chain of
-custody survives independent reproduction, isolation, and adjudication — not before.
+benchmark, and exact-`TargetContract` gates close may production kernel bounty execution
+begin. The separately supervised workflow proceeds alongside this work under ADR-0025,
+with its own exact scope, accepted containment and independent reproduction requirements.
+Accepted outcomes and income are measurements, never authority. Autonomy over a live target
+expands after one full chain of custody survives independent reproduction, isolation, and
+adjudication — not before.
 
 After qualification, the first decisive discovery evidence is the selected
 **static-analysis / fuzzing / model-only / hybrid comparison**, under matched information
