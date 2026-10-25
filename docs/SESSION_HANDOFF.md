@@ -1,8 +1,46 @@
 # Etzio Session Handoff
 
-Status: **canonical recovery entrypoint**. Updated 2026-10-24, Asia/Jerusalem.
+Status: **canonical recovery entrypoint**. Updated 2026-10-25, Asia/Jerusalem.
 
-## Current pickup, 2026-10-24: owned guest containment preflight
+## Current pickup, 2026-10-25: actual collector-death controls
+
+The inherited release is `2baea709089ca5cb88928bd41f3c65d94fa38c15`
+([PR 68](https://github.com/manfromnowhere143/etzio/pull/68)). Preserve its
+frozen release and recovery evidence. The new
+[owned collector-death experiment](OWNED_COLLECTOR_DEATH_PREFLIGHT.md) passed
+normal cleanup, real collector SIGKILL with watchdog EOF cleanup, and a
+withheld-watchdog calibration that refused primary acceptance and used bounded
+outer cleanup. The observer separately confirmed worker reaping, kernel-helper
+exit and empty cgroups. Three earlier attempts refused before injection; their
+exact observations and corrections remain retained. All four attempts' 24
+resource identities are verified absent. No arbitrary-code profile is admitted.
+
+Eighty-seven new portable controls pass on both supported runtimes; the focused
+total with the previous guest preflight is 123. The collection target is:
+
+- 2852 tests expected;
+
+Resolve full-suite, package and exact-commit CI results from
+`artifacts/checkpoints/2026-10-25-collector-death/release-validation.json`.
+The initial baseline attempt used a symlinked TMPDIR and also observed one
+process-group PermissionError. Both its failure log and the corrected-path
+baseline/focused results are retained; the process-group error did not recur in
+25 additional owned stderr trials. No runtime cleanup repair is claimed.
+
+A separate five-file CoW relayer/transfer source review closed three hypotheses
+without a report candidate. Exact scoped source URLs, byte identities, contrary
+evidence and remaining deployment/eligibility obligations are private at
+`artifacts/bounty-research/2026-10-25-cow-relayer-review/`. No target code, chain
+query or submission was executed. Do not duplicate the other Immutable session.
+
+Private host evidence is at `artifacts/collector-death-20261025/`; current
+coordination is `artifacts/coordination/2026-10-25-collector-death.json`.
+Next measure bounded resource exhaustion and input/cross-worker resistance, then
+obtain independent containment review and bind an exact scoped reproduction.
+Production integrity/storage gates remain unchanged. Account-level Daybreak
+approval remains unverified; no model/configuration/security bypass was made.
+
+## Previous pickup, 2026-10-24: owned guest containment preflight
 
 The inherited release is `1cbdfe0b0917679aea3b66eaa96564ad108e830c`
 ([PR 67](https://github.com/manfromnowhere143/etzio/pull/67)). Its new-session
@@ -50,7 +88,7 @@ request. Continue permitted work from retained checkpoints.
 
 The collection target is:
 
-- 2765 tests expected;
+- `2765` tests in that previous collection;
 
 Resolve full-suite, package and publication results from
 `artifacts/checkpoints/2026-10-24-owned-firecracker/release-validation.json`.

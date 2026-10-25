@@ -115,9 +115,55 @@ def prepare_inputs(jail, mode):
     inputs.chmod(0o555)
 
 
-def collect_case(mode, ordinal):
+def process_identity(pid):
+    # comm may contain spaces and parentheses; fields after its final ')' start
+    # at stat field 3. starttime is field 22, not a wall-clock timestamp.
+    fields = Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()
+    return {"pid": pid, "parent": int(fields[1]), "start_ticks": int(fields[19])}
+
+
+def reap_launcher(proc):
+    code = proc.wait(timeout=2)
+    if code != 0:
+        raise RuntimeError("owned jailer launcher did not exit successfully")
+    return code
+
+
+def hold_for_crash_probe(fd, ordinal, pid, watcher, cg, write_fd, result, output):
+    if not result["passed"] or len(output) > 4096:
+        raise RuntimeError("owned crash readiness prerequisite failed")
+    st = cg.stat()
+    ready = {
+        "schema": "etzio.owned-collector-ready.v1",
+        "ordinal": ordinal,
+        "launcher_exit_code": result["launcher_exit_code"],
+        "collector": process_identity(os.getpid()),
+        "worker": process_identity(pid),
+        "watchdog": process_identity(watcher.pid) if watcher else None,
+        "cgroup": {"device": st.st_dev, "inode": st.st_ino},
+        "watch_pipe": os.readlink(f"/proc/self/fd/{write_fd}") if write_fd is not None else None,
+        "threads": result["poststart_threads"],
+        "output_b64": base64.b64encode(output).decode(),
+    }
+    wire = json.dumps(ready, sort_keys=True).encode()
+    if len(wire) > 16384:
+        raise RuntimeError("owned crash readiness size")
+    view = memoryview(wire)
+    while view:
+        view = view[os.write(fd, view):]
+    os.close(fd)
+    while True:
+        signal.pause()
+
+
+def collect_case(mode, ordinal, *, crash_probe_fd=None):
     if mode not in ("ready", "wrong", "spin", "output"):
         raise ValueError("closed owned fixture set")
+    if crash_probe_fd is not None and (
+        mode != "ready" or type(ordinal) is not int or ordinal not in (5, 6)
+        or type(crash_probe_fd) is not int or crash_probe_fd < 3
+    ):
+        raise ValueError("closed owned collector-death probe")
     uid = 65000 + ordinal
     name = "owned-" + str(ordinal)
     cg = CGROOT / name
@@ -139,25 +185,42 @@ def collect_case(mode, ordinal):
         raise RuntimeError("network namespace contains non-loopback interface")
     # Separate root watchdog: it closes the cgroup on collector death or 45s,
     # and has no model or target input. This is not separate administration.
-    read_fd, write_fd = os.pipe()
+    # Ordinal 6 is a deliberately withheld watchdog, reachable only through the
+    # separate bounded owned crash observer. Ordinary controls always have one.
+    watcher = None
+    write_fd = None
     watch_source = """import os,select,sys,time,pathlib,json
-cg=pathlib.Path(sys.argv[1]); fd=int(sys.argv[2]); out=pathlib.Path(sys.argv[3])
+cg=int(sys.argv[1]); fd=int(sys.argv[2]); out=pathlib.Path(sys.argv[3])
+def empty():
+ f=os.open('cgroup.events',os.O_RDONLY,dir_fd=cg)
+ try:return b'populated 0' in os.read(f,4096)
+ finally:os.close(f)
 reason='deadline'
 if select.select([fd],[],[],45)[0]:
  reason='collector_pipe_closed' if os.read(fd,1)==b'' else 'explicit_stop'
-os.close(fd); (cg/'cgroup.kill').write_text('1')
+observed=time.monotonic_ns()
+os.close(fd); k=os.open('cgroup.kill',os.O_WRONLY,dir_fd=cg)
+try:os.write(k,b'1')
+finally:os.close(k)
 end=time.monotonic()+3
-while time.monotonic()<end and 'populated 0' not in (cg/'cgroup.events').read_text():time.sleep(.01)
-out.write_text(json.dumps({'reason':reason,'empty':'populated 0' in (cg/'cgroup.events').read_text()}))
+while time.monotonic()<end and not empty():time.sleep(.01)
+out.write_text(json.dumps({'reason':reason,'empty':empty(),
+ 'observed_ns':observed,'completed_ns':time.monotonic_ns()}))
 """
-    watcher = subprocess.Popen(
-        ["python3", "-c", watch_source, str(cg), str(read_fd), str(ROOT / (name + "-watch.json"))],
-        pass_fds=(read_fd,),
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    os.close(read_fd)
+    if not (crash_probe_fd is not None and ordinal == 6):
+        read_fd, write_fd = os.pipe()
+        cg_fd = os.open(cg, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            watcher = subprocess.Popen(
+                ["python3", "-c", watch_source, str(cg_fd), str(read_fd), str(ROOT / (name + "-watch.json"))],
+                pass_fds=(read_fd, cg_fd),
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        finally:
+            os.close(read_fd)
+            os.close(cg_fd)
     proc = None
     pid = None
     output = b""
@@ -274,15 +337,24 @@ out.write_text(json.dumps({'reason':reason,'empty':'populated 0' in (cg/'cgroup.
             result["passed"] = marker_observed(output, READY) and not marker_observed(output, WRONG) and not overflow
             result["decision"] = "owned_marker_observed_then_stopped"
         result["output_limit_exceeded"] = overflow
+        if crash_probe_fd is not None:
+            # --new-pid-ns leaves an exited launcher as our direct child. Reap
+            # it before publishing readiness, so collector death cannot pass
+            # an unaccounted zombie launcher to the outer subreaper.
+            result["launcher_exit_code"] = reap_launcher(proc)
+            hold_for_crash_probe(crash_probe_fd, ordinal, pid, watcher, cg, write_fd, result, output)
     except BaseException as exc:
         result["error"] = {"type": type(exc).__name__, "message": str(exc)[:600]}
     finally:
         kill_started = time.monotonic()
         empty = kill_group(cg)
-        os.write(write_fd, b"s")
-        os.close(write_fd)
-        watcher.wait(timeout=5)
-        result["watchdog"] = json.loads((ROOT / (name + "-watch.json")).read_text())
+        if watcher:
+            os.write(write_fd, b"s")
+            os.close(write_fd)
+            watcher.wait(timeout=5)
+            result["watchdog"] = json.loads((ROOT / (name + "-watch.json")).read_text())
+        else:
+            result["watchdog"] = {"reason": "withheld", "empty": False}
         if proc:
             proc.wait(timeout=3)
             if proc.stdout:
@@ -331,7 +403,7 @@ out.write_text(json.dumps({'reason':reason,'empty':'populated 0' in (cg/'cgroup.
     return result
 
 
-def collect():
+def require_host():
     if platform.system() != "Linux" or platform.machine() != "x86_64" or os.getuid() != 0:
         raise RuntimeError("requires the specified disposable Linux x86_64 root host")
     if not platform.release().startswith("6.1."):
@@ -340,15 +412,27 @@ def collect():
         path = ROOT / name
         if path.is_symlink() or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise RuntimeError("artifact pin mismatch: " + name)
+    set_subreaper()
+
+
+def set_subreaper():
     libc = ctypes.CDLL(None, use_errno=True)
     if libc.prctl(36, 1, 0, 0, 0) != 0:
         raise OSError(ctypes.get_errno(), "subreaper")
+
+
+def prepare_cgroups():
     cgbase = Path("/sys/fs/cgroup")
     if not {"cpu", "memory", "pids"} <= set((cgbase / "cgroup.controllers").read_text().split()):
         raise RuntimeError("required cgroup controllers missing")
     (cgbase / "cgroup.subtree_control").write_text("+cpu +memory +pids")
     CGROOT.mkdir()
     (CGROOT / "cgroup.subtree_control").write_text("+cpu +memory +pids")
+
+
+def collect():
+    require_host()
+    prepare_cgroups()
     result = {
         "schema": "etzio.owned-firecracker.observation.v1",
         "kernel": platform.release(),

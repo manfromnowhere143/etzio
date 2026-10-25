@@ -83,21 +83,28 @@ The retained [recovery composition controls](docs/evidence/qualified-governed-re
 add eleven signed-fixture schedules for cold restart and concurrently changed authority.
 All `67` focused tests pass per runtime; deliberately removing authorization gates fails
 the eight corresponding refusal controls. The existing runtime passes without a repair.
-The full collection is `2765` tests; resolve exact full-suite, package and CI results from
+
+The October 25 [owned collector-death controls](docs/OWNED_COLLECTOR_DEATH_PREFLIGHT.md)
+measure real collector SIGKILL, watchdog cleanup and a deliberately withheld
+watchdog. The negative control refuses primary acceptance and uses separately
+bounded cleanup. All four attempts are retained and their cloud resources deleted.
+This remains preparation for an execution profile; no target or finding is admitted.
+
+The full collection is `2852` tests; resolve exact full-suite, package and CI results from
 the [release handoff](docs/SESSION_HANDOFF.md). Earlier byte-admission, cleanup, accounting
 and protocol corrections remain in the retained release history.
 
-## Progress through 2026-10-24
+## Progress through 2026-10-25
 
 | Workstream | Retained progress | Remaining boundary |
 |---|---|---|
 | Governed fixture kernel | Signed admission, immutable inputs, candidate and lease lineages, transactional evidence vault, deterministic replay and schema-v4 qualified fixture enrollment | Six Python rule classes and two owned scan fixtures; no independently verified security effect |
 | Integrity and recovery | Four immutable finality phases, authenticated signed-fixture packages, governed retry/seal decisions and interruption controls | Actual independent provider administration and external latest-head recovery are unqualified |
 | Native evidence preparation | Offline timestamp/CRL validation, conditional elapsed-time bounds, trusted-list and checkpoint inspection, source-provenance reconciliation | Documentary and offline observations do not admit a live provider; both FreeTSA acquisition attempts are spent |
-| Host preparation | Benign KVM controls and [four owned Firecracker guest controls](docs/OWNED_FIRECRACKER_PREFLIGHT.md) completed; disposable resources deleted | No accepted worker isolation, protected storage or power-fault profile |
-| Repository reliability | Cleanup and coherent-read repairs, exact evidence-byte admission, interrupted setup cleanup, ambiguous close ownership, qualified recovery and real canonical process-death controls | `2765` tests in the current collection; release checks establish repository behavior only |
+| Host preparation | Benign KVM, [four owned guest controls](docs/OWNED_FIRECRACKER_PREFLIGHT.md) and [collector-death controls](docs/OWNED_COLLECTOR_DEATH_PREFLIGHT.md) completed; disposable resources deleted | No accepted worker isolation, protected storage or power-fault profile |
+| Repository reliability | Cleanup and coherent-read repairs, exact evidence-byte admission, interrupted setup cleanup, ambiguous close ownership, qualified recovery and real canonical process-death controls | `2852` tests in the current collection; release checks establish repository behavior only |
 | Research and comparison | Targeted primary-source reviews through October 24; verifier acceptance, model-specific skill evaluation and explicit proof scope refine the retained comparison | Experiment order selected; `18` registration inputs remain unbound; no comparator has run |
-| Bounty preparation | CoW source/deployment-record reconciliation, contrary evidence against four hypotheses and conditional fee/fill obligations | Exact deployed state, scope, independent reproduction and program eligibility remain unresolved; no confirmed finding or payment |
+| Bounty preparation | CoW source/deployment-record reconciliation, conditional fee/fill obligations and relayer/transfer source checks | Exact deployed state, scope, independent reproduction and program eligibility remain unresolved; no confirmed finding or payment |
 | Operating dependencies | Eight organizations previously contacted for catalog or monitor roles; October 24 readback records one decline already acknowledged by the operator | No commitment in seven reread provider/customer conversations; other threads and channels unobserved |
 | Upstream engineering | [Source review contributed to Tessera issue 1098](https://github.com/transparency-dev/tessera/issues/1098#issuecomment-6320024671), with producer error cleanup and worker completion controls | No native reproduction, upstream fix or maintainer acceptance established |
 | Customer discovery | Two new inquiries proposing a small paid design pilot on synthetic evidence, with current capability limits stated | No customer engagement, delivery commitment or payment established |

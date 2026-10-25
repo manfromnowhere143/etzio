@@ -1,0 +1,108 @@
+{
+  "schema": "etzio.owned-collector-death.summary.v1",
+  "date": "2026-10-25",
+  "status": "three_owned_controls_passed_no_execution_profile_admitted",
+  "base_commit": "2baea709089ca5cb88928bd41f3c65d94fa38c15",
+  "observation": "owned-collector-death-observation-2026-10-25.json",
+  "observation_bytes": 28236,
+  "observation_sha256": "a55ef5c9507c232c3441cee6612c715965fd7f7b61756aa44e4ce9a6b89de625",
+  "attempts": [
+    {
+      "ordinal": 1,
+      "all_controls_passed": false,
+      "resource_identities_verified_absent": 6,
+      "collector_sha256": "386fedd77017e823d8ad08fb4a9178bd4eec6745315193d468b25ea3e8f78251",
+      "guest_collector_sha256": "cb777074799da6369da96d1932d3f13368330f27d4f0c2fc843bbd4b1292c359",
+      "observation_sha256": "6ab6a1942a6c1ee4b3ead02f7cb6ac137de9ce2aae01d8f416dcc974a8d85114",
+      "refusal": {
+        "message": "worker cgroup membership",
+        "type": "ValueError"
+      }
+    },
+    {
+      "ordinal": 2,
+      "all_controls_passed": false,
+      "resource_identities_verified_absent": 6,
+      "collector_sha256": "03e9973fa727f655244876ced0c3ede80f7da5602b33bf4c9bcbab78b982a995",
+      "guest_collector_sha256": "016b72a49ffc5463e170aed5290075a2aa0d50c1c8ba70773dfd24eeb97dad95",
+      "observation_sha256": "f8ac2e39a94c82539e96be4e1dae916eb69160e443f7b5ecdc54587635f43f1b",
+      "refusal": {
+        "message": "worker cgroup membership",
+        "type": "ValueError"
+      }
+    },
+    {
+      "ordinal": 3,
+      "all_controls_passed": false,
+      "resource_identities_verified_absent": 6,
+      "collector_sha256": "b8da8d80c226b4e3c12574f8a3c106c9811d1a192b1135a2a55c422b28aa2d3d",
+      "guest_collector_sha256": "016b72a49ffc5463e170aed5290075a2aa0d50c1c8ba70773dfd24eeb97dad95",
+      "observation_sha256": "899a19c3e1b7fe7289e46dcb3b0d6b8d225ad8102f6bdd374d19bda678bc0784",
+      "refusal": {
+        "message": "unqualified cgroup helper",
+        "type": "ValueError"
+      }
+    },
+    {
+      "ordinal": 4,
+      "all_controls_passed": true,
+      "resource_identities_verified_absent": 6,
+      "collector_sha256": "2dd3f8727ca86f9afbc647f8f38dadb1f0583912be8f8b6aef68bde68ccba79e",
+      "guest_collector_sha256": "016b72a49ffc5463e170aed5290075a2aa0d50c1c8ba70773dfd24eeb97dad95",
+      "observation_sha256": "a55ef5c9507c232c3441cee6612c715965fd7f7b61756aa44e4ce9a6b89de625",
+      "refusal": null
+    }
+  ],
+  "portable_controls": {
+    "new": 87,
+    "including_previous_preflight": 123,
+    "runtimes": [
+      "CPython 3.11.15",
+      "CPython 3.14.2"
+    ]
+  },
+  "normal_control_passed": true,
+  "cases": [
+    {
+      "ordinal": 5,
+      "passed": true,
+      "primary_accepted": true,
+      "fallback_used": false,
+      "primary_elapsed_ns": 131977521,
+      "completed_elapsed_ns": 132148711,
+      "reaped": {
+        "collector": -9,
+        "watchdog": 0,
+        "worker": -9
+      },
+      "kernel_helper_exited": true,
+      "cgroup_empty": true
+    },
+    {
+      "ordinal": 6,
+      "passed": true,
+      "primary_accepted": false,
+      "fallback_used": true,
+      "primary_elapsed_ns": 5001017994,
+      "completed_elapsed_ns": 5062013191,
+      "reaped": {
+        "collector": -9,
+        "worker": -9
+      },
+      "kernel_helper_exited": true,
+      "cgroup_empty": true
+    }
+  ],
+  "corrections": [
+    "First membership refusal did not retain the failing value; later attempts retain complete pre-gate cgroup observations.",
+    "Reap the exited jailer launcher before collector-death readiness.",
+    "Represent the Linux 6.1 NX recovery kernel helper separately from userspace; require its actual exit, not cgroup emptiness alone.",
+    "Match the observed full helper comm including host VMM PID, not an assumed 15-byte truncation."
+  ],
+  "limits": [
+    "Same host and root operator, not independent CATO administration.",
+    "No arbitrary target runner or production isolation profile admitted.",
+    "No target execution, submission, accepted finding or bounty payment.",
+    "Memory/pids exhaustion, input mutation, cross-worker access and storage/escape qualification remain separate."
+  ]
+}
